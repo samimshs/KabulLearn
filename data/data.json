@@ -1,0 +1,347 @@
+{
+  "courses": [
+    {
+      "id": "intro-physics",
+      "title": {
+        "en": "Intro to Physics",
+        "ps": "د فزیک پېژندنه"
+      },
+      "description": {
+        "en": "Build a practical foundation in motion, forces, energy, and simple problem solving.",
+        "ps": "د حرکت، قوو، انرژۍ او ساده مسئلو د حل عملي بنسټ زده کړئ."
+      },
+      "level": {
+        "en": "Beginner",
+        "ps": "پیل کوونکی"
+      },
+      "modules": [
+        {
+          "id": "kinematics",
+          "title": {
+            "en": "Kinematics",
+            "ps": "حرکت پېژندنه"
+          },
+          "lessons": [
+            {
+              "id": "position-velocity",
+              "title": {
+                "en": "Position, Distance, and Velocity",
+                "ps": "موقعیت، واټن او سرعت"
+              },
+              "description": {
+                "en": "Learn how physicists describe where an object is and how quickly it moves.",
+                "ps": "زده کړئ چې فزیک پوهان د شي موقعیت او حرکت سرعت څنګه تشریح کوي."
+              },
+              "youtubeId": "ZM8ECpBuQYE",
+              "content": [
+                {
+                  "en": "Position describes where an object is compared with a reference point.",
+                  "ps": "موقعیت ښيي چې یو شی د یوې ټاکلې نښې په پرتله چېرته دی."
+                },
+                {
+                  "en": "Distance measures how much ground an object covers, while displacement also includes direction.",
+                  "ps": "واټن د تېر شوي ځای اندازه ده، خو بې ځایه کېدل لوری هم لري."
+                },
+                {
+                  "en": "Velocity describes both speed and direction, so it can change when either one changes.",
+                  "ps": "سرعت چټکتیا او لوری دواړه ښيي، نو د هر یوه په بدلون سره بدلېږي."
+                }
+              ]
+            },
+            {
+              "id": "acceleration",
+              "title": {
+                "en": "Acceleration",
+                "ps": "تعجیل"
+              },
+              "description": {
+                "en": "Understand acceleration as a change in velocity over time.",
+                "ps": "تعجیل د وخت په تېرېدو د سرعت بدلون په توګه وپېژنئ."
+              },
+              "youtubeId": "FOkQszg1-j8",
+              "content": [
+                {
+                  "en": "Acceleration means velocity is changing.",
+                  "ps": "تعجیل یعنې سرعت بدلېږي."
+                },
+                {
+                  "en": "An object can accelerate by speeding up, slowing down, or changing direction.",
+                  "ps": "یو شی د چټکېدو، ورو کېدو یا د لوري بدلولو له لارې تعجیل لري."
+                },
+                {
+                  "en": "Acceleration is measured over time, so the time interval matters.",
+                  "ps": "تعجیل د وخت په موده کې اندازه کېږي، نو د وخت واټن مهم دی."
+                }
+              ]
+            }
+          ],
+          "quiz": {
+            "id": "kinematics-quiz",
+            "title": {
+              "en": "Kinematics Quiz",
+              "ps": "حرکت پېژندنه ازموینه"
+            },
+            "description": {
+              "en": "Pass this required checkpoint with 70% or higher to continue.",
+              "ps": "د دوام لپاره دا اړینه ازموینه لږ تر لږه په ۷۰٪ نمره تېره کړئ."
+            },
+            "passScore": 70,
+            "questions": [
+              {
+                "id": "position-reference",
+                "question": {
+                  "en": "What does position describe?",
+                  "ps": "موقعیت څه شی تشریح کوي؟"
+                },
+                "options": [
+                  {
+                    "en": "Where an object is compared with a reference point",
+                    "ps": "یو شی د یوې ټاکلې نښې په پرتله چېرته دی"
+                  },
+                  {
+                    "en": "How heavy an object is",
+                    "ps": "یو شی څومره دروند دی"
+                  },
+                  {
+                    "en": "The color of an object",
+                    "ps": "د یوه شي رنګ"
+                  }
+                ],
+                "answerIndex": 0
+              },
+              {
+                "id": "acceleration-change",
+                "question": {
+                  "en": "Which change can create acceleration?",
+                  "ps": "کوم بدلون تعجیل رامنځته کولی شي؟"
+                },
+                "options": [
+                  {
+                    "en": "A change in velocity",
+                    "ps": "په سرعت کې بدلون"
+                  },
+                  {
+                    "en": "A change in color",
+                    "ps": "په رنګ کې بدلون"
+                  },
+                  {
+                    "en": "A change in name",
+                    "ps": "په نوم کې بدلون"
+                  }
+                ],
+                "answerIndex": 0
+              }
+            ]
+          }
+        },
+        {
+          "id": "forces",
+          "title": {
+            "en": "Forces",
+            "ps": "قوې"
+          },
+          "lessons": [
+            {
+              "id": "newtons-laws",
+              "title": {
+                "en": "Newton's Laws",
+                "ps": "د نیوټن قانونونه"
+              },
+              "description": {
+                "en": "Explore the three laws that explain how forces affect motion.",
+                "ps": "هغه درې قانونونه زده کړئ چې قوې او حرکت تشریح کوي."
+              },
+              "youtubeId": "kKKM8Y-u7ds",
+              "content": [
+                {
+                  "en": "Newton's first law says an object keeps its motion unless a net force acts on it.",
+                  "ps": "د نیوټن لومړی قانون وايي یو شی خپل حرکت ساتي، تر څو خالصه قوه پرې عمل ونه کړي."
+                },
+                {
+                  "en": "Newton's second law connects force, mass, and acceleration.",
+                  "ps": "د نیوټن دویم قانون قوه، کتله او تعجیل سره تړي."
+                },
+                {
+                  "en": "Newton's third law says forces come in equal and opposite pairs.",
+                  "ps": "د نیوټن درېیم قانون وايي قوې په مساوي او مخالفو جوړو کې راځي."
+                }
+              ]
+            }
+          ],
+          "quiz": {
+            "id": "forces-quiz",
+            "title": {
+              "en": "Forces Quiz",
+              "ps": "قوې ازموینه"
+            },
+            "description": {
+              "en": "Pass this required checkpoint with 70% or higher to continue.",
+              "ps": "د دوام لپاره دا اړینه ازموینه لږ تر لږه په ۷۰٪ نمره تېره کړئ."
+            },
+            "passScore": 70,
+            "questions": [
+              {
+                "id": "third-law",
+                "question": {
+                  "en": "Newton's third law says forces are...",
+                  "ps": "د نیوټن درېیم قانون وايي قوې..."
+                },
+                "options": [
+                  {
+                    "en": "Equal and opposite",
+                    "ps": "مساوي او مخالفې دي"
+                  },
+                  {
+                    "en": "Always zero",
+                    "ps": "تل صفر وي"
+                  },
+                  {
+                    "en": "Only visible in space",
+                    "ps": "یوازې په فضا کې لیدل کېږي"
+                  }
+                ],
+                "answerIndex": 0
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "digital-literacy",
+      "title": {
+        "en": "Digital Literacy",
+        "ps": "ډیجیټل سواد"
+      },
+      "description": {
+        "en": "Learn core computer, internet, email, and online safety skills for study and work.",
+        "ps": "د زده کړې او کار لپاره د کمپیوټر، انټرنېټ، ایمېل او آنلاین خوندیتوب بنسټیز مهارتونه زده کړئ."
+      },
+      "level": {
+        "en": "Foundational",
+        "ps": "بنسټیز"
+      },
+      "modules": [
+        {
+          "id": "computer-basics",
+          "title": {
+            "en": "Computer Basics",
+            "ps": "د کمپیوټر بنسټونه"
+          },
+          "lessons": [
+            {
+              "id": "hardware-software",
+              "title": {
+                "en": "Hardware and Software",
+                "ps": "هارډویر او سافټویر"
+              },
+              "description": {
+                "en": "Understand the difference between physical computer parts and the programs that run on them.",
+                "ps": "د کمپیوټر د فزیکي برخو او هغو پروګرامونو توپیر وپېژنئ چې پرې چلېږي."
+              },
+              "youtubeId": "vG_qmtdBPTU",
+              "content": [
+                {
+                  "en": "Hardware includes the physical parts of a computer, such as a screen, keyboard, and storage.",
+                  "ps": "هارډویر د کمپیوټر فزیکي برخې دي، لکه سکرین، کیبورډ او زېرمه."
+                },
+                {
+                  "en": "Software includes apps and operating systems that tell hardware what to do.",
+                  "ps": "سافټویر هغه اپونه او عملیاتي سیستمونه دي چې هارډویر ته د کار لارښوونه کوي."
+                },
+                {
+                  "en": "Most digital tasks need hardware and software working together.",
+                  "ps": "ډېری ډیجیټل کارونه د هارډویر او سافټویر ګډ کار ته اړتیا لري."
+                }
+              ]
+            },
+            {
+              "id": "internet-safety",
+              "title": {
+                "en": "Internet Safety",
+                "ps": "د انټرنېټ خوندیتوب"
+              },
+              "description": {
+                "en": "Practice safer browsing, stronger passwords, and careful sharing online.",
+                "ps": "خوندي لټون، پیاوړي پاسورډونه او په آنلاین ډول محتاط شریکول تمرین کړئ."
+              },
+              "youtubeId": "yiKeLOKc1tw",
+              "content": [
+                {
+                  "en": "Use strong, unique passwords for important accounts.",
+                  "ps": "د مهمو اکاونټونو لپاره پیاوړي او جلا پاسورډونه وکاروئ."
+                },
+                {
+                  "en": "Be careful before opening unknown links or downloading unexpected files.",
+                  "ps": "د نااشنا لینکونو پرانیستلو یا ناڅاپي فایلونو ډاونلوډولو مخکې احتیاط وکړئ."
+                },
+                {
+                  "en": "Share personal information only with services and people you trust.",
+                  "ps": "شخصي معلومات یوازې له باوري خدمتونو او کسانو سره شریک کړئ."
+                }
+              ]
+            }
+          ],
+          "quiz": {
+            "id": "computer-basics-quiz",
+            "title": {
+              "en": "Computer Basics Quiz",
+              "ps": "د کمپیوټر بنسټونه ازموینه"
+            },
+            "description": {
+              "en": "Pass this required checkpoint with 70% or higher to continue.",
+              "ps": "د دوام لپاره دا اړینه ازموینه لږ تر لږه په ۷۰٪ نمره تېره کړئ."
+            },
+            "passScore": 70,
+            "questions": [
+              {
+                "id": "hardware-example",
+                "question": {
+                  "en": "Which item is hardware?",
+                  "ps": "کوم شی هارډویر دی؟"
+                },
+                "options": [
+                  {
+                    "en": "Keyboard",
+                    "ps": "کیبورډ"
+                  },
+                  {
+                    "en": "Email account",
+                    "ps": "ایمېل اکاونټ"
+                  },
+                  {
+                    "en": "Web browser history",
+                    "ps": "د وېب براوزر تاریخچه"
+                  }
+                ],
+                "answerIndex": 0
+              },
+              {
+                "id": "safe-password",
+                "question": {
+                  "en": "What is a safer password habit?",
+                  "ps": "د پاسورډ کوم عادت خوندي دی؟"
+                },
+                "options": [
+                  {
+                    "en": "Use a strong, unique password",
+                    "ps": "پیاوړی او جلا پاسورډ کارول"
+                  },
+                  {
+                    "en": "Use the same password everywhere",
+                    "ps": "هر ځای یو شان پاسورډ کارول"
+                  },
+                  {
+                    "en": "Share your password with friends",
+                    "ps": "خپل پاسورډ له ملګرو سره شریکول"
+                  }
+                ],
+                "answerIndex": 0
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

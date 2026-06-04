@@ -60,7 +60,7 @@ export default async function LoginPage({
       </section>
 
       {/* Role tabs */}
-      <div className="grid grid-cols-3 gap-2 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-1.5">
+      <div className="grid grid-cols-2 gap-2 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-1.5">
         <Link
           href="/login"
           className={`inline-flex h-10 items-center justify-center rounded-[var(--radius)] text-sm font-[800] transition ${
@@ -80,12 +80,6 @@ export default async function LoginPage({
           }`}
         >
           Educator
-        </Link>
-        <Link
-          href="/login?callbackUrl=%2Fadmin"
-          className="inline-flex h-10 items-center justify-center rounded-[var(--radius)] text-sm font-[800] text-[var(--muted)] transition hover:text-[var(--ink)]"
-        >
-          Admin
         </Link>
       </div>
 

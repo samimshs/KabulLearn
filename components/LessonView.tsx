@@ -2,54 +2,117 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import curriculum from "@/data/data.json";
 import { useLanguage } from "@/components/LanguageProvider";
 import { VideoPlayer } from "@/components/VideoPlayer";
-import { getPassedQuizzes, isModuleUnlocked } from "@/lib/progress";
+import { SimpleMarkdown } from "@/components/SimpleMarkdown";
+import { getPassedQuizzes, isModuleUnlocked, markLessonVisited } from "@/lib/progress";
+import { usesPashtoContent } from "@/lib/i18n";
+import type { Course, Lesson, Module } from "@prisma/client";
 
-type LessonViewProps = {
-  courseId: string;
-  lessonId: string;
+type LessonCourse = Pick<
+  Lesson,
+  | "id" | "moduleId" | "order" | "type"
+  | "titleEn" | "titlePs"
+  | "descriptionEn" | "descriptionPs"
+  | "youtubeUrl" | "readingEn" | "readingPs"
+  | "isFinalTest" | "passingScore"
+>;
+
+type CourseModule = Pick<Module, "id" | "order" | "titleEn" | "titlePs"> & {
+  lessons: LessonCourse[];
 };
 
-export function LessonView({ courseId, lessonId }: LessonViewProps) {
-  const { locale, t } = useLanguage();
+type CourseWithLessons = Pick<
+  Course,
+  "id" | "titleEn" | "titlePs" | "descriptionEn" | "descriptionPs" | "level"
+> & {
+  modules: CourseModule[];
+};
+
+type LessonViewProps = {
+  course: CourseWithLessons;
+  lesson: LessonCourse;
+  serverPassedModuleIds?: string[];
+  isComplete?: boolean;
+};
+
+/* ── Inline icons ──────────────────────────────────────────── */
+const IconVideo = () => (
+  <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1" y="3" width="10" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+    <path d="M11 6.5l4-2v7l-4-2V6.5z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+  </svg>
+);
+
+const IconQuiz = () => (
+  <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.4" />
+    <path d="M5 8h6M5 5.5h4M5 10.5h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+  </svg>
+);
+
+const IconCheck = () => (
+  <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.4" />
+    <path d="M5.5 8l2 2 3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const IconLock = () => (
+  <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="7" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+    <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+  </svg>
+);
+
+const IconArrowLeft = () => (
+  <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+/* ── Component ─────────────────────────────────────────────── */
+export function LessonView({ course, lesson, serverPassedModuleIds = [], isComplete = false }: LessonViewProps) {
+  const { locale, t, direction } = useLanguage();
   const [passedQuizzes, setPassedQuizzes] = useState<Set<string>>(new Set());
-  const course = curriculum.courses.find((item) => item.id === courseId);
-  const moduleIds = course?.modules.map((module) => module.id) ?? [];
-  const lessonSequence =
-    course?.modules.flatMap((module) =>
-      module.lessons.map((lessonItem) => ({
-        ...lessonItem,
-        moduleId: module.id,
-        moduleTitle: module.title
-      }))
-    ) ?? [];
-  const lessonIndex = lessonSequence.findIndex((item) => item.id === lessonId);
-  const lesson = lessonSequence[lessonIndex];
+
+  const moduleIds = course.modules.map(m => m.id);
+  const lessonSequence = course.modules.flatMap(m =>
+    m.lessons.map(l => ({ ...l, moduleId: m.id, moduleTitleEn: m.titleEn, moduleTitlePs: m.titlePs }))
+  );
+  const lessonIndex = lessonSequence.findIndex(l => l.id === lesson.id);
   const previousLesson = lessonIndex > 0 ? lessonSequence[lessonIndex - 1] : null;
-  const moduleIndex = course?.modules.findIndex((module) => module.id === lesson?.moduleId) ?? -1;
-  const currentModule = moduleIndex >= 0 ? course?.modules[moduleIndex] : null;
-  const lessonIndexInModule = currentModule?.lessons.findIndex((item) => item.id === lessonId) ?? -1;
+  const moduleIndex = course.modules.findIndex(m => m.id === lesson.moduleId);
+  const currentModule = moduleIndex >= 0 ? course.modules[moduleIndex] : null;
+  const lessonIndexInModule = currentModule?.lessons.findIndex(l => l.id === lesson.id) ?? -1;
   const nextLessonInModule =
     currentModule && lessonIndexInModule >= 0 && lessonIndexInModule < currentModule.lessons.length - 1
       ? currentModule.lessons[lessonIndexInModule + 1]
       : null;
-  const quizHref = currentModule ? `/courses/${courseId}/quizzes/${currentModule.id}` : "/";
-  const moduleUnlocked = moduleIndex >= 0 ? isModuleUnlocked(moduleIndex, moduleIds, passedQuizzes) : false;
+  const quizHref = currentModule
+    ? `/courses/${encodeURIComponent(course.id)}/quizzes/${encodeURIComponent(currentModule.id)}`
+    : "/";
+  const moduleUnlocked = isComplete || (moduleIndex >= 0 ? isModuleUnlocked(moduleIndex, moduleIds, passedQuizzes) : false);
+  const lessonTitle = usesPashtoContent(locale) ? lesson.titlePs : lesson.titleEn;
+  const lessonDescription = usesPashtoContent(locale) ? lesson.descriptionPs ?? "" : lesson.descriptionEn ?? "";
+  const lessonContent = usesPashtoContent(locale) ? lesson.readingPs : lesson.readingEn;
+  const courseTitle = usesPashtoContent(locale) ? course.titlePs : course.titleEn;
 
   useEffect(() => {
-    setPassedQuizzes(getPassedQuizzes(courseId, moduleIds));
-  }, [courseId, moduleIds.join("|")]);
+    const localPassed = getPassedQuizzes(course.id, moduleIds);
+    setPassedQuizzes(new Set([...localPassed, ...serverPassedModuleIds]));
+  }, [course.id, moduleIds.join("|"), serverPassedModuleIds.join("|")]);
 
-  if (!course || !lesson) {
+  useEffect(() => {
+    markLessonVisited(course.id, lesson.id);
+  }, [course.id, lesson.id]);
+
+  if (!lesson) {
     return (
-      <main className="mx-auto grid min-h-[70vh] w-full max-w-7xl place-items-center px-5">
-        <div className="rounded-3xl border border-stone-200 bg-[#fffdfa] p-8 text-center shadow-sm">
-          <h1 className="text-3xl font-black text-[#102033]">{t.notFound}</h1>
-          <Link href="/" className="mt-5 inline-flex h-11 items-center rounded-xl bg-[#0f3d5e] px-5 text-sm font-black text-white">
-            {t.backToCourses}
-          </Link>
+      <main className="pr-page grid min-h-[70vh] place-items-center">
+        <div className="pr-card max-w-lg p-8 text-center">
+          <h1 className="pr-h2">{t.notFound}</h1>
+          <Link href="/" className="pr-btn-primary mt-5">{t.backToCourses}</Link>
         </div>
       </main>
     );
@@ -57,154 +120,190 @@ export function LessonView({ courseId, lessonId }: LessonViewProps) {
 
   if (!moduleUnlocked) {
     return (
-      <main className="mx-auto grid min-h-[70vh] w-full max-w-7xl place-items-center px-5">
-        <div className="max-w-lg rounded-3xl border border-stone-200 bg-[#fffdfa] p-8 text-center shadow-sm">
-          <p className="text-sm font-black uppercase tracking-wider text-red-700">{t.locked}</p>
-          <h1 className="mt-3 text-3xl font-black text-[#102033]">{lesson.title[locale]}</h1>
-          <p className="mt-4 leading-7 text-[#3d4a5a]">{t.lockedUntilQuiz}</p>
-          <Link href="/" className="mt-5 inline-flex h-11 items-center rounded-xl bg-[#2563eb] px-5 text-sm font-black text-white hover:bg-[#1d4ed8]">
-            {t.backToCourses}
-          </Link>
+      <main className="pr-page grid min-h-[70vh] place-items-center">
+        <div className="pr-card max-w-lg p-8 text-center">
+          <p className="pr-eyebrow text-[var(--danger)]">{t.locked}</p>
+          <h1 className="pr-h2 mt-3">{lessonTitle}</h1>
+          <p className="pr-copy mt-4">{t.lockedUntilQuiz}</p>
+          <Link href="/" className="pr-btn-primary mt-5">{t.backToCourses}</Link>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto grid w-full max-w-7xl gap-6 px-5 py-6 lg:grid-cols-[336px_minmax(0,1fr)] lg:px-8 lg:py-8">
-      <aside className="order-2 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-3xl border border-stone-200 bg-[#fffdfa] p-4 shadow-[0_14px_34px_rgba(16,32,51,0.07)] lg:sticky lg:top-24 lg:order-1">
-        <div className="mb-4 border-b border-stone-200 pb-4">
-          <Link href="/" className="text-sm font-black text-[#0f766e]">{t.backToCourses}</Link>
-          <h2 className="mt-3 text-xl font-black tracking-tight text-[#102033]">{course.title[locale]}</h2>
-          <p className="mt-2 text-sm font-semibold leading-6 text-[#3d4a5a]">{t.courseNavigation}</p>
-        </div>
+    <main className="pr-page grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
 
-        <nav className="grid gap-5">
-          {course.modules.map((module) => (
-            <section key={module.id} className="grid gap-2">
-              <h3 className="px-2 text-xs font-black uppercase tracking-wider text-[#2d3e50]">
-                {module.title[locale]}
-                {!isModuleUnlocked(course.modules.findIndex((item) => item.id === module.id), moduleIds, passedQuizzes) ? ` · ${t.locked}` : ""}
-              </h3>
-              <div className="grid gap-1">
-                {module.lessons.map((moduleLesson) => {
-                  const active = moduleLesson.id === lesson.id;
-                  const locked = !isModuleUnlocked(course.modules.findIndex((item) => item.id === module.id), moduleIds, passedQuizzes);
-                  if (locked) {
-                    return (
-                      <span key={moduleLesson.id} className="rounded-xl px-3 py-3 text-sm font-bold leading-5 text-slate-500 opacity-70">
-                        {moduleLesson.title[locale]}
-                      </span>
-                    );
-                  }
-                  return (
-                    <Link
-                      key={moduleLesson.id}
-                      href={`/courses/${course.id}/lessons/${moduleLesson.id}`}
-                      className={`rounded-xl px-3 py-3 text-sm font-bold leading-5 transition ${
-                        active ? "bg-[#2563eb] text-white shadow-sm" : "text-[#1a2e42] hover:bg-stone-100"
-                      }`}
-                    >
-                      {moduleLesson.title[locale]}
-                    </Link>
-                  );
-                })}
-                {isModuleUnlocked(course.modules.findIndex((item) => item.id === module.id), moduleIds, passedQuizzes) ? (
-                  <Link
-                    href={`/courses/${course.id}/quizzes/${module.id}`}
-                    className={`rounded-xl px-3 py-3 text-sm font-bold leading-5 transition ${
-                      passedQuizzes.has(module.id)
-                        ? "bg-emerald-100 text-emerald-900"
-                        : module.id === currentModule?.id
-                          ? "bg-[#fff3c4] text-[#5a2e00] hover:bg-[#ffec99]"
-                          : "text-[#1a2e42] hover:bg-stone-100"
-                    }`}
-                  >
-                    {t.requiredQuiz}: {module.quiz.title[locale]}
-                  </Link>
-                ) : (
-                  <span className="rounded-xl px-3 py-3 text-sm font-bold leading-5 text-slate-500 opacity-70">
-                    {t.requiredQuiz}: {module.quiz.title[locale]}
-                  </span>
-                )}
-              </div>
-            </section>
-          ))}
-        </nav>
+      {/* ── Sidebar ──────────────────────────────────────────── */}
+      <aside className="order-2 lg:order-1 lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-6.5rem)] lg:overflow-y-auto">
+        <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
+
+          {/* Course header */}
+          <div className="border-b border-[var(--border)] p-4">
+            <Link
+              href={`/courses/${encodeURIComponent(course.id)}`}
+              className="flex items-center gap-1.5 text-[12px] font-[800] uppercase tracking-[1px] text-[var(--brand)] transition hover:text-[var(--brand-hover)]"
+            >
+              <span style={{ transform: direction === "rtl" ? "scaleX(-1)" : "none" }}>
+                <IconArrowLeft />
+              </span>
+              {t.backToCourses}
+            </Link>
+            <h2 className="mt-3 text-[16px] font-[800] leading-snug tracking-tight text-[var(--ink)]">{courseTitle}</h2>
+            <p className="mt-1 text-[12px] font-[600] text-[var(--muted)]">{t.courseNavigation}</p>
+          </div>
+
+          {/* Module navigation */}
+          <nav className="p-3">
+            <div className="grid gap-4">
+              {course.modules.map((module) => {
+                const mIdx = course.modules.findIndex(m => m.id === module.id);
+                const unlocked = isComplete || isModuleUnlocked(mIdx, moduleIds, passedQuizzes);
+                const moduleTitle = usesPashtoContent(locale) ? module.titlePs : module.titleEn;
+                const quizPassed = passedQuizzes.has(module.id);
+                const isCurrentModule = module.id === currentModule?.id;
+
+                return (
+                  <section key={module.id}>
+                    {/* Module label */}
+                    <div className="mb-1 flex items-center gap-2 px-2">
+                      {!unlocked && <IconLock />}
+                      <h3 className="text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--muted)] truncate">
+                        {moduleTitle}
+                      </h3>
+                    </div>
+
+                    {/* Lesson list */}
+                    <div className="grid gap-0.5">
+                      {module.lessons.filter(ml => ml.type !== "QUIZ").map((ml) => {
+                        const active = ml.id === lesson.id;
+                        const label = usesPashtoContent(locale) ? ml.titlePs : ml.titleEn;
+                        const isQuizType = ml.type === "QUIZ";
+
+                        if (!unlocked) {
+                          return (
+                            <span
+                              key={ml.id}
+                              className="flex items-center gap-2 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[600] text-[var(--muted-2)]"
+                            >
+                              <span className="opacity-50">{isQuizType ? <IconQuiz /> : <IconVideo />}</span>
+                              <span className="truncate opacity-50">{label}</span>
+                            </span>
+                          );
+                        }
+
+                        return (
+                          <Link
+                            key={ml.id}
+                            href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(ml.id)}`}
+                            className={`flex items-center gap-2 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[700] transition ${
+                              active
+                                ? "bg-[var(--brand)] text-white shadow-sm"
+                                : "text-[var(--ink-2)] hover:bg-[var(--surface)]"
+                            }`}
+                          >
+                            <span className={active ? "text-white/80" : "text-[var(--muted)]"}>
+                              {isQuizType ? <IconQuiz /> : <IconVideo />}
+                            </span>
+                            <span className="truncate">{label}</span>
+                          </Link>
+                        );
+                      })}
+
+                      {/* Required quiz entry */}
+                      {unlocked && (
+                        <Link
+                          href={`/courses/${encodeURIComponent(course.id)}/quizzes/${encodeURIComponent(module.id)}`}
+                          className={`flex items-center gap-2 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[800] transition ${
+                            quizPassed
+                              ? "bg-[var(--success-50)] text-[var(--success)]"
+                              : isCurrentModule
+                                ? "bg-[var(--warning-50)] text-[var(--warning)]"
+                                : "text-[var(--ink-2)] hover:bg-[var(--surface)]"
+                          }`}
+                        >
+                          <span>{quizPassed ? <IconCheck /> : <IconQuiz />}</span>
+                          <span className="truncate">{t.requiredQuiz}</span>
+                          {quizPassed && (
+                            <span className="ms-auto text-[10px] font-[800] uppercase tracking-wider opacity-70">
+                              {t.completed}
+                            </span>
+                          )}
+                        </Link>
+                      )}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+          </nav>
+        </div>
       </aside>
 
-      <section className="order-1 grid min-w-0 gap-5 lg:order-2">
-        <div className="rounded-3xl border border-stone-200 bg-[#fffdfa] p-5 shadow-[0_14px_34px_rgba(16,32,51,0.07)] lg:p-7">
-          <p className="text-sm font-black uppercase tracking-wider text-[#0f766e]">{t.currentLesson}</p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight text-[#102033] lg:text-5xl">{lesson.title[locale]}</h1>
-          <p className="mt-4 max-w-3xl text-base font-medium leading-7 text-[#3d4a5a]">{lesson.description[locale]}</p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            {previousLesson ? (
+      {/* ── Main content ─────────────────────────────────────── */}
+      <section className="order-1 grid min-w-0 auto-rows-min gap-5 lg:order-2">
+
+        {/* Hero panel */}
+        <div className="pr-panel p-6 lg:p-8">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="pr-eyebrow">{t.currentLesson}</p>
+            {lesson.isFinalTest && (
+              <span className="pr-badge pr-badge-gold">{t.requiredQuiz}</span>
+            )}
+            {lesson.youtubeUrl && (
+              <span className="flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-[11px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
+                <IconVideo /> {t.video}
+              </span>
+            )}
+          </div>
+
+          <h1 className="pr-h1 mt-3">{lessonTitle}</h1>
+
+          {lessonDescription && (
+            <p className="pr-copy mt-4 max-w-2xl">{lessonDescription}</p>
+          )}
+
+          {/* Navigation */}
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            {previousLesson && (
               <Link
-                href={`/courses/${course.id}/lessons/${previousLesson.id}`}
-                className="inline-flex h-11 items-center justify-center rounded-xl border border-stone-300 bg-white px-5 text-sm font-black text-[#1a2e42] transition hover:border-stone-400 hover:bg-stone-50"
+                href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(previousLesson.id)}`}
+                className="pr-btn-ghost"
               >
                 {t.previousLesson}
               </Link>
-            ) : null}
+            )}
             {nextLessonInModule ? (
               <Link
-                href={`/courses/${course.id}/lessons/${nextLessonInModule.id}`}
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-[#2563eb] px-5 text-sm font-black text-white transition hover:bg-[#1d4ed8]"
+                href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(nextLessonInModule.id)}`}
+                className="pr-btn-primary"
               >
                 {t.nextLesson}
               </Link>
             ) : (
-              <Link
-                href={quizHref}
-                className="inline-flex h-11 items-center justify-center rounded-xl bg-[#2563eb] px-5 text-sm font-black text-white transition hover:bg-[#1d4ed8]"
-              >
+              <Link href={quizHref} className="pr-btn-primary">
                 {t.nextRequiredQuiz}
               </Link>
             )}
           </div>
         </div>
 
-        <nav className="grid gap-2 rounded-2xl border border-stone-200 bg-[#fffdfa] p-3 shadow-sm sm:grid-cols-2">
-          <a href="#video" className="inline-flex h-10 items-center justify-center rounded-xl bg-stone-100 px-4 text-sm font-black text-[#1a2e42] hover:bg-stone-200">
-            {t.video}
-          </a>
-          <a href="#content" className="inline-flex h-10 items-center justify-center rounded-xl bg-stone-100 px-4 text-sm font-black text-[#1a2e42] hover:bg-stone-200">
-            {t.lessonContent}
-          </a>
-        </nav>
+        {/* Video */}
+        {lesson.youtubeUrl && (
+          <section id="video" className="scroll-mt-24 overflow-hidden rounded-[var(--radius-xl)] shadow-[var(--shadow)]">
+            <VideoPlayer video={lesson.youtubeUrl} courseId={course.id} lessonId={lesson.id} />
+          </section>
+        )}
 
-        <section id="video" className="scroll-mt-24">
-          <VideoPlayer video={lesson.youtubeId} />
-          <div className="mt-4 flex justify-end">
-            <a href="#content" className="inline-flex h-10 items-center justify-center rounded-xl bg-[#0f766e] px-4 text-sm font-black text-white">
-              {t.nextSection}
-            </a>
-          </div>
-        </section>
-
-        <article id="content" className="scroll-mt-24 rounded-3xl border border-stone-200 bg-[#fffdfa] p-5 shadow-[0_14px_34px_rgba(16,32,51,0.07)] lg:p-7">
-          <h2 className="text-xl font-black text-[#102033]">{t.lessonDescription}</h2>
-          <p className="mt-3 max-w-4xl font-medium leading-7 text-[#3d4a5a]">{lesson.description[locale]}</p>
-          <h3 className="mt-6 text-lg font-black text-[#102033]">{t.lessonContent}</h3>
-          <ol className="mt-4 grid gap-3">
-            {lesson.content.map((item, index) => (
-              <li key={item.en} className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 rounded-xl bg-stone-50 p-4 font-medium text-[#1a2e42]">
-                <span className="grid size-7 place-items-center rounded-full bg-[#0f766e] text-xs font-black text-white">{index + 1}</span>
-                <span className="leading-7">{item[locale]}</span>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-5 rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm font-bold leading-6 text-teal-950">{t.lowBandwidth}</p>
-          <div className="mt-5 flex flex-wrap justify-between gap-3">
-            <a href="#video" className="inline-flex h-10 items-center justify-center rounded-xl border border-stone-300 bg-white px-4 text-sm font-black text-[#1a2e42]">
-              {t.previousSection}
-            </a>
-            <Link href={quizHref} className="inline-flex h-10 items-center justify-center rounded-xl bg-[#0f766e] px-4 text-sm font-black text-white">
-              {t.nextRequiredQuiz}
-            </Link>
-          </div>
-        </article>
+        {/* Reading content — only rendered when there is actual markdown */}
+        {lessonContent && (
+          <article id="content" className="pr-card scroll-mt-24 p-6 lg:p-8">
+            <h2 className="text-[18px] font-[800] tracking-tight text-[var(--ink-2)]">{t.lessonContent}</h2>
+            <div className="mt-5 border-t border-[var(--border)] pt-5">
+              <SimpleMarkdown content={lessonContent} />
+            </div>
+          </article>
+        )}
       </section>
     </main>
   );

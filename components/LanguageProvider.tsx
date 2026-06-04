@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { dictionaries, getDirection, type Dictionary, type Locale } from "@/lib/i18n";
 
 type LanguageContextValue = {
@@ -12,9 +13,19 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocale] = useState<Locale>("en");
+export function LanguageProvider({ children, initialLocale = "en" }: { children: React.ReactNode; initialLocale?: Locale }) {
+  const [locale, setLocaleState] = useState<Locale>(initialLocale);
   const direction = getDirection(locale);
+  const router = useRouter();
+  const [, startTransition] = useTransition();
+
+  function setLocale(nextLocale: Locale) {
+    document.cookie = `poharana-locale=${nextLocale}; path=/; max-age=31536000; SameSite=Lax`;
+    setLocaleState(nextLocale);
+    startTransition(() => {
+      router.refresh();
+    });
+  }
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -28,6 +39,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       t: dictionaries[locale],
       setLocale
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [direction, locale]
   );
 

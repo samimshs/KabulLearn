@@ -1,0 +1,48 @@
+<svg width="680" height="180" viewBox="0 0 680 180" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>PohaRana Logo v3</title>
+  <desc>PohaRana full horizontal lockup — PR monogram icon with Manrope 800 two-tone wordmark and tagline</desc>
+
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;800&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- Icon -->
+  <rect x="10" y="10" width="160" height="160" rx="36" fill="#0057FF"/>
+
+  <!-- P stem -->
+  <rect x="34" y="30" width="18" height="88" rx="5" fill="#ffffff"/>
+  <!-- P bowl -->
+  <path d="M52 30 Q100 30 100 65 Q100 100 52 100" fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round"/>
+
+  <!-- R stem -->
+  <rect x="82" y="76" width="18" height="72" rx="5" fill="#ffffff"/>
+  <!-- R bowl -->
+  <path d="M100 76 Q134 76 134 100 Q134 124 100 124" fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round"/>
+  <!-- R leg — from bottom-right of bowl -->
+  <line x1="117" y1="124" x2="148" y2="162" stroke="#ffffff" stroke-width="16" stroke-linecap="round"/>
+
+  <!-- Wordmark -->
+  <text
+    x="192"
+    y="110"
+    font-family="'Manrope', 'Arial Black', sans-serif"
+    font-weight="800"
+    font-size="72"
+    letter-spacing="-3"
+    fill="#07060E"
+  >Poha<tspan fill="#0057FF">Rana</tspan></text>
+
+  <!-- Tagline -->
+  <text
+    x="195"
+    y="142"
+    font-family="'Manrope', Arial, sans-serif"
+    font-weight="300"
+    font-size="13"
+    letter-spacing="5"
+    fill="#666580"
+  >LEARN WITHOUT LIMITS</text>
+
+</svg>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Manrope', sans-serif; background: #F7F7FB; color: #07060E; }
+  .sheet { max-width: 680px; margin: 0 auto; padding: 32px 24px; }
+  .section-label { font-size: 10px; font-weight: 700; letter-spacing: 4px; color: #9896B8; text-transform: uppercase; margin-bottom: 16px; margin-top: 36px; padding-bottom: 8px; border-bottom: 1px solid #E2E1F0; }
+  .section-label:first-child { margin-top: 0; }
+
+  /* LOGO AREA */
+  .logo-row { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+  .logo-bg-white { background: #fff; border-radius: 12px; padding: 24px 32px; border: 1px solid #E2E1F0; display: flex; align-items: center; gap: 16px; flex: 1; min-width: 200px; }
+  .logo-bg-blue { background: #0057FF; border-radius: 12px; padding: 24px 32px; display: flex; align-items: center; gap: 16px; flex: 1; min-width: 200px; }
+  .logo-bg-dark { background: #07060E; border-radius: 12px; padding: 24px 32px; display: flex; align-items: center; gap: 16px; flex: 1; min-width: 200px; }
+
+  .wordmark { font-size: 28px; font-weight: 800; letter-spacing: -1px; color: #07060E; line-height: 1; }
+  .wordmark-blue { font-size: 28px; font-weight: 800; letter-spacing: -1px; color: #fff; line-height: 1; }
+  .wordmark-dark { font-size: 28px; font-weight: 800; letter-spacing: -1px; color: #fff; line-height: 1; }
+  .wordmark span { color: #0057FF; }
+  .wordmark-blue span { color: #88AAFF; }
+  .wordmark-dark span { color: #5588FF; }
+  .tagline { font-size: 8px; font-weight: 300; letter-spacing: 3px; color: #666580; margin-top: 3px; text-transform: uppercase; }
+  .tagline-white { font-size: 8px; font-weight: 300; letter-spacing: 3px; color: rgba(255,255,255,0.65); margin-top: 3px; text-transform: uppercase; }
+
+  /* ICON GRID */
+  .icon-grid { display: flex; gap: 16px; flex-wrap: wrap; }
+  .icon-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .icon-label { font-size: 10px; color: #9896B8; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+  svg.icon { display: block; }
+
+  /* COLORS */
+  .color-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .swatch { border-radius: 10px; width: 88px; }
+  .swatch-block { height: 56px; border-radius: 8px 8px 0 0; }
+  .swatch-info { padding: 6px 8px 8px; background: #fff; border-radius: 0 0 8px 8px; border: 1px solid #E2E1F0; border-top: none; }
+  .swatch-name { font-size: 11px; font-weight: 700; color: #07060E; }
+  .swatch-hex { font-size: 10px; color: #9896B8; font-weight: 400; margin-top: 1px; font-family: monospace; }
+
+  /* TYPE SCALE */
+  .type-row { margin-bottom: 12px; display: flex; align-items: baseline; gap: 16px; }
+  .type-meta { font-size: 10px; color: #9896B8; font-weight: 600; letter-spacing: 1px; width: 110px; flex-shrink: 0; }
+
+  /* UI ELEMENTS */
+  .ui-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+  .btn-primary { background: #0057FF; color: #fff; font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 700; padding: 10px 22px; border-radius: 8px; border: none; cursor: default; letter-spacing: 0.2px; }
+  .btn-secondary { background: #fff; color: #0057FF; font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 700; padding: 10px 22px; border-radius: 8px; border: 1.5px solid #0057FF; cursor: default; letter-spacing: 0.2px; }
+  .btn-ghost { background: transparent; color: #07060E; font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 600; padding: 10px 22px; border-radius: 8px; border: 1.5px solid #E2E1F0; cursor: default; }
+  .badge-blue { background: #EBF1FF; color: #0057FF; font-family: 'Manrope', sans-serif; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: inline-block; }
+  .badge-green { background: #E6F7EF; color: #1B8A52; font-family: 'Manrope', sans-serif; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: inline-block; }
+  .badge-amber { background: #FFF4E0; color: #B06C00; font-family: 'Manrope', sans-serif; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: inline-block; }
+
+  /* COURSE CARD */
+  .card { background: #fff; border-radius: 14px; border: 1px solid #E2E1F0; overflow: hidden; width: 240px; }
+  .card-thumb { height: 96px; background: linear-gradient(135deg, #0057FF 0%, #3379FF 100%); display: flex; align-items: center; justify-content: center; }
+  .card-thumb-text { color: rgba(255,255,255,0.9); font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; }
+  .card-body { padding: 14px; }
+  .card-title { font-size: 14px; font-weight: 700; color: #07060E; line-height: 1.35; margin-bottom: 6px; }
+  .card-meta { font-size: 11px; color: #9896B8; font-weight: 500; margin-bottom: 10px; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .progress-bar { height: 4px; background: #E2E1F0; border-radius: 2px; flex: 1; margin-right: 8px; }
+  .progress-fill { height: 4px; background: #0057FF; border-radius: 2px; width: 42%; }
+  .progress-pct { font-size: 10px; font-weight: 700; color: #0057FF; }
+
+  .divider { height: 1px; background: #E2E1F0; margin: 4px 0 0; }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="section-label">Logo — Light / Color / Dark</div>
+  <div class="logo-row">
+    <div class="logo-bg-white">
+      <svg width="44" height="44" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="400" rx="96" fill="#0057FF"/>
+        <rect x="88" y="88" width="44" height="224" rx="12" fill="#fff"/>
+        <path d="M132 88 Q252 88 252 154 Q252 220 132 220" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <rect x="214" y="158" width="44" height="154" rx="12" fill="#fff"/>
+        <path d="M258 158 Q330 158 330 210 Q330 262 258 262" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <line x1="272" y1="262" x2="336" y2="344" stroke="#fff" stroke-width="40" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="wordmark">Poha<span>Rana</span></div>
+        <div class="tagline">Learn without limits</div>
+      </div>
+    </div>
+
+    <div class="logo-bg-blue">
+      <svg width="44" height="44" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="400" rx="96" fill="rgba(255,255,255,0.18)"/>
+        <rect x="88" y="88" width="44" height="224" rx="12" fill="#fff"/>
+        <path d="M132 88 Q252 88 252 154 Q252 220 132 220" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <rect x="214" y="158" width="44" height="154" rx="12" fill="#fff"/>
+        <path d="M258 158 Q330 158 330 210 Q330 262 258 262" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <line x1="272" y1="262" x2="336" y2="344" stroke="#fff" stroke-width="40" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="wordmark-blue">Poha<span>Rana</span></div>
+        <div class="tagline-white">Learn without limits</div>
+      </div>
+    </div>
+
+    <div class="logo-bg-dark">
+      <svg width="44" height="44" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="400" rx="96" fill="#0057FF"/>
+        <rect x="88" y="88" width="44" height="224" rx="12" fill="#fff"/>
+        <path d="M132 88 Q252 88 252 154 Q252 220 132 220" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <rect x="214" y="158" width="44" height="154" rx="12" fill="#fff"/>
+        <path d="M258 158 Q330 158 330 210 Q330 262 258 262" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <line x1="272" y1="262" x2="336" y2="344" stroke="#fff" stroke-width="40" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="wordmark-dark">Poha<span>Rana</span></div>
+        <div class="tagline-white">Learn without limits</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" style="margin-top:28px;"></div>
+
+  <div class="section-label">Icon — Size Variants</div>
+  <div class="icon-grid">
+    <div class="icon-wrap">
+      <svg class="icon" width="80" height="80" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="400" rx="96" fill="#0057FF"/>
+        <rect x="88" y="88" width="44" height="224" rx="12" fill="#fff"/>
+        <path d="M132 88 Q252 88 252 154 Q252 220 132 220" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <rect x="214" y="158" width="44" height="154" rx="12" fill="#fff"/>
+        <path d="M258 158 Q330 158 330 210 Q330 262 258 262" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <line x1="272" y1="262" x2="336" y2="344" stroke="#fff" stroke-width="40" stroke-linecap="round"/>
+      </svg>
+      <div class="icon-label">80px</div>
+    </div>
+    <div class="icon-wrap">
+      <svg class="icon" width="48" height="48" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="400" rx="96" fill="#0057FF"/>
+        <rect x="88" y="88" width="44" height="224" rx="12" fill="#fff"/>
+        <path d="M132 88 Q252 88 252 154 Q252 220 132 220" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <rect x="214" y="158" width="44" height="154" rx="12" fill="#fff"/>
+        <path d="M258 158 Q330 158 330 210 Q330 262 258 262" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <line x1="272" y1="262" x2="336" y2="344" stroke="#fff" stroke-width="40" stroke-linecap="round"/>
+      </svg>
+      <div class="icon-label">48px</div>
+    </div>
+    <div class="icon-wrap">
+      <svg class="icon" width="32" height="32" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="400" rx="96" fill="#0057FF"/>
+        <rect x="88" y="88" width="44" height="224" rx="12" fill="#fff"/>
+        <path d="M132 88 Q252 88 252 154 Q252 220 132 220" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <rect x="214" y="158" width="44" height="154" rx="12" fill="#fff"/>
+        <path d="M258 158 Q330 158 330 210 Q330 262 258 262" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <line x1="272" y1="262" x2="336" y2="344" stroke="#fff" stroke-width="40" stroke-linecap="round"/>
+      </svg>
+      <div class="icon-label">32px</div>
+    </div>
+    <div class="icon-wrap">
+      <svg class="icon" width="20" height="20" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="400" rx="96" fill="#0057FF"/>
+        <rect x="88" y="88" width="44" height="224" rx="12" fill="#fff"/>
+        <path d="M132 88 Q252 88 252 154 Q252 220 132 220" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <rect x="214" y="158" width="44" height="154" rx="12" fill="#fff"/>
+        <path d="M258 158 Q330 158 330 210 Q330 262 258 262" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <line x1="272" y1="262" x2="336" y2="344" stroke="#fff" stroke-width="40" stroke-linecap="round"/>
+      </svg>
+      <div class="icon-label">20px</div>
+    </div>
+    <div class="icon-wrap">
+      <svg class="icon" width="80" height="80" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="400" rx="96" fill="#07060E"/>
+        <rect x="88" y="88" width="44" height="224" rx="12" fill="#fff"/>
+        <path d="M132 88 Q252 88 252 154 Q252 220 132 220" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <rect x="214" y="158" width="44" height="154" rx="12" fill="#fff"/>
+        <path d="M258 158 Q330 158 330 210 Q330 262 258 262" fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round"/>
+        <line x1="272" y1="262" x2="336" y2="344" stroke="#fff" stroke-width="40" stroke-linecap="round"/>
+      </svg>
+      <div class="icon-label">Dark</div>
+    </div>
+    <div class="icon-wrap">
+      <div style="width:80px;height:80px;border-radius:19px;border:1px solid #E2E1F0;display:flex;align-items:center;justify-content:center;">
+        <svg class="icon" width="80" height="80" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="400" rx="96" fill="#fff"/>
+          <rect x="88" y="88" width="44" height="224" rx="12" fill="#0057FF"/>
+          <path d="M132 88 Q252 88 252 154 Q252 220 132 220" fill="none" stroke="#0057FF" stroke-width="44" stroke-linecap="round"/>
+          <rect x="214" y="158" width="44" height="154" rx="12" fill="#0057FF"/>
+          <path d="M258 158 Q330 158 330 210 Q330 262 258 262" fill="none" stroke="#0057FF" stroke-width="44" stroke-linecap="round"/>
+          <line x1="272" y1="262" x2="336" y2="344" stroke="#0057FF" stroke-width="40" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="icon-label">Mono</div>
+    </div>
+  </div>
+
+  <div class="divider" style="margin-top:28px;"></div>
+
+  <div class="section-label">Color Palette</div>
+  <div class="color-row">
+    <div class="swatch">
+      <div class="swatch-block" style="background:#0057FF;"></div>
+      <div class="swatch-info"><div class="swatch-name">Blue 600</div><div class="swatch-hex">#0057FF</div></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-block" style="background:#3379FF;"></div>
+      <div class="swatch-info"><div class="swatch-name">Blue 400</div><div class="swatch-hex">#3379FF</div></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-block" style="background:#EBF1FF;"></div>
+      <div class="swatch-info"><div class="swatch-name">Blue 50</div><div class="swatch-hex">#EBF1FF</div></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-block" style="background:#07060E;"></div>
+      <div class="swatch-info"><div class="swatch-name">Ink</div><div class="swatch-hex">#07060E</div></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-block" style="background:#666580;"></div>
+      <div class="swatch-info"><div class="swatch-name">Muted</div><div class="swatch-hex">#666580</div></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-block" style="background:#E2E1F0;"></div>
+      <div class="swatch-info"><div class="swatch-name">Border</div><div class="swatch-hex">#E2E1F0</div></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-block" style="background:#F7F7FB;"></div>
+      <div class="swatch-info"><div class="swatch-name">Surface</div><div class="swatch-hex">#F7F7FB</div></div>
+    </div>
+  </div>
+
+  <div class="divider" style="margin-top:28px;"></div>
+
+  <div class="section-label">Type Scale — Manrope</div>
+  <div class="type-row">
+    <div class="type-meta">Display / 800</div>
+    <div style="font-family:'Manrope',sans-serif;font-size:40px;font-weight:800;letter-spacing:-1.5px;line-height:1.1;color:#07060E;">Learn Anything</div>
+  </div>
+  <div class="type-row">
+    <div class="type-meta">H1 / 700</div>
+    <div style="font-family:'Manrope',sans-serif;font-size:28px;font-weight:700;letter-spacing:-0.5px;line-height:1.2;color:#07060E;">Your Learning Path</div>
+  </div>
+  <div class="type-row">
+    <div class="type-meta">H2 / 600</div>
+    <div style="font-family:'Manrope',sans-serif;font-size:20px;font-weight:600;letter-spacing:-0.2px;color:#07060E;">Featured Courses</div>
+  </div>
+  <div class="type-row">
+    <div class="type-meta">Body / 400</div>
+    <div style="font-family:'Manrope',sans-serif;font-size:15px;font-weight:400;line-height:1.65;color:#07060E;">Structured learning for curious minds — from fundamentals to mastery.</div>
+  </div>
+  <div class="type-row">
+    <div class="type-meta">Caption / 300</div>
+    <div style="font-family:'Manrope',sans-serif;font-size:12px;font-weight:300;letter-spacing:0.3px;color:#666580;">42,000 learners enrolled · Updated June 2026</div>
+  </div>
+
+  <div class="divider" style="margin-top:28px;"></div>
+
+  <div class="section-label">UI Components</div>
+  <div class="ui-row" style="margin-bottom:16px;">
+    <button class="btn-primary">Start Learning</button>
+    <button class="btn-secondary">Browse Courses</button>
+    <button class="btn-ghost">Sign In</button>
+  </div>
+  <div class="ui-row">
+    <span class="badge-blue">New Course</span>
+    <span class="badge-green">Certificate</span>
+    <span class="badge-amber">In Progress</span>
+  </div>
+
+  <div class="divider" style="margin-top:28px;"></div>
+
+  <div class="section-label">Sample Course Card</div>
+  <div class="card">
+    <div class="card-thumb">
+      <div class="card-thumb-text">Data Science</div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Foundations of Machine Learning</div>
+      <div class="card-meta">Dr. Priya Mehta · 18 modules · 6h 40m</div>
+      <div style="margin-bottom:10px;"><span class="badge-blue">Certificate</span></div>
+      <div class="card-footer">
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+        <div class="progress-pct">42%</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

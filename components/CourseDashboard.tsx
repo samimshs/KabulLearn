@@ -1,64 +1,252 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import curriculum from "@/data/data.json";
 import { useLanguage } from "@/components/LanguageProvider";
+import { CourseCard, type CourseCardRow } from "@/components/CourseCard";
+import { usesPashtoContent, localizeLevel } from "@/lib/i18n";
 
-export function CourseDashboard() {
+type CourseModule = {
+  id: string; titleEn: string; titlePs: string; order: number;
+  lessons: Array<{ id: string; order: number }>;
+};
+
+type CourseRow = CourseCardRow & { modules: CourseModule[] };
+
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  "data-science": ["data", "machine", "python", "pandas", "learning", "ml", "ai", "neural", "deep", "classification", "clustering"],
+  "statistics": ["statistic", "probability", "regression", "احصایه", "distribution", "sampling", "variance"],
+  "computer-basics": ["computer", "basics", "hardware", "software", "operating", "network", "fundamental", "intro to comp"],
+  "physics": ["physics", "kinematics", "فیزیک", "mechanics", "motion", "force", "energy", "velocity"],
+};
+
+const SECTION_ORDER = ["data-science", "statistics", "computer-basics", "physics", "other"] as const;
+type SectionKey = typeof SECTION_ORDER[number];
+
+function matchesCategory(course: CourseRow, key: string): boolean {
+  if (key === "all") return true;
+  const haystack = [
+    course.titleEn, course.titlePs,
+    course.descriptionEn, course.descriptionPs,
+  ].join(" ").toLowerCase();
+  return (CATEGORY_KEYWORDS[key] ?? []).some(kw => haystack.includes(kw));
+}
+
+function getPrimaryCategory(course: CourseRow): SectionKey {
+  const haystack = [
+    course.titleEn, course.titlePs,
+    course.descriptionEn, course.descriptionPs,
+  ].join(" ").toLowerCase();
+  for (const key of ["data-science", "statistics", "computer-basics", "physics"] as const) {
+    if (CATEGORY_KEYWORDS[key].some(kw => haystack.includes(kw))) return key;
+  }
+  return "other";
+}
+
+function SectionDivider({ label, count }: { label: string; count: number }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="shrink-0 text-[11px] font-[800] uppercase tracking-[2px] text-[var(--muted-2)] whitespace-nowrap">
+        {label}
+      </span>
+      <div className="h-px flex-1 bg-gradient-to-r from-[var(--border)] to-transparent" />
+      <span className="shrink-0 rounded-full bg-[var(--surface)] px-2 py-0.5 text-[10px] font-[800] text-[var(--muted-2)]">
+        {count}
+      </span>
+    </div>
+  );
+}
+
+export function CourseDashboard({ courses, dbError }: { courses: CourseRow[]; dbError?: boolean }) {
   const { locale, t } = useLanguage();
+  const [query, setQuery] = useState("");
+  const [levelFilter, setLevelFilter] = useState("");
+  const [activeCategory, setActiveCategory] = useState("all");
+
+  const categories = [
+    { key: "all",             label: t.categoryAll },
+    { key: "data-science",    label: t.categoryDataScience },
+    { key: "statistics",      label: t.categoryStatistics },
+    { key: "computer-basics", label: t.categoryComputerBasics },
+    { key: "physics",         label: t.categoryPhysics },
+  ];
+
+  const sectionLabels: Record<SectionKey, string> = {
+    "data-science":    t.categoryDataScience,
+    "statistics":      t.categoryStatistics,
+    "computer-basics": t.categoryComputerBasics,
+    "physics":         t.categoryPhysics,
+    "other":           t.categoryOther,
+  };
+
+  // Stable thumbnail index per course regardless of filter state
+  const courseIndexMap = useMemo(
+    () => new Map(courses.map((c, i) => [c.id, i])),
+    [courses]
+  );
+
+  const allLevels = useMemo(() => {
+    const s = new Set<string>();
+    courses.forEach((c) => {
+      const l = localizeLevel(c.level, locale);
+      if (l) s.add(l);
+    });
+    return [...s].sort();
+  }, [courses, locale]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return courses.filter((c) => {
+      const title = usesPashtoContent(locale) ? c.titlePs : c.titleEn;
+      const desc  = usesPashtoContent(locale) ? c.descriptionPs : c.descriptionEn;
+      const level = localizeLevel(c.level, locale);
+      const authorName = c.instructors?.[0]?.name ?? "";
+      const authorUsername = c.instructors?.[0]?.username ?? "";
+      return (
+        (!q || title.toLowerCase().includes(q) || desc.toLowerCase().includes(q) || authorName.toLowerCase().includes(q) || authorUsername.toLowerCase().includes(q))
+        && (!levelFilter || level === levelFilter)
+        && matchesCategory(c, activeCategory)
+      );
+    });
+  }, [courses, query, levelFilter, activeCategory, locale]);
 
   return (
-    <main className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-8 lg:px-8 lg:py-10">
-      <section className="grid gap-6 rounded-3xl border border-stone-200 bg-[#fffdfa] p-6 shadow-[0_18px_50px_rgba(16,32,51,0.08)] lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:p-8">
-        <div>
-          <p className="text-sm font-black uppercase tracking-wider text-[#0f766e]">{t.availableCourses}</p>
-          <h1 className="mt-3 max-w-3xl text-4xl font-black tracking-tight text-[#102033] lg:text-6xl">{t.dashboard}</h1>
+    <>
+      {/* ── Discovery Center ────────────────────────────────────── */}
+      <div className="mb-8 overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow)]">
+
+        {/* Header */}
+        <div className="border-b border-[var(--border)] px-6 pt-6 pb-5">
+          <p className="pr-eyebrow mb-2">{t.availableCourses}</p>
+          <h2 className="pr-h2">{t.discoverCourses}</h2>
         </div>
-        <p className="max-w-2xl text-base font-medium leading-7 text-[#2d3e50] lg:justify-self-end">{t.dashboardIntro}</p>
-      </section>
 
-      <section className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-        {curriculum.courses.map((course) => {
-          const lessonCount = course.modules.reduce((count, module) => count + module.lessons.length, 0);
-          const firstLesson = course.modules[0]?.lessons[0];
+        {/* Search */}
+        <div className="px-6 pt-5">
+          <label htmlFor="course-search" className="sr-only">{t.searchPlaceholder}</label>
+          <div className="relative">
+            <span className="pointer-events-none absolute inset-y-0 start-4 flex items-center text-[var(--muted)]">
+              <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.5" />
+                <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </span>
+            <input
+              id="course-search"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t.searchPlaceholder}
+              className="pr-input text-[15px]"
+              style={{ paddingInlineStart: "2.75rem", paddingBlock: "14px" }}
+            />
+          </div>
+        </div>
 
-          return (
-            <article key={course.id} className="grid min-h-80 content-between rounded-3xl border border-stone-200 bg-[#fffdfa] p-6 shadow-[0_14px_34px_rgba(16,32,51,0.07)] transition hover:-translate-y-1 hover:shadow-[0_24px_54px_rgba(16,32,51,0.1)]">
-              <div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-black uppercase tracking-wider text-emerald-800">
-                    {course.level[locale]}
-                  </span>
-                  <span className="text-sm font-bold text-[#2d3e50]">
-                    {course.modules.length} {t.modules} · {lessonCount} {t.lessons}
-                  </span>
-                </div>
-                <h2 className="mt-8 text-3xl font-black tracking-tight text-[#102033]">{course.title[locale]}</h2>
-                <p className="mt-4 font-medium leading-7 text-[#3d4a5a]">{course.description[locale]}</p>
-                <div className="mt-6 grid gap-2">
-                  {course.modules.map((module, index) => (
-                    <div key={module.id} className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2">
-                      <span className="grid size-7 place-items-center rounded-full bg-white text-xs font-black text-[#0f3d5e] shadow-sm">{index + 1}</span>
-                      <span className="text-sm font-bold text-[#1a2e42]">
-                        {module.title[locale]} · {module.lessons.length} {t.lessons} · {t.requiredQuiz}
-                      </span>
+        {/* Category chips + level filter */}
+        <div className="flex flex-wrap items-center gap-2 px-6 pt-3 pb-5">
+          {categories.map(cat => (
+            <button
+              key={cat.key}
+              type="button"
+              onClick={() => setActiveCategory(cat.key)}
+              className={`rounded-full border px-4 py-1.5 text-[12px] font-[800] uppercase tracking-[0.8px] transition
+                ${activeCategory === cat.key
+                  ? "border-[var(--brand)] bg-[var(--brand)] text-white shadow-[0_4px_12px_rgba(0,87,255,0.22)]"
+                  : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[rgba(0,87,255,0.3)] hover:text-[var(--ink)]"
+                }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+
+          {allLevels.length > 0 && (
+            <div className="ms-auto">
+              <label htmlFor="level-filter" className="sr-only">{t.filterAll}</label>
+              <select
+                id="level-filter"
+                value={levelFilter}
+                onChange={(e) => setLevelFilter(e.target.value)}
+                className="pr-input min-w-[150px] py-2 text-[13px]"
+              >
+                <option value="">{t.filterAll}</option>
+                {allLevels.map((l) => <option key={l} value={l}>{l}</option>)}
+              </select>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* DB error */}
+      {dbError && (
+        <div className="mb-8 rounded-[var(--radius-lg)] border border-[rgba(150,96,0,0.18)] bg-[var(--warning-50)] px-6 py-4 text-[14px] font-[700] text-[var(--warning)]">
+          Courses temporarily unavailable — please refresh in a moment.
+        </div>
+      )}
+
+      {/* Course grid */}
+      {!dbError && (
+        <section aria-label={t.availableCourses} aria-live="polite">
+          {filtered.length === 0 ? (
+            <div className="pr-muted-box py-16 text-center text-[15px] font-[700] text-[var(--muted)]">
+              {courses.length > 0 ? t.noResults : t.noCourses}
+            </div>
+          ) : activeCategory !== "all" ? (
+            /* Single-category view — flat grid, no dividers */
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filtered.map((course) => (
+                <CourseCard key={course.id} course={course} index={courseIndexMap.get(course.id) ?? 0} />
+              ))}
+            </div>
+          ) : (
+            /* "All" view — courses grouped by category with section dividers */
+            <div className="grid gap-10">
+              {SECTION_ORDER.map((sectionKey) => {
+                const sectionCourses = filtered.filter(c => getPrimaryCategory(c) === sectionKey);
+                if (sectionCourses.length === 0) return null;
+                return (
+                  <div key={sectionKey} className="grid gap-4">
+                    <SectionDivider label={sectionLabels[sectionKey]} count={sectionCourses.length} />
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                      {sectionCourses.map((course) => (
+                        <CourseCard key={course.id} course={course} index={courseIndexMap.get(course.id) ?? 0} />
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      )}
 
-              {firstLesson ? (
-                <Link
-                  href={`/courses/${course.id}/lessons/${firstLesson.id}`}
-                  className="mt-8 inline-flex h-11 items-center justify-center rounded-xl bg-[#2563eb] px-5 text-sm font-black text-white transition hover:bg-[#1d4ed8]"
-                >
-                  {t.startLearning}
-                </Link>
-              ) : null}
-            </article>
-          );
-        })}
+      {/* Educator CTA */}
+      <section className="pr-panel mt-12 p-7 lg:p-10">
+        <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div>
+            <p className="pr-eyebrow">{t.teachCta}</p>
+            <h2 className="pr-h2 mt-2">{t.teachCtaSubtitle}</h2>
+            <ol className="mt-5 grid gap-3">
+              {[t.teachCtaStep1, t.teachCtaStep2, t.teachCtaStep3].map((step, i) => (
+                <li key={i} className="flex items-start gap-3 text-[14px] font-[500] text-[var(--muted)]">
+                  <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--brand-50)] text-[11px] font-[800] text-[var(--brand)]">
+                    {i + 1}
+                  </span>
+                  {step}
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div className="flex flex-wrap gap-3 lg:flex-col lg:items-stretch">
+            <Link href="/register" className="pr-btn-primary">
+              {t.teachCtaButton}
+            </Link>
+            <Link href="/login?callbackUrl=%2Feducator" className="pr-btn-ghost">
+              {t.educatorPortal}
+            </Link>
+          </div>
+        </div>
       </section>
-    </main>
+    </>
   );
 }

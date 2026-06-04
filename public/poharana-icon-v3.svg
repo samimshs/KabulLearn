@@ -1,0 +1,19 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>PohaRana Icon v3</title>
+  <desc>PohaRana education platform icon — PR monogram on blue rounded square, R fully rendered</desc>
+
+  <rect width="400" height="400" rx="96" fill="#0057FF"/>
+
+  <!-- P stem -->
+  <rect x="60" y="60" width="44" height="220" rx="12" fill="#ffffff"/>
+  <!-- P bowl -->
+  <path d="M104 60 Q224 60 224 126 Q224 192 104 192" fill="none" stroke="#ffffff" stroke-width="44" stroke-linecap="round"/>
+
+  <!-- R stem -->
+  <rect x="196" y="162" width="44" height="160" rx="12" fill="#ffffff"/>
+  <!-- R bowl -->
+  <path d="M240 162 Q316 162 316 204 Q316 246 240 246" fill="none" stroke="#ffffff" stroke-width="44" stroke-linecap="round"/>
+  <!-- R leg — from bottom-right of bowl -->
+  <line x1="274" y1="246" x2="330" y2="330" stroke="#ffffff" stroke-width="40" stroke-linecap="round"/>
+
+</svg>

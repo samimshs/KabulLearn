@@ -1,112 +1,331 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
-import type { Locale } from "@/lib/i18n";
+import { usesPashtoContent, type Locale } from "@/lib/i18n";
+import { QuestionType } from "@prisma/client";
 
-type LocalizedText = Record<Locale, string>;
+type LocalizedText = Record<"en" | "ps", string> & Partial<Record<Locale, string>>;
 
 type QuizQuestion = {
   id: string;
+  type: QuestionType;
   question: LocalizedText;
+  explanation?: LocalizedText;
   options: LocalizedText[];
-  answerIndex: number;
+  choiceIds: string[];
+  correctChoiceIds: string[];
+  correctAnswer?: string;
+};
+
+type SelectedAnswer = {
+  questionId: string;
+  answerChoiceIds?: string[];
+  textAnswer?: string;
 };
 
 type QuizBlockProps = {
   questions: QuizQuestion[];
   passScore: number;
-  onPass: (score: number) => void;
+  title?: string;
+  description?: string;
+  onStart: () => Promise<string | null>;
+  onPass: (selectedAnswers: SelectedAnswer[], attemptId: string) => Promise<void>;
 };
 
-export function QuizBlock({ questions, passScore, onPass }: QuizBlockProps) {
-  const { locale, t } = useLanguage();
-  const [selected, setSelected] = useState<Record<string, number>>({});
-  const [score, setScore] = useState<number | null>(null);
-  const allAnswered = questions.every((question) => selected[question.id] !== undefined);
-  const passed = score !== null && score >= passScore;
+type SubmitState = "idle" | "submitted" | "saving";
 
-  function submitQuiz() {
-    const correctAnswers = questions.filter((question) => selected[question.id] === question.answerIndex).length;
-    const nextScore = Math.round((correctAnswers / questions.length) * 100);
-    setScore(nextScore);
-    if (nextScore >= passScore) {
-      onPass(nextScore);
+export function QuizBlock({ questions, passScore, title, description, onStart, onPass }: QuizBlockProps) {
+  const { locale, t } = useLanguage();
+  const [selected, setSelected] = useState<Record<string, string[]>>({});
+  const [textAnswers, setTextAnswers] = useState<Record<string, string>>({});
+  const [submitState, setSubmitState] = useState<SubmitState>("idle");
+  const [score, setScore] = useState<number | null>(null);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [attemptId, setAttemptId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    onStart()
+      .then((id) => {
+        if (!cancelled) setAttemptId(id);
+      })
+      .catch(() => {
+        if (!cancelled) setSubmissionError("Could not start quiz attempt.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [onStart]);
+
+  const allAnswered = questions.every((q) => {
+    if (q.type === QuestionType.TEXT_INPUT) return Boolean(textAnswers[q.id]?.trim());
+    return (selected[q.id] ?? []).length > 0;
+  });
+  const passed = score !== null && score >= passScore;
+  const textLocale = usesPashtoContent(locale) ? "ps" : "en";
+
+  function normalizeText(value: string) {
+    return value.trim().replace(/\s+/g, " ").toLowerCase();
+  }
+
+  function isQuestionCorrect(question: QuizQuestion) {
+    if (question.type === QuestionType.TEXT_INPUT) {
+      return normalizeText(textAnswers[question.id] ?? "") === normalizeText(question.correctAnswer ?? "");
     }
+
+    const selectedIds = new Set(selected[question.id] ?? []);
+    const correctIds = new Set(question.correctChoiceIds);
+    return selectedIds.size === correctIds.size && [...correctIds].every((id) => selectedIds.has(id));
+  }
+
+  function getChoiceStatus(question: QuizQuestion, choiceId: string) {
+    if (submitState !== "submitted") return "idle";
+    const questionCorrect = isQuestionCorrect(question);
+    const isThisSelected = (selected[question.id] ?? []).includes(choiceId);
+    const isCorrect = question.correctChoiceIds.includes(choiceId);
+    if (questionCorrect && isCorrect) return "correct";
+    if (isThisSelected && !isCorrect) return "wrong";
+    return "idle";
+  }
+
+  async function submitQuiz() {
+    const correctCount = questions.filter((q) => isQuestionCorrect(q)).length;
+    const nextScore = Math.round((correctCount / questions.length) * 100);
+    setScore(nextScore);
+    setSubmitState("submitted");
+
+    if (nextScore >= passScore) {
+      const selectedAnswers = questions.map((q) =>
+        q.type === QuestionType.TEXT_INPUT
+          ? {
+              questionId: q.id,
+              textAnswer: textAnswers[q.id] ?? ""
+            }
+          : {
+              questionId: q.id,
+              answerChoiceIds: selected[q.id] ?? []
+            }
+      );
+      setSubmitState("saving");
+      setSubmissionError(null);
+      try {
+        if (!attemptId) {
+          throw new Error("Quiz attempt is not ready yet. Please wait a moment.");
+        }
+        await onPass(selectedAnswers, attemptId);
+      } catch (error) {
+        setSubmissionError(error instanceof Error ? error.message : "Unable to save quiz progress.");
+      } finally {
+        setSubmitState("submitted");
+      }
+    }
+  }
+
+  function reset() {
+    setSelected({});
+    setTextAnswers({});
+    setScore(null);
+    setSubmitState("idle");
+    setSubmissionError(null);
+    onStart().then(setAttemptId).catch(() => setSubmissionError("Could not start quiz attempt."));
   }
 
   return (
     <div className="grid gap-4">
-      <div className="rounded-3xl border border-stone-200 bg-[#fffdfa] p-5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-black uppercase tracking-wider text-[#0f766e]">{t.requiredQuiz}</p>
-          <span className="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-black uppercase tracking-wider text-teal-900">
-            {t.passingScore}: {passScore}%
-          </span>
+      <div className="pr-panel p-6 lg:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="pr-eyebrow">{t.requiredQuiz}</p>
+            {title && <h1 className="pr-h2 mt-2">{title}</h1>}
+            {description && <p className="pr-copy mt-3 max-w-2xl">{description}</p>}
+          </div>
+          <span className="pr-badge shrink-0">{t.passingScore}: {passScore}%</span>
         </div>
       </div>
 
       {questions.map((question, questionIndex) => {
-        const selectedIndex = selected[question.id];
+        const selectedIds = selected[question.id] ?? [];
+        const isSubmitted = submitState === "submitted";
+        const questionCorrect = isSubmitted && isQuestionCorrect(question);
 
         return (
-          <article key={question.id} className="rounded-3xl border border-stone-200 bg-[#fffdfa] p-5 shadow-sm">
+          <article
+            key={question.id}
+            className={`rounded-[var(--radius-lg)] border p-5 shadow-sm transition ${
+              isSubmitted
+                ? questionCorrect
+                  ? "border-[rgba(0,87,255,0.25)] bg-[var(--brand-50)]"
+                  : "border-[rgba(196,43,43,0.25)] bg-[var(--danger-50)]"
+                : "border-[var(--border)] bg-white"
+            }`}
+          >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-black uppercase tracking-wider text-[#0f766e]">
+                <p className="text-xs font-[800] uppercase tracking-[1.5px] text-[var(--brand)]">
                   {t.quiz} {questionIndex + 1}
                 </p>
-                <h3 className="mt-2 text-xl font-black tracking-tight text-[#102033]">{question.question[locale]}</h3>
+                <h3 className="mt-2 text-xl font-[800] tracking-[-0.35px] text-[var(--ink)]">
+                  {question.question[textLocale]}
+                </h3>
               </div>
+              {isSubmitted ? (
+                <span
+                  className={`shrink-0 grid h-8 w-8 place-items-center rounded-full text-sm font-[800] ${
+                    questionCorrect
+                      ? "bg-[var(--brand)] text-white"
+                      : "bg-[var(--danger)] text-white"
+                  }`}
+                  aria-label={questionCorrect ? t.correctAnswer : t.incorrectAnswer}
+                >
+                  {questionCorrect ? "✓" : "✗"}
+                </span>
+              ) : null}
             </div>
 
-            <div className="mt-5 grid gap-2">
-              {question.options.map((option, optionIndex) => {
-                const active = selectedIndex === optionIndex;
+            {question.type === QuestionType.TEXT_INPUT ? (
+              <div className="mt-5 grid gap-2">
+                <input
+                  value={textAnswers[question.id] ?? ""}
+                  disabled={submitState !== "idle"}
+                  onChange={(event) => setTextAnswers((current) => ({ ...current, [question.id]: event.target.value }))}
+                  placeholder={usesPashtoContent(locale) ? "ځواب ولیکئ" : "Enter your answer"}
+                  className="min-h-12 rounded-[var(--radius)] border border-[var(--border)] bg-white px-4 text-sm font-[800] text-[var(--ink)] outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[rgba(0,87,255,0.12)] disabled:opacity-80"
+                />
+                {isSubmitted ? (
+                  <p className={`text-sm font-[800] ${questionCorrect ? "text-[var(--brand)]" : "text-[var(--danger)]"}`}>
+                    {questionCorrect ? `✓ ${t.correctAnswer}` : `✗ ${t.incorrectAnswer}`}
+                  </p>
+                ) : null}
+              </div>
+            ) : (
+              <div
+                className="mt-5 grid gap-2"
+                role={question.type === QuestionType.SINGLE_CHOICE ? "radiogroup" : "group"}
+                aria-label={question.question[textLocale]}
+              >
+                {question.options.map((option, optionIndex) => {
+                const choiceId = question.choiceIds[optionIndex];
+                const active = selectedIds.includes(choiceId);
+                const status = getChoiceStatus(question, choiceId);
+                const isDisabled = submitState !== "idle";
+
+                let className =
+                  "min-h-12 rounded-[var(--radius)] border px-4 text-start text-sm font-[800] transition ";
+                if (status === "correct") {
+                  // Blue tick — correct answer
+                  className += "border-[var(--brand)] bg-[var(--brand)] text-white";
+                } else if (status === "wrong") {
+                  // Red cross — wrong selected answer
+                  className += "border-[rgba(196,43,43,0.5)] bg-[var(--danger)] text-white";
+                } else if (active && !isDisabled) {
+                  className += "border-[var(--brand)] bg-[var(--brand)] text-white";
+                } else {
+                  className +=
+                    "border-[var(--border)] bg-[var(--surface)] text-[var(--ink-2)] hover:border-[rgba(0,87,255,0.24)] hover:bg-white";
+                }
+
                 return (
                   <button
-                    key={option[locale]}
+                    key={optionIndex}
                     type="button"
+                    role={question.type === QuestionType.SINGLE_CHOICE ? "radio" : "checkbox"}
+                    aria-checked={active}
+                    disabled={isDisabled}
                     onClick={() => {
-                      setSelected((current) => ({ ...current, [question.id]: optionIndex }));
-                      setScore(null);
+                      setSelected((current) => {
+                        if (question.type === QuestionType.SINGLE_CHOICE) {
+                          return { ...current, [question.id]: [choiceId] };
+                        }
+
+                        const existing = current[question.id] ?? [];
+                        return {
+                          ...current,
+                          [question.id]: existing.includes(choiceId)
+                            ? existing.filter((id) => id !== choiceId)
+                            : [...existing, choiceId]
+                        };
+                      });
                     }}
-                    className={`min-h-12 rounded-xl border px-4 text-start text-sm font-bold transition ${
-                      active
-                        ? "border-[#2563eb] bg-blue-50 text-[#0d47a1]"
-                        : "border-stone-200 bg-stone-50 text-[#1a2e42] hover:border-stone-300 hover:bg-white"
-                    }`}
+                    className={className}
                   >
-                    {option[locale]}
+                    <span className="flex items-center gap-2">
+                      {status === "correct" ? "✓ " : status === "wrong" ? "✗ " : ""}
+                      {option[textLocale]}
+                    </span>
                   </button>
                 );
               })}
-            </div>
+              </div>
+            )}
+
+            {isSubmitted && questionCorrect && question.explanation?.[textLocale] ? (
+              <div className="mt-4 rounded-[var(--radius)] border border-[rgba(0,87,255,0.18)] bg-[var(--brand-50)] p-3">
+                <p className="text-xs font-[800] uppercase tracking-[1.5px] text-[var(--brand)]">Explanation</p>
+                <p className="mt-1 text-sm font-[600] text-[var(--ink-2)]">{question.explanation[textLocale]}</p>
+              </div>
+            ) : null}
           </article>
         );
       })}
 
-      <div className="rounded-3xl border border-stone-200 bg-[#fffdfa] p-5 shadow-sm">
+      <div className="pr-card p-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <button
-            type="button"
-            disabled={!allAnswered}
-            onClick={submitQuiz}
-            className="inline-flex h-11 items-center justify-center rounded-xl bg-[#2563eb] px-5 text-sm font-black text-white transition hover:bg-[#1d4ed8] disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-600"
-          >
-            {t.submitQuiz}
-          </button>
+          {submitState === "idle" ? (
+            <button
+              type="button"
+              disabled={!allAnswered}
+              onClick={submitQuiz}
+              aria-label={t.submitQuiz}
+              className="pr-btn-primary disabled:cursor-not-allowed disabled:border-[var(--border)] disabled:bg-[var(--surface)] disabled:text-[var(--muted)]"
+            >
+              {t.submitQuiz}
+            </button>
+          ) : submitState === "saving" ? (
+            <span className="pr-btn-ghost">
+              Saving...
+            </span>
+          ) : !passed ? (
+            <button
+              type="button"
+              onClick={reset}
+              className="pr-btn-ghost"
+            >
+              {t.tryAgain}
+            </button>
+          ) : null}
+
           {score !== null ? (
             <div className="text-sm font-black">
-              <span className="text-[#3d4a5a]">{t.yourScore}: </span>
-              <span className={passed ? "text-emerald-700" : "text-rose-700"}>{score}%</span>
+              <span className="text-[var(--muted)]">{t.yourScore}: </span>
+              <span className={passed ? "text-[var(--success)]" : "text-[var(--danger)]"}>{score}%</span>
             </div>
           ) : null}
         </div>
+
         {score !== null ? (
-          <p className={`mt-4 rounded-xl p-4 text-sm font-bold leading-6 ${passed ? "bg-emerald-100 text-emerald-950" : "bg-red-50 text-red-900"}`}>
+          <p
+            className={`mt-4 rounded-xl p-4 text-sm font-bold leading-6 ${
+              passed ? "bg-[var(--success-50)] text-[var(--success)]" : "bg-[var(--danger-50)] text-[var(--danger)]"
+            }`}
+            role="alert"
+          >
             {passed ? t.passedQuiz : t.failedQuiz}
           </p>
+        ) : null}
+
+        {submissionError ? (
+          <div className="mt-4 flex items-start gap-3 rounded-[var(--radius)] bg-[var(--danger-50)] p-4" role="alert">
+            <p className="flex-1 text-sm font-bold text-[var(--danger)]">{submissionError}</p>
+            <button
+              type="button"
+              onClick={() => setSubmissionError(null)}
+              className="shrink-0 text-[var(--danger)] opacity-60 transition hover:opacity-100"
+              aria-label="Dismiss"
+            >
+              ✕
+            </button>
+          </div>
         ) : null}
       </div>
     </div>

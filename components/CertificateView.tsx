@@ -1,0 +1,213 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect } from "react";
+
+type CertificateViewProps = {
+  courseId: string;
+  courseTitleEn: string;
+  courseTitlePs: string;
+  eligible: boolean;
+  completedQuizzes: number;
+  requiredQuizzes: number;
+  grade: number;
+  issuedAt?: Date | string;
+  verificationCode?: string;
+  certificateUuid?: string;
+  studentName: string;
+  autoPrint?: boolean;
+};
+
+const issuedDateStr = (d?: Date | string) => {
+  if (!d) return new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  const date = typeof d === "string" ? new Date(d) : d;
+  return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+};
+
+export function CertificateView({
+  courseId,
+  courseTitleEn,
+  eligible,
+  completedQuizzes,
+  requiredQuizzes,
+  grade,
+  issuedAt,
+  verificationCode,
+  certificateUuid,
+  studentName,
+  autoPrint = false
+}: CertificateViewProps) {
+  useEffect(() => {
+    if (autoPrint && eligible) {
+      const t = setTimeout(() => window.print(), 600);
+      return () => clearTimeout(t);
+    }
+  }, [autoPrint, eligible]);
+
+  if (!eligible) {
+    return (
+      <main className="pr-page grid max-w-3xl gap-8">
+        <section className="pr-panel p-8">
+          <p className="pr-eyebrow">Certificate</p>
+          <h1 className="pr-h1 mt-4">Not quite there yet</h1>
+          <p className="pr-copy mt-5">
+            You need to pass all {requiredQuizzes} quiz{requiredQuizzes !== 1 ? "zes" : ""} in this course to earn your certificate.
+            You&apos;ve completed <strong>{completedQuizzes}</strong> out of <strong>{requiredQuizzes}</strong>.
+          </p>
+
+          {/* Progress toward certificate */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between text-[13px] font-[700] mb-2 text-[var(--muted)]">
+              <span>Quiz progress</span>
+              <span className="text-[var(--brand)]">{completedQuizzes}/{requiredQuizzes}</span>
+            </div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface)]">
+              <div
+                className="h-2.5 rounded-full bg-[var(--brand)] transition-all"
+                style={{ width: `${requiredQuizzes > 0 ? Math.round((completedQuizzes / requiredQuizzes) * 100) : 0}%` }}
+              />
+            </div>
+          </div>
+
+          <Link href={`/courses/${courseId}`} className="pr-btn-primary mt-8 inline-flex">
+            Return to course
+          </Link>
+        </section>
+      </main>
+    );
+  }
+
+  const dateStr = issuedDateStr(issuedAt);
+  const verificationId = certificateUuid ?? verificationCode;
+  const verificationUrl =
+    typeof window !== "undefined" && verificationId
+      ? `${window.location.origin}/verify/${encodeURIComponent(verificationId)}`
+      : verificationId
+        ? `/verify/${encodeURIComponent(verificationId)}`
+        : "";
+  const qrUrl = verificationUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=132x132&data=${encodeURIComponent(verificationUrl)}`
+    : "";
+
+  return (
+    <>
+      {/* Print-only styles */}
+      <style>{`
+        @media print {
+          html, body { background: white !important; }
+          .no-print { display: none !important; }
+          .cert-page { padding: 0 !important; }
+          .cert-card {
+            box-shadow: none !important;
+            border: none !important;
+            page-break-inside: avoid;
+          }
+        }
+      `}</style>
+
+      <main className="cert-page pr-page grid gap-8">
+        {/* Action bar — hidden when printing */}
+        <div className="no-print flex flex-wrap items-center justify-between gap-4">
+          <Link href={`/courses/${courseId}`} className="text-sm font-[800] text-[var(--brand)] hover:underline">
+            ← Back to course
+          </Link>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="pr-btn-primary"
+          >
+            Save as PDF
+          </button>
+        </div>
+
+        {/* Certificate card */}
+        <div className="cert-card relative overflow-hidden rounded-[20px] border-2 border-[#C9A84C] bg-white shadow-[0_24px_80px_rgba(10,9,20,0.14)]">
+          {/* Decorative top stripe */}
+          <div className="h-2 bg-gradient-to-r from-[#0057FF] via-[#3379FF] to-[#0057FF]" />
+
+          <div className="px-10 py-12 text-center lg:px-16 lg:py-16">
+            {/* Header */}
+            <div className="flex justify-center">
+              <img src="/poharana-icon-v2.svg" alt="KabulLearn" className="h-14 w-14" />
+            </div>
+            <p className="mt-4 text-[11px] font-[800] uppercase tracking-[4px] text-[#0057FF]">
+              KabulLearn · Learn Without Limits
+            </p>
+
+            {/* Title */}
+            <div className="mt-8 border-y border-[#E4E3F2] py-6">
+              <h1 className="text-[13px] font-[700] uppercase tracking-[3px] text-[#9896B8]">
+                Certificate of Completion
+              </h1>
+            </div>
+
+            {/* Body */}
+            <p className="mt-8 text-[14px] font-[500] text-[#6B6987]">This certifies that</p>
+            <p className="mt-3 text-[36px] font-[800] leading-tight tracking-[-0.8px] text-[#0A0914] lg:text-[44px]">
+              {studentName}
+            </p>
+            <p className="mt-4 text-[14px] font-[500] text-[#6B6987]">has successfully completed</p>
+            <p className="mt-3 text-[22px] font-[800] leading-snug tracking-[-0.4px] text-[#0A0914] lg:text-[28px]">
+              {courseTitleEn}
+            </p>
+
+            {/* Grade badge */}
+            <div className="mt-8 flex justify-center">
+              <div className="rounded-full border-2 border-[#C9A84C] bg-[#FFFBF0] px-8 py-3">
+                <p className="text-[11px] font-[800] uppercase tracking-[2px] text-[#966000]">Final grade</p>
+                <p className="mt-1 text-[32px] font-[800] leading-none text-[#966000]">{grade}%</p>
+              </div>
+            </div>
+
+            {/* Issued date */}
+            <p className="mt-8 text-[14px] font-[600] text-[#6B6987]">
+              Issued on <span className="font-[800] text-[#0A0914]">{dateStr}</span>
+            </p>
+
+            {/* Divider */}
+            <div className="mt-10 border-t border-[#E4E3F2] pt-8">
+              <div className="flex items-center justify-center gap-3">
+                <div className="h-px flex-1 bg-[#E4E3F2]" />
+                <p className="text-[11px] font-[700] uppercase tracking-[2px] text-[#9896B8]">Verified credential</p>
+                <div className="h-px flex-1 bg-[#E4E3F2]" />
+              </div>
+              {verificationId ? (
+                <div className="mt-3 grid gap-1">
+                  {qrUrl ? (
+                    <img src={qrUrl} alt="Certificate verification QR code" className="mx-auto h-[132px] w-[132px] rounded-lg border border-[#E4E3F2] bg-white p-2" />
+                  ) : null}
+                  <p className="font-mono text-[12px] text-[#9896B8]">
+                    Code: <span className="font-[700] text-[#6B6987]">{verificationId}</span>
+                  </p>
+                  <Link href={`/verify/${encodeURIComponent(verificationId)}`} className="no-print text-[12px] font-[800] text-[#0057FF]">
+                    Verify online
+                  </Link>
+                </div>
+              ) : null}
+              <p className="mt-1 text-[11px] text-[#9896B8]">kabullearn.com · Afghan learners, lifelong knowledge</p>
+            </div>
+          </div>
+
+          {/* Decorative bottom stripe */}
+          <div className="h-2 bg-gradient-to-r from-[#0057FF] via-[#3379FF] to-[#0057FF]" />
+        </div>
+
+        {/* Congratulations note — hidden when printing */}
+        <div className="no-print grid gap-4 rounded-[var(--radius-xl)] border border-[rgba(24,130,92,0.2)] bg-[var(--success-50)] p-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div>
+            <p className="pr-eyebrow text-[var(--success)]">Congratulations!</p>
+            <p className="mt-2 text-[16px] font-[700] text-[#0A0914]">
+              You finished <strong>{courseTitleEn}</strong> with a grade of {grade}%.
+            </p>
+            <p className="mt-1 text-sm font-[500] text-[var(--muted)]">
+              Click <strong>Save as PDF</strong> above to download your certificate. It will open your browser&apos;s print dialog — choose &ldquo;Save as PDF&rdquo; as the destination.
+            </p>
+          </div>
+          <Link href="/" className="pr-btn-ghost no-print shrink-0">
+            Browse more courses
+          </Link>
+        </div>
+      </main>
+    </>
+  );
+}

@@ -97,7 +97,7 @@ export const dictionaries = {
     pillar3Desc: "Complete final modules to earn cryptographic, QR-verified certificates to prove your technical capabilities anywhere.",
     back: "Back",
     dari: "Dari",
-    rightsReserved: "© 2026 KabulLearn. All rights reserved.",
+    rightsReserved: "© 2026 KabulHub. All rights reserved.",
     questions: "Questions?",
     educatorDashboard: "Educator Dashboard",
     courseWorkspace: "Course workspace",

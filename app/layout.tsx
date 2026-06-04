@@ -41,10 +41,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <p>
                 {t.questions}{" "}
                 <a
-                  href="mailto:info@kabullearn.com"
+                  href="mailto:info@kabulhub.com"
                   className="font-[700] text-[var(--brand)] transition-colors hover:text-[var(--brand-hover)]"
                 >
-                  info@kabullearn.com
+                  info@kabulhub.com
                 </a>
               </p>
             </div>

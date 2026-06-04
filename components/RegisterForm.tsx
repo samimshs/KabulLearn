@@ -4,16 +4,19 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { registerUser, type RegisterState } from "@/lib/actions/register-actions";
 import { signInWithGoogle } from "@/lib/actions/oauth-actions";
+import { useLanguage } from "@/components/LanguageProvider";
 
 const initialState: RegisterState = { error: "" };
 
 export function RegisterForm() {
   const [state, formAction, isPending] = useActionState(registerUser, initialState);
+  const { locale, t } = useLanguage();
 
   return (
     <form action={formAction} className="pr-card grid gap-4 p-6">
+      <input type="hidden" name="locale" value={locale} />
       <label className="pr-label">
-        Full name
+        {t.fullName}
         <input
           type="text"
           name="name"
@@ -24,7 +27,7 @@ export function RegisterForm() {
         />
       </label>
       <label className="pr-label">
-        Email address
+        {t.emailAddress}
         <input
           type="email"
           name="email"
@@ -34,7 +37,7 @@ export function RegisterForm() {
         />
       </label>
       <label className="pr-label">
-        Password
+        {t.password}
         <input
           type="password"
           name="password"
@@ -43,7 +46,7 @@ export function RegisterForm() {
           minLength={8}
           className="pr-input"
         />
-        <span className="text-xs font-[700] text-[var(--muted)]">Minimum 8 characters</span>
+        <span className="text-xs font-[700] text-[var(--muted)]">{t.passwordMin8}</span>
       </label>
 
       {state.error ? (
@@ -57,12 +60,12 @@ export function RegisterForm() {
         disabled={isPending}
         className="pr-btn-primary mt-2 w-full"
       >
-        {isPending ? "Creating account..." : "Create account"}
+        {isPending ? t.creatingAccount : t.createAccount}
       </button>
 
       <div className="flex items-center gap-3 text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
         <span className="h-px flex-1 bg-[var(--border)]" />
-        or
+        {t.or}
         <span className="h-px flex-1 bg-[var(--border)]" />
       </div>
 
@@ -78,13 +81,13 @@ export function RegisterForm() {
           <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z" />
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 4 3.47 2.18 7.06L5.84 9.9C6.71 7.3 9.14 5.38 12 5.38z" />
         </svg>
-        Continue with Google
+        {t.continueWithGoogle}
       </button>
 
       <p className="text-center text-sm font-[700] text-[var(--muted)]">
-        Already have an account?{" "}
+        {t.alreadyHaveAccount}{" "}
         <Link href="/login" className="font-[800] text-[var(--brand)] hover:underline">
-          Sign in
+          {t.signIn}
         </Link>
       </p>
     </form>

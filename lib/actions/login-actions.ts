@@ -6,12 +6,48 @@ import { compare } from "bcryptjs";
 import { z } from "zod";
 import { signIn } from "@/auth";
 import { db } from "@/lib/db";
+import type { Locale } from "@/lib/i18n";
 
-const loginSchema = z.object({
-  email: z.string().trim().email("Enter a valid email address."),
-  password: z.string().min(8, "Password must be at least 8 characters."),
-  callbackUrl: z.string().optional()
-});
+function normalizeLocale(value: FormDataEntryValue | null): Locale {
+  return value === "ps" || value === "fa" ? value : "en";
+}
+
+const messages = {
+  en: {
+    validEmail: "Enter a valid email address.",
+    passwordMin: "Password must be at least 8 characters.",
+    invalidLogin: "Invalid login details.",
+    invalidCredentials: "Invalid email or password.",
+    notAuthorized: "Not authorized.",
+    signInUnavailable: "Unable to sign in right now. Please try again in a moment."
+  },
+  ps: {
+    validEmail: "مهرباني وکړئ سمه ایمیل پته ولیکئ.",
+    passwordMin: "پټنوم باید لږ تر لږه ۸ توري وي.",
+    invalidLogin: "د ننوتلو معلومات سم نه دي.",
+    invalidCredentials: "ایمیل یا پټنوم سم نه دی.",
+    notAuthorized: "تاسو اجازه نه لرئ.",
+    signInUnavailable: "اوس ننوتل ممکن نه دي. مهرباني وکړئ لږ وروسته بیا هڅه وکړئ."
+  },
+  fa: {
+    validEmail: "لطفاً یک آدرس ایمیل معتبر وارد کنید.",
+    passwordMin: "رمز عبور باید حداقل ۸ حرف باشد.",
+    invalidLogin: "معلومات ورود درست نیست.",
+    invalidCredentials: "ایمیل یا رمز عبور درست نیست.",
+    notAuthorized: "شما اجازه دسترسی ندارید.",
+    signInUnavailable: "فعلاً ورود ممکن نیست. لطفاً کمی بعد دوباره تلاش کنید."
+  }
+} as const;
+
+function loginSchema(locale: Locale) {
+  const m = messages[locale];
+
+  return z.object({
+    email: z.string().trim().email(m.validEmail),
+    password: z.string().min(8, m.passwordMin),
+    callbackUrl: z.string().optional()
+  });
+}
 
 export type LoginState = {
   error: string;
@@ -33,14 +69,16 @@ function requiredRoleForPath(path: string) {
 }
 
 export async function loginUser(_state: LoginState, formData: FormData): Promise<LoginState> {
-  const parsed = loginSchema.safeParse({
+  const locale = normalizeLocale(formData.get("locale"));
+  const m = messages[locale];
+  const parsed = loginSchema(locale).safeParse({
     email: String(formData.get("email") || ""),
     password: String(formData.get("password") || ""),
     callbackUrl: String(formData.get("callbackUrl") || "")
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Invalid login details." };
+    return { error: parsed.error.issues[0]?.message ?? m.invalidLogin };
   }
 
   const { email, password, callbackUrl } = parsed.data;
@@ -55,16 +93,16 @@ export async function loginUser(_state: LoginState, formData: FormData): Promise
       });
 
       if (!user?.passwordHash) {
-        return { error: "Invalid email or password." };
+        return { error: m.invalidCredentials };
       }
 
       const validPassword = await compare(password, user.passwordHash);
       if (!validPassword) {
-        return { error: "Invalid email or password." };
+        return { error: m.invalidCredentials };
       }
 
       if (user.role !== requiredRole) {
-        return { error: "Not authorized" };
+        return { error: m.notAuthorized };
       }
     }
 
@@ -82,11 +120,11 @@ export async function loginUser(_state: LoginState, formData: FormData): Promise
     }
 
     if (error instanceof AuthError) {
-      return { error: "Invalid email or password." };
+      return { error: m.invalidCredentials };
     }
 
     console.error("Login error:", error);
-    return { error: "Unable to sign in right now. Please try again in a moment." };
+    return { error: m.signInUnavailable };
   }
 
   return { error: "", redirectTo: `/auth/redirect?callbackUrl=${encodeURIComponent(safeCallbackUrl)}` };

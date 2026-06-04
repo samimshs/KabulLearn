@@ -1,48 +1,34 @@
-<svg width="680" height="180" viewBox="0 0 680 180" xmlns="http://www.w3.org/2000/svg" role="img">
-  <title>PohaRana Logo v3</title>
-  <desc>PohaRana full horizontal lockup — PR monogram icon with Manrope 800 two-tone wordmark and tagline</desc>
-
-  <defs>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;800&amp;display=swap');
-    </style>
-  </defs>
-
-  <!-- Icon -->
+<svg width="760" height="180" viewBox="0 0 760 180" xmlns="http://www.w3.org/2000/svg" role="img">
+  <title>KabulLearn Logo</title>
+  <desc>KabulLearn horizontal logo with an open book icon and Learn Without Limits tagline.</desc>
   <rect x="10" y="10" width="160" height="160" rx="36" fill="#0057FF"/>
-
-  <!-- P stem -->
-  <rect x="34" y="30" width="18" height="88" rx="5" fill="#ffffff"/>
-  <!-- P bowl -->
-  <path d="M52 30 Q100 30 100 65 Q100 100 52 100" fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round"/>
-
-  <!-- R stem -->
-  <rect x="82" y="76" width="18" height="72" rx="5" fill="#ffffff"/>
-  <!-- R bowl -->
-  <path d="M100 76 Q134 76 134 100 Q134 124 100 124" fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round"/>
-  <!-- R leg — from bottom-right of bowl -->
-  <line x1="117" y1="124" x2="148" y2="162" stroke="#ffffff" stroke-width="16" stroke-linecap="round"/>
-
-  <!-- Wordmark -->
+  <g transform="translate(10 10) scale(0.4)">
+    <path d="M84 112c46-14 86-6 116 24v172c-30-30-70-38-116-24Z" fill="#FFFFFF" opacity="0.22"/>
+    <path d="M200 136c30-30 70-38 116-24v172c-46-14-86-6-116 24Z" fill="#FFFFFF" opacity="0.22"/>
+    <path d="M84 112c46-14 86-6 116 24v172c-30-30-70-38-116-24Z" fill="none" stroke="#FFFFFF" stroke-width="22" stroke-linejoin="round"/>
+    <path d="M200 136c30-30 70-38 116-24v172c-46-14-86-6-116 24Z" fill="none" stroke="#FFFFFF" stroke-width="22" stroke-linejoin="round"/>
+    <path d="M200 136v172" stroke="#FFFFFF" stroke-width="18" stroke-linecap="round"/>
+    <path d="M122 164c28-3 54 4 78 22" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" opacity="0.65"/>
+    <path d="M122 212c28-3 54 4 78 22" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" opacity="0.65"/>
+    <path d="M238 186c24-18 50-25 78-22" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" opacity="0.65"/>
+    <path d="M238 234c24-18 50-25 78-22" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" opacity="0.65"/>
+  </g>
   <text
-    x="192"
-    y="110"
-    font-family="'Manrope', 'Arial Black', sans-serif"
+    x="198"
+    y="108"
+    font-family="Manrope, Arial, Helvetica, sans-serif"
     font-weight="800"
-    font-size="72"
-    letter-spacing="-3"
+    font-size="70"
+    letter-spacing="-2.8"
     fill="#07060E"
-  >Poha<tspan fill="#0057FF">Rana</tspan></text>
-
-  <!-- Tagline -->
+  >Kabul<tspan fill="#0057FF">Learn</tspan></text>
   <text
-    x="195"
+    x="202"
     y="142"
-    font-family="'Manrope', Arial, sans-serif"
-    font-weight="300"
-    font-size="13"
-    letter-spacing="5"
+    font-family="Manrope, Arial, Helvetica, sans-serif"
+    font-weight="500"
+    font-size="16"
+    letter-spacing="4"
     fill="#666580"
   >LEARN WITHOUT LIMITS</text>
-
 </svg>

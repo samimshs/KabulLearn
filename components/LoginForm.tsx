@@ -5,9 +5,11 @@ import { useFormStatus } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import { loginUser } from "@/lib/actions/login-actions";
 import { signInWithGoogle } from "@/lib/actions/oauth-actions";
+import { useLanguage } from "@/components/LanguageProvider";
 
 function SubmitButton({ portal }: { portal: "student" | "educator" | "admin" }) {
   const { pending } = useFormStatus();
+  const { t } = useLanguage();
 
   return (
     <button
@@ -15,13 +17,14 @@ function SubmitButton({ portal }: { portal: "student" | "educator" | "admin" }) 
       disabled={pending}
       className={`pr-btn-primary mt-2 w-full ${portal === "admin" ? "border-[#3b82f6] bg-[#3b82f6] shadow-[0_14px_34px_rgba(59,130,246,0.22)] hover:border-[#2563eb] hover:bg-[#2563eb]" : ""}`}
     >
-      {pending ? "Signing in..." : "Sign in"}
+      {pending ? t.signingIn : t.signIn}
     </button>
   );
 }
 
 export function LoginForm() {
   const searchParams = useSearchParams();
+  const { locale, t } = useLanguage();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const portal = callbackUrl.startsWith("/admin")
     ? "admin"
@@ -59,14 +62,15 @@ export function LoginForm() {
               KabulLearn
             </p>
             <h1 className="mt-1 text-[28px] font-[800] leading-none tracking-[-0.6px] text-white">
-              Admin sign in
+              {t.adminSignInTitle}
             </h1>
           </div>
         </div>
       ) : null}
       <input type="hidden" name="callbackUrl" value={callbackUrl} />
+      <input type="hidden" name="locale" value={locale} />
       <label className={`pr-label ${portal === "admin" ? "text-[#d9e5f7]" : ""}`}>
-        {portal === "admin" ? "Username" : "Email"}
+        {portal === "admin" ? t.username : t.email}
         <input
           type="email"
           name="email"
@@ -76,7 +80,7 @@ export function LoginForm() {
         />
       </label>
       <label className={`pr-label ${portal === "admin" ? "text-[#d9e5f7]" : ""}`}>
-        Password
+        {t.password}
         <input
           type="password"
           name="password"
@@ -91,7 +95,7 @@ export function LoginForm() {
         <>
           <div className="flex items-center gap-3 text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
             <span className="h-px flex-1 bg-[var(--border)]" />
-            or
+            {t.or}
             <span className="h-px flex-1 bg-[var(--border)]" />
           </div>
           <button
@@ -106,13 +110,13 @@ export function LoginForm() {
               <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z" />
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 4 3.47 2.18 7.06L5.84 9.9C6.71 7.3 9.14 5.38 12 5.38z" />
             </svg>
-            Continue with Google
+            {t.continueWithGoogle}
           </button>
         </>
       ) : null}
       {portal !== "admin" ? (
         <a href="/forgot-login" className="text-center text-sm font-[800] text-[var(--brand)] hover:underline">
-          Forgot password or email?
+          {t.forgotPasswordOrEmail}
         </a>
       ) : null}
     </form>

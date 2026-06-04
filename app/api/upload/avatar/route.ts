@@ -36,7 +36,14 @@ export async function POST(request: Request) {
   const ext = file.type.split("/")[1].replace("jpeg", "jpg");
   const filename = `avatars/${session.user.id}-${Date.now()}.${ext}`;
 
-  const blob = await put(filename, file, { access: "public" });
+  let blob;
+  try {
+    blob = await put(filename, file, { access: "public" });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Upload failed.";
+    console.error("Blob upload error:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 
   return NextResponse.json({ url: blob.url });
 }

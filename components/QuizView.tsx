@@ -82,9 +82,13 @@ const IconArrowLeft = () => (
   </svg>
 );
 
-function getLessonIcon(type: LessonCourse["type"]) {
-  if (type === "READING") return <IconReading />;
-  if (type === "QUIZ") return <IconQuiz />;
+function isReadingLesson(lesson: LessonCourse) {
+  return lesson.type === "READING" || (!lesson.youtubeUrl && Boolean(lesson.readingEn || lesson.readingPs));
+}
+
+function getLessonIcon(lesson: LessonCourse) {
+  if (isReadingLesson(lesson)) return <IconReading />;
+  if (lesson.type === "QUIZ") return <IconQuiz />;
   return <IconVideo />;
 }
 
@@ -150,7 +154,7 @@ function CourseSidebar({
                           href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(lesson.id)}`}
                           className="flex items-center gap-2 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[700] text-[var(--ink-2)] transition hover:bg-[var(--surface)]"
                         >
-                          <span className="text-[var(--muted)]">{getLessonIcon(lesson.type)}</span>
+                          <span className="text-[var(--muted)]">{getLessonIcon(lesson)}</span>
                           <span className="truncate">{label}</span>
                         </Link>
                       );

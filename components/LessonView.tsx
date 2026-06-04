@@ -80,9 +80,17 @@ const IconArrowLeft = () => (
   </svg>
 );
 
-function getLessonIcon(type: LessonCourse["type"]) {
-  if (type === "READING") return <IconReading />;
-  if (type === "QUIZ") return <IconQuiz />;
+function isVideoLesson(lesson: LessonCourse) {
+  return lesson.type === "VIDEO" && Boolean(lesson.youtubeUrl);
+}
+
+function isReadingLesson(lesson: LessonCourse) {
+  return lesson.type === "READING" || (!lesson.youtubeUrl && Boolean(lesson.readingEn || lesson.readingPs));
+}
+
+function getLessonIcon(lesson: LessonCourse) {
+  if (isReadingLesson(lesson)) return <IconReading />;
+  if (lesson.type === "QUIZ") return <IconQuiz />;
   return <IconVideo />;
 }
 
@@ -200,7 +208,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], isCompl
                               key={ml.id}
                               className="flex items-center gap-2 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[600] text-[var(--muted-2)]"
                             >
-                              <span className="opacity-50">{getLessonIcon(ml.type)}</span>
+                              <span className="opacity-50">{getLessonIcon(ml)}</span>
                               <span className="truncate opacity-50">{label}</span>
                             </span>
                           );
@@ -217,7 +225,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], isCompl
                             }`}
                           >
                             <span className={active ? "text-white/80" : "text-[var(--muted)]"}>
-                              {getLessonIcon(ml.type)}
+                              {getLessonIcon(ml)}
                             </span>
                             <span className="truncate">{label}</span>
                           </Link>
@@ -264,11 +272,16 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], isCompl
             {lesson.isFinalTest && (
               <span className="pr-badge pr-badge-gold">{t.requiredQuiz}</span>
             )}
-            {lesson.youtubeUrl && (
+            {isVideoLesson(lesson) ? (
               <span className="flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-[11px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
                 <IconVideo /> {t.video}
               </span>
-            )}
+            ) : null}
+            {isReadingLesson(lesson) ? (
+              <span className="flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-[11px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
+                <IconReading /> {t.reading}
+              </span>
+            ) : null}
           </div>
 
           <h1 className="pr-h1 mt-3">{lessonTitle}</h1>
@@ -303,21 +316,21 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], isCompl
         </div>
 
         {/* Video */}
-        {lesson.youtubeUrl && (
+        {isVideoLesson(lesson) ? (
           <section id="video" className="scroll-mt-24 overflow-hidden rounded-[var(--radius-xl)] shadow-[var(--shadow)]">
-            <VideoPlayer video={lesson.youtubeUrl} courseId={course.id} lessonId={lesson.id} />
+            <VideoPlayer video={lesson.youtubeUrl!} courseId={course.id} lessonId={lesson.id} />
           </section>
-        )}
+        ) : null}
 
         {/* Reading content — only rendered when there is actual markdown */}
-        {lessonContent && (
+        {isReadingLesson(lesson) && lessonContent ? (
           <article id="content" className="pr-card scroll-mt-24 p-6 lg:p-8">
             <h2 className="text-[18px] font-[800] tracking-tight text-[var(--ink-2)]">{t.lessonContent}</h2>
             <div className="mt-5 border-t border-[var(--border)] pt-5">
               <SimpleMarkdown content={lessonContent} />
             </div>
           </article>
-        )}
+        ) : null}
       </section>
     </main>
   );

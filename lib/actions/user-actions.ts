@@ -104,6 +104,10 @@ export async function deleteUser(input: z.infer<typeof deleteUserSchema>): Promi
     await db.$transaction([
       // CourseReviewEvent uses onDelete: Restrict — clear audit rows first
       db.courseReviewEvent.deleteMany({ where: { actorId: userId } }),
+      db.course.updateMany({
+        where: { authorId: userId },
+        data: { authorId: admin.id }
+      }),
       db.user.delete({ where: { id: userId } }),
     ]);
     revalidatePath("/admin");

@@ -1,15 +1,30 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import nextEnv from "@next/env";
 import { CourseStatus, LessonType, PrismaClient, QuestionType, UserRole } from "@prisma/client";
 import { hash } from "bcryptjs";
 
-const prisma = new PrismaClient();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const { loadEnvConfig } = nextEnv;
+
+loadEnvConfig(path.join(__dirname, ".."));
+
+const prisma = new PrismaClient();
 const curriculumPath = path.join(__dirname, "..", "data", "data.json");
 
 function markdownList(items, locale) {
   return items.map((item) => `- ${item[locale]}`).join("\n");
+}
+
+function normalizeLevel(level) {
+  const key = level?.toLowerCase();
+
+  if (["beginner", "foundational", "basic", "intro"].includes(key)) return "beginner";
+  if (["intermediate", "middle"].includes(key)) return "intermediate";
+  if (["advanced", "expert"].includes(key)) return "advanced";
+
+  return null;
 }
 
 async function seedAdmin() {
@@ -81,8 +96,7 @@ async function seedCurriculum(authorId) {
       update: {
         slug: course.id,
         status: CourseStatus.PUBLISHED,
-        levelEn: course.level?.en ?? null,
-        levelPs: course.level?.ps ?? null,
+        level: normalizeLevel(course.level?.en),
         titleEn: course.title.en,
         titlePs: course.title.ps,
         descriptionEn: course.description.en,
@@ -95,8 +109,7 @@ async function seedCurriculum(authorId) {
         id: course.id,
         slug: course.id,
         status: CourseStatus.PUBLISHED,
-        levelEn: course.level?.en ?? null,
-        levelPs: course.level?.ps ?? null,
+        level: normalizeLevel(course.level?.en),
         titleEn: course.title.en,
         titlePs: course.title.ps,
         descriptionEn: course.description.en,

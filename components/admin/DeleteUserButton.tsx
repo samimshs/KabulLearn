@@ -27,7 +27,7 @@ export function DeleteUserButton({ userId, label }: { userId: string; label: str
               This cannot be undone.
             </h2>
             <p className="mt-3 text-sm font-[600] leading-6 text-[var(--muted)]">
-              You are about to delete {label}. This removes their sessions, enrollments, progress, certificates, ratings, and submissions.
+              You are about to delete {label}. This removes their sessions, enrollments, progress, certificates, ratings, and submissions. Authored courses are kept and reassigned to your admin account.
             </p>
             {message ? (
               <p className="mt-3 rounded-[var(--radius)] bg-[var(--danger-50)] p-3 text-sm font-[800] text-[var(--danger)]">

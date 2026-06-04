@@ -44,10 +44,19 @@ const IconVideo = () => (
   </svg>
 );
 
+const IconReading = () => (
+  <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2.5 3.25c2.05-.6 3.87-.28 5.5.95v10c-1.63-1.23-3.45-1.55-5.5-.95Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    <path d="M8 4.2c1.63-1.23 3.45-1.55 5.5-.95v10c-2.05-.6-3.87-.28-5.5.95Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    <path d="M8 4.2v10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+  </svg>
+);
+
 const IconQuiz = () => (
   <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.4" />
-    <path d="M5 8h6M5 5.5h4M5 10.5h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    <path d="M6.25 6.1a2 2 0 0 1 3.55 1.25c0 1.7-1.8 1.72-1.8 2.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M8 12.25h.01" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
   </svg>
 );
 
@@ -70,6 +79,12 @@ const IconArrowLeft = () => (
     <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
+
+function getLessonIcon(type: LessonCourse["type"]) {
+  if (type === "READING") return <IconReading />;
+  if (type === "QUIZ") return <IconQuiz />;
+  return <IconVideo />;
+}
 
 /* ── Component ─────────────────────────────────────────────── */
 export function LessonView({ course, lesson, serverPassedModuleIds = [], isComplete = false }: LessonViewProps) {
@@ -178,7 +193,6 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], isCompl
                       {module.lessons.filter(ml => ml.type !== "QUIZ").map((ml) => {
                         const active = ml.id === lesson.id;
                         const label = usesPashtoContent(locale) ? ml.titlePs : ml.titleEn;
-                        const isQuizType = ml.type === "QUIZ";
 
                         if (!unlocked) {
                           return (
@@ -186,7 +200,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], isCompl
                               key={ml.id}
                               className="flex items-center gap-2 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[600] text-[var(--muted-2)]"
                             >
-                              <span className="opacity-50">{isQuizType ? <IconQuiz /> : <IconVideo />}</span>
+                              <span className="opacity-50">{getLessonIcon(ml.type)}</span>
                               <span className="truncate opacity-50">{label}</span>
                             </span>
                           );
@@ -203,7 +217,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], isCompl
                             }`}
                           >
                             <span className={active ? "text-white/80" : "text-[var(--muted)]"}>
-                              {isQuizType ? <IconQuiz /> : <IconVideo />}
+                              {getLessonIcon(ml.type)}
                             </span>
                             <span className="truncate">{label}</span>
                           </Link>

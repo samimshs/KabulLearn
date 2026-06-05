@@ -57,6 +57,39 @@ function SectionDivider({ label, count }: { label: string; count: number }) {
   );
 }
 
+export function EducatorCta() {
+  const { t } = useLanguage();
+
+  return (
+    <section className="pr-panel mt-12 p-7 lg:p-10">
+      <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div>
+          <p className="pr-eyebrow">{t.teachCta}</p>
+          <h2 className="pr-h2 mt-2">{t.teachCtaSubtitle}</h2>
+          <ol className="mt-5 grid gap-3">
+            {[t.teachCtaStep1, t.teachCtaStep2, t.teachCtaStep3].map((step, i) => (
+              <li key={i} className="flex items-start gap-3 text-[14px] font-[500] text-[var(--muted)]">
+                <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--brand-50)] text-[11px] font-[800] text-[var(--brand)]">
+                  {i + 1}
+                </span>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div className="flex flex-wrap gap-3 lg:flex-col lg:items-stretch">
+          <Link href="/register" className="pr-btn-primary">
+            {t.teachCtaButton}
+          </Link>
+          <Link href="/login?callbackUrl=%2Feducator" className="pr-btn-ghost">
+            {t.educatorPortal}
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function CourseDashboard({ courses, dbError }: { courses: CourseRow[]; dbError?: boolean }) {
   const { locale, t } = useLanguage();
   const [query, setQuery] = useState("");
@@ -220,33 +253,6 @@ export function CourseDashboard({ courses, dbError }: { courses: CourseRow[]; db
         </section>
       )}
 
-      {/* Educator CTA */}
-      <section className="pr-panel mt-12 p-7 lg:p-10">
-        <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
-          <div>
-            <p className="pr-eyebrow">{t.teachCta}</p>
-            <h2 className="pr-h2 mt-2">{t.teachCtaSubtitle}</h2>
-            <ol className="mt-5 grid gap-3">
-              {[t.teachCtaStep1, t.teachCtaStep2, t.teachCtaStep3].map((step, i) => (
-                <li key={i} className="flex items-start gap-3 text-[14px] font-[500] text-[var(--muted)]">
-                  <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--brand-50)] text-[11px] font-[800] text-[var(--brand)]">
-                    {i + 1}
-                  </span>
-                  {step}
-                </li>
-              ))}
-            </ol>
-          </div>
-          <div className="flex flex-wrap gap-3 lg:flex-col lg:items-stretch">
-            <Link href="/register" className="pr-btn-primary">
-              {t.teachCtaButton}
-            </Link>
-            <Link href="/login?callbackUrl=%2Feducator" className="pr-btn-ghost">
-              {t.educatorPortal}
-            </Link>
-          </div>
-        </div>
-      </section>
     </>
   );
 }

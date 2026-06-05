@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CourseDashboard } from "@/components/CourseDashboard";
+import { CourseDashboard, EducatorCta } from "@/components/CourseDashboard";
 import ValuePillars from "@/components/ValuePillars";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
@@ -243,6 +243,8 @@ export default async function Home({
           </div>
         ))}
       </div>
+
+      <EducatorCta />
     </main>
   );
 }

@@ -22,7 +22,7 @@ function SubmitButton({ portal }: { portal: "student" | "educator" | "admin" }) 
   );
 }
 
-export function LoginForm() {
+export function LoginForm({ googleOAuthEnabled = false }: { googleOAuthEnabled?: boolean }) {
   const searchParams = useSearchParams();
   const { locale, t } = useLanguage();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
@@ -91,7 +91,7 @@ export function LoginForm() {
       </label>
       {state.error ? <p className="rounded-[var(--radius)] border border-[rgba(196,43,43,0.2)] bg-[var(--danger-50)] px-4 py-3 text-sm font-[800] text-[var(--danger)]">{state.error}</p> : null}
       <SubmitButton portal={portal} />
-      {portal !== "admin" ? (
+      {portal !== "admin" && googleOAuthEnabled ? (
         <>
           <div className="flex items-center gap-3 text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
             <span className="h-px flex-1 bg-[var(--border)]" />

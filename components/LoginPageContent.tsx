@@ -17,7 +17,7 @@ function LoadingCard({ dark = false }: { dark?: boolean }) {
   );
 }
 
-export function LoginPageContent() {
+export function LoginPageContent({ googleOAuthEnabled = false }: { googleOAuthEnabled?: boolean }) {
   const searchParams = useSearchParams();
   const { t } = useLanguage();
   const registered = searchParams.get("registered");
@@ -53,7 +53,7 @@ export function LoginPageContent() {
       <main className="grid min-h-[calc(100vh-4rem)] w-full place-items-center bg-[#05070b] px-5 py-10">
         <section className="w-full max-w-[420px]">
           <Suspense fallback={<LoadingCard dark />}>
-            <LoginForm />
+            <LoginForm googleOAuthEnabled={googleOAuthEnabled} />
           </Suspense>
         </section>
       </main>
@@ -103,7 +103,7 @@ export function LoginPageContent() {
       ) : null}
 
       <Suspense fallback={<LoadingCard />}>
-        <LoginForm />
+          <LoginForm googleOAuthEnabled={googleOAuthEnabled} />
       </Suspense>
 
       {isEducatorLogin ? (

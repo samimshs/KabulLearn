@@ -9,7 +9,7 @@ function LoadingCard() {
   return <div className="pr-card p-6" aria-hidden="true" />;
 }
 
-export function RegisterPageContent() {
+export function RegisterPageContent({ googleOAuthEnabled = false }: { googleOAuthEnabled?: boolean }) {
   const { t } = useLanguage();
 
   return (
@@ -24,7 +24,7 @@ export function RegisterPageContent() {
       </section>
 
       <Suspense fallback={<LoadingCard />}>
-        <RegisterForm />
+        <RegisterForm googleOAuthEnabled={googleOAuthEnabled} />
       </Suspense>
 
       <p className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white px-5 py-4 text-center text-sm font-[600] leading-6 text-[var(--muted)]">

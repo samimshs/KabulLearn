@@ -13,6 +13,10 @@ const credentialsSchema = z.object({
   password: z.string().min(8)
 });
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const googleProviderConfigured = Boolean(googleClientId && googleClientSecret);
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(db),
@@ -56,10 +60,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         };
       }
     }),
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? ""
-    })
+    ...(googleProviderConfigured
+      ? [
+          Google({
+            clientId: googleClientId!,
+            clientSecret: googleClientSecret!
+          })
+        ]
+      : [])
   ],
   callbacks: {
     async signIn({ user, account }) {

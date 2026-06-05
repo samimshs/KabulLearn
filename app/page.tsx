@@ -224,6 +224,11 @@ export default async function Home({
         </div>
       </section>
 
+      {/* ── Course catalogue ────────────────────────────────────── */}
+      <div id="courses">
+        <CourseDashboard courses={courses} dbError={dbError} />
+      </div>
+
       {/* ── Value pillars ───────────────────────────────────────── */}
       <ValuePillars dict={dict} />
 
@@ -237,11 +242,6 @@ export default async function Home({
             <p className="text-[13px] font-[800] leading-snug text-[var(--ink-2)]">{label}</p>
           </div>
         ))}
-      </div>
-
-      {/* ── Course catalogue ────────────────────────────────────── */}
-      <div id="courses">
-        <CourseDashboard courses={courses} dbError={dbError} />
       </div>
     </main>
   );

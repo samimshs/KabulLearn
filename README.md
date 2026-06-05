@@ -71,12 +71,12 @@ Status legend: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` block
 
 ### Phase 0: Project Consolidation
 
-- [x] Rename active education app from PohaHub to PohaRana.
+- [x] Rename active education app from the old brand to KabulLearn.
 - [x] Confirm active source lives in `projects/PohaRana`.
-- [x] Confirm old `projects/PohaHub` contains no source files outside stale `.next` output.
-- [x] Remove obsolete `projects/PohaHub` folder after audit.
-- [ ] Update any public links from PohaHub to PohaRana.
-- [ ] Add PohaRana link from the KabulHub education page when ready.
+- [x] Confirm the old education app folder contains no source files outside stale `.next` output.
+- [x] Remove obsolete old-brand folder after audit.
+- [x] Update public links to KabulLearn.
+- [x] Add KabulLearn link from the KabulHub education page.
 
 ### Phase 1: Database Schema & Authentication
 

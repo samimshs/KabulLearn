@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CourseStatus, EducatorRequestStatus, LessonType, QuestionType, UserRole } from "@prisma/client";
 import { auth } from "@/auth";
@@ -6,8 +7,11 @@ import { publishCourse, rejectCourse } from "@/lib/actions/course-actions";
 import { resetUserPassword, updateUserRole } from "@/lib/actions/user-actions";
 import { saveReviewChecklistItem } from "@/lib/actions/review-checklist-actions";
 import { approveEducatorRequest, rejectEducatorRequest } from "@/lib/actions/educator-request-actions";
+import { getSiteVideoUrls } from "@/lib/actions/site-settings-actions";
 import { DeleteUserButton } from "@/components/admin/DeleteUserButton";
 import { DeleteCourseButton } from "@/components/educator/DeleteCourseButton";
+import { AdminComposeForm } from "@/components/admin/AdminComposeForm";
+import { AdminSiteVideosForm } from "@/components/admin/AdminSiteVideosForm";
 
 function statusLabel(status: CourseStatus) {
   return status.split("_").map((w) => w[0] + w.slice(1).toLowerCase()).join(" ");
@@ -169,10 +173,11 @@ export default async function AdminDashboardPage({
   let educatorRequests: EducatorReq[] = [];
   let totalEnrollments = 0;
   let totalSubmissions = 0;
+  let siteVideos: Record<string, string> = {};
   let dbError = false;
 
   try {
-    const [c, u, e, s, er] = await Promise.all([
+    const [c, u, e, s, er, sv] = await Promise.all([
       db.course.findMany({
         orderBy: [{ submittedAt: "desc" }, { updatedAt: "desc" }],
         select: {
@@ -253,13 +258,15 @@ export default async function AdminDashboardPage({
           id: true, message: true, status: true, adminNote: true, createdAt: true,
           user: { select: { id: true, name: true, email: true } }
         }
-      })
+      }),
+      getSiteVideoUrls()
     ]);
     courses = c as AdminCourse[];
     users = u;
     totalEnrollments = e;
     totalSubmissions = s;
     educatorRequests = er as EducatorReq[];
+    siteVideos = sv;
   } catch {
     dbError = true;
   }
@@ -795,6 +802,42 @@ export default async function AdminDashboardPage({
               </div>
             )}
           </section>
+
+          {/* ── Messaging ─────────────────────────────────────────────── */}
+          <section className="pr-card overflow-hidden">
+            <div className="border-b border-[var(--border)] bg-white p-5 lg:p-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="pr-eyebrow">Admin messaging</p>
+                  <h2 className="pr-h2 mt-2">Message users</h2>
+                  <p className="mt-1 text-sm font-[600] text-[var(--muted)]">
+                    Send a direct message to any individual user, or broadcast to all educators or all students at once.
+                  </p>
+                </div>
+                <Link href="/admin/messages" className="pr-btn-ghost shrink-0">
+                  Open inbox →
+                </Link>
+              </div>
+            </div>
+            <div className="p-5 lg:p-6">
+              <AdminComposeForm users={users} />
+            </div>
+          </section>
+
+          {/* ── Site videos ───────────────────────────────────────────── */}
+          <section className="pr-card overflow-hidden">
+            <div className="border-b border-[var(--border)] bg-white p-5 lg:p-6">
+              <p className="pr-eyebrow">Site content</p>
+              <h2 className="pr-h2 mt-2">Instruction &amp; demo videos</h2>
+              <p className="mt-1 text-sm font-[600] text-[var(--muted)]">
+                Paste a YouTube link for each page placeholder. Leave blank to keep the default placeholder visible.
+              </p>
+            </div>
+            <div className="p-5 lg:p-6">
+              <AdminSiteVideosForm currentValues={siteVideos} />
+            </div>
+          </section>
+
         </div>
       )}
     </main>

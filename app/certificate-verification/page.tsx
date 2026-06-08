@@ -3,6 +3,7 @@ import { CertificateVerificationLookup } from "@/components/CertificateVerificat
 import { InfoHero, InfoSection, VideoPlaceholder } from "@/components/InfoPage";
 import { getPublicInfoContent } from "@/lib/info-translations";
 import { getServerLocale } from "@/lib/server-locale";
+import { getSiteVideoUrls, VIDEO_KEYS } from "@/lib/actions/site-settings-actions";
 
 export const metadata = {
   title: "Certificate Verification - KabulLearn",
@@ -10,7 +11,7 @@ export const metadata = {
 };
 
 export default async function CertificateVerificationPage() {
-  const locale = await getServerLocale();
+  const [locale, videos] = await Promise.all([getServerLocale(), getSiteVideoUrls()]);
   const content = getPublicInfoContent(locale).certificate;
 
   return (
@@ -44,6 +45,7 @@ export default async function CertificateVerificationPage() {
         <VideoPlaceholder
           title={content.videoTitle}
           description={content.videoDescription}
+          youtubeUrl={videos[VIDEO_KEYS.certificateVerification]}
         />
       </InfoSection>
     </main>

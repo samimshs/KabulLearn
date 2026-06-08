@@ -2,6 +2,7 @@ import Link from "next/link";
 import { InfoHero, InfoSection, LinkGrid, VideoPlaceholder } from "@/components/InfoPage";
 import { getPublicInfoContent } from "@/lib/info-translations";
 import { getServerLocale } from "@/lib/server-locale";
+import { getSiteVideoUrls, VIDEO_KEYS } from "@/lib/actions/site-settings-actions";
 
 export const metadata = {
   title: "Course Catalog - KabulLearn",
@@ -9,7 +10,7 @@ export const metadata = {
 };
 
 export default async function CatalogPage() {
-  const locale = await getServerLocale();
+  const [locale, videos] = await Promise.all([getServerLocale(), getSiteVideoUrls()]);
   const content = getPublicInfoContent(locale).catalog;
 
   return (
@@ -31,6 +32,7 @@ export default async function CatalogPage() {
         <VideoPlaceholder
           title={content.videoTitle}
           description={content.videoDescription}
+          youtubeUrl={videos[VIDEO_KEYS.catalog]}
         />
       </InfoSection>
     </main>

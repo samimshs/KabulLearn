@@ -40,13 +40,51 @@ export function InfoSection({ title, children }: InfoSectionProps) {
   );
 }
 
+function youtubeEmbedUrl(raw: string): string | null {
+  try {
+    const url = new URL(raw.trim());
+    let videoId: string | null = null;
+    if (url.hostname.includes("youtu.be")) {
+      videoId = url.pathname.slice(1).split("?")[0];
+    } else if (url.hostname.includes("youtube.com")) {
+      videoId = url.searchParams.get("v") ?? url.pathname.split("/").pop() ?? null;
+    }
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+  } catch {
+    return null;
+  }
+}
+
 export function VideoPlaceholder({
   title = "Instruction video placeholder",
-  description = "Add a short walkthrough video here."
+  description = "Add a short walkthrough video here.",
+  youtubeUrl
 }: {
   title?: string;
   description?: string;
+  youtubeUrl?: string | null;
 }) {
+  const embedUrl = youtubeUrl ? youtubeEmbedUrl(youtubeUrl) : null;
+
+  if (embedUrl) {
+    return (
+      <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-black shadow-[var(--shadow)]">
+        <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+          <iframe
+            src={embedUrl}
+            title={title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 h-full w-full border-0"
+          />
+        </div>
+        {description && (
+          <p className="px-5 py-3 text-sm font-[600] text-[var(--muted)]">{description}</p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
       className="grid min-h-[220px] place-items-center rounded-[var(--radius-xl)] border border-dashed border-[rgba(0,87,255,0.35)] bg-[linear-gradient(135deg,rgba(0,87,255,0.08),rgba(255,255,255,0.82))] p-6 text-center"

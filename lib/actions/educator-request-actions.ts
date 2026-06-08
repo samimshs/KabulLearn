@@ -89,7 +89,7 @@ function buildWelcomeInboxMessage(): string {
     "• Teaching Resources:  kabullearn.com/educator-resources",
     "",
     "ABOUT YOUR STUDENT HISTORY",
-    "Your previous course progress and certificates are preserved. Contact us at info@kabullearn.com if you need access to them.",
+    "Your previous course progress and certificates are preserved. Contact us at info@kabulhub.com if you need access to them.",
     "",
     "Welcome to the team!",
     "— The KabulLearn Team"

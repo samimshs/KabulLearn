@@ -214,7 +214,7 @@ export async function sendEducatorWelcomeEmail(input: { email: string; name?: st
           </ul>
 
           <h2 style="font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#526174;margin:28px 0 8px">About your student history</h2>
-          <p>Your previous course progress and certificates are preserved. If you ever need to access them, contact us at <a href="mailto:info@kabullearn.com" style="color:#0057FF">info@kabullearn.com</a>.</p>
+          <p>Your previous course progress and certificates are preserved. If you ever need to access them, contact us at <a href="mailto:info@kabulhub.com" style="color:#0057FF">info@kabulhub.com</a>.</p>
 
           <p style="margin-top:28px;color:#526174;font-size:13px">Welcome to the team — we are excited to have you teach on KabulLearn!<br>The KabulLearn Team</p>
         </div>

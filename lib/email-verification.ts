@@ -175,3 +175,58 @@ export async function sendPasswordResetEmail(input: { email: string; name?: stri
 
   return { sent: true };
 }
+
+export async function sendEducatorWelcomeEmail(input: { email: string; name?: string | null }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.FROM_EMAIL;
+
+  if (!apiKey || !fromEmail) {
+    console.warn("Educator welcome email not sent: RESEND_API_KEY or FROM_EMAIL is missing.");
+    return { sent: false };
+  }
+
+  const name = input.name || "educator";
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: input.email,
+      subject: "Welcome to the KabulLearn Educator Program!",
+      html: `
+        <div style="font-family:Arial,sans-serif;line-height:1.7;color:#102033;max-width:600px">
+          <h1 style="margin:0 0 8px;color:#0057FF">Congratulations, ${name}!</h1>
+          <p style="margin:0 0 20px;font-size:16px">Your application has been approved — you are now an educator on KabulLearn.</p>
+
+          <h2 style="font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#526174;margin:0 0 8px">How to log in as an educator</h2>
+          <p>Your account is the <strong>same account</strong> you used as a student — same email, same password. Simply sign in at <a href="https://kabullearn.com/login" style="color:#0057FF">kabullearn.com</a> and you will be taken directly to your <strong>Educator Dashboard</strong>. No separate login is needed.</p>
+
+          <p style="margin-top:20px"><a href="https://kabullearn.com/login" style="display:inline-block;background:#0057FF;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">Go to Educator Dashboard</a></p>
+
+          <h2 style="font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#526174;margin:28px 0 8px">Educator resources</h2>
+          <ul style="padding-left:20px;margin:0 0 16px">
+            <li><a href="https://kabullearn.com/educator-guidelines" style="color:#0057FF">Educator Guidelines</a> — course structure, recording tips, quiz requirements</li>
+            <li><a href="https://kabullearn.com/educator-resources" style="color:#0057FF">Teaching Resources</a> — tools and checklists for your first course</li>
+          </ul>
+
+          <h2 style="font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#526174;margin:28px 0 8px">About your student history</h2>
+          <p>Your previous course progress and certificates are preserved. If you ever need to access them, contact us at <a href="mailto:info@kabullearn.com" style="color:#0057FF">info@kabullearn.com</a>.</p>
+
+          <p style="margin-top:28px;color:#526174;font-size:13px">Welcome to the team — we are excited to have you teach on KabulLearn!<br>The KabulLearn Team</p>
+        </div>
+      `
+    })
+  });
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    console.error("Educator welcome email failed:", response.status, body);
+    return { sent: false };
+  }
+
+  return { sent: true };
+}

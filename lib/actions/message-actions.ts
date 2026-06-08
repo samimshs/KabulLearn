@@ -39,10 +39,16 @@ const sendSchema = z.object({
 });
 
 function canDirectMessage(senderRole: string, recipientRole: string) {
+  if (senderRole === UserRole.ADMIN) return true; // admin can send to anyone (system messages)
   return (
     (senderRole === UserRole.STUDENT && recipientRole === UserRole.EDUCATOR) ||
     (senderRole === UserRole.EDUCATOR && recipientRole === UserRole.STUDENT)
   );
+}
+
+/** Creates a system/admin message directly in the DB without role-permission checks. */
+export async function createSystemInboxMessage(recipientId: string, senderId: string, body: string) {
+  await db.directMessage.create({ data: { senderId, recipientId, body } });
 }
 
 /** Send a direct message to another user. */
@@ -104,7 +110,7 @@ export async function getInbox(): Promise<ConversationSummary[]> {
   const byPartner = new Map<string, ConversationSummary>();
   for (const m of messages) {
     const partner = m.senderId === me ? m.recipient : m.sender;
-    if (!canDirectMessage(currentUser.role, partner.role)) continue;
+    if (!canDirectMessage(currentUser.role, partner.role) && !canDirectMessage(partner.role, currentUser.role)) continue;
     const existing = byPartner.get(partner.id);
     const isUnread = m.recipientId === me && m.readAt === null;
 
@@ -146,7 +152,7 @@ export async function getConversation(input: z.infer<typeof conversationSchema>)
     })
   ]);
   if (!currentUser || !partner) return { partner: null, messages: [] };
-  if (!canDirectMessage(currentUser.role, partner.role)) return { partner: null, messages: [] };
+  if (!canDirectMessage(currentUser.role, partner.role) && !canDirectMessage(partner.role, currentUser.role)) return { partner: null, messages: [] };
 
   const rows = await db.directMessage.findMany({
     where: {
@@ -193,5 +199,5 @@ export async function getUnreadMessageCount(): Promise<number> {
     select: { sender: { select: { role: true } } }
   });
 
-  return rows.filter((row) => canDirectMessage(currentUser.role, row.sender.role)).length;
+  return rows.filter((row) => canDirectMessage(currentUser.role, row.sender.role) || canDirectMessage(row.sender.role, currentUser.role)).length;
 }

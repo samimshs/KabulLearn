@@ -6,6 +6,8 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/rbac";
 import { auth } from "@/auth";
+import { sendEducatorWelcomeEmail } from "@/lib/email-verification";
+import { createSystemInboxMessage } from "@/lib/actions/message-actions";
 
 export type ActionResult<T = void> =
   | { ok: true; data: T }
@@ -50,7 +52,7 @@ const decisionSchema = z.object({
 
 export async function approveEducatorRequest(input: z.infer<typeof decisionSchema>): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const { requestId, adminNote } = decisionSchema.parse(input);
 
     const request = await db.educatorRequest.update({
@@ -59,16 +61,39 @@ export async function approveEducatorRequest(input: z.infer<typeof decisionSchem
     });
 
     // Upgrade the user's role
-    await db.user.update({
+    const newEducator = await db.user.update({
       where: { id: request.userId },
-      data: { role: UserRole.EDUCATOR }
+      data: { role: UserRole.EDUCATOR },
+      select: { email: true, name: true }
     });
+
+    // Welcome email + inbox notification (fire-and-forget, don't block approval)
+    void sendEducatorWelcomeEmail({ email: newEducator.email, name: newEducator.name });
+    void createSystemInboxMessage(request.userId, admin.id, buildWelcomeInboxMessage());
 
     revalidatePath("/admin");
     return { ok: true, data: undefined };
   } catch (error) {
     return toActionError(error);
   }
+}
+
+function buildWelcomeInboxMessage(): string {
+  return [
+    "Congratulations — your educator application has been approved!",
+    "",
+    "Your KabulLearn account has been upgraded. You can now access your Educator Dashboard using the same email and password you already have. Just sign in at kabullearn.com and you will be taken there automatically.",
+    "",
+    "EDUCATOR RESOURCES",
+    "• Educator Guidelines: kabullearn.com/educator-guidelines",
+    "• Teaching Resources:  kabullearn.com/educator-resources",
+    "",
+    "ABOUT YOUR STUDENT HISTORY",
+    "Your previous course progress and certificates are preserved. Contact us at info@kabullearn.com if you need access to them.",
+    "",
+    "Welcome to the team!",
+    "— The KabulLearn Team"
+  ].join("\n");
 }
 
 export async function rejectEducatorRequest(input: z.infer<typeof decisionSchema>): Promise<ActionResult> {

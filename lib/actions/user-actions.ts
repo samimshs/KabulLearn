@@ -6,6 +6,8 @@ import { hash } from "bcryptjs";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAdmin, requireEducator } from "@/lib/rbac";
+import { sendEducatorWelcomeEmail } from "@/lib/email-verification";
+import { createSystemInboxMessage } from "@/lib/actions/message-actions";
 
 export type ActionResult<T = void> =
   | {
@@ -60,10 +62,32 @@ export async function updateUserRole(input: z.infer<typeof updateUserRoleSchema>
       throw new Error("You cannot remove your own admin access.");
     }
 
-    await db.user.update({
+    const updatedUser = await db.user.update({
       where: { id: userId },
-      data: { role }
+      data: { role },
+      select: { email: true, name: true }
     });
+
+    if (role === UserRole.EDUCATOR) {
+      const welcomeBody = [
+        "Congratulations — your account has been upgraded to Educator status!",
+        "",
+        "You can now access your Educator Dashboard using the same email and password you already have. Just sign in at kabullearn.com and you will be taken there automatically.",
+        "",
+        "EDUCATOR RESOURCES",
+        "• Educator Guidelines: kabullearn.com/educator-guidelines",
+        "• Teaching Resources:  kabullearn.com/educator-resources",
+        "",
+        "ABOUT YOUR STUDENT HISTORY",
+        "Your previous course progress and certificates are preserved. Contact us at info@kabullearn.com if you need access to them.",
+        "",
+        "Welcome to the team!",
+        "— The KabulLearn Team"
+      ].join("\n");
+
+      void sendEducatorWelcomeEmail({ email: updatedUser.email, name: updatedUser.name });
+      void createSystemInboxMessage(userId, admin.id, welcomeBody);
+    }
 
     revalidatePath("/admin");
 

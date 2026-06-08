@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useState } from "react";
 
 interface AvatarUploadProps {
   name: string;
@@ -18,7 +18,7 @@ function initials(name: string) {
 }
 
 export function AvatarUpload({ name, currentUrl, onChange }: AvatarUploadProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
   const [preview, setPreview] = useState<string | null>(currentUrl || null);
   const [status, setStatus] = useState<"idle" | "uploading" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -59,47 +59,34 @@ export function AvatarUpload({ name, currentUrl, onChange }: AvatarUploadProps) 
   return (
     <div className="flex items-center gap-4">
       {/* Avatar preview */}
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-dashed border-[var(--border)] transition hover:border-[var(--brand)] focus:outline-none focus:ring-2 focus:ring-[var(--brand)]"
-        title="Click to upload photo"
-        aria-label="Upload instructor photo"
-      >
+      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-dashed border-slate-200 bg-slate-50">
         {preview ? (
-          <img src={preview} alt="" className="h-full w-full object-cover" />
+          <img src={preview} alt="" className="h-full w-full rounded-full object-cover" />
         ) : (
-          <span className="flex h-full w-full items-center justify-center bg-[var(--brand-50)] text-lg font-[900] text-[var(--brand)]">
+          <span className="flex h-full w-full items-center justify-center bg-slate-100 text-lg font-[900] text-[var(--brand)]">
             {initials(name || "?")}
           </span>
         )}
 
         {/* Upload overlay */}
-        <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition hover:bg-black/30">
+        <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0">
           {status === "uploading" ? (
             <svg className="h-5 w-5 animate-spin text-white" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 60" />
             </svg>
-          ) : (
-            <svg className="h-5 w-5 text-white opacity-0 transition group-hover:opacity-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-          )}
+          ) : null}
         </span>
-      </button>
+      </div>
 
       {/* Text actions */}
       <div className="grid gap-1.5">
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          disabled={status === "uploading"}
-          className="inline-flex h-8 items-center rounded-[var(--radius)] border border-[var(--border)] bg-white px-3 text-xs font-[800] text-[var(--ink)] transition hover:border-[var(--brand)] hover:text-[var(--brand)] disabled:cursor-wait disabled:opacity-60"
+        <label
+          htmlFor={inputId}
+          aria-disabled={status === "uploading"}
+          className="inline-flex h-8 cursor-pointer items-center rounded-[var(--radius)] border border-slate-200 bg-white px-3 text-xs font-[800] text-slate-800 transition hover:border-[var(--brand)] hover:text-[var(--brand)] aria-disabled:pointer-events-none aria-disabled:cursor-wait aria-disabled:opacity-60"
         >
           {status === "uploading" ? "Uploading…" : preview ? "Change photo" : "Upload photo"}
-        </button>
+        </label>
 
         {preview && status !== "uploading" && (
           <button
@@ -120,7 +107,7 @@ export function AvatarUpload({ name, currentUrl, onChange }: AvatarUploadProps) 
 
       {/* Hidden file input */}
       <input
-        ref={inputRef}
+        id={inputId}
         type="file"
         accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
         className="sr-only"

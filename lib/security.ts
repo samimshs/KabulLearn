@@ -52,6 +52,49 @@ export function signHeartbeat(input: {
     .digest("hex");
 }
 
+/**
+ * Strict sequential lock: a quiz is gated behind EVERY content lesson
+ * (video/reading) that precedes it in course order — across all earlier modules
+ * and earlier in its own module. Preceding quizzes are NOT required (so module
+ * quizzes never block a later quiz or the final exam). Throws if any preceding
+ * content lesson isn't COMPLETED for the user.
+ */
+export async function assertPrecedingLessonsCompleted(input: {
+  userId: string;
+  courseId: string;
+  lessonId: string;
+}) {
+  const course = await db.course.findUnique({
+    where: { id: input.courseId },
+    select: {
+      modules: {
+        orderBy: { order: "asc" },
+        select: { lessons: { orderBy: { order: "asc" }, select: { id: true, type: true } } }
+      }
+    }
+  });
+  if (!course) throw new Error("Course not found.");
+
+  // Flatten into the global lesson order
+  const ordered = course.modules.flatMap((m) => m.lessons);
+  const idx = ordered.findIndex((l) => l.id === input.lessonId);
+  if (idx <= 0) return; // first lesson — nothing precedes it
+
+  const precedingContentIds = ordered
+    .slice(0, idx)
+    .filter((l) => l.type !== LessonType.QUIZ)
+    .map((l) => l.id);
+  if (precedingContentIds.length === 0) return;
+
+  const completed = await db.userProgress.count({
+    where: { userId: input.userId, lessonId: { in: precedingContentIds }, status: ProgressStatus.COMPLETED }
+  });
+
+  if (completed < precedingContentIds.length) {
+    throw new Error("Complete all preceding lessons before taking this quiz.");
+  }
+}
+
 export async function assertPrerequisiteModulesCompleted(input: {
   userId: string;
   courseId: string;
@@ -111,7 +154,7 @@ export async function getCourseProgress(userId: string, courseId: string) {
       modules: {
         select: {
           lessons: {
-            where: { type: LessonType.QUIZ },
+            // Count all lesson types — VIDEO, READING, and QUIZ all contribute to %
             select: { id: true }
           }
         }

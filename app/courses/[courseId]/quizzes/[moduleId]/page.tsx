@@ -108,27 +108,36 @@ export default async function QuizPage({
     return notFound();
   }
 
+  // Fold the active locale's content (titlePs for ps, titleDa for fa) into the
+  // `…Ps` field the views read for any non-English locale, so Dari shows.
+  const localized = (row: unknown, base: string): string | null => {
+    const r = row as Record<string, string | null | undefined>;
+    if (locale === "fa") return r[`${base}Da`] ?? r[`${base}En`] ?? null;
+    if (locale === "ps") return r[`${base}Ps`] ?? r[`${base}En`] ?? null;
+    return r[`${base}En`] ?? null;
+  };
+
   const normalizedCourse: QuizCourse = {
     ...course,
-    titleEn: course.titleEn ?? course.titlePs ?? "",
-    titlePs: course.titlePs ?? course.titleEn ?? "",
-    descriptionEn: course.descriptionEn ?? course.descriptionPs ?? "",
-    descriptionPs: course.descriptionPs ?? course.descriptionEn ?? "",
+    titleEn: course.titleEn ?? "",
+    titlePs: localized(course, "title") ?? course.titleEn ?? "",
+    descriptionEn: course.descriptionEn ?? "",
+    descriptionPs: localized(course, "description") ?? course.descriptionEn ?? "",
     level: (course as unknown as { level?: string | null }).level ?? null,
     modules: course.modules.map((courseModule) => ({
       ...courseModule,
-      titleEn: courseModule.titleEn ?? courseModule.titlePs ?? "",
-      titlePs: courseModule.titlePs ?? courseModule.titleEn ?? "",
-      descriptionEn: courseModule.descriptionEn ?? courseModule.descriptionPs ?? null,
-      descriptionPs: courseModule.descriptionPs ?? courseModule.descriptionEn ?? null,
+      titleEn: courseModule.titleEn ?? "",
+      titlePs: localized(courseModule, "title") ?? courseModule.titleEn ?? "",
+      descriptionEn: courseModule.descriptionEn ?? null,
+      descriptionPs: localized(courseModule, "description"),
       lessons: courseModule.lessons.map((lesson) => ({
         ...lesson,
-        titleEn: lesson.titleEn ?? lesson.titlePs ?? "",
-        titlePs: lesson.titlePs ?? lesson.titleEn ?? "",
-        descriptionEn: lesson.descriptionEn ?? lesson.descriptionPs ?? null,
-        descriptionPs: lesson.descriptionPs ?? lesson.descriptionEn ?? null,
-        readingEn: lesson.readingEn ?? lesson.readingPs ?? null,
-        readingPs: lesson.readingPs ?? lesson.readingEn ?? null,
+        titleEn: lesson.titleEn ?? "",
+        titlePs: localized(lesson, "title") ?? lesson.titleEn ?? "",
+        descriptionEn: lesson.descriptionEn ?? null,
+        descriptionPs: localized(lesson, "description"),
+        readingEn: lesson.readingEn ?? null,
+        readingPs: localized(lesson, "reading"),
         quiz: lesson.quiz
           ? {
               ...lesson.quiz,
@@ -178,6 +187,7 @@ export default async function QuizPage({
   }
 
   let serverPassedModuleIds: string[] = [];
+  let lessonStatuses: Record<string, "IN_PROGRESS" | "COMPLETED"> = {};
   let previousScore: number | null = null;
 
   try {
@@ -188,12 +198,8 @@ export default async function QuizPage({
 
     const [progressRows, quizProgress] = await Promise.all([
       db.userProgress.findMany({
-        where: {
-          userId,
-          status: ProgressStatus.COMPLETED,
-          lesson: { type: "QUIZ", module: { courseId } }
-        },
-        select: { lesson: { select: { moduleId: true } } }
+        where: { userId, lesson: { module: { courseId } } },
+        select: { lessonId: true, status: true, lesson: { select: { moduleId: true, type: true } } }
       }),
       quizLesson
         ? db.userProgress.findUnique({
@@ -203,7 +209,16 @@ export default async function QuizPage({
         : null
     ]);
 
-    serverPassedModuleIds = Array.from(new Set(progressRows.map((p) => p.lesson.moduleId)));
+    serverPassedModuleIds = Array.from(new Set(
+      progressRows
+        .filter((p) => p.status === ProgressStatus.COMPLETED && p.lesson.type === "QUIZ")
+        .map((p) => p.lesson.moduleId)
+    ));
+    for (const p of progressRows) {
+      if (p.status === ProgressStatus.COMPLETED || p.status === ProgressStatus.IN_PROGRESS) {
+        lessonStatuses[p.lessonId] = p.status;
+      }
+    }
     previousScore = quizProgress?.latestScore ?? quizProgress?.bestScore ?? null;
   } catch {
     // progress unavailable
@@ -218,6 +233,7 @@ export default async function QuizPage({
       course={normalizedCourse}
       module={module}
       serverPassedModuleIds={serverPassedModuleIds}
+      lessonStatuses={lessonStatuses}
       isComplete={isComplete}
       previousScore={thisModulePassed ? previousScore : null}
     />

@@ -1,10 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { localizeLevel } from "@/lib/i18n";
-import { getVisitedLessons } from "@/lib/progress";
 
 export type CourseCardRow = {
   id: string;
@@ -19,6 +17,7 @@ export type CourseCardRow = {
   modules: Array<{ id: string; order: number; lessons: Array<{ id: string; order: number }> }>;
   enrollmentCount?: number;
   isEnrolled?: boolean;
+  isCreatorCourse?: boolean;
   progress?: { completedModules: number; totalModules: number };
   rating?: { average: number; count: number };
   instructors?: Array<{ name: string; username: string; avatarUrl: string | null }>;
@@ -128,7 +127,7 @@ function initials(name: string) {
     .join("") || "PR";
 }
 
-export function CourseCard({ course, index = 0 }: { course: CourseCardRow; index?: number }) {
+export function CourseCard({ course, index = 0, isAuthenticated = false }: { course: CourseCardRow; index?: number; isAuthenticated?: boolean }) {
   const { locale, t } = useLanguage();
   const title =
     locale === "fa" ? (course.titleDa ?? course.titleEn) :
@@ -141,15 +140,24 @@ export function CourseCard({ course, index = 0 }: { course: CourseCardRow; index
   const level = localizeLevel(course.level, locale);
   const lessonCount = course.modules.reduce((n, m) => n + m.lessons.length, 0);
   const thumb = THUMB_CONFIGS[index % THUMB_CONFIGS.length];
-  const [lessonPct, setLessonPct] = useState<number | null>(null);
+  const courseHref = `/courses/${course.id}`;
+  const manageHref = `/educator/courses/${course.id}`;
+  const cardHref = course.isCreatorCourse
+    ? manageHref
+    : isAuthenticated
+      ? courseHref
+      : `/login?callbackUrl=${encodeURIComponent(courseHref)}`;
+  const actionLabel = course.isCreatorCourse
+    ? t.manageCourse
+    : course.isEnrolled
+      ? t.continueLearning
+      : t.viewCourse;
 
-  useEffect(() => {
-    if (!course.progress) return; // not enrolled — don't show progress
-    const allIds = course.modules.flatMap((m) => m.lessons.map((l) => l.id));
-    if (allIds.length === 0) return;
-    const visited = getVisitedLessons(course.id, allIds);
-    setLessonPct(Math.round((visited.size / allIds.length) * 100));
-  }, [course.id, course.modules, course.progress]);
+  // Real completion %, from the server — only shown for enrolled courses.
+  const lessonPct =
+    course.isEnrolled && course.progress && course.progress.totalModules > 0
+      ? Math.round((course.progress.completedModules / course.progress.totalModules) * 100)
+      : null;
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 hover:border-[rgba(0,87,255,0.28)] hover:shadow-[var(--shadow)]">
@@ -168,6 +176,13 @@ export function CourseCard({ course, index = 0 }: { course: CourseCardRow; index
           {course.hasCertificate && (
             <span className="pr-badge pr-badge-cert">{t.certificateIncluded}</span>
           )}
+          {course.isCreatorCourse ? (
+            <span className="rounded-full border border-[rgba(0,87,255,0.2)] bg-[var(--brand-50)] px-2.5 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] text-[var(--brand)]">
+              {t.myCourse}
+            </span>
+          ) : course.isEnrolled ? (
+            <span className="pr-badge pr-badge-green">{t.enrolled}</span>
+          ) : null}
           <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-0.5 text-[10px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
             {course.modules.length} {t.modules}
           </span>
@@ -210,21 +225,20 @@ export function CourseCard({ course, index = 0 }: { course: CourseCardRow; index
         ) : null}
 
         <div className="mt-auto pt-4">
-          <Link href={`/courses/${course.id}`} className="pr-btn-primary w-full">
-            {t.viewCourse}
+          <Link href={cardHref} className="pr-btn-primary w-full">
+            {actionLabel}
           </Link>
 
           {course.instructors && course.instructors.length > 0 ? (
             <div className="mt-3 flex items-center gap-2">
-              <div className="flex items-center">
-                {course.instructors.slice(0, 4).map((inst, i) => (
+              <div className="flex items-center -space-x-2 rtl:space-x-reverse">
+                {course.instructors.slice(0, 4).map((inst) => (
                   <Link
                     key={inst.username}
                     href={`/creators/${encodeURIComponent(inst.username)}`}
                     title={inst.name}
                     aria-label={inst.name}
-                    className="relative block rounded-full ring-2 ring-[var(--card)] transition hover:z-10 hover:ring-[var(--brand)]"
-                    style={{ marginInlineStart: i === 0 ? 0 : "-8px", zIndex: 10 - i }}
+                    className="relative inline-block rounded-full ring-2 ring-[var(--card)] transition hover:z-10 hover:ring-[var(--brand)]"
                   >
                     {inst.avatarUrl ? (
                       <img
@@ -240,10 +254,7 @@ export function CourseCard({ course, index = 0 }: { course: CourseCardRow; index
                   </Link>
                 ))}
                 {course.instructors.length > 4 && (
-                  <span
-                    className="relative grid h-7 w-7 place-items-center rounded-full bg-[var(--surface)] text-[10px] font-[800] text-[var(--muted)] ring-2 ring-[var(--card)]"
-                    style={{ marginInlineStart: "-8px", zIndex: 0 }}
-                  >
+                  <span className="relative grid h-7 w-7 place-items-center rounded-full bg-[var(--surface)] text-[10px] font-[800] text-[var(--muted)] ring-2 ring-[var(--card)]">
                     +{course.instructors.length - 4}
                   </span>
                 )}

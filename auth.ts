@@ -54,7 +54,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user.id,
           name: user.name,
           email: user.email,
-          image: null,
+          image: user.image,
           role: user.role,
           status: user.status
         };
@@ -84,23 +84,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
     async jwt({ token, user }) {
-      delete token.picture;
-
       if (user) {
         token.role = user.role ?? UserRole.STUDENT;
         token.status = user.status ?? UserStatus.ACTIVE;
         token.name = user.name ?? token.name;
         token.email = user.email ?? token.email;
+        token.picture = user.image ?? null;
       } else if (token.email) {
         const dbUser = await db.user.findUnique({
           where: { email: token.email.toLowerCase() },
-          select: { role: true, status: true, name: true }
+          select: { role: true, status: true, name: true, image: true }
         }).catch(() => null);
 
         if (dbUser) {
           token.role = dbUser.role;
           token.status = dbUser.status;
           if (dbUser.name) token.name = dbUser.name;
+          token.picture = dbUser.image ?? null;
         }
       }
 
@@ -111,7 +111,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.sub ?? "";
         session.user.role = (token.role as UserRole | undefined) ?? UserRole.STUDENT;
         session.user.status = (token.status as UserStatus | undefined) ?? UserStatus.ACTIVE;
-        session.user.image = null;
+        session.user.image = typeof token.picture === "string" ? token.picture : null;
       }
 
       return session;

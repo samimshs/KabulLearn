@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
-import { CourseStatus, LessonType, QuestionType, UserRole } from "@prisma/client";
+import { CourseStatus, EducatorRequestStatus, LessonType, QuestionType, UserRole } from "@prisma/client";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { publishCourse, rejectCourse } from "@/lib/actions/course-actions";
 import { resetUserPassword, updateUserRole } from "@/lib/actions/user-actions";
 import { saveReviewChecklistItem } from "@/lib/actions/review-checklist-actions";
+import { approveEducatorRequest, rejectEducatorRequest } from "@/lib/actions/educator-request-actions";
 import { DeleteUserButton } from "@/components/admin/DeleteUserButton";
 import { DeleteCourseButton } from "@/components/educator/DeleteCourseButton";
 
@@ -75,6 +76,22 @@ async function handleSaveChecklistItem(formData: FormData) {
   });
 }
 
+async function handleApproveEducatorRequest(formData: FormData) {
+  "use server";
+  await approveEducatorRequest({
+    requestId: String(formData.get("requestId") || ""),
+    adminNote: String(formData.get("adminNote") || "")
+  });
+}
+
+async function handleRejectEducatorRequest(formData: FormData) {
+  "use server";
+  await rejectEducatorRequest({
+    requestId: String(formData.get("requestId") || ""),
+    adminNote: String(formData.get("adminNote") || "")
+  });
+}
+
 export default async function AdminDashboardPage({
   searchParams
 }: {
@@ -138,15 +155,24 @@ export default async function AdminDashboardPage({
     }>;
   };
   type AdminUser = { id: string; name: string | null; email: string; role: UserRole };
+  type EducatorReq = {
+    id: string;
+    message: string;
+    status: EducatorRequestStatus;
+    adminNote: string | null;
+    createdAt: Date;
+    user: { id: string; name: string | null; email: string };
+  };
 
   let courses: AdminCourse[] = [];
   let users: AdminUser[] = [];
+  let educatorRequests: EducatorReq[] = [];
   let totalEnrollments = 0;
   let totalSubmissions = 0;
   let dbError = false;
 
   try {
-    const [c, u, e, s] = await Promise.all([
+    const [c, u, e, s, er] = await Promise.all([
       db.course.findMany({
         orderBy: [{ submittedAt: "desc" }, { updatedAt: "desc" }],
         select: {
@@ -220,12 +246,20 @@ export default async function AdminDashboardPage({
         select: { id: true, name: true, email: true, role: true }
       }),
       db.enrollment.count(),
-      db.quizSubmission.count()
+      db.quizSubmission.count(),
+      db.educatorRequest.findMany({
+        orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+        select: {
+          id: true, message: true, status: true, adminNote: true, createdAt: true,
+          user: { select: { id: true, name: true, email: true } }
+        }
+      })
     ]);
     courses = c as AdminCourse[];
     users = u;
     totalEnrollments = e;
     totalSubmissions = s;
+    educatorRequests = er as EducatorReq[];
   } catch {
     dbError = true;
   }
@@ -234,11 +268,12 @@ export default async function AdminDashboardPage({
   const reviewCount = courses.filter((c) => c.status === CourseStatus.PENDING_REVIEW).length;
   const publishedCount = courses.filter((c) => c.status === CourseStatus.PUBLISHED).length;
   const pendingCourses = courses.filter((c) => c.status === CourseStatus.PENDING_REVIEW);
+  const pendingRequests = educatorRequests.filter((r) => r.status === EducatorRequestStatus.PENDING);
 
   const metrics = [
-    { label: "Pending", value: reviewCount, tone: "text-[var(--warning)]" },
+    { label: "Courses pending", value: reviewCount, tone: "text-[var(--warning)]" },
+    { label: "Access requests", value: pendingRequests.length, tone: pendingRequests.length > 0 ? "text-[#7C3AED]" : "text-[var(--muted)]" },
     { label: "Published", value: publishedCount, tone: "text-[var(--success)]" },
-    { label: "Drafts", value: draftCount, tone: "text-[var(--muted)]" },
     { label: "Users", value: users.length, tone: "text-[var(--brand)]" },
     { label: "Enrollments", value: totalEnrollments, tone: "text-[var(--ink)]" },
     { label: "Submissions", value: totalSubmissions, tone: "text-[var(--ink)]" }
@@ -566,6 +601,94 @@ export default async function AdminDashboardPage({
             )}
           </section>
 
+          {/* ── Educator Access Requests ───────────────────────────── */}
+          <section className="pr-card overflow-hidden">
+            <div className="border-b border-[var(--border)] bg-white p-5 lg:p-6">
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="pr-eyebrow">Educator access</p>
+                  <h2 className="pr-h2 mt-2">Access requests</h2>
+                </div>
+                <div className="flex items-center gap-3">
+                  {pendingRequests.length > 0 && (
+                    <span className="rounded-full border border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.06)] px-3 py-1 text-xs font-[800] uppercase tracking-[1px] text-[#7C3AED]">
+                      {pendingRequests.length} pending
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {educatorRequests.length === 0 ? (
+              <div className="p-6">
+                <div className="pr-muted-box text-center font-[800] text-[var(--muted)]">No educator access requests yet.</div>
+              </div>
+            ) : (
+              <div className="divide-y divide-[var(--border)]">
+                {educatorRequests.map((req) => {
+                  const isPending = req.status === EducatorRequestStatus.PENDING;
+                  const isApproved = req.status === EducatorRequestStatus.APPROVED;
+                  return (
+                    <div key={req.id} className="grid gap-4 p-5 lg:grid-cols-[1fr_auto] lg:items-start">
+                      <div className="grid gap-2">
+                        {/* User + status */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-[14px] font-[800] text-[var(--ink)]">{req.user.name ?? "Unnamed"}</span>
+                          <span className="text-[13px] font-[500] text-[var(--muted)]">{req.user.email}</span>
+                          <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-[800] uppercase tracking-[0.8px] ${
+                            isPending ? "border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.06)] text-[#7C3AED]"
+                            : isApproved ? "border-[rgba(24,130,92,0.2)] bg-[var(--success-50)] text-[var(--success)]"
+                            : "border-[rgba(220,38,38,0.18)] bg-red-50 text-red-700"
+                          }`}>
+                            {req.status.toLowerCase()}
+                          </span>
+                          <span className="text-[11px] text-[var(--muted-2)]">
+                            {new Date(req.createdAt).toLocaleDateString(undefined, { dateStyle: "medium" })}
+                          </span>
+                        </div>
+
+                        {/* Message */}
+                        <p className="max-w-2xl text-[13px] font-[500] leading-relaxed text-[var(--ink-2)]">{req.message}</p>
+
+                        {/* Admin note if exists */}
+                        {req.adminNote && (
+                          <p className="text-[12px] font-[600] text-[var(--muted)]">Admin note: {req.adminNote}</p>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      {isPending && (
+                        <div className="flex flex-col gap-2 lg:min-w-56">
+                          <form action={handleApproveEducatorRequest} className="grid gap-2">
+                            <input type="hidden" name="requestId" value={req.id} />
+                            <input name="adminNote" placeholder="Optional note to user" className="pr-input text-[12px]" />
+                            <button type="submit" className="pr-btn-primary !min-h-9 w-full text-[12px]">
+                              ✓ Approve — upgrade to Educator
+                            </button>
+                          </form>
+                          <form action={handleRejectEducatorRequest} className="grid gap-2">
+                            <input type="hidden" name="requestId" value={req.id} />
+                            <input name="adminNote" placeholder="Reason (shown to user)" className="pr-input text-[12px]" />
+                            <button type="submit" className="pr-btn-danger !min-h-9 w-full text-[12px]">
+                              ✕ Reject
+                            </button>
+                          </form>
+                        </div>
+                      )}
+
+                      {!isPending && (
+                        <span className="text-[12px] font-[700] text-[var(--muted)]">
+                          {isApproved ? "Account upgraded to Educator" : "Request rejected"}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          {/* ── Users & Roles ──────────────────────────────────────── */}
           <section className="pr-card overflow-hidden">
             <div className="border-b border-[var(--border)] bg-white p-5 lg:p-6">
               <div className="flex flex-wrap items-end justify-between gap-4">

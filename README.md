@@ -317,3 +317,26 @@ Status legend: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` block
 - [x] Implement a server-side blocklist array to reject registrations from known disposable/temporary email domains (e.g., Mailinator, 10minutemail) before database insertion.
 - [x] (Optional) Integrate OAuth 2.0 providers (e.g., Google) via your auth library to offload identity verification entirely, allowing users to bypass manual email confirmation.
 - [x] Build frontend holding page (`/verify-request`) and processing route (`/verify`) to handle user states.
+
+
+
+
+
+For KabulLearn project, create a todo list to implement the following tasks:
+
+1.  Translation Audit (Dari & Pashto): Review the project's translation files. Identify and list any missing Dari and Pashto translations where lessons or components are currently falling back to English, so we can ensure equal application across the RTL options.
+
+2. Fix Quiz Polling Loop: Resolve the bug where the "Quiz attempt is not ready yet. Please wait a moment." message displays repeatedly. Locate the state management or rendering logic causing this loop and correct the dependency or condition.
+
+3. Video Completion Event: Update the video player logic (e.g., for lessons like "Overview: Intro to Python for Learners"). Hook into the video's end event so that once the video finishes playing, the disabled completion button activates and becomes clickable.This works for some vidoes but for videos like i gave the example, it doesn't work (maybe the video is too short, but investigate).
+
+4. String Update: Globally replace the UI text for buttons that say "Complete lesson" with "Mark as complete" across all relevant components.
+
+5. Final Quiz Routing: On the final quiz page, remove the "Download certificate" button that currently appears after a user passes. Instead, upon passing, automatically redirect the user to the course homepage where they will see the rating card and a preview of their certificate.
+
+6. Sequential Navigation Lock: Implement strict sequential locking for quizzes. A quiz must remain locked and inaccessible unless all preceding lessons, including those in previous modules, have a 100% completion status.
+
+7. Final Exam Certificate Override: Update the certificate validation logic. If a course includes a "Final Exam" (identified by the "Final test" checkbox set during quiz creation), certificate generation must depend solely on passing that specific exam, entirely ignoring the completion status of standard module quizzes.
+
+8. Course Homepage Action Buttons: On the course main page, update the conditional rendering for the action buttons located on the right side of the curriculum items. If the item is a standard lesson, keep the text as "Open lesson". If the item is a quiz or final exam, change the text to "Test your skills".
+9. Update the styling for the instructor avatars container to display as an overlapping horizontal stack (e.g., using negative margins or Tailwind's -space-x), ensuring the circular headshots overlap cleanly regardless of how many are rendered.

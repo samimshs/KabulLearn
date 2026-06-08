@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createDiscussionReply, createDiscussionThread } from "@/lib/actions/discussion-actions";
+import { useLanguage } from "@/components/LanguageProvider";
 
 type DiscussionThread = {
   id: string;
@@ -28,6 +29,7 @@ export function CourseDiscussion({
   canPost: boolean;
 }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [message, setMessage] = useState("");
@@ -36,8 +38,8 @@ export function CourseDiscussion({
   return (
     <section className="pr-card grid gap-5 p-5 lg:p-6">
       <div>
-        <p className="pr-eyebrow">Discussion</p>
-        <h2 className="pr-h2 mt-2">Course Q&A</h2>
+        <p className="pr-eyebrow">{t.discussionLabel}</p>
+        <h2 className="pr-h2 mt-2">{threads.length > 0 ? t.joinDiscussion : t.startDiscussion}</h2>
       </div>
 
       {canPost ? (
@@ -47,7 +49,7 @@ export function CourseDiscussion({
             event.preventDefault();
             startTransition(async () => {
               const result = await createDiscussionThread({ courseId, title, body });
-              setMessage(result.ok ? "Discussion posted." : result.error);
+              setMessage(result.ok ? t.discussionPosted : result.error);
               if (result.ok) {
                 setTitle("");
                 setBody("");
@@ -56,10 +58,10 @@ export function CourseDiscussion({
             });
           }}
         >
-          <input className="pr-input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Question or topic" />
-          <textarea className="pr-input min-h-24" value={body} onChange={(event) => setBody(event.target.value)} placeholder="What would you like to ask or discuss?" />
+          <input className="pr-input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder={t.questionOrTopic} />
+          <textarea className="pr-input min-h-24" value={body} onChange={(event) => setBody(event.target.value)} placeholder={t.discussionBodyPlaceholder} />
           <button type="submit" disabled={isPending} className="pr-btn-secondary !min-h-10">
-            {isPending ? "Posting..." : "Post discussion"}
+            {isPending ? t.postingLabel : t.postDiscussion}
           </button>
           {message ? <p className="text-sm font-[800] text-[var(--muted)]">{message}</p> : null}
         </form>
@@ -106,6 +108,7 @@ export function CourseDiscussion({
 }
 
 function ReplyForm({ threadId }: { threadId: string }) {
+  const { t } = useLanguage();
   const router = useRouter();
   const [body, setBody] = useState("");
   const [message, setMessage] = useState("");
@@ -118,7 +121,7 @@ function ReplyForm({ threadId }: { threadId: string }) {
         event.preventDefault();
         startTransition(async () => {
           const result = await createDiscussionReply({ threadId, body });
-          setMessage(result.ok ? "Reply posted." : result.error);
+          setMessage(result.ok ? t.replyPosted : result.error);
           if (result.ok) {
             setBody("");
             router.refresh();
@@ -126,9 +129,9 @@ function ReplyForm({ threadId }: { threadId: string }) {
         });
       }}
     >
-      <textarea className="pr-input min-h-20" value={body} onChange={(event) => setBody(event.target.value)} placeholder="Reply" />
+      <textarea className="pr-input min-h-20" value={body} onChange={(event) => setBody(event.target.value)} placeholder={t.replyPlaceholder} />
       <button type="submit" disabled={isPending} className="pr-btn-secondary !min-h-9">
-        {isPending ? "Replying..." : "Reply"}
+        {isPending ? t.replyingLabel : t.replyPlaceholder}
       </button>
       {message ? <p className="text-xs font-[800] text-[var(--muted)]">{message}</p> : null}
     </form>

@@ -102,6 +102,61 @@ export function LoginPageContent({ googleOAuthEnabled = false }: { googleOAuthEn
         </div>
       ) : null}
 
+      {/* How to become an educator — shown only on the educator login tab */}
+      {isEducatorLogin && (
+        <div className="rounded-[var(--radius-lg)] border border-[rgba(0,87,255,0.12)] bg-[var(--brand-50)] px-5 py-5">
+          <p className="mb-4 text-[13px] font-[600] leading-relaxed text-[var(--ink-2)]">
+            {t.educatorOnboardingIntro}
+          </p>
+          <ol className="grid gap-3">
+            {[
+              {
+                text: t.educatorOnboardingStep1,
+                icon: (
+                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden="true">
+                    <circle cx="8" cy="5.5" r="2.8" stroke="currentColor" strokeWidth="1.4" />
+                    <path d="M2.5 13.5c0-3 2.5-4.5 5.5-4.5s5.5 1.5 5.5 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  </svg>
+                ),
+              },
+              {
+                text: t.educatorOnboardingStep2,
+                icon: (
+                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden="true">
+                    <rect x="2" y="6" width="12" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+                    <path d="M5 6V4.5a3 3 0 0 1 6 0V6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                    <circle cx="8" cy="10" r="1.2" fill="currentColor" />
+                  </svg>
+                ),
+              },
+              {
+                text: t.educatorOnboardingStep3,
+                icon: (
+                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden="true">
+                    <path d="M8 2.5C6.5 1.5 3.8 1.4 2.2 2v9c1.6-.6 4.3-.5 5.8.7M8 2.5c1.5-1 4.2-1.1 5.8-.5v9c-1.6-.6-4.3-.5-5.8.7M8 2.5v9" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+                  </svg>
+                ),
+              },
+              {
+                text: t.educatorOnboardingStep4,
+                icon: (
+                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden="true">
+                    <path d="M2.5 8.5 6 12l7.5-8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                ),
+              },
+            ].map((step, i) => (
+              <li key={i} className="flex items-center gap-3">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white text-[var(--brand)] shadow-sm ring-1 ring-[rgba(0,87,255,0.12)]">
+                  {step.icon}
+                </span>
+                <span className="text-[13px] font-[700] text-[var(--ink)]">{step.text}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
       <Suspense fallback={<LoadingCard />}>
           <LoginForm googleOAuthEnabled={googleOAuthEnabled} />
       </Suspense>

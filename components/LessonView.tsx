@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { SimpleMarkdown } from "@/components/SimpleMarkdown";
 import { getPassedQuizzes, isModuleUnlocked, markLessonVisited } from "@/lib/progress";
 import { usesPashtoContent } from "@/lib/i18n";
+import { completeReadingLesson, markLessonInProgress } from "@/lib/actions/video-actions";
+import { LessonStateIcon, lessonKindOf, type LessonState } from "@/components/LessonStateIcon";
 import type { Course, Lesson, Module } from "@prisma/client";
 
 type LessonCourse = Pick<
@@ -33,6 +36,7 @@ type LessonViewProps = {
   course: CourseWithLessons;
   lesson: LessonCourse;
   serverPassedModuleIds?: string[];
+  lessonStatuses?: Record<string, "IN_PROGRESS" | "COMPLETED">;
   isComplete?: boolean;
 };
 
@@ -94,10 +98,29 @@ function getLessonIcon(lesson: LessonCourse) {
   return <IconVideo />;
 }
 
+
 /* ── Component ─────────────────────────────────────────────── */
-export function LessonView({ course, lesson, serverPassedModuleIds = [], isComplete = false }: LessonViewProps) {
+export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonStatuses = {}, isComplete = false }: LessonViewProps) {
   const { locale, t, direction } = useLanguage();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const fromPortal = searchParams.get("from") === "my-courses";
+  const fromParam = fromPortal ? "?from=my-courses" : "";
+  const backHref = fromPortal ? "/dashboard/my-courses" : `/courses/${encodeURIComponent(course.id)}`;
+  const backLabel = fromPortal ? t.myCourses : t.backToCourse;
   const [passedQuizzes, setPassedQuizzes] = useState<Set<string>>(new Set());
+  const [statuses, setStatuses] = useState<Record<string, "IN_PROGRESS" | "COMPLETED">>(lessonStatuses);
+  const [readingDone, setReadingDone] = useState(false);
+  const [isPendingComplete, startCompleteTransition] = useTransition();
+
+  // Resolve the visual state of any lesson in the sidebar
+  const stateOf = (id: string): LessonState => {
+    const s = statuses[id];
+    if (s === "COMPLETED") return "completed";
+    if (s === "IN_PROGRESS") return "in_progress";
+    if (id === lesson.id) return "in_progress"; // the lesson being viewed is at least in progress
+    return "not_started";
+  };
 
   const moduleIds = course.modules.map(m => m.id);
   const lessonSequence = course.modules.flatMap(m =>
@@ -126,8 +149,16 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], isCompl
     setPassedQuizzes(new Set([...localPassed, ...serverPassedModuleIds]));
   }, [course.id, moduleIds.join("|"), serverPassedModuleIds.join("|")]);
 
+  // On open: record visit (resume) + mark IN_PROGRESS server-side, and reflect it instantly.
   useEffect(() => {
     markLessonVisited(course.id, lesson.id);
+    markLessonInProgress({ courseId: course.id, lessonId: lesson.id }).catch(() => {});
+    setStatuses(() => {
+      const next: Record<string, "IN_PROGRESS" | "COMPLETED"> = { ...lessonStatuses };
+      if (next[lesson.id] !== "COMPLETED") next[lesson.id] = "IN_PROGRESS";
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [course.id, lesson.id]);
 
   if (!lesson) {
@@ -164,13 +195,13 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], isCompl
           {/* Course header */}
           <div className="border-b border-[var(--border)] p-4">
             <Link
-              href={`/courses/${encodeURIComponent(course.id)}`}
+              href={backHref}
               className="flex items-center gap-1.5 text-[12px] font-[800] uppercase tracking-[1px] text-[var(--brand)] transition hover:text-[var(--brand-hover)]"
             >
               <span style={{ transform: direction === "rtl" ? "scaleX(-1)" : "none" }}>
                 <IconArrowLeft />
               </span>
-              {t.backToCourses}
+              {backLabel}
             </Link>
             <h2 className="mt-3 text-[16px] font-[800] leading-snug tracking-tight text-[var(--ink)]">{courseTitle}</h2>
             <p className="mt-1 text-[12px] font-[600] text-[var(--muted)]">{t.courseNavigation}</p>
@@ -206,27 +237,28 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], isCompl
                           return (
                             <span
                               key={ml.id}
-                              className="flex items-center gap-2 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[600] text-[var(--muted-2)]"
+                              className="flex items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[600] text-[var(--muted-2)]"
                             >
-                              <span className="opacity-50">{getLessonIcon(ml)}</span>
+                              <span className="opacity-50"><LessonStateIcon state="not_started" kind={lessonKindOf(ml)} /></span>
                               <span className="truncate opacity-50">{label}</span>
                             </span>
                           );
                         }
 
+                        const lessonState = stateOf(ml.id);
                         return (
                           <Link
                             key={ml.id}
-                            href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(ml.id)}`}
-                            className={`flex items-center gap-2 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[700] transition ${
+                            href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(ml.id)}${fromParam}`}
+                            className={`flex items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[700] transition ${
                               active
                                 ? "bg-[var(--brand)] text-white shadow-sm"
-                                : "text-[var(--ink-2)] hover:bg-[var(--surface)]"
+                                : lessonState === "completed"
+                                  ? "text-[var(--ink-2)] hover:bg-[var(--surface)]"
+                                  : "text-[var(--ink-2)] hover:bg-[var(--surface)]"
                             }`}
                           >
-                            <span className={active ? "text-white/80" : "text-[var(--muted)]"}>
-                              {getLessonIcon(ml)}
-                            </span>
+                            <LessonStateIcon state={lessonState} kind={lessonKindOf(ml)} />
                             <span className="truncate">{label}</span>
                           </Link>
                         );
@@ -236,7 +268,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], isCompl
                       {unlocked && (
                         <Link
                           href={`/courses/${encodeURIComponent(course.id)}/quizzes/${encodeURIComponent(module.id)}`}
-                          className={`flex items-center gap-2 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[800] transition ${
+                          className={`flex items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[800] transition ${
                             quizPassed
                               ? "bg-[var(--success-50)] text-[var(--success)]"
                               : isCurrentModule
@@ -244,13 +276,11 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], isCompl
                                 : "text-[var(--ink-2)] hover:bg-[var(--surface)]"
                           }`}
                         >
-                          <span>{quizPassed ? <IconCheck /> : <IconQuiz />}</span>
+                          <LessonStateIcon
+                            state={quizPassed ? "completed" : isCurrentModule ? "in_progress" : "not_started"}
+                            kind="quiz"
+                          />
                           <span className="truncate">{t.requiredQuiz}</span>
-                          {quizPassed && (
-                            <span className="ms-auto text-[10px] font-[800] uppercase tracking-wider opacity-70">
-                              {t.completed}
-                            </span>
-                          )}
                         </Link>
                       )}
                     </div>
@@ -265,60 +295,44 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], isCompl
       {/* ── Main content ─────────────────────────────────────── */}
       <section className="order-1 grid min-w-0 auto-rows-min gap-5 lg:order-2">
 
-        {/* Hero panel */}
-        <div className="pr-panel p-6 lg:p-8">
+        {/* Compact lesson header card */}
+        <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)] lg:p-5">
+          {/* Type + badge */}
           <div className="flex flex-wrap items-center gap-2">
-            <p className="pr-eyebrow">{t.currentLesson}</p>
-            {lesson.isFinalTest && (
-              <span className="pr-badge pr-badge-gold">{t.requiredQuiz}</span>
-            )}
             {isVideoLesson(lesson) ? (
-              <span className="flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-[11px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-[10px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
                 <IconVideo /> {t.video}
               </span>
             ) : null}
             {isReadingLesson(lesson) ? (
-              <span className="flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-[11px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-[10px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
                 <IconReading /> {t.reading}
               </span>
             ) : null}
+            {lesson.isFinalTest && <span className="pr-badge pr-badge-gold">{t.requiredQuiz}</span>}
           </div>
 
-          <h1 className="pr-h1 mt-3">{lessonTitle}</h1>
-
+          <h1 className="mt-3 text-[clamp(18px,1.9vw,25px)] font-[800] leading-snug tracking-[-0.4px] text-[var(--ink)]">
+            {lessonTitle}
+          </h1>
           {lessonDescription && (
-            <p className="pr-copy mt-4 max-w-2xl">{lessonDescription}</p>
+            <p className="mt-1.5 max-w-2xl text-[13px] leading-relaxed text-[var(--muted)]">{lessonDescription}</p>
           )}
-
-          {/* Navigation */}
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            {previousLesson && (
-              <Link
-                href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(previousLesson.id)}`}
-                className="pr-btn-ghost"
-              >
-                {t.previousLesson}
-              </Link>
-            )}
-            {nextLessonInModule ? (
-              <Link
-                href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(nextLessonInModule.id)}`}
-                className="pr-btn-primary"
-              >
-                {t.nextLesson}
-              </Link>
-            ) : (
-              <Link href={quizHref} className="pr-btn-primary">
-                {t.nextRequiredQuiz}
-              </Link>
-            )}
-          </div>
         </div>
 
         {/* Video */}
         {isVideoLesson(lesson) ? (
           <section id="video" className="scroll-mt-24 overflow-hidden rounded-[var(--radius-xl)] shadow-[var(--shadow)]">
-            <VideoPlayer video={lesson.youtubeUrl!} courseId={course.id} lessonId={lesson.id} />
+            <VideoPlayer
+              video={lesson.youtubeUrl!}
+              courseId={course.id}
+              lessonId={lesson.id}
+              initialCompleted={statuses[lesson.id] === "COMPLETED"}
+              onComplete={() => {
+                setStatuses((prev) => ({ ...prev, [lesson.id]: "COMPLETED" }));
+                router.refresh();
+              }}
+            />
           </section>
         ) : null}
 
@@ -329,8 +343,60 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], isCompl
             <div className="mt-5 border-t border-[var(--border)] pt-5">
               <SimpleMarkdown content={lessonContent} />
             </div>
+
+            {/* Mark as Complete */}
+            <div className="mt-8 border-t border-[var(--border)] pt-6">
+              {readingDone ? (
+                <div className="flex items-center gap-2 text-[14px] font-[800] text-[var(--success)]">
+                  <IconCheck />
+                  {t.lessonCompleteProgressSaved}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  disabled={isPendingComplete}
+                  onClick={() => {
+                    startCompleteTransition(async () => {
+                      await completeReadingLesson({ courseId: course.id, lessonId: lesson.id });
+                      setStatuses((prev) => ({ ...prev, [lesson.id]: "COMPLETED" }));
+                      setReadingDone(true);
+                      router.refresh();
+                    });
+                  }}
+                  className="pr-btn-primary"
+                >
+                  {isPendingComplete ? t.savingLabel : t.markAsComplete}
+                </button>
+              )}
+            </div>
           </article>
         ) : null}
+
+        {/* Navigation footer — right below the content, no scrolling back up */}
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)]">
+          {previousLesson ? (
+            <Link
+              href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(previousLesson.id)}${fromParam}`}
+              className="pr-btn-ghost !min-h-10 px-4 text-[13px]"
+            >
+              {t.previousLesson}
+            </Link>
+          ) : (
+            <span />
+          )}
+          {nextLessonInModule ? (
+            <Link
+              href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(nextLessonInModule.id)}${fromParam}`}
+              className="pr-btn-primary !min-h-10 px-5 text-[13px]"
+            >
+              {t.nextLesson}
+            </Link>
+          ) : (
+            <Link href={`${quizHref}${fromParam}`} className="pr-btn-primary !min-h-10 px-5 text-[13px]">
+              {t.nextRequiredQuiz}
+            </Link>
+          )}
+        </div>
       </section>
     </main>
   );

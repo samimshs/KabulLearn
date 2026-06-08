@@ -74,7 +74,11 @@ async function upsertCreatorProfile(input: {
     username: string;
     name: string;
     professionalTitle?: string;
+    professionalTitlePs?: string;
+    professionalTitleDa?: string;
     bio?: string;
+    bioPs?: string;
+    bioDa?: string;
     avatarUrl?: string;
     linkedinUrl?: string;
     youtubeUrl?: string;
@@ -89,26 +93,23 @@ async function upsertCreatorProfile(input: {
     throw new Error("That author username is already used. Choose a different author username.");
   }
 
+  const profileData = {
+    name: input.profile.name,
+    professionalTitle: input.profile.professionalTitle || null,
+    professionalTitlePs: input.profile.professionalTitlePs || null,
+    professionalTitleDa: input.profile.professionalTitleDa || null,
+    bio: input.profile.bio || null,
+    bioPs: input.profile.bioPs || null,
+    bioDa: input.profile.bioDa || null,
+    avatarUrl: input.profile.avatarUrl || null,
+    linkedinUrl: input.profile.linkedinUrl || null,
+    youtubeUrl: input.profile.youtubeUrl || null,
+  };
+
   const profile = await db.creatorProfile.upsert({
     where: { username: input.profile.username },
-    update: {
-      name: input.profile.name,
-      professionalTitle: input.profile.professionalTitle || null,
-      bio: input.profile.bio || null,
-      avatarUrl: input.profile.avatarUrl || null,
-      linkedinUrl: input.profile.linkedinUrl || null,
-      youtubeUrl: input.profile.youtubeUrl || null
-    },
-    create: {
-      username: input.profile.username,
-      name: input.profile.name,
-      professionalTitle: input.profile.professionalTitle || null,
-      bio: input.profile.bio || null,
-      avatarUrl: input.profile.avatarUrl || null,
-      linkedinUrl: input.profile.linkedinUrl || null,
-      youtubeUrl: input.profile.youtubeUrl || null,
-      createdById: input.creatorId
-    },
+    update: profileData,
+    create: { username: input.profile.username, createdById: input.creatorId, ...profileData },
     select: { id: true }
   });
 
@@ -133,7 +134,11 @@ export async function createCourse(input: CreateCourseInput): Promise<ActionResu
           username: inst.username,
           name: inst.name,
           professionalTitle: inst.title,
+          professionalTitlePs: inst.titlePs,
+          professionalTitleDa: inst.titleDa,
           bio: inst.bio,
+          bioPs: inst.bioPs,
+          bioDa: inst.bioDa,
           avatarUrl: inst.avatarUrl,
           linkedinUrl: inst.linkedinUrl,
           youtubeUrl: inst.youtubeUrl,
@@ -474,7 +479,11 @@ export async function updateCourse(input: UpdateCourseInputType): Promise<Action
           username: inst.username,
           name: inst.name,
           professionalTitle: inst.title,
+          professionalTitlePs: inst.titlePs,
+          professionalTitleDa: inst.titleDa,
           bio: inst.bio,
+          bioPs: inst.bioPs,
+          bioDa: inst.bioDa,
           avatarUrl: inst.avatarUrl,
           linkedinUrl: inst.linkedinUrl,
           youtubeUrl: inst.youtubeUrl,

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { completeVideoLesson, recordVideoHeartbeat } from "@/lib/actions/video-actions";
+import { useLanguage } from "@/components/LanguageProvider";
 
 declare global {
   interface Window {
@@ -13,11 +14,13 @@ declare global {
           playerVars?: Record<string, unknown>;
           events?: {
             onReady?: () => void;
+            onStateChange?: (event: { data: number }) => void;
           };
         }
       ) => {
         getCurrentTime: () => number;
         getDuration: () => number;
+        getPlayerState: () => number;
         destroy: () => void;
       };
     };
@@ -64,23 +67,50 @@ function loadYouTubeApi() {
 export function VideoPlayer({
   video,
   courseId,
-  lessonId
+  lessonId,
+  initialCompleted = false,
+  onComplete
 }: {
   video: string;
   courseId?: string;
   lessonId?: string;
+  initialCompleted?: boolean;
+  onComplete?: () => void;
 }) {
+  const { t } = useLanguage();
   const videoId = getYouTubeId(video);
   const elementId = `yt-player-${videoId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const playerRef = useRef<InstanceType<NonNullable<typeof window.YT>["Player"]> | null>(null);
   const latestHeartbeat = useRef<{ id: string; signature: string } | null>(null);
   const [watchedPct, setWatchedPct] = useState(0);
   const [message, setMessage] = useState("");
+  const [completed, setCompleted] = useState(initialCompleted);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     let cancelled = false;
     let interval: ReturnType<typeof setInterval> | null = null;
+
+    // Records a heartbeat for the given position; updates the watched %.
+    async function captureHeartbeat(positionSec: number, durationSec: number) {
+      if (!courseId || !lessonId || !durationSec || durationSec <= 0 || !Number.isFinite(positionSec)) return;
+      const pct = Math.min(100, Math.round((positionSec / durationSec) * 100));
+      setWatchedPct((current) => Math.max(current, pct));
+      try {
+        const heartbeat = await recordVideoHeartbeat({ courseId, lessonId, positionSec, durationSec });
+        latestHeartbeat.current = { id: heartbeat.id, signature: heartbeat.signature };
+      } catch {
+        // Keep playback smooth; completion will fail if heartbeat is invalid.
+      }
+    }
+
+    function sampleNow() {
+      const player = playerRef.current;
+      if (!player) return;
+      const currentTime = player.getCurrentTime();
+      const duration = player.getDuration();
+      captureHeartbeat(currentTime, duration);
+    }
 
     loadYouTubeApi().then(() => {
       if (cancelled || !window.YT?.Player) return;
@@ -91,32 +121,23 @@ export function VideoPlayer({
           modestbranding: 1,
           rel: 0,
           origin: window.location.origin
+        },
+        events: {
+          onStateChange: (event) => {
+            // YT states: 0 = ENDED, 2 = PAUSED. On end, credit a full watch so
+            // even very short videos enable the "Mark as complete" button.
+            if (event.data === 0) {
+              const duration = playerRef.current?.getDuration() ?? 0;
+              if (duration > 0) captureHeartbeat(duration, duration);
+            } else if (event.data === 2) {
+              sampleNow();
+            }
+          }
         }
       });
 
-      interval = setInterval(async () => {
-        const player = playerRef.current;
-        if (!player || !courseId || !lessonId) return;
-
-        const currentTime = player.getCurrentTime();
-        const duration = player.getDuration();
-        if (!duration || duration <= 0 || !Number.isFinite(currentTime)) return;
-
-        const pct = Math.min(100, Math.round((currentTime / duration) * 100));
-        setWatchedPct((current) => Math.max(current, pct));
-
-        try {
-          const heartbeat = await recordVideoHeartbeat({
-            courseId,
-            lessonId,
-            positionSec: currentTime,
-            durationSec: duration
-          });
-          latestHeartbeat.current = { id: heartbeat.id, signature: heartbeat.signature };
-        } catch {
-          // Keep playback smooth; completion will fail if heartbeat is invalid.
-        }
-      }, 5000);
+      // Sample every 2.5s so progress (and a valid heartbeat) is captured quickly.
+      interval = setInterval(sampleNow, 2500);
     });
 
     return () => {
@@ -135,39 +156,51 @@ export function VideoPlayer({
       </div>
       {courseId && lessonId ? (
         <div className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">
-          <div className="flex items-center justify-between gap-3 text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
-            <span>Watch progress</span>
-            <span>{watchedPct}%</span>
-          </div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--surface)]">
-            <div className="h-2 rounded-full bg-[var(--brand)] transition-all" style={{ width: `${watchedPct}%` }} />
-          </div>
-          <button
-            type="button"
-            disabled={watchedPct < 90 || isPending || !latestHeartbeat.current}
-            onClick={() =>
-              startTransition(async () => {
-                setMessage("");
-                const heartbeat = latestHeartbeat.current;
-                if (!heartbeat) return;
-                try {
-                  await completeVideoLesson({
-                    courseId,
-                    lessonId,
-                    heartbeatId: heartbeat.id,
-                    signature: heartbeat.signature
-                  });
-                  setMessage("Lesson completed.");
-                } catch (error) {
-                  setMessage(error instanceof Error ? error.message : "Could not complete lesson.");
+          {completed ? (
+            <div className="flex items-center gap-2 text-[14px] font-[800] text-[var(--success)]">
+              <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-[var(--success)] text-white">
+                <svg viewBox="0 0 14 14" className="h-2.5 w-2.5" fill="none" aria-hidden="true">
+                  <path d="M2.5 7.5 5.5 10.5 11.5 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              {t.completedProgressSaved}
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-[13px] font-[600] text-[var(--muted)]">
+                {watchedPct < 90
+                  ? t.watchFullVideoHint
+                  : t.readyToCompleteHint}
+              </p>
+              <button
+                type="button"
+                disabled={watchedPct < 90 || isPending || !latestHeartbeat.current}
+                onClick={() =>
+                  startTransition(async () => {
+                    setMessage("");
+                    const heartbeat = latestHeartbeat.current;
+                    if (!heartbeat) return;
+                    try {
+                      await completeVideoLesson({
+                        courseId,
+                        lessonId,
+                        heartbeatId: heartbeat.id,
+                        signature: heartbeat.signature
+                      });
+                      setCompleted(true);
+                      onComplete?.();
+                    } catch (error) {
+                      setMessage(error instanceof Error ? error.message : t.couldNotCompleteLesson);
+                    }
+                  })
                 }
-              })
-            }
-            className="pr-btn-primary mt-4 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isPending ? "Completing..." : "Complete lesson"}
-          </button>
-          {message ? <p className="mt-3 text-sm font-[800] text-[var(--muted)]">{message}</p> : null}
+                className="pr-btn-primary ms-auto !min-h-10 shrink-0 px-5 text-[13px] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isPending ? t.savingLabel : t.markAsComplete}
+              </button>
+              {message ? <p className="basis-full text-sm font-[800] text-[var(--danger)]">{message}</p> : null}
+            </div>
+          )}
         </div>
       ) : null}
     </div>

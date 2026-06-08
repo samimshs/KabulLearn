@@ -1,11 +1,12 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { LessonType, ProgressStatus, QuestionType } from "@prisma/client";
 import { createCertificateIfEligible } from "@/lib/actions/certificate-actions";
-import { assertPrerequisiteModulesCompleted, assertRateLimit } from "@/lib/security";
+import { assertPrecedingLessonsCompleted, assertRateLimit } from "@/lib/security";
 
 export type ActionResult<T = void> =
   | {
@@ -76,10 +77,11 @@ export async function startQuizAttempt(
       throw new Error("Invalid quiz attempt.");
     }
 
-    await assertPrerequisiteModulesCompleted({
+    // Gate: every lesson preceding this quiz must be completed first
+    await assertPrecedingLessonsCompleted({
       userId: session.user.id,
       courseId: values.courseId,
-      moduleId: values.moduleId
+      lessonId: values.lessonId
     });
 
     const attempt = await db.quizAttemptSession.create({
@@ -157,11 +159,8 @@ export async function submitQuizAttempt(
       throw new Error("Invalid quiz route parameters.");
     }
 
-    await assertPrerequisiteModulesCompleted({
-      userId: session.user.id,
-      courseId,
-      moduleId
-    });
+    // Gate: every lesson preceding this quiz must be completed first
+    await assertPrecedingLessonsCompleted({ userId: session.user.id, courseId, lessonId });
 
     const attempt = await db.quizAttemptSession.findUnique({
       where: { id: attemptId }
@@ -244,11 +243,7 @@ export async function submitQuizAttempt(
     const passingScore = lesson.passingScore ?? 70;
     const passed = score >= passingScore;
     const durationMs = Date.now() - attempt.startedAt.getTime();
-    const minimumMs = Math.max(questions.length * 3000, 8000);
 
-    if (durationMs < minimumMs) {
-      throw new Error("Quiz submitted too quickly. Please take a fresh attempt.");
-    }
     const submissionAnswers: Array<{ questionId: string; answerChoiceId?: string; textAnswer?: string }> = [];
     for (const selected of selectedAnswers) {
       if (selected.textAnswer !== undefined) {
@@ -340,8 +335,16 @@ export async function submitQuizAttempt(
       });
     }
 
-    if (passed && lesson.isFinalTest && score > 80) {
-      await createCertificateIfEligible(courseId, session.user.id);
+    if (passed) {
+      // Issue the certificate if this was the last requirement
+      if (lesson.isFinalTest) {
+        await createCertificateIfEligible(courseId, session.user.id).catch(() => null);
+      }
+      // Invalidate cached pages so the course/certificate reflect completion immediately
+      revalidatePath(`/courses/${courseId}`);
+      revalidatePath(`/courses/${courseId}/certificate`);
+      revalidatePath("/dashboard");
+      revalidatePath("/dashboard/my-courses");
     }
 
     return {

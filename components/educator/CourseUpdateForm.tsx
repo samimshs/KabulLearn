@@ -24,7 +24,8 @@ interface CourseUpdateFormProps {
 
 const inputCls = "rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10";
 const emptyInstructor = (): InstructorInput => ({
-  name: "", username: "", title: undefined, bio: undefined,
+  name: "", username: "", title: undefined, titlePs: undefined, titleDa: undefined,
+  bio: undefined, bioPs: undefined, bioDa: undefined,
   avatarUrl: undefined, linkedinUrl: undefined, youtubeUrl: undefined
 });
 
@@ -173,7 +174,7 @@ export function CourseUpdateForm({
                 <input value={inst.username} onChange={(e) => updateInstructor(idx, { username: e.target.value })} placeholder="instructor-username" className={inputCls} />
               </label>
               <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-                Professional title
+                Professional title (English)
                 <input value={inst.title ?? ""} onChange={(e) => updateInstructor(idx, { title: e.target.value || undefined })} placeholder="Senior Data Scientist" className={inputCls} />
               </label>
               <div className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
@@ -184,9 +185,25 @@ export function CourseUpdateForm({
                   onChange={(url) => updateInstructor(idx, { avatarUrl: url || undefined })}
                 />
               </div>
+              <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+                Professional title (Pashto)
+                <input dir="rtl" value={inst.titlePs ?? ""} onChange={(e) => updateInstructor(idx, { titlePs: e.target.value || undefined })} placeholder="د مسلک سرلیک" className={inputCls} />
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+                Professional title (Dari)
+                <input dir="rtl" value={inst.titleDa ?? ""} onChange={(e) => updateInstructor(idx, { titleDa: e.target.value || undefined })} placeholder="عنوان حرفه‌ای" className={inputCls} />
+              </label>
               <label className="grid gap-1 text-sm font-medium text-[#3d4a5a] sm:col-span-2">
-                Bio
+                Bio (English)
                 <textarea value={inst.bio ?? ""} onChange={(e) => updateInstructor(idx, { bio: e.target.value || undefined })} rows={2} className={`min-h-[70px] ${inputCls}`} />
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-[#3d4a5a] sm:col-span-2">
+                Bio (Pashto)
+                <textarea dir="rtl" value={inst.bioPs ?? ""} onChange={(e) => updateInstructor(idx, { bioPs: e.target.value || undefined })} rows={2} className={`min-h-[70px] ${inputCls}`} />
+              </label>
+              <label className="grid gap-1 text-sm font-medium text-[#3d4a5a] sm:col-span-2">
+                Bio (Dari)
+                <textarea dir="rtl" value={inst.bioDa ?? ""} onChange={(e) => updateInstructor(idx, { bioDa: e.target.value || undefined })} rows={2} className={`min-h-[70px] ${inputCls}`} />
               </label>
               <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
                 LinkedIn URL

@@ -45,6 +45,7 @@ function loginSchema(locale: Locale) {
   return z.object({
     email: z.string().trim().email(m.validEmail),
     password: z.string().min(8, m.passwordMin),
+    portal: z.enum(["student", "educator", "admin"]).default("student"),
     callbackUrl: z.string().optional()
   });
 }
@@ -68,12 +69,19 @@ function requiredRoleForPath(path: string) {
   return null;
 }
 
+function requiredRoleForPortal(portal: "student" | "educator" | "admin") {
+  if (portal === "admin") return UserRole.ADMIN;
+  if (portal === "educator") return UserRole.EDUCATOR;
+  return UserRole.STUDENT;
+}
+
 export async function loginUser(_state: LoginState, formData: FormData): Promise<LoginState> {
   const locale = normalizeLocale(formData.get("locale"));
   const m = messages[locale];
   const parsed = loginSchema(locale).safeParse({
     email: String(formData.get("email") || ""),
     password: String(formData.get("password") || ""),
+    portal: String(formData.get("portal") || "student"),
     callbackUrl: String(formData.get("callbackUrl") || "")
   });
 
@@ -81,29 +89,33 @@ export async function loginUser(_state: LoginState, formData: FormData): Promise
     return { error: parsed.error.issues[0]?.message ?? m.invalidLogin };
   }
 
-  const { email, password, callbackUrl } = parsed.data;
+  const { email, password, callbackUrl, portal } = parsed.data;
   const safeCallbackUrl = safeLocalPath(callbackUrl);
-  const requiredRole = requiredRoleForPath(safeCallbackUrl);
+  const portalRole = requiredRoleForPortal(portal);
+  const callbackRole = requiredRoleForPath(safeCallbackUrl);
+  const requiredRole = callbackRole ?? portalRole;
+
+  if (callbackRole && callbackRole !== portalRole) {
+    return { error: m.notAuthorized };
+  }
 
   try {
-    if (requiredRole) {
-      const user = await db.user.findUnique({
-        where: { email: email.toLowerCase() },
-        select: { role: true, passwordHash: true }
-      });
+    const user = await db.user.findUnique({
+      where: { email: email.toLowerCase() },
+      select: { role: true, passwordHash: true }
+    });
 
-      if (!user?.passwordHash) {
-        return { error: m.invalidCredentials };
-      }
+    if (!user?.passwordHash) {
+      return { error: m.invalidCredentials };
+    }
 
-      const validPassword = await compare(password, user.passwordHash);
-      if (!validPassword) {
-        return { error: m.invalidCredentials };
-      }
+    const validPassword = await compare(password, user.passwordHash);
+    if (!validPassword) {
+      return { error: m.invalidCredentials };
+    }
 
-      if (user.role !== requiredRole) {
-        return { error: m.notAuthorized };
-      }
+    if (user.role !== requiredRole) {
+      return { error: m.notAuthorized };
     }
 
     await signIn("credentials", {
@@ -127,5 +139,8 @@ export async function loginUser(_state: LoginState, formData: FormData): Promise
     return { error: m.signInUnavailable };
   }
 
-  return { error: "", redirectTo: `/auth/redirect?callbackUrl=${encodeURIComponent(safeCallbackUrl)}` };
+  return {
+    error: "",
+    redirectTo: `/auth/redirect?callbackUrl=${encodeURIComponent(safeCallbackUrl)}&portal=${encodeURIComponent(portal)}`
+  };
 }

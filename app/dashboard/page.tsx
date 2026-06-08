@@ -1,41 +1,44 @@
 import { redirect } from "next/navigation";
+import { ProgressStatus, CourseStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { MyCoursesView } from "@/components/MyCoursesView";
+import { DashboardView } from "@/components/DashboardView";
+import type { CourseCardRow } from "@/components/CourseCard";
 import { getCourseProgress } from "@/lib/security";
 import { getServerLocale, localizedCourseSelect, localizedLessonSelect, localizedModuleSelect } from "@/lib/server-locale";
 
 export default async function DashboardPage() {
   const session = await auth();
-
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
+  if (!session?.user?.id) redirect("/login");
+  if (session.user.role === "ADMIN") redirect("/admin");
+  if (session.user.role === "EDUCATOR") redirect("/educator");
 
   const userId = session.user.id;
   const locale = await getServerLocale();
 
-  type EnrollmentRow = {
-    createdAt: Date;
-    course: {
-      id: string;
-      titleEn?: string; titlePs?: string; titleDa?: string | null;
-      descriptionEn?: string; descriptionPs?: string; descriptionDa?: string | null;
-      level?: string | null;
-      modules: Array<{
-        id: string;
-        titleEn?: string; titlePs?: string;
-        order: number;
-        lessons: Array<{ id: string; isFinalTest: boolean }>;
-      }>;
-    };
-  };
-
-  let enrollments: EnrollmentRow[] = [];
   let dbError = false;
+  let enrollments: Awaited<ReturnType<typeof fetchEnrollments>> = [];
+  let certificates: Awaited<ReturnType<typeof fetchCertificates>> = [];
+  let userProfile = {
+    name: session.user.name ?? session.user.email ?? "Learner",
+    email: session.user.email ?? "",
+    bio: "",
+    image: session.user.image ?? null,
+    linkedinUrl: null as string | null
+  };
+  let sessions: Array<{ id: string; label: string; expires: string; current?: boolean }> = [
+    {
+      id: "current-jwt",
+      label: "Current browser session",
+      expires: "managed by secure sign-in cookie",
+      current: true
+    }
+  ];
+  let completedLessonCount = 0;
+  let quizAttemptCount = 0;
 
-  try {
-    enrollments = await db.enrollment.findMany({
+  async function fetchEnrollments() {
+    return db.enrollment.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
       select: {
@@ -44,6 +47,10 @@ export default async function DashboardPage() {
           select: {
             id: true,
             ...localizedCourseSelect(locale),
+            instructors: {
+              orderBy: { order: "asc" },
+              select: { profile: { select: { name: true, username: true, avatarUrl: true } } }
+            },
             modules: {
               orderBy: { order: "asc" },
               select: {
@@ -60,34 +67,131 @@ export default async function DashboardPage() {
         }
       }
     });
+  }
+
+  async function fetchCertificates() {
+    return db.certificate.findMany({
+      where: { userId },
+      orderBy: { issuedAt: "desc" },
+      select: {
+        id: true,
+        grade: true,
+        issuedAt: true,
+        verificationCode: true,
+        course: { select: { id: true, ...localizedCourseSelect(locale) } }
+      }
+    });
+  }
+
+  try {
+    const [profile, dbSessions, enrollmentRows, certificateRows, lessonCount, quizCount] = await Promise.all([
+      db.user.findUnique({
+        where: { id: userId },
+        select: { name: true, email: true, bio: true, image: true }
+      }),
+      db.session.findMany({
+        where: { userId },
+        orderBy: { expires: "desc" },
+        take: 8,
+        select: { id: true, expires: true }
+      }).catch(() => []),
+      fetchEnrollments(),
+      fetchCertificates(),
+      db.userProgress.count({ where: { userId, status: ProgressStatus.COMPLETED } }),
+      db.quizSubmission.count({ where: { userId } })
+    ]);
+    if (profile) {
+      userProfile = {
+        name: profile.name ?? session.user.email ?? "Learner",
+        email: profile.email,
+        bio: profile.bio ?? "",
+        image: profile.image ?? null,
+        linkedinUrl: null
+      };
+    }
+    enrollments = enrollmentRows;
+    certificates = certificateRows;
+    completedLessonCount = lessonCount;
+    quizAttemptCount = quizCount;
+    sessions = [
+      sessions[0],
+      ...dbSessions.map((row, index) => ({
+        id: row.id,
+        label: `Stored session ${index + 1}`,
+        expires: row.expires.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
+      }))
+    ];
   } catch {
     dbError = true;
   }
 
+  // Per-course module progress (consistent with the rest of the app)
   const progressByCourse = new Map<string, { completed: number; required: number; percent: number }>();
-
   if (!dbError && enrollments.length > 0) {
     try {
-      const courseIds = enrollments.map((e) => e.course.id);
-      const rows = await Promise.all(courseIds.map(async (courseId) => ({
-        courseId,
-        progress: await getCourseProgress(userId, courseId)
-      })));
-      for (const row of rows) {
-        progressByCourse.set(row.courseId, row.progress);
-      }
+      const rows = await Promise.all(
+        enrollments.map(async (e) => ({ id: e.course.id, progress: await getCourseProgress(userId, e.course.id) }))
+      );
+      for (const row of rows) progressByCourse.set(row.id, row.progress);
     } catch {
-      // progress unavailable — show enrollments without progress
+      /* progress unavailable — render without personalization */
     }
   }
 
-  const coursesWithProgress = enrollments.map((e) => {
+  const enrolledIds = enrollments.map((e) => e.course.id);
+
+  // Recommended: published courses the learner has NOT enrolled in
+  let recommended: CourseCardRow[] = [];
+  if (!dbError) {
+    try {
+      const recRaw = await db.course.findMany({
+        where: {
+          AND: [
+            { OR: [{ status: CourseStatus.PUBLISHED }, { publishedAt: { not: null } }] },
+            enrolledIds.length > 0 ? { id: { notIn: enrolledIds } } : {}
+          ]
+        },
+        orderBy: { createdAt: "desc" },
+        take: 3,
+        select: {
+          id: true,
+          titleEn: true, titlePs: true, titleDa: true,
+          descriptionEn: true, descriptionPs: true, descriptionDa: true,
+          level: true,
+          _count: { select: { enrollments: true } },
+          instructors: { orderBy: { order: "asc" }, select: { profile: { select: { name: true, username: true, avatarUrl: true } } } },
+          modules: {
+            orderBy: { order: "asc" },
+            select: { id: true, order: true, lessons: { orderBy: { order: "asc" }, select: { id: true, order: true, isFinalTest: true } } }
+          }
+        }
+      });
+      recommended = recRaw.map((c) => ({
+        id: c.id,
+        titleEn: c.titleEn ?? "", titlePs: c.titlePs ?? "", titleDa: c.titleDa,
+        descriptionEn: c.descriptionEn ?? "", descriptionPs: c.descriptionPs ?? "", descriptionDa: c.descriptionDa,
+        level: c.level,
+        hasCertificate: c.modules.length > 0 && c.modules.every((m) => m.lessons.some((l) => l.isFinalTest)),
+        modules: c.modules.map((m) => ({ id: m.id, order: m.order, lessons: m.lessons.map((l) => ({ id: l.id, order: l.order })) })),
+        enrollmentCount: c._count.enrollments,
+        instructors: c.instructors.map((ci) => ci.profile)
+      }));
+    } catch {
+      /* recommended unavailable */
+    }
+  }
+
+  // Shape enrolled courses for the dashboard cards
+  const courses = enrollments.map((e, idx) => {
     const course = e.course;
     const progress = progressByCourse.get(course.id);
-    const totalModules = progress?.required ?? 0;
+    const totalModules = progress?.required ?? course.modules.length;
     const completedModules = progress?.completed ?? 0;
-    const resumeIdx = completedModules < totalModules ? completedModules : totalModules - 1;
-    const resumeLessonId = course.modules[resumeIdx]?.lessons[0]?.id ?? null;
+    const percent = progress?.percent ?? 0;
+    const totalLessons = course.modules.reduce((n, m) => n + m.lessons.length, 0);
+    const resumeIdx = completedModules < course.modules.length ? completedModules : course.modules.length - 1;
+    const resumeLessonId = course.modules[resumeIdx]?.lessons[0]?.id ?? course.modules[0]?.lessons[0]?.id ?? null;
+    const nextModuleTitle = course.modules[resumeIdx]?.titleEn ?? course.modules[resumeIdx]?.titlePs ?? "";
     return {
       id: course.id,
       titleEn: course.titleEn ?? course.titlePs ?? "",
@@ -97,25 +201,57 @@ export default async function DashboardPage() {
       descriptionPs: course.descriptionPs ?? course.descriptionEn ?? "",
       descriptionDa: course.descriptionDa,
       level: course.level,
-      modules: course.modules.map((module) => ({
-        id: module.id,
-        titleEn: module.titleEn ?? module.titlePs ?? "",
-        titlePs: module.titlePs ?? module.titleEn ?? "",
-        order: module.order,
-        lessons: module.lessons
-      })),
-      enrolledAt: e.createdAt,
-      completedModules,
+      hasCertificate: course.modules.length > 0 && course.modules.every((m) => m.lessons.some((l) => l.isFinalTest)),
       totalModules,
-      resumeLessonId
+      completedModules,
+      totalLessons,
+      percent,
+      resumeLessonId,
+      nextModuleTitle,
+      thumbIndex: idx,
+      instructors: course.instructors.map((ci) => ci.profile),
+      enrolledAt: e.createdAt
     };
   });
 
+  // Aggregate stats
+  const inProgress = courses.filter((c) => c.percent < 100).length;
+  const coursesCompleted = courses.filter((c) => c.percent >= 100).length;
+  const totalLessonsAll = courses.reduce((n, c) => n + c.totalLessons, 0);
+  const overallPercent =
+    courses.length > 0 ? Math.round(courses.reduce((n, c) => n + c.percent, 0) / courses.length) : 0;
+
   return (
-    <MyCoursesView
-      courses={coursesWithProgress}
+    <DashboardView
       userName={session.user.name ?? null}
+      userProfile={userProfile}
+      sessions={sessions}
       dbError={dbError}
+      stats={{
+        inProgress,
+        lessonsDone: completedLessonCount,
+        certificates: certificates.length,
+        quizAttempts: quizAttemptCount
+      }}
+      overall={{
+        percent: overallPercent,
+        lessonsCompleted: completedLessonCount,
+        totalLessons: totalLessonsAll,
+        coursesCompleted,
+        coursesEnrolled: courses.length
+      }}
+      courses={courses}
+      recommended={recommended}
+      certificates={certificates.map((cert) => ({
+        id: cert.id,
+        grade: cert.grade,
+        issuedAt: cert.issuedAt,
+        verificationCode: cert.verificationCode,
+        courseId: cert.course.id,
+        courseTitleEn: cert.course.titleEn ?? cert.course.titlePs ?? "",
+        courseTitlePs: cert.course.titlePs ?? cert.course.titleEn ?? "",
+        courseTitleDa: cert.course.titleDa ?? null
+      }))}
     />
   );
 }

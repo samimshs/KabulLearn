@@ -64,10 +64,11 @@ export function EducatorCta() {
     <section className="pr-panel mt-12 p-7 lg:p-10">
       <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
         <div>
-          <p className="pr-eyebrow">{t.teachCta}</p>
-          <h2 className="pr-h2 mt-2">{t.teachCtaSubtitle}</h2>
-          <ol className="mt-5 grid gap-3">
-            {[t.teachCtaStep1, t.teachCtaStep2, t.teachCtaStep3].map((step, i) => (
+          <p className="pr-eyebrow">{t.educator}</p>
+          <h2 className="pr-h2 mt-2">{t.teachCta}</h2>
+          <p className="pr-copy mt-2 max-w-xl">{t.teachCtaSubtitle}</p>
+          <ol className="mt-5 grid gap-3 sm:grid-cols-2">
+            {[t.teachCtaStep1, t.teachCtaStep2, t.teachCtaStep3, t.teachCtaStep4].map((step, i) => (
               <li key={i} className="flex items-start gap-3 text-[14px] font-[500] text-[var(--muted)]">
                 <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--brand-50)] text-[11px] font-[800] text-[var(--brand)]">
                   {i + 1}
@@ -90,7 +91,7 @@ export function EducatorCta() {
   );
 }
 
-export function CourseDashboard({ courses, dbError }: { courses: CourseRow[]; dbError?: boolean }) {
+export function CourseDashboard({ courses, dbError, isAuthenticated = false }: { courses: CourseRow[]; dbError?: boolean; isAuthenticated?: boolean }) {
   const { locale, t } = useLanguage();
   const [query, setQuery] = useState("");
   const [levelFilter, setLevelFilter] = useState("");
@@ -213,7 +214,7 @@ export function CourseDashboard({ courses, dbError }: { courses: CourseRow[]; db
       {/* DB error */}
       {dbError && (
         <div className="mb-8 rounded-[var(--radius-lg)] border border-[rgba(150,96,0,0.18)] bg-[var(--warning-50)] px-6 py-4 text-[14px] font-[700] text-[var(--warning)]">
-          Courses temporarily unavailable — please refresh in a moment.
+          {t.dbUnavailable} — {t.dbUnavailableHint}
         </div>
       )}
 
@@ -228,7 +229,7 @@ export function CourseDashboard({ courses, dbError }: { courses: CourseRow[]; db
             /* Single-category view — flat grid, no dividers */
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filtered.map((course) => (
-                <CourseCard key={course.id} course={course} index={courseIndexMap.get(course.id) ?? 0} />
+                <CourseCard key={course.id} course={course} index={courseIndexMap.get(course.id) ?? 0} isAuthenticated={isAuthenticated} />
               ))}
             </div>
           ) : (
@@ -242,7 +243,7 @@ export function CourseDashboard({ courses, dbError }: { courses: CourseRow[]; db
                     <SectionDivider label={sectionLabels[sectionKey]} count={sectionCourses.length} />
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                       {sectionCourses.map((course) => (
-                        <CourseCard key={course.id} course={course} index={courseIndexMap.get(course.id) ?? 0} />
+                        <CourseCard key={course.id} course={course} index={courseIndexMap.get(course.id) ?? 0} isAuthenticated={isAuthenticated} />
                       ))}
                     </div>
                   </div>

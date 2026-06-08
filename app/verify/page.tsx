@@ -2,6 +2,8 @@ import Link from "next/link";
 import { UserStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { hashVerificationToken } from "@/lib/email-verification";
+import { getServerLocale } from "@/lib/server-locale";
+import { dictionaries } from "@/lib/i18n";
 
 type VerifyResult =
   | { ok: true; email: string }
@@ -47,7 +49,8 @@ export default async function VerifyPage({
 }: {
   searchParams?: Promise<{ token?: string }>;
 }) {
-  const params = await searchParams;
+  const [params, locale] = await Promise.all([searchParams, getServerLocale()]);
+  const t = dictionaries[locale];
   const result = await verifyToken(params?.token);
 
   return (
@@ -55,18 +58,16 @@ export default async function VerifyPage({
       <section className="pr-panel max-w-xl p-8 text-center">
         <img src="/poharana-icon-v3.svg" alt="" className="mx-auto h-14 w-14 rounded-[16px]" />
         <p className={`pr-eyebrow mt-6 ${result.ok ? "text-[var(--success)]" : "text-[var(--danger)]"}`}>
-          {result.ok ? "Account verified" : "Verification failed"}
+          {result.ok ? t.accountVerified : t.verificationFailed}
         </p>
         <h1 className="pr-h1 mt-4">
-          {result.ok ? "You are ready to learn" : "We could not verify this link"}
+          {result.ok ? t.readyToLearn : t.couldNotVerifyLink}
         </h1>
         <p className="pr-copy mt-5">
-          {result.ok
-            ? `${result.email} is now active. You can sign in and continue to your dashboard.`
-            : result.reason}
+          {result.ok ? t.emailIsNowActive : result.reason}
         </p>
         <Link href="/login" className="pr-btn-primary mt-8">
-          Go to login
+          {t.goToLogin}
         </Link>
       </section>
     </main>

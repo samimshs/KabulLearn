@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import { cookies } from "next/headers";
 import "./globals.css";
+import { auth } from "@/auth";
 import { Header } from "@/components/Header";
+import { SessionGuard } from "@/components/SessionGuard";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { BackButton } from "@/components/BackButton";
+import { SiteFooter } from "@/components/SiteFooter";
 import { dictionaries, getDirection } from "@/lib/i18n";
 import { normalizeLocale } from "@/lib/server-locale";
 
@@ -28,27 +31,23 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const direction = getDirection(locale);
   const t = dictionaries[locale];
 
+  // Authoritative user ID for SessionGuard — clears stale localStorage when user changes
+  let userId: string | null = null;
+  try {
+    const session = await auth();
+    userId = session?.user?.id ?? null;
+  } catch { /* auth failure — treat as logged out */ }
+
   return (
     <html lang={locale} dir={direction} className={manrope.variable}>
       <body>
         <LanguageProvider initialLocale={locale}>
+          {/* Wipes user-scoped localStorage keys whenever the active user changes */}
+          <SessionGuard userId={userId} />
           <Header />
           <BackButton />
           {children}
-          <footer className="mt-16 border-t border-[var(--border)] bg-[var(--card)]">
-            <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-4 px-5 py-6 text-[13px] font-[600] text-[var(--muted)] lg:px-8">
-              <p>{t.rightsReserved}</p>
-              <p>
-                {t.questions}{" "}
-                <a
-                  href="mailto:info@kabulhub.com"
-                  className="font-[700] text-[var(--brand)] transition-colors hover:text-[var(--brand-hover)]"
-                >
-                  info@kabulhub.com
-                </a>
-              </p>
-            </div>
-          </footer>
+          <SiteFooter rightsReserved={t.rightsReserved} />
         </LanguageProvider>
       </body>
     </html>

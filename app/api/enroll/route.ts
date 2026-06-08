@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { CourseStatus } from "@prisma/client";
+import { CourseStatus, UserRole } from "@prisma/client";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
@@ -16,6 +16,13 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { ok: false, error: "You must be signed in to enroll." },
       { status: 401 }
+    );
+  }
+
+  if (session.user.role !== UserRole.STUDENT) {
+    return NextResponse.json(
+      { ok: false, error: "Only student accounts can enroll in courses." },
+      { status: 403 }
     );
   }
 

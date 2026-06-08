@@ -25,7 +25,7 @@ function SubmitButton({ portal }: { portal: "student" | "educator" | "admin" }) 
 export function LoginForm({ googleOAuthEnabled = false }: { googleOAuthEnabled?: boolean }) {
   const searchParams = useSearchParams();
   const { locale, t } = useLanguage();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const portal = callbackUrl.startsWith("/admin")
     ? "admin"
     : callbackUrl.startsWith("/educator")
@@ -69,6 +69,7 @@ export function LoginForm({ googleOAuthEnabled = false }: { googleOAuthEnabled?:
       ) : null}
       <input type="hidden" name="callbackUrl" value={callbackUrl} />
       <input type="hidden" name="locale" value={locale} />
+      <input type="hidden" name="portal" value={portal} />
       <label className={`pr-label ${portal === "admin" ? "text-[#d9e5f7]" : ""}`}>
         {portal === "admin" ? t.username : t.email}
         <input

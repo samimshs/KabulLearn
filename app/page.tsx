@@ -1,250 +1,128 @@
 import Link from "next/link";
-import { CourseDashboard, EducatorCta } from "@/components/CourseDashboard";
-import ValuePillars from "@/components/ValuePillars";
+import { HomeHeroVisual } from "@/components/HomeHeroVisual";
+import { HeroLangPills } from "@/components/HeroLangPills";
 import { auth } from "@/auth";
-import { db } from "@/lib/db";
-import { CourseStatus } from "@prisma/client";
-import { getCourseProgress } from "@/lib/security";
 import { getServerLocale } from "@/lib/server-locale";
 import { dictionaries } from "@/lib/i18n";
+import { db } from "@/lib/db";
+import { CourseStatus } from "@prisma/client";
+import type { Locale } from "@/lib/i18n";
 
-type CourseRow = {
-  id: string;
-  titleEn: string; titlePs: string; titleDa?: string | null;
-  descriptionEn: string; descriptionPs: string; descriptionDa?: string | null;
-  level?: string | null;
-  enrollmentCount: number;
-  isEnrolled: boolean;
-  hasCertificate: boolean;
-  modules: Array<{ id: string; titleEn: string; titlePs: string; order: number; lessons: Array<{ id: string; order: number }> }>;
-  progress?: { completedModules: number; totalModules: number };
-  rating?: { average: number; count: number };
-  instructors?: Array<{ name: string; username: string; avatarUrl: string | null }>;
+function formatNumber(value: number, locale: Locale) {
+  const numberLocale = locale === "en" ? "en-US" : `${locale}-AF`;
+  return new Intl.NumberFormat(numberLocale, { maximumFractionDigits: 0 }).format(value);
+}
+
+function fmtStat(n: number, fallback: number, locale: Locale): string {
+  const value = n === 0 ? fallback : n;
+  if (value >= 1000) return `${formatNumber(Math.floor(value / 1000), locale)}K+`;
+  return `${formatNumber(value, locale)}+`;
+}
+
+const STAT_ICONS = {
+  courses:   <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none"><path d="M10 5C8 3.7 4.8 3.4 3 4v11c1.8-.6 5-.3 7 1M10 5c2-1.3 5.2-1.6 7-1v11c-1.8-.6-5-.3-7 1M10 5v11" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" /></svg>,
+  lessons:   <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none"><circle cx="10" cy="10" r="7.2" stroke="currentColor" strokeWidth="1.5" /><path d="M8.4 7.4 13 10l-4.6 2.6V7.4Z" fill="currentColor" /></svg>,
+  languages: <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none"><circle cx="10" cy="10" r="7.2" stroke="currentColor" strokeWidth="1.5" /><path d="M3 10h14M10 3c2.1 2.2 2.1 11.8 0 14M10 3c-2.1 2.2-2.1 11.8 0 14" stroke="currentColor" strokeWidth="1.3" /></svg>,
+  learners:  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none"><circle cx="7.5" cy="7" r="2.6" stroke="currentColor" strokeWidth="1.5" /><path d="M3 16c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /><path d="M13.5 6.2A2.4 2.4 0 0 1 15 11M14 12.2c1.8.3 3 1.7 3 3.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>,
 };
 
-export default async function Home({
-  searchParams
-}: {
-  searchParams?: Promise<{ q?: string }>;
-}) {
+export default async function Home() {
   const session = await auth();
-  const userId = session?.user?.id;
+  const role = session?.user?.role;
   const locale = await getServerLocale();
-  const params = await searchParams;
-  const searchTerm = params?.q?.trim();
   const dict = dictionaries[locale];
 
-  let rawCourses: Array<{
-    id: string; titleEn?: string; titlePs?: string; titleDa?: string | null;
-    descriptionEn?: string; descriptionPs?: string; descriptionDa?: string | null;
-    level?: string | null;
-    _count: { enrollments: number };
-    modules: Array<{ id: string; titleEn?: string; titlePs?: string; order: number; lessons: Array<{ id: string; order: number; isFinalTest: boolean }> }>;
-    author: { name: string | null; email: string };
-    authorProfile: { name: string; username: string; avatarUrl: string | null } | null;
-    instructors: Array<{ order: number; profile: { name: string; username: string; avatarUrl: string | null } }>;
-  }> = [];
+  const features = [
+    {
+      label: dict.featureStructured,
+      icon: <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4"><path d="M12 6C9.5 4.3 5.5 4 3 4.7v13C5.5 17 9.5 17.3 12 19M12 6c2.5-1.7 6.5-2 9-1.3v13c-2.5-.7-6.5-.4-9 1.3M12 6v13" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /></svg>,
+    },
+    {
+      label: dict.featurePractice,
+      icon: <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4"><rect x="3.5" y="3.5" width="17" height="17" rx="4" stroke="currentColor" strokeWidth="1.7" /><path d="M9 9.2a3 3 0 0 1 5.1 1.9c0 2.1-2.3 2.1-2.3 3.6M12 17.5h.01" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+    },
+    {
+      label: dict.featureCerts,
+      icon: <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4"><circle cx="12" cy="9" r="5" stroke="currentColor" strokeWidth="1.7" /><path d="m9 13-1.5 8L12 19l4.5 2L15 13" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /></svg>,
+    },
+    {
+      label: dict.featureTrilingual,
+      icon: <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7" /><path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18" stroke="currentColor" strokeWidth="1.5" /></svg>,
+    },
+  ];
 
-  let dbError = false;
-
+  // Live platform stats — fall back to placeholder values if DB is unavailable
+  let courseCount = 0, lessonCount = 0, learnerCount = 0;
   try {
-    rawCourses = await db.course.findMany({
-      where: {
-        AND: [
-          {
-            OR: [
-              { status: CourseStatus.PUBLISHED },
-              { publishedAt: { not: null } }
-            ]
-          },
-          searchTerm
-            ? {
-                OR: [
-                  { titleEn: { contains: searchTerm, mode: "insensitive" } },
-                  { titlePs: { contains: searchTerm, mode: "insensitive" } },
-                  { descriptionEn: { contains: searchTerm, mode: "insensitive" } },
-                  { descriptionPs: { contains: searchTerm, mode: "insensitive" } },
-                  { authorProfile: { is: { name: { contains: searchTerm, mode: "insensitive" } } } },
-                  { authorProfile: { is: { username: { contains: searchTerm, mode: "insensitive" } } } },
-                  { author: { is: { name: { contains: searchTerm, mode: "insensitive" } } } }
-                ]
-              }
-            : {}
-        ]
-      },
-      orderBy: [{ createdAt: "desc" }],
-      select: {
-        id: true,
-        titleEn: true, titlePs: true, titleDa: true,
-        descriptionEn: true, descriptionPs: true, descriptionDa: true,
-        level: true,
-        _count: { select: { enrollments: true } },
-        author: { select: { name: true, email: true } },
-        authorProfile: { select: { name: true, username: true, avatarUrl: true } },
-        instructors: { orderBy: { order: "asc" }, select: { order: true, profile: { select: { name: true, username: true, avatarUrl: true } } } },
-        modules: {
-          orderBy: [{ order: "asc" }],
-          select: {
-            id: true,
-            titleEn: true, titlePs: true,
-            order: true,
-            lessons: { orderBy: [{ order: "asc" }], select: { id: true, order: true, isFinalTest: true } }
-          }
-        }
-      }
-    });
-  } catch {
-    dbError = true;
-  }
+    [courseCount, lessonCount, learnerCount] = await Promise.all([
+      db.course.count({ where: { status: CourseStatus.PUBLISHED } }),
+      db.lesson.count({ where: { module: { course: { status: CourseStatus.PUBLISHED } } } }),
+      db.user.count({ where: { role: "STUDENT" } }),
+    ]);
+  } catch { /* DB unavailable — placeholders shown */ }
 
-  const enrolledCourseIds = new Set<string>();
-  const progressByCourse = new Map<string, { completedModules: number; totalModules: number }>();
-  const ratingsByCourse = new Map<string, { average: number; count: number }>();
-
-  if (rawCourses.length > 0) {
-    try {
-      const ratingRows = await db.courseRating.groupBy({
-        by: ["courseId"],
-        where: { courseId: { in: rawCourses.map((course) => course.id) } },
-        _avg: { rating: true },
-        _count: { rating: true }
-      });
-      for (const row of ratingRows) {
-        ratingsByCourse.set(row.courseId, {
-          average: row._avg.rating ?? 0,
-          count: row._count.rating
-        });
-      }
-    } catch {
-      // ratings unavailable
-    }
-  }
-
-  if (userId && rawCourses.length > 0) {
-    try {
-      const [enrollments, progressRows] = await Promise.all([
-        db.enrollment.findMany({
-          where: { userId, courseId: { in: rawCourses.map((c) => c.id) } },
-          select: { courseId: true }
-        }),
-        Promise.all(rawCourses.map(async (course) => ({
-          courseId: course.id,
-          progress: await getCourseProgress(userId, course.id)
-        })))
-      ]);
-
-      for (const e of enrollments) {
-        enrolledCourseIds.add(e.courseId);
-      }
-
-      for (const row of progressRows) {
-        progressByCourse.set(row.courseId, {
-          completedModules: row.progress.completed,
-          totalModules: row.progress.required
-        });
-      }
-    } catch {
-      // progress/enrollment unavailable — show courses without personalization
-    }
-  }
-
-  const courses: CourseRow[] = rawCourses.map((c) => {
-    const hasCertificate = c.modules.length > 0 &&
-      c.modules.every(m => m.lessons.some(l => l.isFinalTest));
-    return {
-    id: c.id,
-    titleEn: c.titleEn ?? c.titlePs ?? "",
-    titlePs: c.titlePs ?? c.titleEn ?? "",
-    titleDa: c.titleDa,
-    descriptionEn: c.descriptionEn ?? c.descriptionPs ?? "",
-    descriptionPs: c.descriptionPs ?? c.descriptionEn ?? "",
-    descriptionDa: c.descriptionDa,
-    level: c.level,
-    hasCertificate,
-    modules: c.modules.map((module) => ({
-      id: module.id,
-      titleEn: module.titleEn ?? module.titlePs ?? "",
-      titlePs: module.titlePs ?? module.titleEn ?? "",
-      order: module.order,
-      lessons: module.lessons.map(l => ({ id: l.id, order: l.order }))
-    })),
-    enrollmentCount: c._count.enrollments,
-    isEnrolled: enrolledCourseIds.has(c.id),
-    rating: ratingsByCourse.get(c.id),
-    instructors: c.instructors.length > 0
-      ? c.instructors.sort((a, b) => a.order - b.order).map((ci) => ci.profile)
-      : c.authorProfile
-        ? [c.authorProfile]
-        : [{ name: c.author.name ?? c.author.email, username: c.author.email.split("@")[0].toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""), avatarUrl: null }],
-    progress: userId
-      ? progressByCourse.get(c.id) ?? { completedModules: 0, totalModules: 0 }
-      : undefined
-    };
-  });
-
-  const featureTokens = [
-    dict.featureStructured,
-    dict.featurePractice,
-    dict.featureCerts,
-    dict.featureLowBandwidth,
+  const platformStats = [
+    { icon: STAT_ICONS.courses,   value: fmtStat(courseCount, 25, locale),     label: dict.courses },
+    { icon: STAT_ICONS.lessons,   value: fmtStat(lessonCount, 400, locale),    label: dict.lessons },
+    { icon: STAT_ICONS.languages, value: formatNumber(3, locale),              label: dict.statLanguages },
+    { icon: STAT_ICONS.learners,  value: fmtStat(learnerCount, 1000, locale),  label: dict.statLearners },
   ];
 
   return (
-    <main className="pr-page">
+    <main className="pr-page kl-home-page">
+      <section className="kl-home-hero grid items-center gap-8 lg:grid-cols-[0.78fr_1.22fr]">
+        <div className="kl-home-copy flex flex-col gap-5">
+          <img
+            src="/poharana-logo-v3.svg"
+            alt="KabulLearn"
+            className="kl-home-logo h-auto w-[276px] max-w-[78vw] object-contain"
+          />
+          <p className="pr-eyebrow kl-home-kicker">{dict.heroEyebrow}</p>
+          <h1 className="pr-h1 kl-home-heading">{dict.heroHeading}</h1>
+          <p className="pr-copy kl-home-subheadline">{dict.heroSubtext}</p>
 
-      {/* ── Split-screen hero ───────────────────────────────────── */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center py-10 lg:py-14">
-
-        {/* Left: value proposition */}
-        <div className="flex flex-col gap-6">
-          <p className="pr-eyebrow">{dict.heroEyebrow}</p>
-          <h1 className="pr-h1">{dict.heroHeading}</h1>
-          <p className="pr-copy max-w-lg">{dict.heroSubtext}</p>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/#courses" className="pr-btn-primary">
-              {dict.heroCta}
-            </Link>
-            {!userId && (
-              <Link href="/register" className="pr-btn-ghost">
-                {dict.heroCtaSecondary}
-              </Link>
+          <div className="kl-home-cta flex flex-wrap gap-2">
+            {role === "STUDENT" ? (
+              <Link href="/dashboard" className="pr-btn-primary">Resume Learning</Link>
+            ) : role === "EDUCATOR" ? (
+              <Link href="/educator" className="pr-btn-primary">Go to Creator Workspace</Link>
+            ) : role === "ADMIN" ? (
+              <Link href="/admin" className="pr-btn-primary">Go to Admin Portal</Link>
+            ) : (
+              <>
+                <Link href="/courses" className="pr-btn-primary">{dict.heroCta}</Link>
+                <Link href="/educator" className="pr-btn-ghost">
+                  {dict.heroForEducators}
+                  <svg viewBox="0 0 22 22" className="h-5 w-5 shrink-0 text-[var(--brand)]" fill="none" aria-hidden="true">
+                    <path d="M11 3 2 8l9 5 9-5-9-5Z" fill="currentColor" />
+                    <path d="M5.5 10.8v4C5.5 16.6 8 18 11 18s5.5-1.4 5.5-3.2v-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M19 8v5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                  </svg>
+                </Link>
+              </>
             )}
           </div>
+
+          <ul className="kl-feature-list grid grid-cols-2 gap-x-3 gap-y-1.5 sm:grid-cols-4">
+            {features.map((feature) => (
+              <li key={feature.label} className="grid justify-items-center gap-1 text-center">
+                <span className="grid h-8 w-8 place-items-center rounded-[9px] bg-[var(--brand-50)] text-[var(--brand)]">
+                  {feature.icon}
+                </span>
+                <span className="text-[10px] font-[800] leading-tight text-[var(--ink-2)]">{feature.label}</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="kl-home-lang">
+            <HeroLangPills />
+          </div>
         </div>
 
-        {/* Right: image asset */}
-        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-[var(--shadow-lg)]">
-          <img
-            src="/classroom-hero.png"
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            aria-hidden="true"
-          />
-          <span className="absolute bottom-6 start-6 h-1.5 w-16 rounded-full bg-[var(--brand)]" />
+        <div className="kl-home-art">
+          <HomeHeroVisual stats={platformStats} />
         </div>
       </section>
-
-      {/* ── Course catalogue ────────────────────────────────────── */}
-      <div id="courses">
-        <CourseDashboard courses={courses} dbError={dbError} />
-      </div>
-
-      {/* ── Value pillars ───────────────────────────────────────── */}
-      <ValuePillars dict={dict} />
-
-      {/* ── Social proof strip ──────────────────────────────────── */}
-      <div className="my-10 grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {featureTokens.map((label) => (
-          <div
-            key={label}
-            className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] px-5 py-4 shadow-[var(--shadow-sm)]"
-          >
-            <p className="text-[13px] font-[800] leading-snug text-[var(--ink-2)]">{label}</p>
-          </div>
-        ))}
-      </div>
-
-      <EducatorCta />
     </main>
   );
 }

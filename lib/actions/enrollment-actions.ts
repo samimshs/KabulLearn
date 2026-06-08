@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
-import { CourseStatus } from "@prisma/client";
+import { CourseStatus, UserRole } from "@prisma/client";
 
 export type ActionResult<T = void> =
   | { ok: true; data: T }
@@ -21,6 +21,7 @@ export async function enrollInCourse(input: { courseId: string }): Promise<Actio
   try {
     const session = await auth();
     if (!session?.user?.id) throw new Error("You must be signed in to enroll.");
+    if (session.user.role !== UserRole.STUDENT) throw new Error("Only student accounts can enroll in courses.");
 
     const { courseId } = enrollSchema.parse(input);
 
@@ -48,9 +49,32 @@ export async function enrollInCourse(input: { courseId: string }): Promise<Actio
   }
 }
 
+export async function dropEnrollment(input: { courseId: string }): Promise<ActionResult> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) throw new Error("You must be signed in to drop a course.");
+    if (session.user.role !== UserRole.STUDENT) throw new Error("Only student accounts can drop enrolled courses.");
+
+    const { courseId } = enrollSchema.parse(input);
+
+    await db.enrollment.deleteMany({
+      where: { userId: session.user.id, courseId }
+    });
+
+    revalidatePath(`/courses/${courseId}`);
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/my-courses");
+
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
 export async function getEnrollmentStatus(courseId: string): Promise<boolean> {
   const session = await auth();
   if (!session?.user?.id) return false;
+  if (session.user.role !== UserRole.STUDENT) return false;
 
   const enrollment = await db.enrollment.findUnique({
     where: { userId_courseId: { userId: session.user.id, courseId } }

@@ -63,6 +63,18 @@ export function RegisterForm({ googleOAuthEnabled = false }: { googleOAuthEnable
         {isPending ? t.creatingAccount : t.createAccount}
       </button>
 
+      <p className="text-center text-xs font-[700] leading-5 text-[var(--muted)]">
+        {t.registerAgreementPrefix}{" "}
+        <Link href="/terms" className="font-[800] text-[var(--brand)] hover:underline">
+          {t.termsOfUse}
+        </Link>{" "}
+        {t.registerAgreementJoiner}{" "}
+        <Link href="/privacy" className="font-[800] text-[var(--brand)] hover:underline">
+          {t.privacyPolicy}
+        </Link>{" "}
+        {t.registerAgreementSuffix}
+      </p>
+
       {googleOAuthEnabled ? (
         <>
           <div className="flex items-center gap-3 text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">

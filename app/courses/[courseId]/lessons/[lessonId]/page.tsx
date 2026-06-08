@@ -103,16 +103,24 @@ export default async function LessonPage({
   }
 
   let serverPassedModuleIds: string[] = [];
+  let lessonStatuses: Record<string, "IN_PROGRESS" | "COMPLETED"> = {};
   try {
     const rows = await db.userProgress.findMany({
-      where: {
-        userId,
-        status: ProgressStatus.COMPLETED,
-        lesson: { type: "QUIZ", module: { courseId } }
-      },
-      select: { lesson: { select: { moduleId: true } } }
+      where: { userId, lesson: { module: { courseId } } },
+      select: { lessonId: true, status: true, lesson: { select: { moduleId: true, type: true } } }
     });
-    serverPassedModuleIds = Array.from(new Set(rows.map((r) => r.lesson.moduleId)));
+    serverPassedModuleIds = Array.from(
+      new Set(
+        rows
+          .filter((r) => r.status === ProgressStatus.COMPLETED && r.lesson.type === "QUIZ")
+          .map((r) => r.lesson.moduleId)
+      )
+    );
+    for (const r of rows) {
+      if (r.status === ProgressStatus.COMPLETED || r.status === ProgressStatus.IN_PROGRESS) {
+        lessonStatuses[r.lessonId] = r.status;
+      }
+    }
   } catch {
     // progress unavailable — gating falls back to localStorage
   }
@@ -122,29 +130,40 @@ export default async function LessonPage({
   const totalModules = course.modules.length;
   const isComplete = totalModules > 0 && serverPassedModuleIds.length >= totalModules;
 
+  // The query selects English + the ACTIVE locale's field (titlePs for ps,
+  // titleDa for fa). Fold that into the `…Ps` field the views read for any
+  // non-English locale, so Dari content (titleDa/descriptionDa/readingDa) shows
+  // instead of falling back to English.
+  const localized = (row: unknown, base: string): string | null => {
+    const r = row as Record<string, string | null | undefined>;
+    if (locale === "fa") return r[`${base}Da`] ?? r[`${base}En`] ?? null;
+    if (locale === "ps") return r[`${base}Ps`] ?? r[`${base}En`] ?? null;
+    return r[`${base}En`] ?? null;
+  };
+
   const normalizedCourse: CourseForLesson = {
     ...course,
-    titleEn: course.titleEn ?? course.titlePs ?? "",
-    titlePs: course.titlePs ?? course.titleEn ?? "",
-    descriptionEn: course.descriptionEn ?? course.descriptionPs ?? "",
-    descriptionPs: course.descriptionPs ?? course.descriptionEn ?? "",
+    titleEn: course.titleEn ?? "",
+    titlePs: localized(course, "title") ?? course.titleEn ?? "",
+    descriptionEn: course.descriptionEn ?? "",
+    descriptionPs: localized(course, "description") ?? course.descriptionEn ?? "",
     level: (course as unknown as { level?: string | null }).level ?? null,
     modules: course.modules.map((module) => ({
       ...module,
-      titleEn: module.titleEn ?? module.titlePs ?? "",
-      titlePs: module.titlePs ?? module.titleEn ?? "",
+      titleEn: module.titleEn ?? "",
+      titlePs: localized(module, "title") ?? module.titleEn ?? "",
       lessons: module.lessons.map((item) => ({
         ...item,
-        titleEn: item.titleEn ?? item.titlePs ?? "",
-        titlePs: item.titlePs ?? item.titleEn ?? "",
-        descriptionEn: item.descriptionEn ?? item.descriptionPs ?? null,
-        descriptionPs: item.descriptionPs ?? item.descriptionEn ?? null,
-        readingEn: item.readingEn ?? item.readingPs ?? null,
-        readingPs: item.readingPs ?? item.readingEn ?? null
+        titleEn: item.titleEn ?? "",
+        titlePs: localized(item, "title") ?? item.titleEn ?? "",
+        descriptionEn: item.descriptionEn ?? null,
+        descriptionPs: localized(item, "description"),
+        readingEn: item.readingEn ?? null,
+        readingPs: localized(item, "reading")
       }))
     }))
   };
   const normalizedLesson = normalizedCourse.modules.flatMap((module) => module.lessons).find((item) => item.id === lesson.id) ?? lesson;
 
-  return <LessonView course={normalizedCourse} lesson={normalizedLesson} serverPassedModuleIds={serverPassedModuleIds} isComplete={isComplete} />;
+  return <LessonView course={normalizedCourse} lesson={normalizedLesson} serverPassedModuleIds={serverPassedModuleIds} lessonStatuses={lessonStatuses} isComplete={isComplete} />;
 }

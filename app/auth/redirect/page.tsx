@@ -1,22 +1,28 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { UserRole } from "@prisma/client";
+import { auth, signOut } from "@/auth";
+
+function requiredRoleForPortal(portal: string | undefined) {
+  if (portal === "admin") return UserRole.ADMIN;
+  if (portal === "educator") return UserRole.EDUCATOR;
+  if (portal === "student") return UserRole.STUDENT;
+  return null;
+}
 
 export default async function AuthRedirectPage({
   searchParams
 }: {
-  searchParams: Promise<{ callbackUrl?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; portal?: string }>;
 }) {
   const session = await auth();
   const role = session?.user?.role;
   const status = session?.user?.status;
-  const { callbackUrl } = await searchParams;
+  const { callbackUrl, portal } = await searchParams;
   const safeCallback =
     callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
       ? callbackUrl
       : "/";
-
-  if (role === "ADMIN") redirect("/admin");
-  if (role === "EDUCATOR") redirect("/educator");
+  const portalRole = requiredRoleForPortal(portal);
 
   if (!role) {
     redirect("/login");
@@ -26,8 +32,24 @@ export default async function AuthRedirectPage({
     redirect(`/verify-request${session.user.email ? `?email=${encodeURIComponent(session.user.email)}` : ""}`);
   }
 
+  if (portalRole && role !== portalRole) {
+    await signOut({ redirectTo: "/login?error=not-authorized" });
+  }
+
+  if (role === "ADMIN") {
+    redirect(safeCallback.startsWith("/admin") ? safeCallback : "/admin");
+  }
+
+  if (role === "EDUCATOR") {
+    redirect(safeCallback.startsWith("/educator") ? safeCallback : "/educator");
+  }
+
   // Students can return to learning pages, but never privileged workspaces.
   if (safeCallback.startsWith("/admin") || safeCallback.startsWith("/educator")) {
+    redirect("/dashboard");
+  }
+
+  if (safeCallback === "/") {
     redirect("/dashboard");
   }
 

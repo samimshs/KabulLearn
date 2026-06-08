@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { usesPashtoContent, type Locale } from "@/lib/i18n";
 import { QuestionType } from "@prisma/client";
@@ -30,7 +30,7 @@ type QuizBlockProps = {
   title?: string;
   description?: string;
   onStart: () => Promise<string | null>;
-  onPass: (selectedAnswers: SelectedAnswer[], attemptId: string) => Promise<void>;
+  onPass: (selectedAnswers: SelectedAnswer[], attemptId: string) => Promise<{ score: number; passed: boolean }>;
 };
 
 type SubmitState = "idle" | "submitted" | "saving";
@@ -43,20 +43,42 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
   const [score, setScore] = useState<number | null>(null);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [attemptId, setAttemptId] = useState<string | null>(null);
+  const startedRef = useRef(false);
+  const startPromiseRef = useRef<Promise<string | null> | null>(null);
 
+  // Start ONE attempt on mount. `onStart` is a fresh function each render, so we
+  // guard with a ref to avoid re-firing (which would spawn endless attempt
+  // sessions and flash "Quiz attempt is not ready yet").
   useEffect(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
     let cancelled = false;
-    onStart()
-      .then((id) => {
-        if (!cancelled) setAttemptId(id);
-      })
-      .catch(() => {
-        if (!cancelled) setSubmissionError("Could not start quiz attempt.");
-      });
+    const p = onStart();
+    startPromiseRef.current = p;
+    p.then((id) => {
+      if (!cancelled) setAttemptId(id);
+    }).catch(() => {
+      if (!cancelled) setSubmissionError(t.couldNotStartQuiz);
+    });
     return () => {
       cancelled = true;
     };
-  }, [onStart]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Resolve a usable attempt id — awaits the in-flight start so a fast submit
+  // (before the attempt finished creating) doesn't fail with "not ready".
+  async function ensureAttempt(): Promise<string | null> {
+    if (attemptId) return attemptId;
+    if (startPromiseRef.current) {
+      const id = await startPromiseRef.current.catch(() => null);
+      if (id) { setAttemptId(id); return id; }
+    }
+    const fresh = await onStart().catch(() => null);
+    startPromiseRef.current = Promise.resolve(fresh);
+    if (fresh) setAttemptId(fresh);
+    return fresh;
+  }
 
   const allAnswered = questions.every((q) => {
     if (q.type === QuestionType.TEXT_INPUT) return Boolean(textAnswers[q.id]?.trim());
@@ -91,34 +113,36 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
 
   async function submitQuiz() {
     const correctCount = questions.filter((q) => isQuestionCorrect(q)).length;
-    const nextScore = Math.round((correctCount / questions.length) * 100);
-    setScore(nextScore);
-    setSubmitState("submitted");
+    const clientScore = Math.round((correctCount / questions.length) * 100);
+    setSubmitState("submitted"); // reveal per-question correct/wrong feedback
 
-    if (nextScore >= passScore) {
-      const selectedAnswers = questions.map((q) =>
-        q.type === QuestionType.TEXT_INPUT
-          ? {
-              questionId: q.id,
-              textAnswer: textAnswers[q.id] ?? ""
-            }
-          : {
-              questionId: q.id,
-              answerChoiceIds: selected[q.id] ?? []
-            }
-      );
-      setSubmitState("saving");
-      setSubmissionError(null);
-      try {
-        if (!attemptId) {
-          throw new Error("Quiz attempt is not ready yet. Please wait a moment.");
-        }
-        await onPass(selectedAnswers, attemptId);
-      } catch (error) {
-        setSubmissionError(error instanceof Error ? error.message : "Unable to save quiz progress.");
-      } finally {
-        setSubmitState("submitted");
+    // Failing client-side — no server round-trip needed; let them retry.
+    if (clientScore < passScore) {
+      setScore(clientScore);
+      return;
+    }
+
+    // Passing client-side → the SERVER must confirm before we show "Passed".
+    const selectedAnswers = questions.map((q) =>
+      q.type === QuestionType.TEXT_INPUT
+        ? { questionId: q.id, textAnswer: textAnswers[q.id] ?? "" }
+        : { questionId: q.id, answerChoiceIds: selected[q.id] ?? [] }
+    );
+    setSubmitState("saving");
+    setSubmissionError(null);
+    try {
+      const id = await ensureAttempt(); // waits for the attempt if it's still being created
+      if (!id) {
+        throw new Error(t.couldNotStartQuiz);
       }
+      const result = await onPass(selectedAnswers, id);
+      setScore(result.score); // authoritative score from the server
+      setSubmitState("submitted");
+    } catch (error) {
+      // Server rejected — do NOT show a passed/score banner; surface the error and allow a retry.
+      setScore(null);
+      setSubmissionError(error instanceof Error ? error.message : t.unableToSaveQuiz);
+      setSubmitState("submitted");
     }
   }
 
@@ -128,7 +152,7 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
     setScore(null);
     setSubmitState("idle");
     setSubmissionError(null);
-    onStart().then(setAttemptId).catch(() => setSubmissionError("Could not start quiz attempt."));
+    onStart().then(setAttemptId).catch(() => setSubmissionError(t.couldNotStartQuiz));
   }
 
   return (
@@ -189,7 +213,7 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
                   value={textAnswers[question.id] ?? ""}
                   disabled={submitState !== "idle"}
                   onChange={(event) => setTextAnswers((current) => ({ ...current, [question.id]: event.target.value }))}
-                  placeholder={usesPashtoContent(locale) ? "ځواب ولیکئ" : "Enter your answer"}
+                  placeholder={t.enterYourAnswer}
                   className="min-h-12 rounded-[var(--radius)] border border-[var(--border)] bg-white px-4 text-sm font-[800] text-[var(--ink)] outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[rgba(0,87,255,0.12)] disabled:opacity-80"
                 />
                 {isSubmitted ? (
@@ -283,7 +307,7 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
             </button>
           ) : submitState === "saving" ? (
             <span className="pr-btn-ghost">
-              Saving...
+              {t.savingLabel}
             </span>
           ) : !passed ? (
             <button
@@ -321,7 +345,7 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
               type="button"
               onClick={() => setSubmissionError(null)}
               className="shrink-0 text-[var(--danger)] opacity-60 transition hover:opacity-100"
-              aria-label="Dismiss"
+              aria-label={t.dismissLabel}
             >
               ✕
             </button>

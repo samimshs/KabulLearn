@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { QuizBlock } from "@/components/QuizBlock";
 import { useLanguage } from "@/components/LanguageProvider";
 import { getPassedQuizzes, quizProgressKey } from "@/lib/progress";
 import { startQuizAttempt, submitQuizAttempt } from "@/lib/actions/quiz-actions";
+import { LessonStateIcon, lessonKindOf, type LessonState } from "@/components/LessonStateIcon";
 import { usesPashtoContent, type Locale, type Dictionary } from "@/lib/i18n";
 import { type Course, type Module, type Lesson, type Question, type AnswerChoice } from "@prisma/client";
 
@@ -41,6 +43,7 @@ type QuizViewProps = {
   course: CourseWithModules;
   module: CourseModule;
   serverPassedModuleIds?: string[];
+  lessonStatuses?: Record<string, "IN_PROGRESS" | "COMPLETED">;
   isComplete?: boolean;
   previousScore?: number | null;
 };
@@ -97,6 +100,7 @@ function CourseSidebar({
   course,
   module,
   passedQuizzes,
+  lessonStatuses,
   locale,
   t,
   direction,
@@ -104,11 +108,18 @@ function CourseSidebar({
   course: CourseWithModules;
   module: CourseModule;
   passedQuizzes: Set<string>;
+  lessonStatuses: Record<string, "IN_PROGRESS" | "COMPLETED">;
   locale: Locale;
   t: Dictionary;
   direction: "ltr" | "rtl";
 }) {
   const courseTitle = usesPashtoContent(locale) ? course.titlePs : course.titleEn;
+  const contentLessonState = (id: string): LessonState => {
+    const s = lessonStatuses[id];
+    if (s === "COMPLETED") return "completed";
+    if (s === "IN_PROGRESS") return "in_progress";
+    return "not_started";
+  };
 
   return (
     <aside className="order-2 lg:order-1 lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-6.5rem)] lg:overflow-y-auto">
@@ -123,7 +134,7 @@ function CourseSidebar({
             <span style={{ transform: direction === "rtl" ? "scaleX(-1)" : "none" }}>
               <IconArrowLeft />
             </span>
-            {t.backToCourses}
+            {t.backToCourse}
           </Link>
           <h2 className="mt-3 text-[16px] font-[800] leading-snug tracking-tight text-[var(--ink)]">{courseTitle}</h2>
           <p className="mt-1 text-[12px] font-[600] text-[var(--muted)]">{t.courseNavigation}</p>
@@ -152,9 +163,9 @@ function CourseSidebar({
                         <Link
                           key={lesson.id}
                           href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(lesson.id)}`}
-                          className="flex items-center gap-2 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[700] text-[var(--ink-2)] transition hover:bg-[var(--surface)]"
+                          className="flex items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[700] text-[var(--ink-2)] transition hover:bg-[var(--surface)]"
                         >
-                          <span className="text-[var(--muted)]">{getLessonIcon(lesson)}</span>
+                          <LessonStateIcon state={contentLessonState(lesson.id)} kind={lessonKindOf(lesson)} />
                           <span className="truncate">{label}</span>
                         </Link>
                       );
@@ -163,7 +174,7 @@ function CourseSidebar({
                     {/* Required quiz link */}
                     <Link
                       href={`/courses/${encodeURIComponent(course.id)}/quizzes/${encodeURIComponent(mod.id)}`}
-                      className={`flex items-center gap-2 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[800] transition ${
+                      className={`flex items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[800] transition ${
                         isCurrentModule
                           ? "bg-[var(--brand)] text-white shadow-sm"
                           : quizPassed
@@ -171,15 +182,11 @@ function CourseSidebar({
                             : "text-[var(--ink-2)] hover:bg-[var(--surface)]"
                       }`}
                     >
-                      <span className={isCurrentModule ? "text-white/80" : quizPassed ? "" : "text-[var(--muted)]"}>
-                        {quizPassed ? <IconCheck /> : <IconQuiz />}
-                      </span>
+                      <LessonStateIcon
+                        state={quizPassed ? "completed" : isCurrentModule ? "in_progress" : "not_started"}
+                        kind="quiz"
+                      />
                       <span className="truncate">{t.requiredQuiz}</span>
-                      {quizPassed && (
-                        <span className="ms-auto text-[10px] font-[800] uppercase tracking-wider opacity-70">
-                          {t.completed}
-                        </span>
-                      )}
                     </Link>
                   </div>
                 </section>
@@ -197,10 +204,12 @@ export function QuizView({
   course,
   module,
   serverPassedModuleIds = [],
+  lessonStatuses = {},
   isComplete = false,
   previousScore = null,
 }: QuizViewProps) {
   const { locale, t, direction } = useLanguage();
+  const router = useRouter();
   const [passedQuizzes, setPassedQuizzes] = useState<Set<string>>(new Set(serverPassedModuleIds));
   const [retaking, setRetaking] = useState(false);
 
@@ -217,7 +226,7 @@ export function QuizView({
     setPassedQuizzes(new Set([...localPassed, ...serverPassedModuleIds]));
   }, [course.id, moduleIds.join("|"), serverPassedModuleIds.join("|")]);
 
-  const sidebarProps = { course, module, passedQuizzes, locale, t, direction };
+  const sidebarProps = { course, module, passedQuizzes, lessonStatuses, locale, t, direction };
 
   if (!quizLesson || !quizLesson.quiz?.questions?.length) {
     return (
@@ -285,10 +294,57 @@ export function QuizView({
                   {t.nextLesson}
                 </Link>
               ) : (
-                <Link href={`/courses/${encodeURIComponent(course.id)}/certificate`} className="pr-btn-secondary">
-                  {t.downloadCertificate}
+                <Link href={`/courses/${encodeURIComponent(course.id)}`} className="pr-btn-secondary">
+                  {t.completeCourse}
                 </Link>
               )}
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  /* ── Sequential lock: every CONTENT lesson preceding this quiz (across modules) must be done ── */
+  const orderedLessons = course.modules.flatMap((m) => m.lessons.map((l) => ({ ...l, moduleId: m.id })));
+  const quizIndex = orderedLessons.findIndex((l) => l.id === quizLesson.id);
+  const precedingLessons = quizIndex > 0
+    ? orderedLessons.slice(0, quizIndex).filter((l) => l.type !== "QUIZ")
+    : [];
+  const incompleteLessons = precedingLessons.filter((l) => lessonStatuses[l.id] !== "COMPLETED");
+  const lessonsLocked = !isComplete && !passed && incompleteLessons.length > 0;
+
+  if (lessonsLocked) {
+    return (
+      <main className="pr-page grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+        <CourseSidebar {...sidebarProps} />
+
+        <section className="order-1 grid min-w-0 auto-rows-min gap-5 lg:order-2">
+          <div className="pr-panel p-6 lg:p-8">
+            <p className="pr-eyebrow text-[var(--warning)]">{t.requiredQuiz}</p>
+            <h1 className="pr-h2 mt-2">{t.completeLessonsFirst}</h1>
+            <p className="pr-copy mt-3 max-w-2xl">{t.completeLessonsFirstHint}</p>
+
+            <div className="mt-6 grid gap-2">
+              {incompleteLessons.map((l) => {
+                const isQuiz = l.type === "QUIZ";
+                const href = isQuiz
+                  ? `/courses/${encodeURIComponent(course.id)}/quizzes/${encodeURIComponent(l.moduleId)}`
+                  : `/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(l.id)}`;
+                return (
+                  <Link
+                    key={l.id}
+                    href={href}
+                    className="flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[14px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.3)] hover:bg-white"
+                  >
+                    <LessonStateIcon state={lessonStatuses[l.id] === "IN_PROGRESS" ? "in_progress" : "not_started"} kind={lessonKindOf(l)} />
+                    <span className="truncate">{usesPashtoContent(locale) ? l.titlePs : l.titleEn}</span>
+                    <span className="ms-auto text-[12px] font-[800] text-[var(--brand)]">
+                      {isQuiz ? t.testYourSkills : t.continueLesson} →
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -333,12 +389,7 @@ export function QuizView({
             return result.data.attemptId;
           }}
           onPass={async (selectedAnswers, attemptId) => {
-            // Save locally first — never block the student
-            window.localStorage.setItem(quizProgressKey(course.id, module.id), "true");
-            const localPassed = getPassedQuizzes(course.id, moduleIds);
-            setPassedQuizzes(new Set([...localPassed, ...serverPassedModuleIds]));
-
-            // Then attempt server sync (best-effort)
+            // Server is the source of truth — it scores and records completion.
             const result = await submitQuizAttempt({
               courseId: course.id,
               moduleId: module.id,
@@ -347,8 +398,22 @@ export function QuizView({
               selectedAnswers,
             });
             if (!result.ok) {
-              console.warn("Quiz server sync warning:", result.error);
+              // Surface the error so the quiz never falsely shows "Passed"
+              throw new Error(result.error);
             }
+
+            // Only mark passed once the server has saved it
+            if (result.data.passed) {
+              window.localStorage.setItem(quizProgressKey(course.id, module.id), "true");
+              setPassedQuizzes((prev) => new Set([...prev, module.id]));
+              // Refresh server data so the course/certificate pages reflect completion right away
+              router.refresh();
+              // Final quiz → send the student to the course homepage (rating card + certificate preview)
+              if (!nextLesson) {
+                setTimeout(() => router.push(`/courses/${encodeURIComponent(course.id)}`), 1200);
+              }
+            }
+            return result.data;
           }}
         />
 
@@ -364,7 +429,8 @@ export function QuizView({
                 {t.nextLesson}
               </Link>
             ) : (
-              <Link href={`/courses/${encodeURIComponent(course.id)}/certificate`} className="pr-btn-primary">
+              // Final quiz passed — go to the course homepage (rating + certificate preview)
+              <Link href={`/courses/${encodeURIComponent(course.id)}`} className="pr-btn-primary">
                 {t.completeCourse}
               </Link>
             )

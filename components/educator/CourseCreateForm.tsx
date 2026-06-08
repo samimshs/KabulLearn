@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
 import { COURSE_LEVEL_OPTIONS, COURSE_LEVELS } from "@/lib/i18n";
@@ -27,10 +27,35 @@ function FieldError({ message }: { message?: string }) {
   );
 }
 
-const emptyInstructor = (): InstructorInput => ({
-  name: "", username: "", title: undefined, bio: undefined,
-  avatarUrl: undefined, linkedinUrl: undefined, youtubeUrl: undefined
-});
+type InstructorProfile = InstructorInput & { id?: string; isPrimary?: boolean; source?: "current-user" | "platform" | "external" };
+
+type InstructorSearchResult = InstructorProfile & { id: string };
+
+const emptyManualInstructor = (): InstructorInput => ({ name: "", username: "", bio: undefined, avatarUrl: undefined });
+
+function slugifyName(name: string) {
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 44);
+  return `${slug || "external-instructor"}-${Date.now().toString(36)}`;
+}
+
+function InstructorAvatar({ instructor }: { instructor: InstructorInput }) {
+  const initials = instructor.name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("") || "?";
+
+  return (
+    <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-sm font-black text-[var(--brand)]">
+      {instructor.avatarUrl ? <img src={instructor.avatarUrl} alt="" className="h-full w-full rounded-full object-cover" /> : initials}
+    </span>
+  );
+}
 
 export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }: { className?: string }) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -39,18 +64,74 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
   const [message, setMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [isPending, startTransition] = useTransition();
-  const [instructors, setInstructors] = useState<InstructorInput[]>([emptyInstructor()]);
+  const [primaryInstructor, setPrimaryInstructor] = useState<InstructorProfile | null>(null);
+  const [coInstructors, setCoInstructors] = useState<InstructorProfile[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<InstructorSearchResult[]>([]);
+  const [manualOpen, setManualOpen] = useState(false);
+  const [manualInstructor, setManualInstructor] = useState<InstructorInput>(emptyManualInstructor());
 
-  function updateInstructor(idx: number, patch: Partial<InstructorInput>) {
-    setInstructors((prev) => prev.map((inst, i) => i === idx ? { ...inst, ...patch } : inst));
+  const instructors = useMemo(
+    () => primaryInstructor ? [primaryInstructor, ...coInstructors] : coInstructors,
+    [primaryInstructor, coInstructors]
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/educator/profile-context")
+      .then((res) => res.json())
+      .then((payload: { ok: boolean; data?: InstructorProfile }) => {
+        if (cancelled || !payload.ok || !payload.data) return;
+        setPrimaryInstructor({ ...payload.data, isPrimary: true, source: "current-user" });
+      })
+      .catch(() => null);
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    const query = searchQuery.trim();
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    const timeout = window.setTimeout(() => {
+      fetch(`/api/educator/instructors/search?q=${encodeURIComponent(query)}`)
+        .then((res) => res.json())
+        .then((payload: { ok: boolean; data?: InstructorSearchResult[] }) => {
+          setSearchResults(payload.ok ? payload.data ?? [] : []);
+        })
+        .catch(() => setSearchResults([]));
+    }, 180);
+    return () => window.clearTimeout(timeout);
+  }, [searchQuery]);
+
+  function addPlatformInstructor(instructor: InstructorSearchResult) {
+    if (primaryInstructor?.username === instructor.username || coInstructors.some((item) => item.username === instructor.username)) return;
+    setCoInstructors((prev) => [...prev, { ...instructor, source: "platform" }]);
+    setSearchQuery("");
+    setSearchResults([]);
   }
 
-  function addInstructor() {
-    setInstructors((prev) => [...prev, emptyInstructor()]);
+  function addManualInstructor() {
+    const name = manualInstructor.name.trim();
+    if (!name) return;
+    setCoInstructors((prev) => [
+      ...prev,
+      {
+        ...manualInstructor,
+        name,
+        username: manualInstructor.username || slugifyName(name),
+        bio: manualInstructor.bio?.trim() || undefined,
+        avatarUrl: manualInstructor.avatarUrl || undefined,
+        source: "external"
+      }
+    ]);
+    setManualInstructor(emptyManualInstructor());
+    setManualOpen(false);
   }
 
-  function removeInstructor(idx: number) {
-    setInstructors((prev) => prev.filter((_, i) => i !== idx));
+  function removeCoInstructor(username: string) {
+    setCoInstructors((prev) => prev.filter((inst) => inst.username !== username));
   }
 
   function validate(slug: string, titleEn: string, titlePs: string, titleDa: string, descriptionEn: string, descriptionPs: string, descriptionDa: string) {
@@ -71,9 +152,8 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
     if (!descriptionPs.trim()) next.descriptionPs = "Enter a Pashto course description.";
     if (!descriptionDa.trim()) next.descriptionDa = "Enter a Dari course description.";
 
-    // Validate instructors
-    if (instructors.length === 0 || !instructors[0].name.trim()) {
-      next.instructors = "Add at least one instructor.";
+    if (!primaryInstructor?.name.trim()) {
+      next.instructors = "Your educator profile must be loaded before creating a course.";
     }
     for (const [i, inst] of instructors.entries()) {
       if (!inst.name.trim()) next[`instructor_${i}_name`] = "Name is required.";
@@ -140,7 +220,7 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
 
         formRef.current?.reset();
         setFieldErrors({});
-        setInstructors([emptyInstructor()]);
+        setCoInstructors([]);
         setMessage("Course draft created. Opening the content editor...");
         router.refresh();
         if (result.data?.courseId) {
@@ -220,111 +300,137 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
       </label>
 
       {/* Instructors */}
-      <div className="grid gap-3">
+      <div className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
         <div>
-          <p className="text-sm font-[900] uppercase tracking-[1.4px] text-[var(--ink)]">{t.instructors}</p>
-          <p className="mt-1 text-xs font-[600] leading-5 text-[var(--muted)]">{t.publicAuthorHint}</p>
+          <p className="text-sm font-black uppercase tracking-[1.4px] text-slate-950">{t.instructors}</p>
+          <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{t.publicAuthorHint}</p>
           {fieldErrors.instructors && <FieldError message={fieldErrors.instructors} />}
         </div>
-        {instructors.map((inst, idx) => (
-          <div key={idx} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-xs font-[800] uppercase tracking-[1.2px] text-[var(--brand)]">
-                Instructor {idx + 1}{idx === 0 ? " (primary)" : ""}
+
+        {primaryInstructor ? (
+          <article className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <InstructorAvatar instructor={primaryInstructor} />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="truncate text-sm font-black text-slate-950">{primaryInstructor.name}</h3>
+                <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[var(--brand)]">
+                  Primary Instructor
+                </span>
+              </div>
+              <p className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-slate-500">
+                {primaryInstructor.bio || "Your educator profile is attached to this course draft."}
               </p>
-              {instructors.length > 1 && (
+            </div>
+          </article>
+        ) : (
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm font-bold text-slate-500">
+            Loading your educator profile...
+          </div>
+        )}
+
+        {coInstructors.length > 0 ? (
+          <div className="grid gap-3">
+            {coInstructors.map((inst) => (
+              <article key={inst.username} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <InstructorAvatar instructor={inst} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="truncate text-sm font-black text-slate-950">{inst.name}</h3>
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-500">
+                      {inst.source === "platform" ? "Platform educator" : "External instructor"}
+                    </span>
+                  </div>
+                  <p className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-slate-500">{inst.bio || "No bio added yet."}</p>
+                </div>
                 <button
                   type="button"
-                  onClick={() => removeInstructor(idx)}
-                  className="rounded-[var(--radius-sm)] px-2.5 py-1 text-xs font-[800] text-[var(--danger)] transition hover:bg-[var(--danger-50)]"
+                  onClick={() => removeCoInstructor(inst.username)}
+                  className="rounded-lg px-2.5 py-1 text-xs font-black text-[var(--danger)] transition hover:bg-[var(--danger-50)]"
                 >
                   {t.removeInstructor}
                 </button>
-              )}
+              </article>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="grid gap-3 rounded-2xl border border-dashed border-slate-200 bg-white p-4">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <label className="grid min-w-[220px] flex-1 gap-2 text-sm font-black text-slate-800">
+              Add Co-Instructor
+              <input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search platform educators..."
+                className="h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-950 outline-none transition focus:border-[var(--brand)] focus:bg-white focus:ring-4 focus:ring-blue-100"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => setManualOpen((open) => !open)}
+              className="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+            >
+              Add an external instructor manually
+            </button>
+          </div>
+
+          {searchResults.length > 0 ? (
+            <div className="grid gap-2">
+              {searchResults.map((result) => (
+                <button
+                  key={result.id}
+                  type="button"
+                  onClick={() => addPlatformInstructor(result)}
+                  className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-start transition hover:border-[var(--brand)] hover:bg-blue-50"
+                >
+                  <InstructorAvatar instructor={result} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-black text-slate-950">{result.name}</span>
+                    <span className="block truncate text-xs font-semibold text-slate-500">{result.title || result.username}</span>
+                  </span>
+                </button>
+              ))}
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              <label className="pr-label">
-                Name *
+          ) : null}
+
+          {manualOpen ? (
+            <div className="grid gap-3 border-t border-slate-200 pt-4 md:grid-cols-2">
+              <label className="grid gap-2 text-sm font-black text-slate-800">
+                Full Name
                 <input
-                  value={inst.name}
-                  onChange={(e) => updateInstructor(idx, { name: e.target.value })}
-                  placeholder="Sami Samim"
-                  className={fieldClass(Boolean(fieldErrors[`instructor_${idx}_name`]))}
-                />
-                <FieldError message={fieldErrors[`instructor_${idx}_name`]} />
-              </label>
-              <label className="pr-label">
-                Username *
-                <input
-                  value={inst.username}
-                  onChange={(e) => updateInstructor(idx, { username: e.target.value })}
-                  placeholder="sami-samim"
-                  className={fieldClass(Boolean(fieldErrors[`instructor_${idx}_username`]))}
-                />
-                <span className="text-xs font-[600] leading-5 text-[var(--muted)]">
-                  Used in public profile URL: /creators/sami-samim
-                </span>
-                <FieldError message={fieldErrors[`instructor_${idx}_username`]} />
-              </label>
-              <label className="pr-label">
-                Professional title
-                <input
-                  value={inst.title ?? ""}
-                  onChange={(e) => updateInstructor(idx, { title: e.target.value || undefined })}
-                  placeholder="Senior Data Scientist"
-                  className="pr-input"
+                  value={manualInstructor.name}
+                  onChange={(event) => setManualInstructor((prev) => ({ ...prev, name: event.target.value }))}
+                  className="h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-950 outline-none transition focus:border-[var(--brand)] focus:bg-white focus:ring-4 focus:ring-blue-100"
                 />
               </label>
-              <div className="pr-label">
-                Profile photo
+              <div className="grid gap-2 text-sm font-black text-slate-800">
+                Avatar
                 <AvatarUpload
-                  name={inst.name}
-                  currentUrl={inst.avatarUrl}
-                  onChange={(url) => updateInstructor(idx, { avatarUrl: url || undefined })}
+                  name={manualInstructor.name}
+                  currentUrl={manualInstructor.avatarUrl}
+                  onChange={(url) => setManualInstructor((prev) => ({ ...prev, avatarUrl: url || undefined }))}
                 />
               </div>
-              <label className="pr-label md:col-span-2">
+              <label className="grid gap-2 text-sm font-black text-slate-800 md:col-span-2">
                 Bio
                 <textarea
-                  value={inst.bio ?? ""}
-                  onChange={(e) => updateInstructor(idx, { bio: e.target.value || undefined })}
-                  rows={2}
-                  className="pr-input leading-6"
+                  value={manualInstructor.bio ?? ""}
+                  onChange={(event) => setManualInstructor((prev) => ({ ...prev, bio: event.target.value || undefined }))}
+                  rows={3}
+                  className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold leading-6 text-slate-950 outline-none transition focus:border-[var(--brand)] focus:bg-white focus:ring-4 focus:ring-blue-100"
                 />
               </label>
-              <label className="pr-label">
-                LinkedIn URL
-                <input
-                  value={inst.linkedinUrl ?? ""}
-                  onChange={(e) => updateInstructor(idx, { linkedinUrl: e.target.value || undefined })}
-                  placeholder="https://www.linkedin.com/in/..."
-                  className={fieldClass(Boolean(fieldErrors[`instructor_${idx}_linkedinUrl`]))}
-                />
-                <FieldError message={fieldErrors[`instructor_${idx}_linkedinUrl`]} />
-              </label>
-              <label className="pr-label">
-                YouTube URL
-                <input
-                  value={inst.youtubeUrl ?? ""}
-                  onChange={(e) => updateInstructor(idx, { youtubeUrl: e.target.value || undefined })}
-                  placeholder="https://www.youtube.com/..."
-                  className={fieldClass(Boolean(fieldErrors[`instructor_${idx}_youtubeUrl`]))}
-                />
-                <FieldError message={fieldErrors[`instructor_${idx}_youtubeUrl`]} />
-              </label>
+              <button
+                type="button"
+                onClick={addManualInstructor}
+                disabled={!manualInstructor.name.trim()}
+                className="h-11 rounded-xl bg-[var(--brand)] px-4 text-sm font-black text-white shadow-sm transition hover:bg-[var(--brand-600)] disabled:cursor-not-allowed disabled:opacity-50 md:col-span-2"
+              >
+                Add external instructor
+              </button>
             </div>
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={addInstructor}
-          className="flex items-center gap-2 self-start rounded-[var(--radius)] border border-dashed border-[var(--border)] px-4 py-2.5 text-sm font-[800] text-[var(--brand)] transition hover:border-[var(--brand)] hover:bg-[var(--brand-50)]"
-        >
-          <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none">
-            <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-          </svg>
-          {t.addInstructor}
-        </button>
+          ) : null}
+        </div>
       </div>
 
       {message ? (

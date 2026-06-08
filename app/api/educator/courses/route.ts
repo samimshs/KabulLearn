@@ -20,7 +20,8 @@ async function upsertInstructors(
     });
 
     if (existing && existing.createdById !== creatorId) {
-      return { error: `Username "${inst.username}" is already in use. Choose a different username.` };
+      profileIds.push(existing.id);
+      continue;
     }
 
     const profile = await db.creatorProfile.upsert({

@@ -1,5 +1,5 @@
-import { notFound } from "next/navigation";
-import { CourseStatus, ProgressStatus } from "@prisma/client";
+import { notFound, redirect } from "next/navigation";
+import { CourseStatus, LessonType, ProgressStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { CourseOverview } from "@/components/CourseOverview";
 import { db } from "@/lib/db";
@@ -20,7 +20,7 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
     level?: string | null;
     status: CourseStatus;
     publishedAt: Date | null;
-    author: { name: string | null; email: string };
+    author: { id: string; name: string | null; email: string };
     authorProfile: {
       name: string;
       username: string;
@@ -29,12 +29,13 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
       bio: string | null;
       linkedinUrl: string | null;
       youtubeUrl: string | null;
+      userId: string | null;
     } | null;
     modules: Array<{
       id: string;
       titleEn?: string; titlePs?: string; titleDa?: string | null;
       order: number;
-      lessons: Array<{ id: string; order: number; titleEn?: string; titlePs?: string; titleDa?: string | null }>;
+      lessons: Array<{ id: string; order: number; type: LessonType; titleEn?: string; titlePs?: string; titleDa?: string | null }>;
     }>;
   } | null = null;
 
@@ -46,7 +47,7 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
         ...localizedCourseSelect(locale),
         status: true,
         publishedAt: true,
-        author: { select: { name: true, email: true } },
+        author: { select: { id: true, name: true, email: true } },
         authorProfile: {
           select: {
             name: true,
@@ -55,7 +56,8 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
             professionalTitle: true,
             bio: true,
             linkedinUrl: true,
-            youtubeUrl: true
+            youtubeUrl: true,
+            userId: true
           }
         },
         modules: {
@@ -66,7 +68,7 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
             order: true,
             lessons: {
               orderBy: [{ order: "asc" }],
-              select: { id: true, order: true, ...localizedLessonSelect(locale) }
+              select: { id: true, order: true, type: true, ...localizedLessonSelect(locale) }
             }
           }
         }
@@ -85,7 +87,12 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
   const session = await auth();
   const userId = session?.user?.id;
 
+  if (!userId) {
+    redirect(`/login?callbackUrl=${encodeURIComponent(`/courses/${courseId}`)}`);
+  }
+
   let serverPassedModuleIds: string[] = [];
+  let lessonStatuses: Record<string, "IN_PROGRESS" | "COMPLETED"> = {};
   let certificateStatus = null;
   let isEnrolled = false;
   let userRating: { rating: number; comment: string | null } | null = null;
@@ -163,12 +170,8 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
     try {
       const [progressRows, certStatus, enrollStatus, ratingRow, progress] = await Promise.all([
         db.userProgress.findMany({
-          where: {
-            userId,
-            status: ProgressStatus.COMPLETED,
-            lesson: { type: "QUIZ", module: { courseId } }
-          },
-          select: { lesson: { select: { moduleId: true } } }
+          where: { userId, lesson: { module: { courseId } } },
+          select: { lessonId: true, status: true, lesson: { select: { moduleId: true, type: true } } }
         }),
         getCourseCertificateStatus(courseId, userId),
         getEnrollmentStatus(courseId),
@@ -180,7 +183,16 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
         }),
         getCourseProgress(userId, courseId)
       ]);
-      serverPassedModuleIds = Array.from(new Set(progressRows.map((p) => p.lesson.moduleId)));
+      serverPassedModuleIds = Array.from(new Set(
+        progressRows
+          .filter((p) => p.status === ProgressStatus.COMPLETED && p.lesson.type === "QUIZ")
+          .map((p) => p.lesson.moduleId)
+      ));
+      for (const p of progressRows) {
+        if (p.status === ProgressStatus.COMPLETED || p.status === ProgressStatus.IN_PROGRESS) {
+          lessonStatuses[p.lessonId] = p.status;
+        }
+      }
       certificateStatus = certStatus;
       isEnrolled = enrollStatus;
       userRating = ratingRow;
@@ -210,6 +222,7 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
           lessons: module.lessons.map((lesson) => ({
             id: lesson.id,
             order: lesson.order,
+            type: lesson.type,
             titleEn: lesson.titleEn ?? lesson.titlePs ?? "",
             titlePs: lesson.titlePs ?? lesson.titleEn ?? "",
             titleDa: lesson.titleDa
@@ -224,7 +237,8 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
               professionalTitle: null,
               bio: null,
               linkedinUrl: null,
-              youtubeUrl: null
+              youtubeUrl: null,
+              userId: null
             }
       }}
       serverPassedModuleIds={serverPassedModuleIds}
@@ -235,6 +249,11 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
       reviews={reviews}
       progressPercent={progressPercent}
       discussionThreads={discussionThreads}
+      instructorUserId={course.author.id}
+      viewerId={userId ?? null}
+      viewerRole={session?.user?.role ?? null}
+      studentName={session?.user?.name ?? session?.user?.email ?? ""}
+      lessonStatuses={lessonStatuses}
     />
   );
 }

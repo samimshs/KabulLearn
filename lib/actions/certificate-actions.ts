@@ -7,6 +7,8 @@ export type CourseCertificateStatus = {
   courseTitleEn: string;
   courseTitlePs: string;
   eligible: boolean;
+  // "completed/required" now reflect ALL lessons (video, reading, quiz), so a
+  // course made entirely of videos/readings can still earn a certificate.
   completedQuizzes: number;
   requiredQuizzes: number;
   grade: number;
@@ -32,8 +34,7 @@ export async function getCourseCertificateStatus(
         orderBy: [{ order: "asc" }],
         select: {
           lessons: {
-            where: { type: LessonType.QUIZ },
-            select: { id: true }
+            select: { id: true, type: true, isFinalTest: true }
           }
         }
       }
@@ -44,16 +45,26 @@ export async function getCourseCertificateStatus(
     return null;
   }
 
-  // All quiz lesson IDs in this course
-  const quizLessonIds = course.modules.flatMap((m) => m.lessons.map((l) => l.id));
-  const requiredQuizzes = quizLessonIds.length;
+  const allLessons = course.modules.flatMap((m) => m.lessons);
+  const quizLessonIds = allLessons.filter((l) => l.type === LessonType.QUIZ).map((l) => l.id);
+  const finalExamIds = allLessons.filter((l) => l.type === LessonType.QUIZ && l.isFinalTest).map((l) => l.id);
+  const contentLessonIds = allLessons.filter((l) => l.type !== LessonType.QUIZ).map((l) => l.id);
 
-  const completedProgress = requiredQuizzes
+  // Certificate gate, in priority order:
+  //  • Final Exam present → cert depends SOLELY on passing the final exam(s).
+  //  • Else any quizzes → ALL module quizzes must be passed.
+  //  • Else → completion of all content lessons (videos/readings).
+  const hasQuizzes = quizLessonIds.length > 0;
+  const requiredLessonIds =
+    finalExamIds.length > 0 ? finalExamIds : hasQuizzes ? quizLessonIds : contentLessonIds;
+  const requiredCount = requiredLessonIds.length;
+
+  const completedProgress = requiredCount
     ? await db.userProgress.findMany({
         where: {
           userId,
           status: ProgressStatus.COMPLETED,
-          lessonId: { in: quizLessonIds }
+          lessonId: { in: requiredLessonIds }
         },
         select: { lessonId: true, latestScore: true }
       })
@@ -62,25 +73,33 @@ export async function getCourseCertificateStatus(
   const certificate = await db.certificate.findFirst({
     where: { courseId, userId }
   });
-  const completedQuizzes = new Set(completedProgress.map((p) => p.lessonId)).size;
+
+  const completedCount = new Set(completedProgress.map((p) => p.lessonId)).size;
   const hasCertificate = Boolean(certificate);
-  const eligible = hasCertificate || (requiredQuizzes > 0 && completedQuizzes === requiredQuizzes);
-  const grade = certificate
-    ? Math.round(certificate.grade)
-    : eligible && completedProgress.length > 0
-    ? Math.round(
-        completedProgress.reduce((sum, p) => sum + (p.latestScore ?? 0), 0) /
-        completedProgress.length
-      )
-    : 0;
+  const eligible = hasCertificate || (requiredCount > 0 && completedCount >= requiredCount);
+
+  // Grade: average of quiz scores when quizzes gate the course; otherwise a
+  // completion-based 100% for video/reading-only courses.
+  let grade: number;
+  if (certificate) {
+    grade = Math.round(certificate.grade);
+  } else if (!eligible) {
+    grade = 0;
+  } else if (hasQuizzes) {
+    grade = completedProgress.length > 0
+      ? Math.round(completedProgress.reduce((sum, p) => sum + (p.latestScore ?? 0), 0) / completedProgress.length)
+      : 0;
+  } else {
+    grade = 100;
+  }
 
   return {
     courseId: course.id,
     courseTitleEn: course.titleEn,
     courseTitlePs: course.titlePs,
     eligible,
-    completedQuizzes,
-    requiredQuizzes,
+    completedQuizzes: completedCount,
+    requiredQuizzes: requiredCount,
     grade,
     issuedAt: certificate?.issuedAt ?? undefined,
     verificationCode: certificate?.verificationCode ?? undefined,

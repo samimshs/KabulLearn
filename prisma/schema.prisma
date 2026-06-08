@@ -50,6 +50,12 @@ enum NotificationStatus {
   FAILED
 }
 
+enum EducatorRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum UserStatus {
   VERIFICATION_PENDING
   ACTIVE
@@ -83,8 +89,43 @@ model User {
   creatorProfile CreatorProfile? @relation("UserCreatorProfile")
   createdCreatorProfiles CreatorProfile[] @relation("CreatorProfileOwner")
 
+  educatorRequest EducatorRequest?
+  sentMessages     DirectMessage[] @relation("SentMessages")
+  receivedMessages DirectMessage[] @relation("ReceivedMessages")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model DirectMessage {
+  id          String    @id @default(cuid())
+  senderId    String
+  recipientId String
+  body        String    @db.Text
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  sender    User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient User @relation("ReceivedMessages", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([recipientId, readAt])
+  @@index([senderId, recipientId, createdAt])
+}
+
+model EducatorRequest {
+  id        String                @id @default(cuid())
+  userId    String                @unique
+  message   String                @db.Text
+  status    EducatorRequestStatus @default(PENDING)
+  adminNote String?               @db.Text
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
 }
 
 model CreatorProfile {
@@ -92,8 +133,12 @@ model CreatorProfile {
   username          String   @unique
   name              String
   avatarUrl         String?
-  professionalTitle String?
-  bio               String?  @db.Text
+  professionalTitle   String?
+  professionalTitlePs String?
+  professionalTitleDa String?
+  bio                 String?  @db.Text
+  bioPs               String?  @db.Text
+  bioDa               String?  @db.Text
   linkedinUrl       String?
   youtubeUrl        String?
   userId            String?  @unique

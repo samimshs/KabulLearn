@@ -193,7 +193,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
 
       {/* ── Sidebar ──────────────────────────────────────────── */}
       <aside className="order-2 lg:order-1 lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-6.5rem)] lg:overflow-y-auto">
-        <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
+        <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
 
           {/* Course header */}
           <div className="border-b border-[var(--border)] p-4">
@@ -223,9 +223,9 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                 return (
                   <section key={module.id}>
                     {/* Module label */}
-                    <div className="mb-1 flex items-center gap-2 px-2">
+                    <div className="mb-1 flex min-w-0 items-center gap-2 px-2">
                       {!unlocked && <IconLock />}
-                      <h3 className="text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--muted)] truncate">
+                      <h3 className="min-w-0 truncate text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--muted)]">
                         {moduleTitle}
                       </h3>
                     </div>

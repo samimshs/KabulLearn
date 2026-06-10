@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { logout } from "@/lib/actions/auth-actions";
 import { usePortalAvatarUrl, usePortalUnreadCount } from "@/lib/portal-client-store";
 import type { MessagePreview } from "@/components/Header";
+import { CommandPalette } from "@/components/CommandPalette";
 
 type HeaderClientProps = {
   user: { name: string | null; role: string; image: string | null } | null;
@@ -38,12 +40,27 @@ function SenderInitials({ name, role }: { name: string | null; role: string }) {
 export function HeaderClient({ user, initialUnread = 0, messagePreviews = [] }: HeaderClientProps) {
   const pathname = usePathname();
   const { locale, setLocale, t } = useLanguage();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen]   = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const unreadCount = usePortalUnreadCount(initialUnread);
   const avatarUrl = usePortalAvatarUrl(user?.image ?? null);
+
+  // Global Cmd+K / Ctrl+K shortcut
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen((o) => !o);
+        setMenuOpen(false);
+        setNotifOpen(false);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   useEffect(() => {
     if (!menuOpen && !notifOpen) return;
@@ -113,6 +130,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [] }: 
     "/dashboard/messages";
 
   return (
+    <>
     <header dir="ltr" className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:gap-5 sm:px-5 lg:px-8">
 
@@ -138,6 +156,21 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [] }: 
         <div className="kl-header-actions flex min-w-0 shrink items-center justify-end gap-1.5 sm:gap-2">
           {user ? (
             <>
+              {/* Search */}
+              <button
+                type="button"
+                onClick={() => { setSearchOpen(true); setMenuOpen(false); setNotifOpen(false); }}
+                aria-label="Search"
+                className="flex h-9 items-center gap-2 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 text-[12px] font-[700] text-[var(--muted)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)]"
+              >
+                <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5 shrink-0" aria-hidden="true">
+                  <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="m10 10 2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                <span className="hidden lg:block">Search</span>
+                <kbd className="hidden rounded border border-[var(--border)] bg-white px-1 py-0.5 text-[10px] font-[800] text-[var(--muted-2)] lg:block">⌘K</kbd>
+              </button>
+
               {/* Support link */}
               <Link href="/support" className="hidden h-9 items-center rounded-[var(--radius)] px-3 text-[13px] font-[700] text-[var(--muted)] transition hover:text-[var(--brand)] sm:inline-flex">
                 {t.supportUs}
@@ -251,7 +284,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [] }: 
                   className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--brand)] text-xs font-[900] text-white shadow-[0_10px_24px_rgba(0,87,255,0.22)] transition hover:ring-2 hover:ring-[var(--brand)] hover:ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-2"
                 >
                   {avatarUrl
-                    ? <img src={avatarUrl} alt={user.name ?? ""} className="h-10 w-10 rounded-full object-cover" />
+                    ? <Image src={avatarUrl} alt={user.name ?? ""} width={40} height={40} className="h-10 w-10 rounded-full object-cover" />
                     : initials}
                 </button>
 
@@ -341,5 +374,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [] }: 
         </div>
       </div>
     </header>
+    <CommandPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
+    </>
   );
 }

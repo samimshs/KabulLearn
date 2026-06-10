@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { CourseStatus } from "@prisma/client";
 import { auth } from "@/auth";
@@ -158,7 +159,7 @@ export default async function CreatorProfilePage({
       {/* Hero */}
       <section className="pr-panel grid gap-6 p-7 lg:grid-cols-[auto_1fr] lg:p-10">
         {avatarUrl ? (
-          <img src={avatarUrl} alt="" className="h-24 w-24 rounded-full object-cover shadow-[var(--shadow)]" />
+          <Image src={avatarUrl} alt="" width={96} height={96} className="h-24 w-24 rounded-full object-cover shadow-[var(--shadow)]" />
         ) : (
           <span className="grid h-24 w-24 place-items-center rounded-full bg-[var(--brand-50)] text-2xl font-[900] text-[var(--brand)] shadow-[var(--shadow-sm)]">
             {initials(creator.name)}

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { CourseStatus, LessonType, ProgressStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { CourseOverview } from "@/components/CourseOverview";
@@ -7,6 +8,32 @@ import { getCourseCertificateStatus } from "@/lib/actions/certificate-actions";
 import { getEnrollmentStatus } from "@/lib/actions/enrollment-actions";
 import { getCourseProgress } from "@/lib/security";
 import { getServerLocale, localizedCourseSelect, localizedLessonSelect, localizedModuleSelect } from "@/lib/server-locale";
+
+const BASE_URL = "https://kabullearn.com";
+
+export async function generateMetadata({ params }: { params: Promise<{ courseId: string }> }): Promise<Metadata> {
+  const { courseId: rawCourseId } = await params;
+  const courseId = decodeURIComponent(rawCourseId);
+  try {
+    const c = await db.course.findUnique({
+      where: { id: courseId },
+      select: { titleEn: true, titlePs: true, descriptionEn: true, descriptionPs: true }
+    });
+    if (!c) return {};
+    const title = c.titleEn || c.titlePs || "Course";
+    const description = (c.descriptionEn || c.descriptionPs || "").slice(0, 160);
+    const url = `${BASE_URL}/courses/${encodeURIComponent(courseId)}`;
+    return {
+      title: `${title} — KabulLearn`,
+      description,
+      alternates: { canonical: url },
+      openGraph: { title: `${title} — KabulLearn`, description, type: "website", url, siteName: "KabulLearn" },
+      twitter: { card: "summary", title: `${title} — KabulLearn`, description }
+    };
+  } catch {
+    return {};
+  }
+}
 
 export default async function CoursePage({ params }: { params: Promise<{ courseId: string }> }) {
   const { courseId: rawCourseId } = await params;
@@ -218,8 +245,43 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
     }
   }
 
+  const instructorList =
+    course.instructors.length > 0
+      ? course.instructors.map((i) => i.profile)
+      : course.authorProfile
+        ? [course.authorProfile]
+        : [];
+
+  const courseJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: course.titleEn || course.titlePs || "",
+    description: (course.descriptionEn || course.descriptionPs || "").slice(0, 500),
+    url: `${BASE_URL}/courses/${encodeURIComponent(courseId)}`,
+    provider: { "@type": "Organization", name: "KabulLearn", url: BASE_URL },
+    instructor: instructorList.map((p) => ({ "@type": "Person", name: p.name, url: `${BASE_URL}/creators/${encodeURIComponent(p.username)}` })),
+    inLanguage: ["en", "ps", "fa"],
+    isAccessibleForFree: true,
+    educationalLevel: course.level ?? "Beginner",
+    hasCourseInstance: { "@type": "CourseInstance", courseMode: "online", inLanguage: ["en", "ps", "fa"] },
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD", category: "Free" }
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: BASE_URL },
+      { "@type": "ListItem", position: 2, name: "Courses", item: `${BASE_URL}/courses` },
+      { "@type": "ListItem", position: 3, name: course.titleEn || course.titlePs || "Course", item: `${BASE_URL}/courses/${encodeURIComponent(courseId)}` }
+    ]
+  };
+
   return (
-    <CourseOverview
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <CourseOverview
       course={{
         id: course.id,
         titleEn: course.titleEn ?? course.titlePs ?? "",
@@ -272,5 +334,6 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
       studentName={session?.user?.name ?? session?.user?.email ?? ""}
       lessonStatuses={lessonStatuses}
     />
+    </>
   );
 }

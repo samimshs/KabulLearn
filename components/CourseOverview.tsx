@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState, useTransition } from "react";
 import type React from "react";
 import { useRouter } from "next/navigation";
@@ -408,7 +409,7 @@ export function CourseOverview({
             <section className="pr-card grid gap-5 p-6 lg:grid-cols-[auto_1fr_auto] lg:items-start lg:p-7">
               <Link href={`/creators/${encodeURIComponent(instructor.username)}`} aria-label={instructor.name}>
                 {instructor.avatarUrl ? (
-                  <img src={instructor.avatarUrl} alt="" className="h-16 w-16 rounded-full object-cover" />
+                  <Image src={instructor.avatarUrl} alt="" width={64} height={64} className="h-16 w-16 rounded-full object-cover" />
                 ) : (
                   <span className="grid h-16 w-16 place-items-center rounded-full bg-[var(--brand-50)] text-lg font-[900] text-[var(--brand)]">
                     {instructor.name.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "PR"}
@@ -455,7 +456,7 @@ export function CourseOverview({
                   <div className="flex items-center gap-4">
                     <Link href={`/creators/${encodeURIComponent(instructor.username)}`} aria-label={instructor.name} className="shrink-0">
                       {instructor.avatarUrl ? (
-                        <img src={instructor.avatarUrl} alt="" className="h-14 w-14 rounded-full object-cover" />
+                        <Image src={instructor.avatarUrl} alt="" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
                       ) : (
                         <span className="grid h-14 w-14 place-items-center rounded-full bg-[var(--brand-50)] text-base font-[900] text-[var(--brand)]">
                           {instructor.name.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "PR"}

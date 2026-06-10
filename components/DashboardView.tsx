@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -120,7 +121,7 @@ function AvatarStack({ instructors }: { instructors: DashCourse["instructors"] }
           className="relative inline-block rounded-full ring-2 ring-[var(--card)] transition hover:z-10 hover:ring-[var(--brand)]"
         >
           {inst.avatarUrl ? (
-            <img src={inst.avatarUrl} alt={inst.name} className="h-7 w-7 rounded-full object-cover" />
+            <Image src={inst.avatarUrl} alt={inst.name} width={28} height={28} className="h-7 w-7 rounded-full object-cover" />
           ) : (
             <span className="grid h-7 w-7 place-items-center rounded-full bg-[var(--brand-50)] text-[10px] font-[900] text-[var(--brand)]">
               {initials(inst.name)}

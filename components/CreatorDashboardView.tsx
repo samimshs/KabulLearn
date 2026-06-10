@@ -249,7 +249,7 @@ export function CreatorDashboardView({
     { key: "submissions", label: t.navMySubmissions, icon: "submissions" },
     { key: "students", label: t.navMyStudents, icon: "students" },
     { key: "messages", label: t.messagesTitle, icon: "messages" },
-    { key: "analytics", label: "Analytics", icon: "analytics" },
+    { key: "analytics", label: t.analyticsNavLabel, icon: "analytics" },
     { key: "resources", label: t.navResources, icon: "resources" },
     { key: "journey", label: t.navMyStudentJourney, icon: "journey" },
     { key: "settings", label: t.navCreatorSettings, icon: "settings" }
@@ -476,15 +476,15 @@ export function CreatorDashboardView({
           {activeView === "analytics" ? (
             <section className="grid gap-5">
               <div className="pr-panel p-6 lg:p-8">
-                <p className="pr-eyebrow">Educator Analytics</p>
-                <h1 className="pr-h2 mt-1">Per-Lesson Completion Rates</h1>
-                <p className="pr-copy mt-2 max-w-2xl">See how many enrolled students completed each lesson across your courses.</p>
+                <p className="pr-eyebrow">{t.analyticsLabel}</p>
+                <h1 className="pr-h2 mt-1">{t.analyticsPageTitle}</h1>
+                <p className="pr-copy mt-2 max-w-2xl">{t.analyticsPageDesc}</p>
               </div>
 
               {analyticsData.length === 0 ? (
                 <div className="pr-muted-box py-16 text-center">
-                  <p className="text-[15px] font-[800] text-[var(--muted)]">No course data yet.</p>
-                  <p className="mt-1 text-[13px] text-[var(--muted)]">Publish a course and wait for enrollments to see analytics.</p>
+                  <p className="text-[15px] font-[800] text-[var(--muted)]">{t.analyticsNoCourseData}</p>
+                  <p className="mt-1 text-[13px] text-[var(--muted)]">{t.analyticsNoCourseHint}</p>
                 </div>
               ) : (
                 <>
@@ -522,17 +522,17 @@ export function CreatorDashboardView({
                       <div className="grid gap-4">
                         <div className="flex flex-wrap items-center gap-6 rounded-[var(--radius-xl)] border border-[var(--border)] bg-white px-6 py-5 shadow-[var(--shadow-sm)]">
                           <div>
-                            <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">Course</p>
+                            <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">{t.analyticsCourseLabel}</p>
                             <p className="mt-0.5 text-[17px] font-[900] text-[var(--ink)]">{course.title}</p>
                           </div>
                           <div className="h-8 w-px bg-[var(--border)]" />
                           <div>
-                            <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">Total Enrollments</p>
+                            <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">{t.analyticsTotalEnrollments}</p>
                             <p className="mt-0.5 text-[28px] font-[900] leading-none text-[var(--ink)]">{course.totalEnrollments}</p>
                           </div>
                           <div className="h-8 w-px bg-[var(--border)]" />
                           <div>
-                            <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">Total Lessons</p>
+                            <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">{t.analyticsTotalLessons}</p>
                             <p className="mt-0.5 text-[28px] font-[900] leading-none text-[var(--ink)]">{course.lessons.length}</p>
                           </div>
                         </div>
@@ -548,12 +548,12 @@ export function CreatorDashboardView({
                                   <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                                     <div className="flex items-center gap-2 min-w-0">
                                       {lesson.type === "QUIZ" && (
-                                        <span className="shrink-0 rounded-full bg-[var(--warning-50)] px-2 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] text-[var(--warning)]">Quiz</span>
+                                        <span className="shrink-0 rounded-full bg-[var(--warning-50)] px-2 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] text-[var(--warning)]">{t.quiz}</span>
                                       )}
                                       <p className="truncate text-[14px] font-[700] text-[var(--ink)]">{lesson.title}</p>
                                     </div>
                                     <div className="flex shrink-0 items-center gap-3 text-[13px]">
-                                      <span className="font-[600] text-[var(--muted)]">{lesson.completedCount} / {course.totalEnrollments} students</span>
+                                      <span className="font-[600] text-[var(--muted)]">{lesson.completedCount} / {course.totalEnrollments} {t.analyticsStudentsSuffix}</span>
                                       <span className="min-w-[36px] text-right text-[15px] font-[900] text-[var(--ink)]">{lesson.completionRate}%</span>
                                     </div>
                                   </div>

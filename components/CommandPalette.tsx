@@ -176,6 +176,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t.searchPlaceholder}
+            dir="auto"
             className="flex-1 bg-transparent text-sm font-[600] text-[var(--ink)] placeholder:text-[var(--muted-2)] outline-none"
           />
           <kbd className="hidden shrink-0 rounded border border-[var(--border)] bg-[var(--surface)] px-1.5 py-0.5 text-[10px] font-[700] text-[var(--muted)] sm:block">Esc</kbd>

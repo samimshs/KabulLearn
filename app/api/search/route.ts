@@ -19,7 +19,8 @@ export async function GET(request: Request) {
           { titlePs: { contains: q, mode: "insensitive" } },
           { titleDa: { contains: q, mode: "insensitive" } },
           { descriptionEn: { contains: q, mode: "insensitive" } },
-          { descriptionPs: { contains: q, mode: "insensitive" } }
+          { descriptionPs: { contains: q, mode: "insensitive" } },
+          { descriptionDa: { contains: q, mode: "insensitive" } }
         ]
       },
       take: 5,
@@ -54,7 +55,8 @@ export async function GET(request: Request) {
           { name: { contains: q, mode: "insensitive" } },
           { username: { contains: q, mode: "insensitive" } },
           { professionalTitle: { contains: q, mode: "insensitive" } },
-          { professionalTitlePs: { contains: q, mode: "insensitive" } }
+          { professionalTitlePs: { contains: q, mode: "insensitive" } },
+          { professionalTitleDa: { contains: q, mode: "insensitive" } }
         ]
       },
       take: 3,

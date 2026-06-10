@@ -13,6 +13,17 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
   const courseId = decodeURIComponent(rawCourseId);
   const locale = await getServerLocale();
 
+  type InstructorProfile = {
+    name: string;
+    username: string;
+    avatarUrl: string | null;
+    professionalTitle: string | null;
+    bio: string | null;
+    linkedinUrl: string | null;
+    youtubeUrl: string | null;
+    userId: string | null;
+  };
+
   let course: {
     id: string;
     titleEn?: string; titlePs?: string; titleDa?: string | null;
@@ -21,16 +32,8 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
     status: CourseStatus;
     publishedAt: Date | null;
     author: { id: string; name: string | null; email: string };
-    authorProfile: {
-      name: string;
-      username: string;
-      avatarUrl: string | null;
-      professionalTitle: string | null;
-      bio: string | null;
-      linkedinUrl: string | null;
-      youtubeUrl: string | null;
-      userId: string | null;
-    } | null;
+    authorProfile: InstructorProfile | null;
+    instructors: Array<{ profile: InstructorProfile }>;
     modules: Array<{
       id: string;
       titleEn?: string; titlePs?: string; titleDa?: string | null;
@@ -58,6 +61,23 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
             linkedinUrl: true,
             youtubeUrl: true,
             userId: true
+          }
+        },
+        instructors: {
+          orderBy: { order: "asc" },
+          select: {
+            profile: {
+              select: {
+                name: true,
+                username: true,
+                avatarUrl: true,
+                professionalTitle: true,
+                bio: true,
+                linkedinUrl: true,
+                youtubeUrl: true,
+                userId: true
+              }
+            }
           }
         },
         modules: {
@@ -235,7 +255,8 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
               linkedinUrl: null,
               youtubeUrl: null,
               userId: null
-            }
+            },
+        instructors: course.instructors.map((i) => i.profile)
       }}
       serverPassedModuleIds={serverPassedModuleIds}
       certificateStatus={certificateStatus ?? undefined}

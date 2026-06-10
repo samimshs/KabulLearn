@@ -44,6 +44,16 @@ type CourseOverviewProps = {
       youtubeUrl?: string | null;
       userId?: string | null;
     } | null;
+    instructors?: Array<{
+      name: string;
+      username: string;
+      avatarUrl: string | null;
+      professionalTitle: string | null;
+      bio: string | null;
+      linkedinUrl?: string | null;
+      youtubeUrl?: string | null;
+      userId?: string | null;
+    }>;
   };
   serverPassedModuleIds?: string[];
   certificateStatus?: CertificateStatus;
@@ -378,43 +388,118 @@ export function CourseOverview({
         })}
       </section>
 
-      {course.author ? (
-        <section className="pr-card grid gap-5 p-6 lg:grid-cols-[auto_1fr_auto] lg:items-start lg:p-7">
-          <Link href={`/creators/${encodeURIComponent(course.author.username)}`} aria-label={course.author.name}>
-            {course.author.avatarUrl ? (
-              <img src={course.author.avatarUrl} alt="" className="h-16 w-16 rounded-full object-cover" />
-            ) : (
-              <span className="grid h-16 w-16 place-items-center rounded-full bg-[var(--brand-50)] text-lg font-[900] text-[var(--brand)]">
-                {course.author.name.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "PR"}
-              </span>
-            )}
-          </Link>
-          <div>
-            <p className="pr-eyebrow">About the Instructor</p>
-            <Link href={`/creators/${encodeURIComponent(course.author.username)}`} className="inline-block">
-              <h2 className="mt-2 text-[24px] font-[800] tracking-[-0.5px] text-[var(--ink)] transition hover:text-[var(--brand)]">
-                {course.author.name}
-              </h2>
-            </Link>
-            {course.author.professionalTitle ? (
-              <p className="mt-1 text-sm font-[800] text-[var(--brand)]">{course.author.professionalTitle}</p>
-            ) : null}
-            {course.author.bio ? (
-              <p className="mt-3 max-w-3xl text-sm font-[500] leading-7 text-[var(--muted)]">{course.author.bio}</p>
-            ) : null}
-          </div>
-          <div className="shrink-0">
-            <MessageInstructorButton
-              instructorUserId={instructorUserId}
-              instructorName={course.author.name}
-              viewerId={viewerId}
-              viewerRole={viewerRole}
-              loginHref={`/login?callbackUrl=${encodeURIComponent(`/courses/${course.id}`)}`}
-              variant="ghost"
-            />
-          </div>
-        </section>
-      ) : null}
+      {(() => {
+        // Prefer the ordered instructors array from the join table; fall back to legacy single author
+        const instructorList =
+          course.instructors && course.instructors.length > 0
+            ? course.instructors
+            : course.author
+              ? [course.author]
+              : [];
+
+        if (instructorList.length === 0) return null;
+
+        const isMultiple = instructorList.length > 1;
+        const loginHref = `/login?callbackUrl=${encodeURIComponent(`/courses/${course.id}`)}`;
+
+        if (!isMultiple) {
+          const instructor = instructorList[0];
+          return (
+            <section className="pr-card grid gap-5 p-6 lg:grid-cols-[auto_1fr_auto] lg:items-start lg:p-7">
+              <Link href={`/creators/${encodeURIComponent(instructor.username)}`} aria-label={instructor.name}>
+                {instructor.avatarUrl ? (
+                  <img src={instructor.avatarUrl} alt="" className="h-16 w-16 rounded-full object-cover" />
+                ) : (
+                  <span className="grid h-16 w-16 place-items-center rounded-full bg-[var(--brand-50)] text-lg font-[900] text-[var(--brand)]">
+                    {instructor.name.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "PR"}
+                  </span>
+                )}
+              </Link>
+              <div>
+                <p className="pr-eyebrow">About the Instructor</p>
+                <Link href={`/creators/${encodeURIComponent(instructor.username)}`} className="inline-block">
+                  <h2 className="mt-2 text-[24px] font-[800] tracking-[-0.5px] text-[var(--ink)] transition hover:text-[var(--brand)]">
+                    {instructor.name}
+                  </h2>
+                </Link>
+                {instructor.professionalTitle ? (
+                  <p className="mt-1 text-sm font-[800] text-[var(--brand)]">{instructor.professionalTitle}</p>
+                ) : null}
+                {instructor.bio ? (
+                  <p className="mt-3 max-w-3xl text-sm font-[500] leading-7 text-[var(--muted)]">{instructor.bio}</p>
+                ) : null}
+              </div>
+              <div className="shrink-0">
+                <MessageInstructorButton
+                  instructorUserId={instructor.userId ?? instructorUserId}
+                  instructorName={instructor.name}
+                  viewerId={viewerId}
+                  viewerRole={viewerRole}
+                  loginHref={loginHref}
+                  variant="ghost"
+                />
+              </div>
+            </section>
+          );
+        }
+
+        return (
+          <section className="pr-card p-6 lg:p-7">
+            <p className="pr-eyebrow">About the Instructors</p>
+            <div className="mt-5 grid gap-5 sm:grid-cols-2">
+              {instructorList.map((instructor) => (
+                <article
+                  key={instructor.username}
+                  className="flex flex-col gap-4 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] p-5"
+                >
+                  <div className="flex items-center gap-4">
+                    <Link href={`/creators/${encodeURIComponent(instructor.username)}`} aria-label={instructor.name} className="shrink-0">
+                      {instructor.avatarUrl ? (
+                        <img src={instructor.avatarUrl} alt="" className="h-14 w-14 rounded-full object-cover" />
+                      ) : (
+                        <span className="grid h-14 w-14 place-items-center rounded-full bg-[var(--brand-50)] text-base font-[900] text-[var(--brand)]">
+                          {instructor.name.split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "PR"}
+                        </span>
+                      )}
+                    </Link>
+                    <div className="min-w-0">
+                      <Link href={`/creators/${encodeURIComponent(instructor.username)}`} className="inline-block">
+                        <h2 className="text-[17px] font-[800] tracking-[-0.3px] text-[var(--ink)] transition hover:text-[var(--brand)]">
+                          {instructor.name}
+                        </h2>
+                      </Link>
+                      {instructor.professionalTitle ? (
+                        <p className="mt-0.5 truncate text-sm font-[700] text-[var(--brand)]">{instructor.professionalTitle}</p>
+                      ) : null}
+                    </div>
+                  </div>
+                  {instructor.bio ? (
+                    <p className="line-clamp-4 text-sm font-[500] leading-6 text-[var(--muted)]">{instructor.bio}</p>
+                  ) : null}
+                  <div className="mt-auto flex items-center gap-3 pt-1">
+                    <Link
+                      href={`/creators/${encodeURIComponent(instructor.username)}`}
+                      className="text-[12px] font-[800] uppercase tracking-[1px] text-[var(--muted)] transition hover:text-[var(--brand)]"
+                    >
+                      View profile →
+                    </Link>
+                    {instructor.userId ? (
+                      <MessageInstructorButton
+                        instructorUserId={instructor.userId}
+                        instructorName={instructor.name}
+                        viewerId={viewerId}
+                        viewerRole={viewerRole}
+                        loginHref={loginHref}
+                        variant="ghost"
+                      />
+                    ) : null}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
 
       {reviews.length > 0 ? (
         <section className="pr-card p-6 lg:p-7">

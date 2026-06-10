@@ -67,6 +67,19 @@ type CreatorDashboardViewProps = {
     linkedinUrl: string | null;
   };
   studentJourney: StudentJourney;
+  analyticsData: Array<{
+    id: string;
+    title: string;
+    totalEnrollments: number;
+    lessons: Array<{
+      id: string;
+      title: string;
+      type: string;
+      moduleTitle: string;
+      completedCount: number;
+      completionRate: number;
+    }>;
+  }>;
   recommendedCourses: RecommendedCourse[];
   sessions: Array<{
     id: string;
@@ -76,7 +89,7 @@ type CreatorDashboardViewProps = {
   }>;
 };
 
-type CreatorView = "dashboard" | "creator" | "submissions" | "students" | "messages" | "resources" | "journey" | "settings";
+type CreatorView = "dashboard" | "creator" | "submissions" | "students" | "messages" | "analytics" | "resources" | "journey" | "settings";
 
 function statusLabel(status: CourseStatus, latestReview: CreatorCourse["latestReview"], t: Dictionary) {
   if (latestReview === "RETURNED") return t.statusRejected;
@@ -111,6 +124,7 @@ function NavIcon({ name }: { name: CreatorView }) {
     submissions: "M7 3.5h7l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19V5a1.5 1.5 0 0 1 1.5-1.5Z M14 3.5V8h4M8.5 13h7M8.5 16h5",
     students: "M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M2.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5 M15.5 6.2A2.8 2.8 0 0 1 17 11.5 M16.5 14c2.2.4 3.5 2 3.5 4.5",
     messages: "M5 5h14a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 16h-7l-4 3v-3H5a1.5 1.5 0 0 1-1.5-1.5v-8A1.5 1.5 0 0 1 5 5Z",
+    analytics: "M3 20h18M7 20V14M11 20V8M15 20V4M19 20v-8",
     resources: "M5 4h14v14.5a1.5 1.5 0 0 1-1.5 1.5H6.5A1.5 1.5 0 0 1 5 18.5V4Z M8 8h8M8 12h8M8 16h5",
     journey: "M2 9.5L12 5l10 4.5-10 4.5L2 9.5Z M6 12v4.5c0 2 2.7 3.5 6 3.5s6-1.5 6-3.5V12 M20 9.5v5",
     settings: "M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z M19.4 15a8 8 0 0 0 .1-2l2-1.5-2-3.5-2.4 1a8 8 0 0 0-1.7-1L15 5.5h-4L10.6 8a8 8 0 0 0-1.7 1l-2.4-1-2 3.5 2 1.5a8 8 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a8 8 0 0 0 1.7 1l.4 2.5h4l.4-2.5a8 8 0 0 0 1.7-1l2.4 1 2-3.5-2.1-1.5Z"
@@ -204,12 +218,14 @@ export function CreatorDashboardView({
   metrics,
   profile,
   studentJourney,
+  analyticsData,
   recommendedCourses,
   sessions
 }: CreatorDashboardViewProps) {
   const { t } = useLanguage();
   const [activeView, setActiveView] = useState<CreatorView>("dashboard");
   const [journeyTab, setJourneyTab] = useState<"certificates" | "courses">("certificates");
+  const [analyticsCourseId, setAnalyticsCourseId] = useState<string>(analyticsData[0]?.id ?? "");
   const latestCourse = courses[0] ?? null;
   const editableCourses = useMemo(
     () => courses.filter((course) => course.status === CourseStatus.DRAFT || course.status === CourseStatus.PUBLISHED),
@@ -233,6 +249,7 @@ export function CreatorDashboardView({
     { key: "submissions", label: t.navMySubmissions, icon: "submissions" },
     { key: "students", label: t.navMyStudents, icon: "students" },
     { key: "messages", label: t.messagesTitle, icon: "messages" },
+    { key: "analytics", label: "Analytics", icon: "analytics" },
     { key: "resources", label: t.navResources, icon: "resources" },
     { key: "journey", label: t.navMyStudentJourney, icon: "journey" },
     { key: "settings", label: t.navCreatorSettings, icon: "settings" }
@@ -455,6 +472,116 @@ export function CreatorDashboardView({
           ) : null}
 
           {activeView === "messages" ? <MessagesInbox /> : null}
+
+          {activeView === "analytics" ? (
+            <section className="grid gap-5">
+              <div className="pr-panel p-6 lg:p-8">
+                <p className="pr-eyebrow">Educator Analytics</p>
+                <h1 className="pr-h2 mt-1">Per-Lesson Completion Rates</h1>
+                <p className="pr-copy mt-2 max-w-2xl">See how many enrolled students completed each lesson across your courses.</p>
+              </div>
+
+              {analyticsData.length === 0 ? (
+                <div className="pr-muted-box py-16 text-center">
+                  <p className="text-[15px] font-[800] text-[var(--muted)]">No course data yet.</p>
+                  <p className="mt-1 text-[13px] text-[var(--muted)]">Publish a course and wait for enrollments to see analytics.</p>
+                </div>
+              ) : (
+                <>
+                  {analyticsData.length > 1 && (
+                    <div className="flex flex-wrap gap-2">
+                      {analyticsData.map((c) => (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => setAnalyticsCourseId(c.id)}
+                          className={`rounded-full px-4 py-2 text-[13px] font-[800] transition ${
+                            analyticsCourseId === c.id
+                              ? "bg-[var(--brand)] text-white shadow-[0_2px_8px_rgba(0,87,255,0.25)]"
+                              : "border border-[var(--border)] bg-white text-[var(--ink-2)] hover:border-[rgba(0,87,255,0.3)]"
+                          }`}
+                        >
+                          {c.title}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {(() => {
+                    const course = analyticsData.find((c) => c.id === analyticsCourseId) ?? analyticsData[0];
+                    if (!course) return null;
+
+                    const byModule = course.lessons.reduce<Record<string, typeof course.lessons>>((acc, lesson) => {
+                      const key = lesson.moduleTitle || "Uncategorized";
+                      if (!acc[key]) acc[key] = [];
+                      acc[key].push(lesson);
+                      return acc;
+                    }, {});
+
+                    return (
+                      <div className="grid gap-4">
+                        <div className="flex flex-wrap items-center gap-6 rounded-[var(--radius-xl)] border border-[var(--border)] bg-white px-6 py-5 shadow-[var(--shadow-sm)]">
+                          <div>
+                            <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">Course</p>
+                            <p className="mt-0.5 text-[17px] font-[900] text-[var(--ink)]">{course.title}</p>
+                          </div>
+                          <div className="h-8 w-px bg-[var(--border)]" />
+                          <div>
+                            <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">Total Enrollments</p>
+                            <p className="mt-0.5 text-[28px] font-[900] leading-none text-[var(--ink)]">{course.totalEnrollments}</p>
+                          </div>
+                          <div className="h-8 w-px bg-[var(--border)]" />
+                          <div>
+                            <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">Total Lessons</p>
+                            <p className="mt-0.5 text-[28px] font-[900] leading-none text-[var(--ink)]">{course.lessons.length}</p>
+                          </div>
+                        </div>
+
+                        {Object.entries(byModule).map(([moduleTitle, lessons]) => (
+                          <div key={moduleTitle} className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-white shadow-[var(--shadow-sm)]">
+                            <div className="border-b border-[var(--border)] bg-[var(--surface)] px-5 py-3">
+                              <p className="text-[12px] font-[900] uppercase tracking-[1.2px] text-[var(--muted)]">{moduleTitle}</p>
+                            </div>
+                            <div className="divide-y divide-[var(--border)]">
+                              {lessons.map((lesson) => (
+                                <div key={lesson.id} className="px-5 py-4">
+                                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                      {lesson.type === "QUIZ" && (
+                                        <span className="shrink-0 rounded-full bg-[var(--warning-50)] px-2 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] text-[var(--warning)]">Quiz</span>
+                                      )}
+                                      <p className="truncate text-[14px] font-[700] text-[var(--ink)]">{lesson.title}</p>
+                                    </div>
+                                    <div className="flex shrink-0 items-center gap-3 text-[13px]">
+                                      <span className="font-[600] text-[var(--muted)]">{lesson.completedCount} / {course.totalEnrollments} students</span>
+                                      <span className="min-w-[36px] text-right text-[15px] font-[900] text-[var(--ink)]">{lesson.completionRate}%</span>
+                                    </div>
+                                  </div>
+                                  <div className="h-2 overflow-hidden rounded-full bg-[var(--surface)]">
+                                    <div
+                                      className="h-2 rounded-full transition-all"
+                                      style={{
+                                        width: `${lesson.completionRate}%`,
+                                        background: lesson.completionRate >= 75
+                                          ? "var(--success)"
+                                          : lesson.completionRate >= 40
+                                          ? "var(--brand)"
+                                          : "var(--warning)"
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </>
+              )}
+            </section>
+          ) : null}
 
           {activeView === "resources" ? (
             <section className="grid gap-5">

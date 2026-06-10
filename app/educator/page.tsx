@@ -109,6 +109,36 @@ export default async function EducatorDashboardPage({
       ]).catch(() => [0, { _avg: { rating: null }, _count: { rating: 0 } }] as const)
     : [0, { _avg: { rating: null }, _count: { rating: 0 } }] as const;
 
+  // Per-lesson analytics for educator courses
+  const analyticsData = courseIds.length > 0
+    ? await db.course.findMany({
+        where: { id: { in: courseIds } },
+        select: {
+          id: true,
+          titleEn: true,
+          titlePs: true,
+          _count: { select: { enrollments: true } },
+          modules: {
+            orderBy: { order: "asc" },
+            select: {
+              id: true, titleEn: true, order: true,
+              lessons: {
+                orderBy: { order: "asc" },
+                select: {
+                  id: true, titleEn: true, titlePs: true, type: true, order: true,
+                  _count: {
+                    select: {
+                      progress: { where: { status: ProgressStatus.COMPLETED } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }).catch(() => [])
+    : [];
+
   const completedLessonIds = new Set(rawProgress.map((p) => p.lessonId));
   const certCourseIds = new Set(rawCerts.map((c) => c.courseId));
 
@@ -184,6 +214,23 @@ export default async function EducatorDashboardPage({
         linkedinUrl: profile?.creatorProfile?.linkedinUrl ?? null
       }}
       studentJourney={studentJourney}
+      analyticsData={analyticsData.map((c) => ({
+        id: c.id,
+        title: c.titleEn ?? c.titlePs ?? "Untitled",
+        totalEnrollments: c._count.enrollments,
+        lessons: c.modules.flatMap((m) =>
+          m.lessons.map((l) => ({
+            id: l.id,
+            title: l.titleEn ?? l.titlePs ?? "Lesson",
+            type: l.type,
+            moduleTitle: m.titleEn ?? "",
+            completedCount: l._count.progress,
+            completionRate: c._count.enrollments > 0
+              ? Math.min(100, Math.round((l._count.progress / c._count.enrollments) * 100))
+              : 0
+          }))
+        )
+      }))}
       recommendedCourses={recommendedCourses}
       sessions={[
         {

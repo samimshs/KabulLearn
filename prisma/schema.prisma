@@ -50,6 +50,14 @@ enum NotificationStatus {
   FAILED
 }
 
+enum AppNotificationKind {
+  NEW_LESSON
+  DISCUSSION_REPLY
+  STREAK_ALERT
+  COURSE_REVIEW
+  GENERAL
+}
+
 enum EducatorRequestStatus {
   PENDING
   APPROVED
@@ -94,6 +102,7 @@ model User {
   sentMessages     DirectMessage[] @relation("SentMessages")
   receivedMessages DirectMessage[] @relation("ReceivedMessages")
   streak           UserStreak?
+  notifications    AppNotification[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -230,6 +239,7 @@ model Course {
   reviewEvents CourseReviewEvent[]
   reviewChecklistItems CourseReviewChecklistItem[]
   discussionThreads DiscussionThread[]
+  tags          CourseTagRelation[]
 
   submittedAt DateTime?
   publishedAt DateTime?
@@ -566,6 +576,41 @@ model SiteSetting {
   key       String   @id
   value     String   @db.Text
   updatedAt DateTime @updatedAt
+}
+
+model AppNotification {
+  id        String              @id @default(cuid())
+  userId    String
+  kind      AppNotificationKind @default(GENERAL)
+  title     String
+  body      String              @db.Text
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime            @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, readAt])
+}
+
+model CourseTag {
+  id    String @id @default(cuid())
+  label String @unique
+  slug  String @unique
+
+  courses CourseTagRelation[]
+}
+
+model CourseTagRelation {
+  courseId String
+  tagId    String
+
+  course Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tag    CourseTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, tagId])
+  @@index([tagId])
 }
 
 model UserStreak {

@@ -575,6 +575,48 @@ export function CreatorDashboardView({
                             </div>
                           </div>
                         ))}
+
+                        {/* Drop-off Analysis */}
+                        {(() => {
+                          const dropOffLessons = [...course.lessons]
+                            .filter((l) => l.type !== "QUIZ" && course.totalEnrollments > 0)
+                            .map((l) => ({ ...l, dropOffCount: course.totalEnrollments - l.completedCount }))
+                            .sort((a, b) => b.dropOffCount - a.dropOffCount)
+                            .slice(0, 5);
+
+                          if (dropOffLessons.length === 0) return null;
+
+                          return (
+                            <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[rgba(234,88,12,0.2)] bg-[var(--warning-50)] shadow-[var(--shadow-sm)]">
+                              <div className="flex items-start gap-3 border-b border-[rgba(234,88,12,0.15)] px-5 py-4">
+                                <svg viewBox="0 0 20 20" className="mt-0.5 h-5 w-5 shrink-0 text-[var(--warning)]" fill="none" aria-hidden="true">
+                                  <path d="M10 3v8M10 15h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                                </svg>
+                                <div>
+                                  <p className="text-[13px] font-[900] text-[var(--ink)]">{t.dropOffTitle}</p>
+                                  <p className="mt-0.5 text-[12px] text-[var(--muted)]">{t.dropOffDesc}</p>
+                                </div>
+                              </div>
+                              <div className="divide-y divide-[rgba(234,88,12,0.1)]">
+                                {dropOffLessons.map((lesson, idx) => (
+                                  <div key={lesson.id} className="flex items-center gap-4 px-5 py-3">
+                                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[rgba(234,88,12,0.12)] text-[11px] font-[900] text-[var(--warning)]">
+                                      {idx + 1}
+                                    </span>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="truncate text-[13px] font-[700] text-[var(--ink)]">{lesson.title}</p>
+                                      <p className="text-[11px] text-[var(--muted)]">{lesson.moduleTitle}</p>
+                                    </div>
+                                    <div className="shrink-0 text-right">
+                                      <p className="text-[15px] font-[900] text-[var(--warning)]">{lesson.dropOffCount}</p>
+                                      <p className="text-[10px] font-[700] uppercase tracking-[0.8px] text-[var(--muted)]">{t.analyticsStudentsSuffix}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     );
                   })()}

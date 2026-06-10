@@ -26,12 +26,13 @@ type CourseRow = {
 export default async function CoursesPage({
   searchParams
 }: {
-  searchParams?: Promise<{ q?: string }>;
+  searchParams?: Promise<{ q?: string; tag?: string }>;
 }) {
   const session = await auth();
   const userId = session?.user?.id;
   const params = await searchParams;
   const searchTerm = params?.q?.trim();
+  const activeTag = params?.tag?.trim();
 
   let rawCourses: Array<{
     id: string;
@@ -44,57 +45,64 @@ export default async function CoursesPage({
     author: { name: string | null; email: string };
     authorProfile: { name: string; username: string; avatarUrl: string | null } | null;
     instructors: Array<{ order: number; profile: { name: string; username: string; avatarUrl: string | null; userId: string | null } }>;
+    tags: Array<{ tag: { id: string; slug: string; label: string } }>;
   }> = [];
+  let availableTags: Array<{ id: string; slug: string; label: string }> = [];
 
   let dbError = false;
 
   try {
-    rawCourses = await db.course.findMany({
-      where: {
-        AND: [
-          {
-            OR: [
-              { status: CourseStatus.PUBLISHED },
-              { publishedAt: { not: null } }
-            ]
+    [rawCourses, availableTags] = await Promise.all([
+      db.course.findMany({
+        where: {
+          AND: [
+            {
+              OR: [
+                { status: CourseStatus.PUBLISHED },
+                { publishedAt: { not: null } }
+              ]
+            },
+            searchTerm
+              ? {
+                  OR: [
+                    { titleEn: { contains: searchTerm, mode: "insensitive" } },
+                    { titlePs: { contains: searchTerm, mode: "insensitive" } },
+                    { descriptionEn: { contains: searchTerm, mode: "insensitive" } },
+                    { descriptionPs: { contains: searchTerm, mode: "insensitive" } },
+                    { authorProfile: { is: { name: { contains: searchTerm, mode: "insensitive" } } } },
+                    { authorProfile: { is: { username: { contains: searchTerm, mode: "insensitive" } } } },
+                    { author: { is: { name: { contains: searchTerm, mode: "insensitive" } } } }
+                  ]
+                }
+              : {},
+            activeTag ? { tags: { some: { tag: { slug: activeTag } } } } : {}
+          ]
+        },
+        orderBy: [{ createdAt: "desc" }],
+        select: {
+          id: true,
+          authorId: true,
+          titleEn: true, titlePs: true, titleDa: true,
+          descriptionEn: true, descriptionPs: true, descriptionDa: true,
+          level: true,
+          _count: { select: { enrollments: true } },
+          author: { select: { name: true, email: true } },
+          authorProfile: { select: { name: true, username: true, avatarUrl: true } },
+          instructors: { orderBy: { order: "asc" }, select: { order: true, profile: { select: { name: true, username: true, avatarUrl: true, userId: true } } } },
+          modules: {
+            orderBy: [{ order: "asc" }],
+            select: {
+              id: true,
+              titleEn: true, titlePs: true,
+              order: true,
+              lessons: { orderBy: [{ order: "asc" }], select: { id: true, order: true, isFinalTest: true } }
+            }
           },
-          searchTerm
-            ? {
-                OR: [
-                  { titleEn: { contains: searchTerm, mode: "insensitive" } },
-                  { titlePs: { contains: searchTerm, mode: "insensitive" } },
-                  { descriptionEn: { contains: searchTerm, mode: "insensitive" } },
-                  { descriptionPs: { contains: searchTerm, mode: "insensitive" } },
-                  { authorProfile: { is: { name: { contains: searchTerm, mode: "insensitive" } } } },
-                  { authorProfile: { is: { username: { contains: searchTerm, mode: "insensitive" } } } },
-                  { author: { is: { name: { contains: searchTerm, mode: "insensitive" } } } }
-                ]
-              }
-            : {}
-        ]
-      },
-      orderBy: [{ createdAt: "desc" }],
-      select: {
-        id: true,
-        authorId: true,
-        titleEn: true, titlePs: true, titleDa: true,
-        descriptionEn: true, descriptionPs: true, descriptionDa: true,
-        level: true,
-        _count: { select: { enrollments: true } },
-        author: { select: { name: true, email: true } },
-        authorProfile: { select: { name: true, username: true, avatarUrl: true } },
-        instructors: { orderBy: { order: "asc" }, select: { order: true, profile: { select: { name: true, username: true, avatarUrl: true, userId: true } } } },
-        modules: {
-          orderBy: [{ order: "asc" }],
-          select: {
-            id: true,
-            titleEn: true, titlePs: true,
-            order: true,
-            lessons: { orderBy: [{ order: "asc" }], select: { id: true, order: true, isFinalTest: true } }
-          }
+          tags: { select: { tag: { select: { id: true, slug: true, label: true } } } }
         }
-      }
-    });
+      }),
+      db.courseTag.findMany({ orderBy: { label: "asc" }, select: { id: true, slug: true, label: true } })
+    ]);
   } catch {
     dbError = true;
   }
@@ -164,6 +172,7 @@ export default async function CoursesPage({
       descriptionDa: course.descriptionDa,
       level: course.level,
       hasCertificate,
+      tagSlugs: course.tags?.map((t) => t.tag.slug) ?? [],
       modules: course.modules.map((module) => ({
         id: module.id,
         titleEn: module.titleEn ?? module.titlePs ?? "",
@@ -199,7 +208,7 @@ export default async function CoursesPage({
 
   return (
     <main className="pr-page py-8">
-      <CourseDashboard courses={courses} dbError={dbError} isAuthenticated={Boolean(userId)} />
+      <CourseDashboard courses={courses} dbError={dbError} isAuthenticated={Boolean(userId)} availableTags={availableTags} activeTag={activeTag} />
     </main>
   );
 }

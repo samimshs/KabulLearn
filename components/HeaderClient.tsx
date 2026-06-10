@@ -6,14 +6,17 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { logout } from "@/lib/actions/auth-actions";
+import { markAllNotificationsRead } from "@/lib/actions/notification-actions";
 import { usePortalAvatarUrl, usePortalUnreadCount } from "@/lib/portal-client-store";
-import type { MessagePreview } from "@/components/Header";
+import type { MessagePreview, AppNotificationPreview } from "@/components/Header";
 import { CommandPalette } from "@/components/CommandPalette";
 
 type HeaderClientProps = {
   user: { name: string | null; role: string; image: string | null } | null;
   initialUnread?: number;
   messagePreviews?: MessagePreview[];
+  appNotifications?: AppNotificationPreview[];
+  unreadAppNotifications?: number;
 };
 
 function timeAgo(isoString: string): string {
@@ -37,16 +40,18 @@ function SenderInitials({ name, role }: { name: string | null; role: string }) {
   );
 }
 
-export function HeaderClient({ user, initialUnread = 0, messagePreviews = [] }: HeaderClientProps) {
+export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], appNotifications = [], unreadAppNotifications = 0 }: HeaderClientProps) {
   const pathname = usePathname();
   const { locale, setLocale, t } = useLanguage();
   const [menuOpen, setMenuOpen]   = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [appNotifUnread, setAppNotifUnread] = useState(unreadAppNotifications);
   const menuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const unreadCount = usePortalUnreadCount(initialUnread);
   const avatarUrl = usePortalAvatarUrl(user?.image ?? null);
+  const totalBellBadge = unreadCount + appNotifUnread;
 
   // Global Cmd+K / Ctrl+K shortcut
   useEffect(() => {
@@ -189,9 +194,9 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [] }: 
                     <path d="M6 8a4 4 0 0 1 8 0c0 3 1.2 4.2 1.2 4.2H4.8S6 11 6 8Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                     <path d="M8.3 14.3a2 2 0 0 0 3.4 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
                   </svg>
-                  {unreadCount > 0 && (
+                  {totalBellBadge > 0 && (
                     <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[var(--danger)] px-1 text-[9px] font-[900] leading-none text-white">
-                      {unreadCount > 9 ? "9+" : unreadCount}
+                      {totalBellBadge > 9 ? "9+" : totalBellBadge}
                     </span>
                   )}
                 </button>
@@ -262,12 +267,52 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [] }: 
 
                     <div className="mx-4 border-t border-[var(--border)]" />
 
-                    {/* Announcements section */}
+                    {/* App notifications */}
                     <div className="px-4 py-3">
-                      <p className="mb-1 text-[11px] font-[800] uppercase tracking-wide text-[var(--muted)]">
-                        {t.platformAnnouncements}
-                      </p>
-                      <p className="text-[12px] text-[var(--muted)]">{t.noAnnouncements}</p>
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="text-[11px] font-[800] uppercase tracking-wide text-[var(--muted)]">
+                          {t.notificationCenter}
+                        </span>
+                        {appNotifUnread > 0 && (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              await markAllNotificationsRead();
+                              setAppNotifUnread(0);
+                            }}
+                            className="text-[11px] font-[700] text-[var(--brand)] hover:underline"
+                          >
+                            {t.markAllRead}
+                          </button>
+                        )}
+                      </div>
+                      {appNotifications.length > 0 ? (
+                        <ul className="grid gap-1 max-h-[200px] overflow-y-auto">
+                          {appNotifications.map((notif) => (
+                            <li key={notif.id}>
+                              {notif.link ? (
+                                <Link
+                                  href={notif.link}
+                                  onClick={() => setNotifOpen(false)}
+                                  className="block rounded-[10px] p-2 transition hover:bg-[var(--surface)]"
+                                >
+                                  <p className="text-[12px] font-[800] text-[var(--ink)]">{notif.title}</p>
+                                  <p className="mt-0.5 line-clamp-2 text-[11px] text-[var(--muted)]">{notif.body}</p>
+                                  <p className="mt-1 text-[10px] font-[600] text-[var(--muted-2)]">{timeAgo(notif.createdAt)}</p>
+                                </Link>
+                              ) : (
+                                <div className="rounded-[10px] p-2">
+                                  <p className="text-[12px] font-[800] text-[var(--ink)]">{notif.title}</p>
+                                  <p className="mt-0.5 line-clamp-2 text-[11px] text-[var(--muted)]">{notif.body}</p>
+                                  <p className="mt-1 text-[10px] font-[600] text-[var(--muted-2)]">{timeAgo(notif.createdAt)}</p>
+                                </div>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="py-2 text-[12px] text-[var(--muted)]">{t.noNotifications}</p>
+                      )}
                     </div>
                   </div>
                 )}

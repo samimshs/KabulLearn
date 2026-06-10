@@ -245,6 +245,44 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
     }
   }
 
+  // Students also enrolled in — find courses that share the most enrolled users
+  type RelatedCourse = { id: string; titleEn: string; titlePs: string; titleDa?: string | null; level?: string | null; enrollmentCount: number };
+  let relatedCourses: RelatedCourse[] = [];
+  try {
+    const courseEnrollments = await db.enrollment.findMany({
+      where: { courseId },
+      select: { userId: true },
+      take: 300
+    });
+    const enrolledUserIds = courseEnrollments.map((e) => e.userId);
+    if (enrolledUserIds.length > 0) {
+      const otherEnrollments = await db.enrollment.findMany({
+        where: { userId: { in: enrolledUserIds }, courseId: { not: courseId } },
+        select: { courseId: true }
+      });
+      const counts: Record<string, number> = {};
+      for (const e of otherEnrollments) {
+        counts[e.courseId] = (counts[e.courseId] ?? 0) + 1;
+      }
+      const topIds = Object.entries(counts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 4)
+        .map(([id]) => id);
+      if (topIds.length > 0) {
+        const docs = await db.course.findMany({
+          where: { id: { in: topIds }, status: CourseStatus.PUBLISHED },
+          select: { id: true, titleEn: true, titlePs: true, titleDa: true, level: true, _count: { select: { enrollments: true } } }
+        });
+        relatedCourses = topIds
+          .map((id) => docs.find((c) => c.id === id))
+          .filter((c): c is NonNullable<typeof c> => Boolean(c))
+          .map((c) => ({ id: c.id, titleEn: c.titleEn, titlePs: c.titlePs, titleDa: c.titleDa, level: c.level, enrollmentCount: c._count.enrollments }));
+      }
+    }
+  } catch {
+    // related courses unavailable
+  }
+
   const instructorList =
     course.instructors.length > 0
       ? course.instructors.map((i) => i.profile)
@@ -333,6 +371,7 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
       viewerRole={session?.user?.role ?? null}
       studentName={session?.user?.name ?? session?.user?.email ?? ""}
       lessonStatuses={lessonStatuses}
+      relatedCourses={relatedCourses}
     />
     </>
   );

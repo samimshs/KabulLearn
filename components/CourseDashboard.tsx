@@ -11,7 +11,7 @@ type CourseModule = {
   lessons: Array<{ id: string; order: number }>;
 };
 
-type CourseRow = CourseCardRow & { modules: CourseModule[] };
+type CourseRow = CourseCardRow & { modules: CourseModule[]; tagSlugs?: string[] };
 
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
   "data-science": ["data", "machine", "python", "pandas", "learning", "ml", "ai", "neural", "deep", "classification", "clustering"],
@@ -91,7 +91,9 @@ export function EducatorCta() {
   );
 }
 
-export function CourseDashboard({ courses, dbError, isAuthenticated = false }: { courses: CourseRow[]; dbError?: boolean; isAuthenticated?: boolean }) {
+type CourseTag = { id: string; slug: string; label: string };
+
+export function CourseDashboard({ courses, dbError, isAuthenticated = false, availableTags = [], activeTag }: { courses: CourseRow[]; dbError?: boolean; isAuthenticated?: boolean; availableTags?: CourseTag[]; activeTag?: string }) {
   const { locale, t } = useLanguage();
   const [query, setQuery] = useState("");
   const [levelFilter, setLevelFilter] = useState("");
@@ -209,6 +211,36 @@ export function CourseDashboard({ courses, dbError, isAuthenticated = false }: {
             </div>
           )}
         </div>
+
+        {/* DB-backed topic tags */}
+        {availableTags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 border-t border-[var(--border)] px-6 py-3">
+            <span className="text-[11px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">{t.filterByCategory}</span>
+            <Link
+              href="/courses"
+              className={`rounded-full border px-3 py-1 text-[12px] font-[700] transition ${
+                !activeTag
+                  ? "border-[var(--brand)] bg-[rgba(0,87,255,0.08)] text-[var(--brand)]"
+                  : "border-[var(--border)] text-[var(--muted)] hover:border-[rgba(0,87,255,0.3)] hover:text-[var(--ink)]"
+              }`}
+            >
+              {t.allCategories}
+            </Link>
+            {availableTags.map((tag) => (
+              <Link
+                key={tag.id}
+                href={`/courses?tag=${encodeURIComponent(tag.slug)}`}
+                className={`rounded-full border px-3 py-1 text-[12px] font-[700] transition ${
+                  activeTag === tag.slug
+                    ? "border-[var(--brand)] bg-[rgba(0,87,255,0.08)] text-[var(--brand)]"
+                    : "border-[var(--border)] text-[var(--muted)] hover:border-[rgba(0,87,255,0.3)] hover:text-[var(--ink)]"
+                }`}
+              >
+                {tag.label}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* DB error */}

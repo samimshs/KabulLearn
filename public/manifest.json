@@ -1,0 +1,27 @@
+{
+  "name": "KabulLearn — Learn Without Limits",
+  "short_name": "KabulLearn",
+  "description": "A trilingual LMS for Afghan learners. Structured courses, guided quizzes, and verified certificates.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0057FF",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/poharana-icon-v3.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/new-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["education"],
+  "screenshots": []
+}

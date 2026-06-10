@@ -69,6 +69,14 @@ type CourseOverviewProps = {
   viewerRole?: string | null;
   studentName?: string;
   lessonStatuses?: Record<string, "IN_PROGRESS" | "COMPLETED">;
+  relatedCourses?: Array<{
+    id: string;
+    titleEn: string;
+    titlePs: string;
+    titleDa?: string | null;
+    level?: string | null;
+    enrollmentCount: number;
+  }>;
 };
 
 /* Khan Academy-style status dot for the course-overview lesson list */
@@ -108,7 +116,8 @@ export function CourseOverview({
   viewerId = null,
   viewerRole = null,
   studentName = "",
-  lessonStatuses = {}
+  lessonStatuses = {},
+  relatedCourses = []
 }: CourseOverviewProps) {
   const { locale, t, direction } = useLanguage();
   const router = useRouter();
@@ -545,6 +554,31 @@ export function CourseOverview({
                   {review.user.name ?? review.user.email}
                 </p>
               </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {relatedCourses.length > 0 ? (
+        <section className="pr-card p-6 lg:p-7">
+          <p className="pr-eyebrow">{t.studentsAlsoEnrolled}</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {relatedCourses.map((rc) => (
+              <Link
+                key={rc.id}
+                href={`/courses/${encodeURIComponent(rc.id)}`}
+                className="group flex flex-col gap-2 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4 transition hover:border-[rgba(0,87,255,0.3)] hover:shadow-[var(--shadow-sm)]"
+              >
+                <p className="line-clamp-2 text-[14px] font-[800] leading-snug text-[var(--ink)] group-hover:text-[var(--brand)]">
+                  {localize(locale, rc.titleEn, rc.titlePs, rc.titleDa)}
+                </p>
+                <div className="flex items-center gap-3 text-[12px] text-[var(--muted)]">
+                  {rc.level ? (
+                    <span className="rounded-full bg-[var(--surface-2)] px-2 py-0.5 font-[700]">{localizeLevel(rc.level, locale)}</span>
+                  ) : null}
+                  <span>{rc.enrollmentCount} {t.enrolledStudents}</span>
+                </div>
+              </Link>
             ))}
           </div>
         </section>

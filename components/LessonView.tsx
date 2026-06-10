@@ -189,11 +189,11 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
   }
 
   return (
-    <main className="pr-page grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+    <main className="pr-page grid grid-cols-1 gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
 
       {/* ── Sidebar ──────────────────────────────────────────── */}
-      <aside className="order-2 lg:order-1 lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-6.5rem)] lg:overflow-y-auto">
-        <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
+      <aside className="order-2 min-w-0 overflow-x-hidden lg:order-1 lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-6.5rem)] lg:overflow-y-auto">
+        <div className="w-full overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
 
           {/* Course header */}
           <div className="border-b border-[var(--border)] p-4">
@@ -240,9 +240,9 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                           return (
                             <span
                               key={ml.id}
-                              className="flex items-start gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[600] text-[var(--muted-2)]"
+                              className="grid w-full rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[600] text-[var(--muted-2)] [grid-template-columns:18px_1fr] gap-x-2.5 items-start"
                             >
-                              <span className="mt-px shrink-0 opacity-50"><LessonStateIcon state="not_started" kind={lessonKindOf(ml)} /></span>
+                              <span className="mt-px opacity-50"><LessonStateIcon state="not_started" kind={lessonKindOf(ml)} /></span>
                               <span className="break-words leading-snug opacity-50">{label}</span>
                             </span>
                           );
@@ -253,13 +253,13 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                           <Link
                             key={ml.id}
                             href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(ml.id)}${fromParam}`}
-                            className={`flex items-start gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[700] transition ${
+                            className={`grid w-full items-start rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[700] transition [grid-template-columns:18px_1fr] gap-x-2.5 ${
                               active
                                 ? "bg-[var(--brand)] text-white shadow-sm"
                                 : "text-[var(--ink-2)] hover:bg-[var(--surface)]"
                             }`}
                           >
-                            <span className="mt-px shrink-0"><LessonStateIcon state={lessonState} kind={lessonKindOf(ml)} /></span>
+                            <span className="mt-px"><LessonStateIcon state={lessonState} kind={lessonKindOf(ml)} /></span>
                             <span className="break-words leading-snug">{label}</span>
                           </Link>
                         );
@@ -269,7 +269,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                       {unlocked && (
                         <Link
                           href={`/courses/${encodeURIComponent(course.id)}/quizzes/${encodeURIComponent(module.id)}`}
-                          className={`flex items-start gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[800] transition ${
+                          className={`grid w-full items-start rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[800] transition [grid-template-columns:18px_1fr] gap-x-2.5 ${
                             quizPassed
                               ? "bg-[var(--success-50)] text-[var(--success)]"
                               : isCurrentModule
@@ -277,7 +277,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                                 : "text-[var(--ink-2)] hover:bg-[var(--surface)]"
                           }`}
                         >
-                          <span className="mt-px shrink-0">
+                          <span className="mt-px">
                             <LessonStateIcon
                               state={quizPassed ? "completed" : isCurrentModule ? "in_progress" : "not_started"}
                               kind="quiz"
@@ -308,15 +308,15 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                 </svg>
               </span>
               <div>
-                <p className="text-[13px] font-[800] text-[var(--ink)]">Free Preview</p>
-                <p className="text-[12px] font-[600] text-[var(--muted)]">Enroll to unlock all lessons and track your progress.</p>
+                <p className="text-[13px] font-[800] text-[var(--ink)]">{t.freePreview}</p>
+                <p className="text-[12px] font-[600] text-[var(--muted)]">{t.freePreviewHint}</p>
               </div>
             </div>
             <Link
               href={`/courses/${encodeURIComponent(course.id)}`}
               className="pr-btn-primary shrink-0 !min-h-9 px-5 text-[13px]"
             >
-              Enroll for free →
+              {t.enrollForFree}
             </Link>
           </div>
         )}

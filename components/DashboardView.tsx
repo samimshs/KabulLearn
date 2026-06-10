@@ -59,6 +59,7 @@ type DashboardViewProps = {
   dbError?: boolean;
   stats: { inProgress: number; lessonsDone: number; certificates: number; quizAttempts: number };
   overall: { percent: number; lessonsCompleted: number; totalLessons: number; coursesCompleted: number; coursesEnrolled: number };
+  streak: { current: number; longest: number } | null;
   courses: DashCourse[];
   recommended: RecommendedCourse[];
   certificates: DashCertificate[];
@@ -184,7 +185,7 @@ function activeViewFromPath(pathname: string) {
   return "dashboard";
 }
 
-export function DashboardView({ userName, userProfile, sessions, dbError, stats, overall, courses, recommended, certificates }: DashboardViewProps) {
+export function DashboardView({ userName, userProfile, sessions, dbError, stats, overall, streak, courses, recommended, certificates }: DashboardViewProps) {
   const { locale, t } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
@@ -298,6 +299,19 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
                 <p className="mt-1.5 text-[11px] font-[800] uppercase tracking-[0.5px] text-white/75">{s.label}</p>
               </div>
             ))}
+            {streak && streak.current > 0 && (
+              <div className="col-span-2 flex items-center gap-3 rounded-[var(--radius-lg)] bg-white/15 px-4 py-3 backdrop-blur-sm">
+                <svg viewBox="0 0 20 20" className="h-7 w-7 shrink-0" fill="none" aria-hidden="true">
+                  <path d="M10 2C9 5 6 7 6 10.5a4 4 0 0 0 8 0c0-1.5-1-3-2-4-0.5 1-1.5 1.5-2 1.5 0-2 1-4 0-6Z" fill="rgba(255,180,0,0.9)" stroke="rgba(255,140,0,0.8)" strokeWidth="0.5" strokeLinejoin="round" />
+                </svg>
+                <div>
+                  <p className="text-[22px] font-[900] leading-none">{streak.current} <span className="text-[13px] font-[700]">day{streak.current !== 1 ? "s" : ""}</span></p>
+                  <p className="mt-0.5 text-[11px] font-[800] uppercase tracking-[0.5px] text-white/75">
+                    Learning Streak {streak.longest > streak.current ? `· Best: ${streak.longest}d` : ""}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -6,6 +6,7 @@ import { DashboardView } from "@/components/DashboardView";
 import { getCourseProgress } from "@/lib/security";
 import { getServerLocale, localizedCourseSelect, localizedLessonSelect, localizedModuleSelect } from "@/lib/server-locale";
 import { getRecommendedCourses } from "@/lib/recommendations";
+import { getUserStreak } from "@/lib/actions/streak-actions";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -184,6 +185,9 @@ export default async function DashboardPage() {
     };
   });
 
+  // Streak
+  const streak = await getUserStreak(userId).catch(() => null);
+
   // Aggregate stats
   const inProgress = courses.filter((c) => c.percent < 100).length;
   const coursesCompleted = courses.filter((c) => c.percent >= 100).length;
@@ -210,6 +214,7 @@ export default async function DashboardPage() {
         coursesCompleted,
         coursesEnrolled: courses.length
       }}
+      streak={streak ? { current: streak.currentStreak, longest: streak.longestStreak } : null}
       courses={courses}
       recommended={recommended}
       certificates={certificates.map((cert) => ({

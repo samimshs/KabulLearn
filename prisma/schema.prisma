@@ -93,6 +93,7 @@ model User {
   educatorRequest EducatorRequest?
   sentMessages     DirectMessage[] @relation("SentMessages")
   receivedMessages DirectMessage[] @relation("ReceivedMessages")
+  streak           UserStreak?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -565,4 +566,13 @@ model SiteSetting {
   key       String   @id
   value     String   @db.Text
   updatedAt DateTime @updatedAt
+}
+
+model UserStreak {
+  userId        String   @id
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentStreak Int      @default(1)
+  longestStreak Int      @default(1)
+  lastActiveDate DateTime @db.Date
+  updatedAt     DateTime @updatedAt
 }

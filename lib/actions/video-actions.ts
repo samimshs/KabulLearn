@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { assertRateLimit, signHeartbeat } from "@/lib/security";
 import { createCertificateIfEligible } from "@/lib/actions/certificate-actions";
+import { updateUserStreak } from "@/lib/actions/streak-actions";
 
 const lessonRefSchema = z.object({
   courseId: z.string().min(1),
@@ -66,6 +67,7 @@ export async function completeReadingLesson(input: z.infer<typeof completeReadin
 
   // Issue the certificate if this was the final lesson needed
   await createCertificateIfEligible(values.courseId, session.user.id).catch(() => null);
+  void updateUserStreak(session.user.id);
 
   revalidatePath(`/courses/${values.courseId}`);
   revalidatePath(`/courses/${values.courseId}/certificate`);
@@ -226,6 +228,7 @@ export async function completeVideoLesson(input: z.infer<typeof completeVideoSch
 
   // Issue the certificate if this was the final lesson needed
   await createCertificateIfEligible(values.courseId, session.user.id).catch(() => null);
+  void updateUserStreak(session.user.id);
 
   revalidatePath(`/courses/${values.courseId}`);
   revalidatePath(`/courses/${values.courseId}/certificate`);

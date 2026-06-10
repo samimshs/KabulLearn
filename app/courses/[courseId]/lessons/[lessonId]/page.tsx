@@ -78,19 +78,19 @@ export default async function LessonPage({
     return notFound();
   }
 
-  // The first non-quiz lesson of the first module is always a free preview
+  const session = await auth();
+  const userId = session?.user?.id;
+
+  // Determine which lesson is the free preview (first non-quiz lesson of the first module)
   const firstModule = course.modules.reduce((a, b) => a.order <= b.order ? a : b);
   const previewLesson = firstModule.lessons
     .filter((l) => l.type !== "QUIZ")
     .reduce<typeof lesson | null>((best, l) => best === null || l.order < best.order ? l : best, null);
-  const isPreviewLesson = previewLesson?.id === lesson.id;
-
-  const session = await auth();
-  const userId = session?.user?.id;
+  const isThePreviewLesson = previewLesson?.id === lesson.id;
 
   // Unauthenticated: allow preview lesson, else redirect to login
   if (!userId) {
-    if (!isPreviewLesson) {
+    if (!isThePreviewLesson) {
       const dest = `/courses/${encodeURIComponent(courseId)}/lessons/${encodeURIComponent(lessonId)}`;
       redirect(`/login?callbackUrl=${encodeURIComponent(dest)}`);
     }
@@ -108,6 +108,9 @@ export default async function LessonPage({
       isEnrolled = true;
     }
   }
+
+  // Only show the preview banner to unenrolled visitors
+  const isPreviewLesson = isThePreviewLesson && !isEnrolled;
 
   if (!isEnrolled && !isPreviewLesson) {
     redirect(`/courses/${encodeURIComponent(courseId)}`);

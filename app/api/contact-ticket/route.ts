@@ -68,7 +68,7 @@ export async function POST(request: Request) {
   console.log("[ticket] screenshot included:", !!screenshotBase64, screenshotName, screenshotMime);
 
   // Sheet write and email run in parallel — neither blocks the other
-  const [scriptResult] = await Promise.allSettled([
+  const [scriptResult, emailResult] = await Promise.allSettled([
     scriptUrl
       ? fetch(scriptUrl, {
           method: "POST",
@@ -94,7 +94,8 @@ export async function POST(request: Request) {
       : Promise.resolve(),
     sendTicketConfirmationEmail({ email, name, ticketNumber, issueType, subject }),
   ]);
-  console.log("[ticket] script result status:", scriptResult.status);
+  console.log("[ticket] script:", scriptResult.status);
+  console.log("[ticket] email:", emailResult.status, emailResult.status === "rejected" ? emailResult.reason : "");
 
   return NextResponse.json({ ok: true, ticketNumber });
 }

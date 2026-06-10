@@ -38,6 +38,7 @@ type LessonViewProps = {
   serverPassedModuleIds?: string[];
   lessonStatuses?: Record<string, "IN_PROGRESS" | "COMPLETED">;
   isComplete?: boolean;
+  isPreviewLesson?: boolean;
 };
 
 /* ── Inline icons ──────────────────────────────────────────── */
@@ -100,7 +101,7 @@ function getLessonIcon(lesson: LessonCourse) {
 
 
 /* ── Component ─────────────────────────────────────────────── */
-export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonStatuses = {}, isComplete = false }: LessonViewProps) {
+export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonStatuses = {}, isComplete = false, isPreviewLesson = false }: LessonViewProps) {
   const { locale, t, direction } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -294,6 +295,29 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
 
       {/* ── Main content ─────────────────────────────────────── */}
       <section className="order-1 grid min-w-0 auto-rows-min gap-5 lg:order-2">
+
+        {/* Preview enrollment banner */}
+        {isPreviewLesson && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-xl)] border border-[rgba(0,87,255,0.2)] bg-[rgba(0,87,255,0.04)] px-5 py-4">
+            <div className="flex items-center gap-3">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--brand)] text-white">
+                <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden="true">
+                  <path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM8 5v4m0 2h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </span>
+              <div>
+                <p className="text-[13px] font-[800] text-[var(--ink)]">Free Preview</p>
+                <p className="text-[12px] font-[600] text-[var(--muted)]">Enroll to unlock all lessons and track your progress.</p>
+              </div>
+            </div>
+            <Link
+              href={`/courses/${encodeURIComponent(course.id)}`}
+              className="pr-btn-primary shrink-0 !min-h-9 px-5 text-[13px]"
+            >
+              Enroll for free →
+            </Link>
+          </div>
+        )}
 
         {/* Compact lesson header card */}
         <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)] lg:p-5">

@@ -321,7 +321,17 @@ export function CourseOverview({
       ) : null}
 
       <section className="grid gap-5" aria-label={t.courseNavigation}>
-        {course.modules.map((module, index) => {
+        {(() => {
+          // Compute the preview lesson ID (first non-quiz lesson of first module)
+          const sortedModules = [...course.modules].sort((a, b) => a.order - b.order);
+          const firstMod = sortedModules[0];
+          const previewLessonId = firstMod
+            ? [...firstMod.lessons]
+                .filter((l) => l.type !== "QUIZ")
+                .sort((a, b) => a.order - b.order)[0]?.id ?? null
+            : null;
+
+          return course.modules.map((module, index) => {
           const unlocked = isModuleUnlocked(index, moduleIds, passedQuizzes);
           const passed = passedQuizzes.has(module.id);
 
@@ -352,14 +362,21 @@ export function CourseOverview({
               </div>
               </div>
               <div className="grid gap-2 border-t border-[var(--border)] bg-[var(--surface)] p-4">
-                {module.lessons.map((lesson) => (
-                  <div key={lesson.id} className="grid gap-2 rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">
+                {module.lessons.map((lesson) => {
+                  const isPreview = lesson.id === previewLessonId;
+                  return (
+                  <div key={lesson.id} className={`grid gap-2 rounded-[var(--radius)] border bg-white p-4 ${isPreview && !enrolled ? "border-[rgba(0,87,255,0.25)]" : "border-[var(--border)]"}`}>
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-2.5">
                         {enrolled ? <LessonStatusDot status={lessonStatuses[lesson.id]} /> : null}
                         <p className="truncate text-sm font-[800] text-[var(--ink-2)]">
                           {localize(locale, lesson.titleEn, lesson.titlePs, lesson.titleDa)}
                         </p>
+                        {isPreview && !enrolled && (
+                          <span className="shrink-0 rounded-full border border-[rgba(0,87,255,0.2)] bg-[rgba(0,87,255,0.06)] px-2 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] text-[var(--brand)]">
+                            Free Preview
+                          </span>
+                        )}
                       </div>
                       {enrolled && unlocked ? (
                         <Link
@@ -373,8 +390,15 @@ export function CourseOverview({
                         >
                           {lesson.type === "QUIZ" ? t.testYourSkills : t.continueLesson}
                         </Link>
+                      ) : !enrolled && isPreview ? (
+                        <Link
+                          href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(lesson.id)}`}
+                          className="shrink-0 text-sm font-[800] text-[var(--brand)] hover:underline"
+                        >
+                          Preview →
+                        </Link>
                       ) : !enrolled ? (
-                        <span className="text-xs font-[800] uppercase tracking-[1px] text-[var(--brand)]">{t.enrollNow}</span>
+                        <span className="text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">{t.enrollNow}</span>
                       ) : (
                         <span className="text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]" aria-label={t.locked}>
                           {t.locked}
@@ -382,11 +406,13 @@ export function CourseOverview({
                       )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </article>
           );
-        })}
+        });
+        })()}
       </section>
 
       {(() => {

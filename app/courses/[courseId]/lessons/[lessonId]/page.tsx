@@ -77,28 +77,38 @@ export default async function LessonPage({
     return notFound();
   }
 
+  // The first non-quiz lesson of the first module is always a free preview
+  const firstModule = course.modules.reduce((a, b) => a.order <= b.order ? a : b);
+  const previewLesson = firstModule.lessons
+    .filter((l) => l.type !== "QUIZ")
+    .reduce<typeof lesson | null>((best, l) => best === null || l.order < best.order ? l : best, null);
+  const isPreviewLesson = previewLesson?.id === lesson.id;
+
   const session = await auth();
   const userId = session?.user?.id;
 
-  // Unauthenticated → login
+  // Unauthenticated: allow preview lesson, else redirect to login
   if (!userId) {
-    const dest = `/courses/${encodeURIComponent(courseId)}/lessons/${encodeURIComponent(lessonId)}`;
-    redirect(`/login?callbackUrl=${encodeURIComponent(dest)}`);
+    if (!isPreviewLesson) {
+      const dest = `/courses/${encodeURIComponent(courseId)}/lessons/${encodeURIComponent(lessonId)}`;
+      redirect(`/login?callbackUrl=${encodeURIComponent(dest)}`);
+    }
   }
 
-  // Not enrolled → course overview to enroll
+  // Not enrolled: allow preview lesson, else redirect to course overview
   let isEnrolled = false;
-  try {
-    const enrollment = await db.enrollment.findUnique({
-      where: { userId_courseId: { userId, courseId } }
-    });
-    isEnrolled = Boolean(enrollment);
-  } catch {
-    // DB error on enrollment check — allow access rather than block
-    isEnrolled = true;
+  if (userId) {
+    try {
+      const enrollment = await db.enrollment.findUnique({
+        where: { userId_courseId: { userId, courseId } }
+      });
+      isEnrolled = Boolean(enrollment);
+    } catch {
+      isEnrolled = true;
+    }
   }
 
-  if (!isEnrolled) {
+  if (!isEnrolled && !isPreviewLesson) {
     redirect(`/courses/${encodeURIComponent(courseId)}`);
   }
 
@@ -165,5 +175,5 @@ export default async function LessonPage({
   };
   const normalizedLesson = normalizedCourse.modules.flatMap((module) => module.lessons).find((item) => item.id === lesson.id) ?? lesson;
 
-  return <LessonView course={normalizedCourse} lesson={normalizedLesson} serverPassedModuleIds={serverPassedModuleIds} lessonStatuses={lessonStatuses} isComplete={isComplete} />;
+  return <LessonView course={normalizedCourse} lesson={normalizedLesson} serverPassedModuleIds={serverPassedModuleIds} lessonStatuses={lessonStatuses} isComplete={isComplete} isPreviewLesson={isPreviewLesson} />;
 }

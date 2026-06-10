@@ -21,15 +21,12 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "KabulLearn — Learn Without Limits",
   description: "A trilingual LMS for Afghan learners. Structured courses, guided quizzes, and verified certificates in English, Pashto and Dari.",
-  icons: { icon: "/poharana-icon-v3.svg" },
+  icons: { icon: "/poharana-icon-v3.svg", apple: "/poharana-icon-v3.svg" },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "KabulLearn"
-  },
-  other: {
-    "mobile-web-app-capable": "yes"
   }
 };
 
@@ -49,10 +46,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale} dir={direction} className={manrope.variable}>
-      <head>
-        <meta name="theme-color" content="#0057FF" />
-        <link rel="apple-touch-icon" href="/poharana-icon-v3.svg" />
-      </head>
       <body>
         <LanguageProvider initialLocale={locale}>
           {/* Wipes user-scoped localStorage keys whenever the active user changes */}

@@ -193,7 +193,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
 
       {/* ── Sidebar ──────────────────────────────────────────── */}
       <aside className="order-2 lg:order-1 lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-6.5rem)] lg:overflow-y-auto">
-        <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
+        <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
 
           {/* Course header */}
           <div className="border-b border-[var(--border)] p-4">
@@ -240,7 +240,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                           return (
                             <span
                               key={ml.id}
-                              className="flex items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[600] text-[var(--muted-2)]"
+                              className="flex min-w-0 items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[600] text-[var(--muted-2)]"
                             >
                               <span className="opacity-50"><LessonStateIcon state="not_started" kind={lessonKindOf(ml)} /></span>
                               <span className="truncate opacity-50">{label}</span>
@@ -253,12 +253,10 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                           <Link
                             key={ml.id}
                             href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(ml.id)}${fromParam}`}
-                            className={`flex items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[700] transition ${
+                            className={`flex min-w-0 items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[700] transition ${
                               active
                                 ? "bg-[var(--brand)] text-white shadow-sm"
-                                : lessonState === "completed"
-                                  ? "text-[var(--ink-2)] hover:bg-[var(--surface)]"
-                                  : "text-[var(--ink-2)] hover:bg-[var(--surface)]"
+                                : "text-[var(--ink-2)] hover:bg-[var(--surface)]"
                             }`}
                           >
                             <LessonStateIcon state={lessonState} kind={lessonKindOf(ml)} />
@@ -271,7 +269,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                       {unlocked && (
                         <Link
                           href={`/courses/${encodeURIComponent(course.id)}/quizzes/${encodeURIComponent(module.id)}`}
-                          className={`flex items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[800] transition ${
+                          className={`flex min-w-0 items-center gap-2.5 rounded-[var(--radius)] px-2.5 py-2 text-[13px] font-[800] transition ${
                             quizPassed
                               ? "bg-[var(--success-50)] text-[var(--success)]"
                               : isCurrentModule

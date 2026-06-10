@@ -33,7 +33,6 @@ function getYouTubeId(value: string) {
   if (!value.includes("youtube.com") && !value.includes("youtu.be")) {
     return value;
   }
-
   try {
     const url = new URL(value);
     if (url.hostname.includes("youtu.be")) {
@@ -46,17 +45,13 @@ function getYouTubeId(value: string) {
 }
 
 function loadYouTubeApi() {
-  if (window.YT?.Player) {
-    return Promise.resolve();
-  }
-
+  if (window.YT?.Player) return Promise.resolve();
   return new Promise<void>((resolve) => {
     const previous = window.onYouTubeIframeAPIReady;
     window.onYouTubeIframeAPIReady = () => {
       previous?.();
       resolve();
     };
-
     if (!document.querySelector("script[src='https://www.youtube.com/iframe_api']")) {
       const tag = document.createElement("script");
       tag.src = "https://www.youtube.com/iframe_api";
@@ -83,35 +78,16 @@ export function VideoPlayer({
   const elementId = `yt-player-${videoId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const playerRef = useRef<InstanceType<NonNullable<typeof window.YT>["Player"]> | null>(null);
   const latestHeartbeat = useRef<{ id: string; signature: string } | null>(null);
-  const resumePositionRef = useRef<number>(0);
   const [watchedPct, setWatchedPct] = useState(0);
   const [message, setMessage] = useState("");
   const [completed, setCompleted] = useState(initialCompleted);
   const [resumeBanner, setResumeBanner] = useState<number | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  // Fetch last saved position. If the player is already ready when the fetch
-  // resolves, seek immediately. Otherwise onReady will read the ref and seek.
-  useEffect(() => {
-    if (!lessonId || initialCompleted) return;
-    fetch(`/api/lesson/heartbeat?lessonId=${encodeURIComponent(lessonId)}`)
-      .then((r) => r.json())
-      .then((data: { positionSec: number }) => {
-        if (data.positionSec > 5) {
-          resumePositionRef.current = data.positionSec;
-          setResumeBanner(data.positionSec);
-          // Player may already be ready — seek now if so
-          playerRef.current?.seekTo(data.positionSec, true);
-        }
-      })
-      .catch(() => {});
-  }, [lessonId, initialCompleted]);
-
   useEffect(() => {
     let cancelled = false;
     let interval: ReturnType<typeof setInterval> | null = null;
 
-    // Records a heartbeat for the given position; updates the watched %.
     async function captureHeartbeat(positionSec: number, durationSec: number) {
       if (!courseId || !lessonId || !durationSec || durationSec <= 0 || !Number.isFinite(positionSec)) return;
       const pct = Math.min(100, Math.round((positionSec / durationSec) * 100));
@@ -127,31 +103,42 @@ export function VideoPlayer({
     function sampleNow() {
       const player = playerRef.current;
       if (!player) return;
-      const currentTime = player.getCurrentTime();
-      const duration = player.getDuration();
-      captureHeartbeat(currentTime, duration);
+      captureHeartbeat(player.getCurrentTime(), player.getDuration());
     }
 
-    loadYouTubeApi().then(() => {
+    async function init() {
+      // Step 1: fetch resume position BEFORE touching the player.
+      // This guarantees the position is in the ref when onReady fires.
+      let resumePos = 0;
+      if (lessonId && !initialCompleted) {
+        try {
+          const r = await fetch(`/api/lesson/heartbeat?lessonId=${encodeURIComponent(lessonId)}`);
+          const data = await r.json() as { positionSec: number };
+          if (!cancelled && data.positionSec > 5) {
+            resumePos = data.positionSec;
+            setResumeBanner(data.positionSec);
+          }
+        } catch { /* resume is optional */ }
+      }
+      if (cancelled) return;
+
+      // Step 2: load the YT iframe API (no-op if already loaded).
+      await loadYouTubeApi();
       if (cancelled || !window.YT?.Player) return;
 
+      // Step 3: create the player. resumePos is now definitely known.
       playerRef.current = new window.YT.Player(elementId, {
         videoId,
-        playerVars: {
-          modestbranding: 1,
-          rel: 0,
-          origin: window.location.origin
-        },
+        playerVars: { modestbranding: 1, rel: 0, origin: window.location.origin },
         events: {
           onReady: () => {
-            const pos = resumePositionRef.current;
-            if (pos > 5) {
-              playerRef.current?.seekTo(pos, true);
+            if (resumePos > 5) {
+              playerRef.current?.seekTo(resumePos, true);
             }
           },
           onStateChange: (event) => {
-            // YT states: 0 = ENDED, 2 = PAUSED. On end, credit a full watch so
-            // even very short videos enable the "Mark as complete" button.
+            // 0 = ENDED: credit full watch so "Mark as complete" unlocks.
+            // 2 = PAUSED: capture a heartbeat immediately.
             if (event.data === 0) {
               const duration = playerRef.current?.getDuration() ?? 0;
               if (duration > 0) captureHeartbeat(duration, duration);
@@ -162,16 +149,19 @@ export function VideoPlayer({
         }
       });
 
-      // Sample every 2.5s so progress (and a valid heartbeat) is captured quickly.
+      // Sample every 2.5s while playing.
       interval = setInterval(sampleNow, 2500);
-    });
+    }
+
+    init();
 
     return () => {
       cancelled = true;
       if (interval) clearInterval(interval);
       playerRef.current?.destroy();
+      playerRef.current = null;
     };
-  }, [courseId, elementId, lessonId, videoId]);
+  }, [courseId, elementId, lessonId, videoId, initialCompleted]);
 
   function formatTime(sec: number) {
     const m = Math.floor(sec / 60);
@@ -220,9 +210,7 @@ export function VideoPlayer({
           ) : (
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-[13px] font-[600] text-[var(--muted)]">
-                {watchedPct < 90
-                  ? t.watchFullVideoHint
-                  : t.readyToCompleteHint}
+                {watchedPct < 90 ? t.watchFullVideoHint : t.readyToCompleteHint}
               </p>
               <button
                 type="button"
@@ -233,12 +221,7 @@ export function VideoPlayer({
                     const heartbeat = latestHeartbeat.current;
                     if (!heartbeat) return;
                     try {
-                      await completeVideoLesson({
-                        courseId,
-                        lessonId,
-                        heartbeatId: heartbeat.id,
-                        signature: heartbeat.signature
-                      });
+                      await completeVideoLesson({ courseId, lessonId, heartbeatId: heartbeat.id, signature: heartbeat.signature });
                       setCompleted(true);
                       onComplete?.();
                     } catch (error) {

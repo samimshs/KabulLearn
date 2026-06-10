@@ -103,7 +103,7 @@ function getLessonIcon(lesson: LessonCourse) {
 
 
 /* ── Study Notes ───────────────────────────────────────────── */
-function LessonNotes({ lessonId, initialNote }: { lessonId: string; initialNote: string }) {
+function LessonNotes({ lessonId, initialNote, sidePanel = false }: { lessonId: string; initialNote: string; sidePanel?: boolean }) {
   const { t, direction } = useLanguage();
   const [open, setOpen] = useState(false);
   const [body, setBody] = useState(initialNote);
@@ -123,6 +123,39 @@ function LessonNotes({ lessonId, initialNote }: { lessonId: string; initialNote:
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
+  const noteIcon = (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" aria-hidden="true">
+      <path d="M3 3.5h10M3 7h10M3 10.5h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+
+  // Side-panel mode: always open, no toggle button, sticky alongside video
+  if (sidePanel) {
+    return (
+      <div className="flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-7rem)]">
+        <div className="flex items-center gap-2 border-b border-[var(--border)] px-4 py-3">
+          {noteIcon}
+          <span className="text-[13px] font-[800] text-[var(--ink-2)]">{t.notesLabel}</span>
+          {saveStatus !== "idle" && (
+            <span className="ms-auto text-[11px] font-[700] text-[var(--muted)]">
+              {saveStatus === "saving" ? t.notesSaving : t.notesSaved}
+            </span>
+          )}
+        </div>
+        <div className="flex-1 p-4">
+          <textarea
+            value={body}
+            onChange={(e) => handleChange(e.target.value)}
+            placeholder={t.notesPlaceholder}
+            dir={direction}
+            className="h-full min-h-[200px] w-full resize-none rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] leading-relaxed text-[var(--ink)] placeholder:text-[var(--muted-2)] focus:border-[var(--brand)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Block mode (reading lessons): collapsible
   return (
     <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
       <button
@@ -130,12 +163,7 @@ function LessonNotes({ lessonId, initialNote }: { lessonId: string; initialNote:
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between gap-3 px-5 py-3.5 text-[13px] font-[800] text-[var(--ink-2)]"
       >
-        <span className="flex items-center gap-2">
-          <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" aria-hidden="true">
-            <path d="M3 3.5h10M3 7h10M3 10.5h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-          {t.notesLabel}
-        </span>
+        <span className="flex items-center gap-2">{noteIcon}{t.notesLabel}</span>
         <span className={`text-[var(--muted)] transition-transform ${open ? "rotate-180" : ""}`}>
           <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" aria-hidden="true">
             <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -409,20 +437,25 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
           )}
         </div>
 
-        {/* Video */}
+        {/* Video + notes side by side */}
         {isVideoLesson(lesson) ? (
-          <section id="video" className="scroll-mt-24 overflow-hidden rounded-[var(--radius-xl)] shadow-[var(--shadow)]">
-            <VideoPlayer
-              video={lesson.youtubeUrl!}
-              courseId={course.id}
-              lessonId={lesson.id}
-              initialCompleted={statuses[lesson.id] === "COMPLETED"}
-              onComplete={() => {
-                setStatuses((prev) => ({ ...prev, [lesson.id]: "COMPLETED" }));
-                router.refresh();
-              }}
-            />
-          </section>
+          <div className="grid scroll-mt-24 gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
+            <section id="video" className="overflow-hidden rounded-[var(--radius-xl)] shadow-[var(--shadow)]">
+              <VideoPlayer
+                video={lesson.youtubeUrl!}
+                courseId={course.id}
+                lessonId={lesson.id}
+                initialCompleted={statuses[lesson.id] === "COMPLETED"}
+                onComplete={() => {
+                  setStatuses((prev) => ({ ...prev, [lesson.id]: "COMPLETED" }));
+                  router.refresh();
+                }}
+              />
+            </section>
+            {!isPreviewLesson && (
+              <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel />
+            )}
+          </div>
         ) : null}
 
         {/* Reading content — only rendered when there is actual markdown */}
@@ -461,8 +494,8 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
           </article>
         ) : null}
 
-        {/* Study notes — available to enrolled (non-preview) students */}
-        {!isPreviewLesson && (
+        {/* Notes below content for reading lessons */}
+        {isReadingLesson(lesson) && !isPreviewLesson && (
           <LessonNotes lessonId={lesson.id} initialNote={initialNote} />
         )}
 

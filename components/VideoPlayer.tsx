@@ -90,7 +90,8 @@ export function VideoPlayer({
   const [resumeBanner, setResumeBanner] = useState<number | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  // Fetch last saved position so we can resume on player ready
+  // Fetch last saved position. If the player is already ready when the fetch
+  // resolves, seek immediately. Otherwise onReady will read the ref and seek.
   useEffect(() => {
     if (!lessonId || initialCompleted) return;
     fetch(`/api/lesson/heartbeat?lessonId=${encodeURIComponent(lessonId)}`)
@@ -99,6 +100,8 @@ export function VideoPlayer({
         if (data.positionSec > 5) {
           resumePositionRef.current = data.positionSec;
           setResumeBanner(data.positionSec);
+          // Player may already be ready — seek now if so
+          playerRef.current?.seekTo(data.positionSec, true);
         }
       })
       .catch(() => {});

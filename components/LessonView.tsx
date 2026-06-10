@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -9,6 +9,7 @@ import { SimpleMarkdown } from "@/components/SimpleMarkdown";
 import { getPassedQuizzes, isModuleUnlocked, markLessonVisited } from "@/lib/progress";
 import { usesPashtoContent } from "@/lib/i18n";
 import { completeReadingLesson, markLessonInProgress } from "@/lib/actions/video-actions";
+import { upsertLessonNote } from "@/lib/actions/note-actions";
 import { LessonStateIcon, lessonKindOf, type LessonState } from "@/components/LessonStateIcon";
 import type { Course, Lesson, Module } from "@prisma/client";
 
@@ -39,6 +40,7 @@ type LessonViewProps = {
   lessonStatuses?: Record<string, "IN_PROGRESS" | "COMPLETED">;
   isComplete?: boolean;
   isPreviewLesson?: boolean;
+  initialNote?: string;
 };
 
 /* ── Inline icons ──────────────────────────────────────────── */
@@ -100,8 +102,69 @@ function getLessonIcon(lesson: LessonCourse) {
 }
 
 
+/* ── Study Notes ───────────────────────────────────────────── */
+function LessonNotes({ lessonId, initialNote }: { lessonId: string; initialNote: string }) {
+  const { t, direction } = useLanguage();
+  const [open, setOpen] = useState(false);
+  const [body, setBody] = useState(initialNote);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function handleChange(value: string) {
+    setBody(value);
+    setSaveStatus("saving");
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(async () => {
+      await upsertLessonNote({ lessonId, body: value }).catch(() => {});
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2000);
+    }, 1200);
+  }
+
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+  return (
+    <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between gap-3 px-5 py-3.5 text-[13px] font-[800] text-[var(--ink-2)]"
+      >
+        <span className="flex items-center gap-2">
+          <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" aria-hidden="true">
+            <path d="M3 3.5h10M3 7h10M3 10.5h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          {t.notesLabel}
+        </span>
+        <span className={`text-[var(--muted)] transition-transform ${open ? "rotate-180" : ""}`}>
+          <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" aria-hidden="true">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      </button>
+      {open && (
+        <div className="border-t border-[var(--border)] px-5 pb-5 pt-4">
+          <textarea
+            value={body}
+            onChange={(e) => handleChange(e.target.value)}
+            placeholder={t.notesPlaceholder}
+            dir={direction}
+            rows={6}
+            className="w-full resize-y rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] leading-relaxed text-[var(--ink)] placeholder:text-[var(--muted-2)] focus:border-[var(--brand)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+          />
+          {saveStatus !== "idle" && (
+            <p className="mt-1.5 text-[11px] font-[700] text-[var(--muted)]">
+              {saveStatus === "saving" ? t.notesSaving : t.notesSaved}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Component ─────────────────────────────────────────────── */
-export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonStatuses = {}, isComplete = false, isPreviewLesson = false }: LessonViewProps) {
+export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonStatuses = {}, isComplete = false, isPreviewLesson = false, initialNote = "" }: LessonViewProps) {
   const { locale, t, direction } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -397,6 +460,11 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
             </div>
           </article>
         ) : null}
+
+        {/* Study notes — available to enrolled (non-preview) students */}
+        {!isPreviewLesson && (
+          <LessonNotes lessonId={lesson.id} initialNote={initialNote} />
+        )}
 
         {/* Navigation footer — right below the content, no scrolling back up */}
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)]">

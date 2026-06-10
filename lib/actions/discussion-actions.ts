@@ -63,7 +63,7 @@ export async function createDiscussionReply(input: z.infer<typeof createReplySch
 
     const thread = await db.discussionThread.findUnique({
       where: { id: values.threadId },
-      select: { courseId: true }
+      select: { courseId: true, authorId: true, title: true }
     });
     if (!thread) throw new Error("Discussion not found.");
 
@@ -72,6 +72,8 @@ export async function createDiscussionReply(input: z.infer<typeof createReplySch
     });
     if (!enrollment) throw new Error("Enroll in the course before replying.");
 
+    const replier = await db.user.findUnique({ where: { id: session.user.id }, select: { name: true } });
+
     await db.discussionReply.create({
       data: {
         threadId: values.threadId,
@@ -79,6 +81,19 @@ export async function createDiscussionReply(input: z.infer<typeof createReplySch
         body: values.body
       }
     });
+
+    // Notify the thread author if someone else replied
+    if (thread.authorId !== session.user.id) {
+      await db.appNotification.create({
+        data: {
+          userId: thread.authorId,
+          kind: "DISCUSSION_REPLY",
+          title: replier?.name ?? "Someone" + " replied to your discussion",
+          body: values.body.slice(0, 120),
+          link: `/courses/${thread.courseId}`
+        }
+      }).catch(() => {});
+    }
 
     revalidatePath(`/courses/${thread.courseId}`);
     return { ok: true, data: undefined };

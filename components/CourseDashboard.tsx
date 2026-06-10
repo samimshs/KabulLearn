@@ -97,6 +97,7 @@ export function CourseDashboard({ courses, dbError, isAuthenticated = false, ava
   const { locale, t } = useLanguage();
   const [query, setQuery] = useState("");
   const [levelFilter, setLevelFilter] = useState("");
+  const [sortBy, setSortBy] = useState<"popular" | "az">("popular");
   const [activeCategory, setActiveCategory] = useState("all");
 
   const categories = [
@@ -132,7 +133,7 @@ export function CourseDashboard({ courses, dbError, isAuthenticated = false, ava
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return courses.filter((c) => {
+    const result = courses.filter((c) => {
       const title = usesPashtoContent(locale) ? c.titlePs : c.titleEn;
       const desc  = usesPashtoContent(locale) ? c.descriptionPs : c.descriptionEn;
       const level = localizeLevel(c.level, locale);
@@ -144,7 +145,17 @@ export function CourseDashboard({ courses, dbError, isAuthenticated = false, ava
         && matchesCategory(c, activeCategory)
       );
     });
-  }, [courses, query, levelFilter, activeCategory, locale]);
+    if (sortBy === "az") {
+      result.sort((a, b) => {
+        const ta = usesPashtoContent(locale) ? a.titlePs : a.titleEn;
+        const tb = usesPashtoContent(locale) ? b.titlePs : b.titleEn;
+        return ta.localeCompare(tb);
+      });
+    } else {
+      result.sort((a, b) => (b.enrollmentCount ?? 0) - (a.enrollmentCount ?? 0));
+    }
+    return result;
+  }, [courses, query, levelFilter, sortBy, activeCategory, locale]);
 
   return (
     <>
@@ -197,7 +208,17 @@ export function CourseDashboard({ courses, dbError, isAuthenticated = false, ava
           ))}
 
           {allLevels.length > 0 && (
-            <div className="ms-auto">
+            <div className="ms-auto flex items-center gap-2">
+              <label htmlFor="sort-filter" className="sr-only">{t.sortByLabel}</label>
+              <select
+                id="sort-filter"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as "popular" | "az")}
+                className="pr-input py-2 text-[13px]"
+              >
+                <option value="popular">{t.sortMostPopular}</option>
+                <option value="az">{t.sortAlphabetical}</option>
+              </select>
               <label htmlFor="level-filter" className="sr-only">{t.filterAll}</label>
               <select
                 id="level-filter"

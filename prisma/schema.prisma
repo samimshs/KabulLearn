@@ -103,6 +103,7 @@ model User {
   receivedMessages DirectMessage[] @relation("ReceivedMessages")
   streak           UserStreak?
   notifications    AppNotification[]
+  lessonNotes      LessonNote[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -240,6 +241,8 @@ model Course {
   reviewChecklistItems CourseReviewChecklistItem[]
   discussionThreads DiscussionThread[]
   tags          CourseTagRelation[]
+  announcements CourseAnnouncement[]
+  learningPaths LearningPathCourse[]
 
   submittedAt DateTime?
   publishedAt DateTime?
@@ -300,6 +303,7 @@ model Lesson {
   submissions QuizSubmission[]
   heartbeats   LessonHeartbeat[]
   quizAttemptSessions QuizAttemptSession[]
+  notes       LessonNote[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -328,9 +332,11 @@ model Question {
 
   promptEn      String  @db.Text
   promptPs      String  @db.Text
+  promptDa      String? @db.Text
   correctAnswer String?
   explanationEn String? @db.Text
   explanationPs String? @db.Text
+  explanationDa String? @db.Text
 
   quiz    Quiz                   @relation(fields: [quizId], references: [id], onDelete: Cascade)
   choices AnswerChoice[]
@@ -347,6 +353,7 @@ model AnswerChoice {
 
   textEn    String
   textPs    String
+  textDa    String?
   isCorrect Boolean @default(false)
 
   question   Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
@@ -611,6 +618,64 @@ model CourseTagRelation {
 
   @@id([courseId, tagId])
   @@index([tagId])
+}
+
+model LessonNote {
+  id       String @id @default(cuid())
+  userId   String
+  lessonId String
+  body     String @db.Text
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+}
+
+model LearningPath {
+  id          String @id @default(cuid())
+  slug        String @unique
+  titleEn     String
+  titlePs     String
+  titleDa     String?
+  descriptionEn String @db.Text
+  descriptionPs String @db.Text
+  descriptionDa String? @db.Text
+  coverColor  String  @default("#0057FF")
+  order       Int     @default(0)
+
+  courses LearningPathCourse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LearningPathCourse {
+  pathId   String
+  courseId String
+  order    Int
+
+  path   LearningPath @relation(fields: [pathId], references: [id], onDelete: Cascade)
+  course Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@id([pathId, courseId])
+  @@index([courseId])
+}
+
+model CourseAnnouncement {
+  id       String @id @default(cuid())
+  courseId String
+  body     String @db.Text
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([courseId])
 }
 
 model UserStreak {

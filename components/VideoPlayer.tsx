@@ -21,6 +21,7 @@ declare global {
         getCurrentTime: () => number;
         getDuration: () => number;
         getPlayerState: () => number;
+        seekTo: (seconds: number, allowSeekAhead: boolean) => void;
         destroy: () => void;
       };
     };
@@ -82,10 +83,26 @@ export function VideoPlayer({
   const elementId = `yt-player-${videoId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const playerRef = useRef<InstanceType<NonNullable<typeof window.YT>["Player"]> | null>(null);
   const latestHeartbeat = useRef<{ id: string; signature: string } | null>(null);
+  const resumePositionRef = useRef<number>(0);
   const [watchedPct, setWatchedPct] = useState(0);
   const [message, setMessage] = useState("");
   const [completed, setCompleted] = useState(initialCompleted);
+  const [resumeBanner, setResumeBanner] = useState<number | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Fetch last saved position so we can resume on player ready
+  useEffect(() => {
+    if (!lessonId || initialCompleted) return;
+    fetch(`/api/lesson/heartbeat?lessonId=${encodeURIComponent(lessonId)}`)
+      .then((r) => r.json())
+      .then((data: { positionSec: number }) => {
+        if (data.positionSec > 5) {
+          resumePositionRef.current = data.positionSec;
+          setResumeBanner(data.positionSec);
+        }
+      })
+      .catch(() => {});
+  }, [lessonId, initialCompleted]);
 
   useEffect(() => {
     let cancelled = false;
@@ -123,6 +140,12 @@ export function VideoPlayer({
           origin: window.location.origin
         },
         events: {
+          onReady: () => {
+            const pos = resumePositionRef.current;
+            if (pos > 5) {
+              playerRef.current?.seekTo(pos, true);
+            }
+          },
           onStateChange: (event) => {
             // YT states: 0 = ENDED, 2 = PAUSED. On end, credit a full watch so
             // even very short videos enable the "Mark as complete" button.
@@ -147,8 +170,34 @@ export function VideoPlayer({
     };
   }, [courseId, elementId, lessonId, videoId]);
 
+  function formatTime(sec: number) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  }
+
   return (
     <div className="grid gap-3">
+      {resumeBanner !== null && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-[rgba(0,87,255,0.25)] bg-[rgba(0,87,255,0.06)] px-4 py-3">
+          <div className="flex items-center gap-2.5">
+            <svg viewBox="0 0 16 16" className="h-4 w-4 shrink-0 text-[var(--brand)]" fill="none" aria-hidden="true">
+              <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.4" />
+              <path d="M6 5.5l4 2.5-4 2.5V5.5z" fill="currentColor" />
+            </svg>
+            <span className="text-[13px] font-[700] text-[var(--ink)]">
+              {t.resumeVideo} — {formatTime(resumeBanner)}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setResumeBanner(null)}
+            className="text-[12px] font-[700] text-[var(--muted)] underline-offset-2 hover:underline"
+          >
+            ✕
+          </button>
+        </div>
+      )}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 shadow-sm">
         <div className="aspect-video w-full">
           <div id={elementId} className="h-full w-full" />

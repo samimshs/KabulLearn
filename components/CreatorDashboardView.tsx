@@ -7,6 +7,7 @@ import { CourseSubmitButton } from "@/components/educator/CourseSubmitButton";
 import { DeleteCourseButton } from "@/components/educator/DeleteCourseButton";
 import { NewCourseModal } from "@/components/educator/NewCourseModal";
 import { MessagesInbox } from "@/components/MessagesInbox";
+import { postCourseAnnouncement } from "@/lib/actions/announcement-actions";
 import { PortalSettingsView } from "@/components/PortalSettingsView";
 import { useLanguage } from "@/components/LanguageProvider";
 import { RecommendedCourses } from "@/components/RecommendedCourses";
@@ -89,7 +90,7 @@ type CreatorDashboardViewProps = {
   }>;
 };
 
-type CreatorView = "dashboard" | "creator" | "submissions" | "students" | "messages" | "analytics" | "resources" | "journey" | "settings";
+type CreatorView = "dashboard" | "creator" | "submissions" | "students" | "messages" | "analytics" | "announce" | "resources" | "journey" | "settings";
 
 function statusLabel(status: CourseStatus, latestReview: CreatorCourse["latestReview"], t: Dictionary) {
   if (latestReview === "RETURNED") return t.statusRejected;
@@ -125,6 +126,7 @@ function NavIcon({ name }: { name: CreatorView }) {
     students: "M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M2.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5 M15.5 6.2A2.8 2.8 0 0 1 17 11.5 M16.5 14c2.2.4 3.5 2 3.5 4.5",
     messages: "M5 5h14a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 16h-7l-4 3v-3H5a1.5 1.5 0 0 1-1.5-1.5v-8A1.5 1.5 0 0 1 5 5Z",
     analytics: "M3 20h18M7 20V14M11 20V8M15 20V4M19 20v-8",
+    announce: "M3 8.5h2.5m-2 5h2m3-8.5h7a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H8.5l-3 3V7a2 2 0 0 1 2-2Z",
     resources: "M5 4h14v14.5a1.5 1.5 0 0 1-1.5 1.5H6.5A1.5 1.5 0 0 1 5 18.5V4Z M8 8h8M8 12h8M8 16h5",
     journey: "M2 9.5L12 5l10 4.5-10 4.5L2 9.5Z M6 12v4.5c0 2 2.7 3.5 6 3.5s6-1.5 6-3.5V12 M20 9.5v5",
     settings: "M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z M19.4 15a8 8 0 0 0 .1-2l2-1.5-2-3.5-2.4 1a8 8 0 0 0-1.7-1L15 5.5h-4L10.6 8a8 8 0 0 0-1.7 1l-2.4-1-2 3.5 2 1.5a8 8 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a8 8 0 0 0 1.7 1l.4 2.5h4l.4-2.5a8 8 0 0 0 1.7-1l2.4 1 2-3.5-2.1-1.5Z"
@@ -210,6 +212,84 @@ function CourseRow({ course, t }: { course: CreatorCourse; t: Dictionary }) {
   );
 }
 
+type AnnounceViewCourse = { id: string; title: string; enrollments: number };
+
+function AnnounceView({ courses, t }: { courses: AnnounceViewCourse[]; t: Dictionary }) {
+  const [courseId, setCourseId] = useState(courses[0]?.id ?? "");
+  const [body, setBody] = useState("");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  const publishedCourses = courses.filter((c) => c.enrollments > 0);
+
+  async function handleSend() {
+    if (!body.trim() || !courseId) return;
+    setStatus("sending");
+    const result = await postCourseAnnouncement({ courseId, body });
+    setStatus(result.ok ? "sent" : "error");
+    if (result.ok) setBody("");
+    setTimeout(() => setStatus("idle"), 3000);
+  }
+
+  return (
+    <section className="grid gap-5">
+      <div className="pr-panel p-6 lg:p-8">
+        <p className="pr-eyebrow">{t.announceNavLabel}</p>
+        <h1 className="pr-h2 mt-1">{t.announcePageTitle}</h1>
+        <p className="pr-copy mt-2 max-w-2xl">{t.announcePageDesc}</p>
+      </div>
+
+      <div className="pr-panel p-6 lg:p-8">
+        {publishedCourses.length === 0 ? (
+          <p className="text-sm text-[var(--muted)]">{t.announceNoCourses}</p>
+        ) : (
+          <div className="grid gap-5">
+            <div>
+              <label className="mb-1.5 block text-[12px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
+                {t.analyticsCourseLabel}
+              </label>
+              <select
+                value={courseId}
+                onChange={(e) => setCourseId(e.target.value)}
+                className="pr-input w-full max-w-sm py-2.5 text-[13px]"
+              >
+                {publishedCourses.map((c) => (
+                  <option key={c.id} value={c.id}>{c.title} · {c.enrollments} {t.analyticsStudentsSuffix}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[12px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
+                {t.announceMessageLabel}
+              </label>
+              <textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                maxLength={1000}
+                rows={4}
+                placeholder={t.announceMessagePlaceholder}
+                className="pr-input w-full resize-none py-3 text-[14px]"
+              />
+              <p className="mt-1 text-[11px] text-[var(--muted)]">{body.length}/1000</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleSend}
+                disabled={status === "sending" || body.trim().length < 10}
+                className="pr-btn-primary disabled:opacity-50"
+              >
+                {status === "sending" ? t.announceSending : t.announceSend}
+              </button>
+              {status === "sent" && <span className="text-[13px] font-[700] text-[var(--success)]">{t.announceSent}</span>}
+              {status === "error" && <span className="text-[13px] font-[700] text-[var(--danger)]">{t.announceError}</span>}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export function CreatorDashboardView({
   firstName,
   intro,
@@ -250,6 +330,7 @@ export function CreatorDashboardView({
     { key: "students", label: t.navMyStudents, icon: "students" },
     { key: "messages", label: t.messagesTitle, icon: "messages" },
     { key: "analytics", label: t.analyticsNavLabel, icon: "analytics" },
+    { key: "announce", label: t.announceNavLabel, icon: "announce" },
     { key: "resources", label: t.navResources, icon: "resources" },
     { key: "journey", label: t.navMyStudentJourney, icon: "journey" },
     { key: "settings", label: t.navCreatorSettings, icon: "settings" }
@@ -623,6 +704,10 @@ export function CreatorDashboardView({
                 </>
               )}
             </section>
+          ) : null}
+
+          {activeView === "announce" ? (
+            <AnnounceView courses={courses} t={t} />
           ) : null}
 
           {activeView === "resources" ? (

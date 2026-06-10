@@ -174,10 +174,19 @@ export default async function AdminDashboardPage({
   let totalEnrollments = 0;
   let totalSubmissions = 0;
   let siteVideos: Record<string, string> = {};
+  let totalUsers = 0;
+  let dau = 0;
+  let wau = 0;
+  let topCourses: Array<{ id: string; titleEn: string; _count: { enrollments: number } }> = [];
+  let recentSignups: Array<{ id: string; name: string | null; email: string; createdAt: Date; role: UserRole }> = [];
   let dbError = false;
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const sevenDaysAgo = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
+
   try {
-    const [c, u, e, s, er, sv] = await Promise.all([
+    const [c, u, e, s, er, sv, tu, dauCount, wauCount, tc, rs] = await Promise.all([
       db.course.findMany({
         orderBy: [{ submittedAt: "desc" }, { updatedAt: "desc" }],
         select: {
@@ -259,7 +268,21 @@ export default async function AdminDashboardPage({
           user: { select: { id: true, name: true, email: true } }
         }
       }),
-      getSiteVideoUrls()
+      getSiteVideoUrls(),
+      db.user.count(),
+      db.userStreak.count({ where: { lastActiveDate: { gte: today } } }),
+      db.userStreak.count({ where: { lastActiveDate: { gte: sevenDaysAgo } } }),
+      db.course.findMany({
+        where: { status: CourseStatus.PUBLISHED },
+        orderBy: { enrollments: { _count: "desc" } },
+        take: 5,
+        select: { id: true, titleEn: true, _count: { select: { enrollments: true } } }
+      }),
+      db.user.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 8,
+        select: { id: true, name: true, email: true, createdAt: true, role: true }
+      })
     ]);
     courses = c as AdminCourse[];
     users = u;
@@ -267,6 +290,11 @@ export default async function AdminDashboardPage({
     totalSubmissions = s;
     educatorRequests = er as EducatorReq[];
     siteVideos = sv;
+    totalUsers = tu;
+    dau = dauCount;
+    wau = wauCount;
+    topCourses = tc;
+    recentSignups = rs;
   } catch {
     dbError = true;
   }
@@ -327,6 +355,87 @@ export default async function AdminDashboardPage({
                 </p>
               </div>
             ))}
+          </section>
+
+          {/* ── Platform Analytics ──────────────────────────────── */}
+          <section className="grid gap-6 lg:grid-cols-2">
+            {/* DAU / WAU / Totals */}
+            <div className="pr-card overflow-hidden">
+              <div className="border-b border-[var(--border)] p-5">
+                <p className="pr-eyebrow">Engagement</p>
+                <h2 className="pr-h2 mt-1">Active users</h2>
+              </div>
+              <div className="grid grid-cols-2 divide-x divide-[var(--border)] divide-y sm:grid-cols-4 sm:divide-y-0">
+                {[
+                  { label: "DAU (today)", value: dau, tone: "text-[var(--brand)]" },
+                  { label: "WAU (7 days)", value: wau, tone: "text-[var(--success)]" },
+                  { label: "Total users", value: totalUsers, tone: "text-[var(--ink)]" },
+                  { label: "Enrollments", value: totalEnrollments, tone: "text-[var(--ink)]" }
+                ].map((stat) => (
+                  <div key={stat.label} className="p-5">
+                    <p className={`text-[26px] font-[800] leading-none tracking-[-0.4px] ${stat.tone}`}>
+                      {stat.value.toLocaleString()}
+                    </p>
+                    <p className="mt-2 text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">
+                      {stat.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent signups */}
+            <div className="pr-card overflow-hidden">
+              <div className="border-b border-[var(--border)] p-5">
+                <p className="pr-eyebrow">Growth</p>
+                <h2 className="pr-h2 mt-1">Recent sign-ups</h2>
+              </div>
+              <ul className="divide-y divide-[var(--border)]">
+                {recentSignups.length === 0 ? (
+                  <li className="p-5 text-sm font-[700] text-[var(--muted)]">No sign-ups yet.</li>
+                ) : recentSignups.map((u) => (
+                  <li key={u.id} className="flex items-center justify-between gap-3 px-5 py-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-[13px] font-[800] text-[var(--ink)]">{u.name ?? "Unnamed"}</p>
+                      <p className="truncate text-[12px] font-[500] text-[var(--muted)]">{u.email}</p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <span className={`inline-block rounded-full border px-2 py-0.5 text-[10px] font-[800] uppercase tracking-[0.8px] ${roleClass(u.role)}`}>
+                        {u.role.toLowerCase()}
+                      </span>
+                      <p className="mt-1 text-[11px] font-[600] text-[var(--muted)]">
+                        {u.createdAt.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Top courses */}
+            <div className="pr-card overflow-hidden lg:col-span-2">
+              <div className="border-b border-[var(--border)] p-5">
+                <p className="pr-eyebrow">Engagement</p>
+                <h2 className="pr-h2 mt-1">Top courses by enrollment</h2>
+              </div>
+              {topCourses.length === 0 ? (
+                <p className="p-5 text-sm font-[700] text-[var(--muted)]">No published courses yet.</p>
+              ) : (
+                <ul className="divide-y divide-[var(--border)]">
+                  {topCourses.map((course, i) => (
+                    <li key={course.id} className="flex items-center gap-4 px-5 py-3">
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-[12px] font-[800] text-[var(--muted)]">
+                        {i + 1}
+                      </span>
+                      <p className="flex-1 truncate text-[13px] font-[800] text-[var(--ink)]">{course.titleEn}</p>
+                      <span className="shrink-0 rounded-full bg-[rgba(0,87,255,0.08)] px-3 py-1 text-[12px] font-[800] text-[var(--brand)]">
+                        {course._count.enrollments.toLocaleString()} enrolled
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </section>
 
           <section className="pr-card overflow-hidden">

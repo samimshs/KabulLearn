@@ -29,6 +29,7 @@ export async function updateUserStreak(userId: string): Promise<void> {
 
     if (diffDays === 0) return; // already active today
 
+    const wasReset = diffDays > 1 && existing.currentStreak > 1;
     const current = diffDays === 1 ? existing.currentStreak + 1 : 1;
     const longest = Math.max(current, existing.longestStreak);
 
@@ -36,6 +37,19 @@ export async function updateUserStreak(userId: string): Promise<void> {
       where: { userId },
       data: { currentStreak: current, longestStreak: longest, lastActiveDate: today }
     });
+
+    // Notify the user that their streak was broken so they can start rebuilding
+    if (wasReset) {
+      await db.appNotification.create({
+        data: {
+          userId,
+          kind: "STREAK_ALERT",
+          title: `Your ${existing.currentStreak}-day streak ended`,
+          body: "No worries — start a new streak today by completing a lesson!",
+          link: "/dashboard"
+        }
+      }).catch(() => {});
+    }
   } catch {
     // streak update failing should never block lesson completion
   }

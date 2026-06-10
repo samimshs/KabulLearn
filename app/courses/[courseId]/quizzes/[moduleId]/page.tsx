@@ -79,14 +79,17 @@ export default async function QuizPage({
                       orderBy: [{ order: "asc" }],
 	                      select: {
 	                        id: true,
-	                        ...(usesPashtoContent(locale) ? { promptPs: true, explanationPs: true } : { promptEn: true, explanationEn: true }),
+	                        promptEn: true, promptPs: true,
+							...(locale === "fa" ? { promptDa: true, explanationDa: true } : {}),
+							explanationEn: true, explanationPs: true,
 	                        correctAnswer: true,
 	                        order: true, type: true,
 	                        choices: {
 	                          orderBy: [{ order: "asc" }],
 	                          select: {
 	                            id: true,
-	                            ...(usesPashtoContent(locale) ? { textPs: true } : { textEn: true }),
+	                            textEn: true, textPs: true,
+									...(locale === "fa" ? { textDa: true } : {}),
 	                            isCorrect: true, order: true
                           }
                         }
@@ -144,13 +147,15 @@ export default async function QuizPage({
               questions: lesson.quiz.questions.map((question) => ({
                 ...question,
                 promptEn: question.promptEn ?? question.promptPs ?? "",
-                promptPs: question.promptPs ?? question.promptEn ?? "",
-                explanationEn: question.explanationEn ?? question.explanationPs ?? null,
-                explanationPs: question.explanationPs ?? question.explanationEn ?? null,
+                promptPs: localized(question, "prompt") ?? question.promptEn ?? "",
+                explanationEn: question.explanationEn ?? null,
+                explanationPs: localized(question, "explanation") ?? null,
+                explanationDa: (question as Record<string, unknown>).explanationDa as string | null ?? null,
                 choices: question.choices.map((choice) => ({
                   ...choice,
                   textEn: choice.textEn ?? choice.textPs ?? "",
-                  textPs: choice.textPs ?? choice.textEn ?? ""
+                  textPs: localized(choice, "text") ?? choice.textEn ?? "",
+                  textDa: (choice as Record<string, unknown>).textDa as string | null ?? null
                 }))
               }))
             }

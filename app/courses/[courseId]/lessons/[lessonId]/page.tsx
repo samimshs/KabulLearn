@@ -3,6 +3,7 @@ import { CourseStatus, LessonType, ProgressStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { LessonView } from "@/components/LessonView";
 import { db } from "@/lib/db";
+import { getLessonNote } from "@/lib/actions/note-actions";
 import { getServerLocale, localizedCourseSelect, localizedLessonSelect, localizedModuleSelect } from "@/lib/server-locale";
 
 type LessonInPage = {
@@ -177,5 +178,7 @@ export default async function LessonPage({
   };
   const normalizedLesson = normalizedCourse.modules.flatMap((module) => module.lessons).find((item) => item.id === lesson.id) ?? lesson;
 
-  return <LessonView course={normalizedCourse} lesson={normalizedLesson} serverPassedModuleIds={serverPassedModuleIds} lessonStatuses={lessonStatuses} isComplete={isComplete} isPreviewLesson={isPreviewLesson} />;
+  const initialNote = isEnrolled && userId ? await getLessonNote(lessonId).catch(() => "") : "";
+
+  return <LessonView course={normalizedCourse} lesson={normalizedLesson} serverPassedModuleIds={serverPassedModuleIds} lessonStatuses={lessonStatuses} isComplete={isComplete} isPreviewLesson={isPreviewLesson} initialNote={initialNote} />;
 }

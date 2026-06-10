@@ -11,9 +11,11 @@ import { LessonStateIcon, lessonKindOf, type LessonState } from "@/components/Le
 import { usesPashtoContent, type Locale, type Dictionary } from "@/lib/i18n";
 import { type Course, type Module, type Lesson, type Question, type AnswerChoice } from "@prisma/client";
 
-type QuizChoice = Pick<AnswerChoice, "id" | "textEn" | "textPs" | "isCorrect" | "order">;
+type QuizChoice = Pick<AnswerChoice, "id" | "textEn" | "textPs" | "isCorrect" | "order"> & { textDa?: string | null };
 
 type QuizQuestion = Pick<Question, "id" | "promptEn" | "promptPs" | "correctAnswer" | "explanationEn" | "explanationPs" | "order" | "type"> & {
+  promptDa?: string | null;
+  explanationDa?: string | null;
   choices: QuizChoice[];
 };
 
@@ -357,10 +359,10 @@ export function QuizView({
     id: q.id,
     type: q.type,
     question: { en: q.promptEn, ps: q.promptPs },
-    explanation: q.explanationEn || q.explanationPs
-      ? { en: q.explanationEn ?? "", ps: q.explanationPs ?? "" }
+    explanation: q.explanationEn || q.explanationPs || q.explanationDa
+      ? { en: q.explanationEn ?? "", ps: q.explanationPs ?? "", fa: q.explanationDa ?? "" }
       : undefined,
-    options: q.choices.map((c) => ({ en: c.textEn, ps: c.textPs })),
+    options: q.choices.map((c) => ({ en: c.textEn, ps: c.textPs, fa: c.textDa ?? c.textEn })),
     choiceIds: q.choices.map((c) => c.id),
     correctChoiceIds: q.choices.filter((c) => c.isCorrect).map((c) => c.id),
     correctAnswer: q.correctAnswer ?? undefined,

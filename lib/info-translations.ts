@@ -66,6 +66,20 @@ export type PublicInfoContent = {
     areas: string[];
     ticketTitle: string;
     ticketText: string;
+    ticketFormTitle: string;
+    ticketFormDescription: string;
+  };
+  donate: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    longDescription: string;
+    ctaButton: string;
+    ctaComingSoon: string;
+    purposes: Array<{ title: string; description: string }>;
+    disclosure: string;
+    questions: string;
+    browseCourses: string;
   };
   educators: {
     eyebrow: string;
@@ -153,7 +167,8 @@ const commonFooterLinks = {
     legal: "Legal & Trust",
     terms: "Terms of Service",
     privacy: "Privacy Policy",
-    contact: "Contact / Support"
+    contact: "Contact",
+    supportDonate: "Support KabulLearn"
   },
   ps: {
     learner: "د زده کوونکو لارښود",
@@ -169,7 +184,8 @@ const commonFooterLinks = {
     legal: "قانوني او باور",
     terms: "د خدمت شرایط",
     privacy: "د محرمیت تګلاره",
-    contact: "اړیکه / ملاتړ"
+    contact: "اړیکه",
+    supportDonate: "د کابل‌لرن ملاتړ"
   },
   fa: {
     learner: "راهنمای فراگیر",
@@ -185,7 +201,8 @@ const commonFooterLinks = {
     legal: "قانونی و اعتماد",
     terms: "شرایط خدمات",
     privacy: "خط مشی رازداری",
-    contact: "تماس / پشتیبانی"
+    contact: "تماس",
+    supportDonate: "حمایت از کابل‌لرن"
   }
 } as const;
 
@@ -230,7 +247,8 @@ function footer(locale: Locale): PublicInfoContent["footer"] {
         links: [
           { key: "terms", label: f.terms, href: "/terms" },
           { key: "privacy", label: f.privacy, href: "/privacy" },
-          { key: "support", label: f.contact, href: "/support" }
+          { key: "contact", label: f.contact, href: "/contact" },
+          { key: "donate", label: f.supportDonate, href: "/support" }
         ]
       }
     ]
@@ -318,7 +336,26 @@ const en: Omit<PublicInfoContent, "footer"> = {
       "Privacy, data deletion, copyright, abuse, or security reports"
     ],
     ticketTitle: "Ticketing placeholder",
-    ticketText: "TODO: Add a support ticket form or help desk integration here when a ticketing system is configured. Until then, support requests should be sent by email."
+    ticketText: "TODO: Add a support ticket form or help desk integration here when a ticketing system is configured. Until then, support requests should be sent by email.",
+    ticketFormTitle: "Submit a support ticket",
+    ticketFormDescription: "Fill in the form below and we'll get back to you within 1–2 business days. You'll receive a confirmation email with your ticket number right away."
+  },
+  donate: {
+    eyebrow: "KabulHub LLC",
+    title: "Support KabulLearn",
+    description: "Help us expand access to practical education in English, Pashto, and Dari.",
+    longDescription: "KabulLearn creates structured courses, guided quizzes, educator support, and verifiable certificates for Afghan learners worldwide. Your contribution helps us create new courses, improve the platform, and keep learning accessible.",
+    ctaButton: "Support with Stripe",
+    ctaComingSoon: "Donation link coming soon.",
+    purposes: [
+      { title: "Create new courses", description: "Fund new course development across mathematics, data science, AI, and more practical subjects." },
+      { title: "Maintain the platform", description: "Keep infrastructure, hosting, and technical systems running reliably for learners around the world." },
+      { title: "Expand learner access", description: "Reach more Afghan learners in the diaspora and at home with structured, practical learning paths." },
+      { title: "Support certificates", description: "Maintain the certificate and verification system so learners can earn and share credible credentials." }
+    ],
+    disclosure: "KabulLearn is operated by KabulHub LLC. Contributions support educational content, platform development, and learner access initiatives. Contributions are voluntary and are not tax-deductible charitable donations.",
+    questions: "Questions? Contact us at",
+    browseCourses: "Browse courses →"
   },
   educators: {
     eyebrow: "Educator Resources",
@@ -542,7 +579,26 @@ const ps: Omit<PublicInfoContent, "footer"> = {
     areasTitle: "موږ په څه کې مرسته کوو",
     areas: ["ننوتل، ثبت، یا ایمیل لاسرسی", "نوم لیکنه، درس لاسرسی، یا ویډیو", "د ازموینې نمرې، تړلې برخې، یا پرمختګ", "سند ښکته کول، چټک-کوډ، یا تصدیق", "د ښوونکي لاسرسی، بیاکتنه، یا خپرول", "محرمیت، ډاټا ړنګول، کاپي‌رایټ، ناوړه کارونه، یا امنیت"],
     ticketTitle: "د ټکټ سیستم ځای",
-    ticketText: "یادونه: کله چې د ملاتړ غوښتنې سیستم برابر شي، دلته فورم یا د ملاتړ مرکز اضافه کړئ. تر هغه وخته ملاتړ د ایمیل له لارې کېږي."
+    ticketText: "یادونه: کله چې د ملاتړ غوښتنې سیستم برابر شي، دلته فورم یا د ملاتړ مرکز اضافه کړئ. تر هغه وخته ملاتړ د ایمیل له لارې کېږي.",
+    ticketFormTitle: "د ملاتړ ټکټ وسپارئ",
+    ticketFormDescription: "لاندې فورم ډک کړئ، موږ به ۱-۲ کاري ورځو کې ستاسو سره اړیکه ونیسو. د ټکټ شمیرې سره تاییدي ایمیل به سمدلاسه واستول شي."
+  },
+  donate: {
+    eyebrow: "KabulHub LLC",
+    title: "د کابل‌لرن ملاتړ",
+    description: "موږ سره مرسته وکړئ چې انګلیسي، پښتو، او دري کې عملي زده کړو ته لاسرسی پراخ کړو.",
+    longDescription: "کابل‌لرن د افغاني زده کوونکو لپاره جوړ شوي کورسونه، لارښود ازموینې، د ښوونکو ملاتړ، او تصدیق وړ سندونه جوړوي. ستاسو مرسته موږ سره د نوو کورسونو جوړولو، پلیټفارم ښه کولو، او د زده کړې لاسرسي ساتلو کې مرسته کوي.",
+    ctaButton: "د سټرایپ له لارې ملاتړ وکړئ",
+    ctaComingSoon: "د مرستې لینک ژر راشي.",
+    purposes: [
+      { title: "نوي کورسونه جوړ کړئ", description: "د ریاضیاتو، ډیټا ساینس، مصنوعي ذکاء، او نورو عملي موضوعاتو کې د نوو کورسونو پراختیا ملاتړ وکړئ." },
+      { title: "پلیټفارم وساتئ", description: "د ټول نړۍ زده کوونکو لپاره زیربنا، هوسټینګ، او تخنیکي سیستمونه د اعتماد وړ وساتئ." },
+      { title: "د زده کوونکو لاسرسی پراخ کړئ", description: "د جوړو، عملي د زده کړې لارو سره د بهرنیو افغانانو او کور کې زیات افغان زده کوونکو ته ورسیږئ." },
+      { title: "سندونه ملاتړ وکړئ", description: "د سند او تصدیق سیستم وساتئ ترڅو زده کوونکي د باور وړ اسناد ترلاسه کړي او شریک یې کړي." }
+    ],
+    disclosure: "کابل‌لرن د KabulHub LLC له خوا پرمخ وړل کېږي. مرستې د زده کړې منځپانګې، د پلیټفارم پراختیا، او د زده کوونکو د لاسرسي ابتکارونو ملاتړ کوي. مرستې خپلسري دي او د مالیاتو کمولو لپاره صدقه نه ده.",
+    questions: "پوښتنې؟ موږ سره اړیکه ونیسئ",
+    browseCourses: "کورسونه وپلټئ ←"
   },
   educators: {
     eyebrow: "د ښوونکو سرچینې",
@@ -740,7 +796,26 @@ const fa: Omit<PublicInfoContent, "footer"> = {
     areasTitle: "در چه مواردی کمک می‌کنیم",
     areas: ["ورود، ثبت‌نام، یا دسترسی ایمیل", "ثبت‌نام دوره، دسترسی درس، یا پخش ویدیو", "نمره آزمون، بخش‌های قفل‌شده، یا پیشرفت", "دانلود گواهی، کد سریع، یا تصدیق", "دسترسی استاد، بررسی دوره، یا نشر", "رازداری، حذف داده، کاپی‌رایت، سوءاستفاده، یا امنیت"],
     ticketTitle: "جای سیستم تکت",
-    ticketText: "یادداشت: وقتی سیستم تکت آماده شد، اینجا فورم یا مرکز پشتیبانی اضافه شود. تا آن زمان درخواست‌ها از طریق ایمیل فرستاده شوند."
+    ticketText: "یادداشت: وقتی سیستم تکت آماده شد، اینجا فورم یا مرکز پشتیبانی اضافه شود. تا آن زمان درخواست‌ها از طریق ایمیل فرستاده شوند.",
+    ticketFormTitle: "ارسال تکت پشتیبانی",
+    ticketFormDescription: "فورم زیر را پر کنید، ما در ۱-۲ روز کاری با شما تماس می‌گیریم. ایمیل تأیید با شماره تکت بلافاصله فرستاده می‌شود."
+  },
+  donate: {
+    eyebrow: "KabulHub LLC",
+    title: "حمایت از کابل‌لرن",
+    description: "به ما کمک کنید دسترسی به آموزش عملی به زبان‌های انگلیسی، پشتو، و دری را گسترش دهیم.",
+    longDescription: "کابل‌لرن دوره‌های ساختاریافته، آزمون‌های راهنما، پشتیبانی از استادان، و گواهی‌های قابل تصدیق برای فراگیران افغان در سراسر جهان ایجاد می‌کند. کمک شما به ما در ساخت دوره‌های جدید، بهبود پلتفرم، و دسترس‌پذیر نگه داشتن یادگیری کمک می‌کند.",
+    ctaButton: "حمایت با Stripe",
+    ctaComingSoon: "لینک اهدا به زودی.",
+    purposes: [
+      { title: "ایجاد دوره‌های جدید", description: "توسعه دوره‌های جدید در زمینه ریاضیات، علم داده، هوش مصنوعی، و سایر موضوعات عملی را تأمین مالی کنید." },
+      { title: "نگهداری پلتفرم", description: "زیرساخت، میزبانی، و سیستم‌های فنی را برای فراگیران سراسر جهان به‌طور قابل اعتماد نگه دارید." },
+      { title: "گسترش دسترسی فراگیر", description: "به فراگیران بیشتر افغان در جامعه غرب و داخل کشور با مسیرهای یادگیری ساختاریافته و عملی دسترسی دهید." },
+      { title: "پشتیبانی از گواهی‌ها", description: "سیستم گواهی و تصدیق را نگه دارید تا فراگیران بتوانند اعتبارنامه‌های معتبر کسب و به اشتراک بگذارند." }
+    ],
+    disclosure: "کابل‌لرن توسط KabulHub LLC اداره می‌شود. کمک‌ها از محتوای آموزشی، توسعه پلتفرم، و ابتکارات دسترسی فراگیر پشتیبانی می‌کنند. کمک‌ها داوطلبانه هستند و کسر مالیاتی محسوب نمی‌شوند.",
+    questions: "سؤال دارید؟ با ما تماس بگیرید",
+    browseCourses: "مرور دوره‌ها ←"
   },
   educators: {
     ...ps.educators,

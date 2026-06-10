@@ -4,15 +4,11 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { LessonType } from "@prisma/client";
 import { createLesson } from "@/lib/actions/course-actions";
-
-const lessonTypes: { value: LessonType; label: string }[] = [
-  { value: LessonType.VIDEO, label: "Video" },
-  { value: LessonType.READING, label: "Reading" },
-  { value: LessonType.QUIZ, label: "Quiz" }
-];
+import { useLanguage } from "@/components/LanguageProvider";
 
 export function LessonCreateForm({ courseId, moduleId }: { courseId: string; moduleId: string }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [type, setType] = useState<LessonType>(LessonType.VIDEO);
   const [titleEn, setTitleEn] = useState("");
   const [titlePs, setTitlePs] = useState("");
@@ -25,6 +21,12 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
   const [passingScore, setPassingScore] = useState(70);
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const lessonTypes = [
+    { value: LessonType.VIDEO, label: t.video },
+    { value: LessonType.READING, label: t.reading },
+    { value: LessonType.QUIZ, label: t.quiz }
+  ];
 
   return (
     <form
@@ -60,25 +62,25 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
           setIsFinalTest(false);
           setPassingScore(70);
           if (type === LessonType.QUIZ) {
-            setMessage("Quiz created. Opening the question builder...");
+            setMessage(t.quizCreatedMsg);
             router.push(`/educator/courses/${encodeURIComponent(courseId)}/quizzes/${encodeURIComponent(result.data.lessonId)}`);
             return;
           }
 
-          setMessage("Lesson created. Add another lesson whenever this module needs one.");
+          setMessage(t.lessonCreatedMsg);
           router.refresh();
         });
       }}
       className="grid gap-4 rounded-3xl border border-stone-200 bg-white p-4"
     >
       <div className="grid gap-2">
-        <p className="text-sm font-black uppercase tracking-wider text-[#0f766e]">New lesson</p>
-        <p className="text-sm text-[#525f6e]">Add videos or readings here. For quizzes, create the quiz shell and then add its questions.</p>
+        <p className="text-sm font-black uppercase tracking-wider text-[#0f766e]">{t.newLessonEyebrow}</p>
+        <p className="text-sm text-[#525f6e]">{t.newLessonHint}</p>
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2">
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          Lesson type
+          {t.lessonTypeLabel}
           <select
             value={type}
             onChange={(event) => setType(event.target.value as LessonType)}
@@ -92,7 +94,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
           </select>
         </label>
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          English title
+          {t.englishTitle}
           <input
             value={titleEn}
             onChange={(event) => setTitleEn(event.target.value)}
@@ -104,7 +106,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
 
       <div className="grid gap-2 sm:grid-cols-2">
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          Pashto title
+          {t.pashtoTitle}
           <input
             value={titlePs}
             onChange={(event) => setTitlePs(event.target.value)}
@@ -113,7 +115,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
           />
         </label>
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          English description
+          {t.englishDescLabel}
           <input
             value={descriptionEn}
             onChange={(event) => setDescriptionEn(event.target.value)}
@@ -124,7 +126,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
       </div>
 
       <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-        Pashto description
+        {t.pashtoDescLabel}
         <input
           value={descriptionPs}
           onChange={(event) => setDescriptionPs(event.target.value)}
@@ -135,7 +137,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
 
       {type === LessonType.VIDEO ? (
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          YouTube URL
+          {t.youtubeUrlLabel}
           <input
             value={youtubeUrl}
             onChange={(event) => setYoutubeUrl(event.target.value)}
@@ -148,7 +150,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
       {type === LessonType.READING ? (
         <div className="grid gap-2 sm:grid-cols-2">
           <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-            English content
+            {t.englishContentLabel}
             <textarea
               value={readingEn}
               onChange={(event) => setReadingEn(event.target.value)}
@@ -158,7 +160,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
             />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-            Pashto content
+            {t.pashtoContentLabel}
             <textarea
               value={readingPs}
               onChange={(event) => setReadingPs(event.target.value)}
@@ -173,7 +175,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
       {type === LessonType.QUIZ ? (
         <div className="grid gap-2 sm:grid-cols-2">
           <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-            Final test
+            {t.finalTestLabel}
             <input
               type="checkbox"
               checked={isFinalTest}
@@ -182,7 +184,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
             />
           </label>
           <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-            Passing score
+            {t.passingScore}
             <input
               type="number"
               min={0}
@@ -201,7 +203,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
           disabled={isPending}
           className="inline-flex h-11 items-center justify-center rounded-xl bg-[#0f766e] px-4 text-sm font-black text-white transition hover:bg-[#115e59] disabled:cursor-wait disabled:opacity-70"
         >
-          {isPending ? "Adding..." : type === LessonType.QUIZ ? "Create quiz and add questions" : "Add lesson"}
+          {isPending ? t.addingLabel : type === LessonType.QUIZ ? t.createQuizBtn : t.addLessonBtn}
         </button>
         {message ? <p className="text-sm text-[#0f766e]">{message}</p> : null}
       </div>

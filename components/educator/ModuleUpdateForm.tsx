@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateModule } from "@/lib/actions/course-actions";
+import { useLanguage } from "@/components/LanguageProvider";
 
 export function ModuleUpdateForm({
   courseId,
@@ -20,6 +21,7 @@ export function ModuleUpdateForm({
   descriptionPs?: string | null;
 }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [form, setForm] = useState({
     titleEn,
     titlePs,
@@ -32,7 +34,7 @@ export function ModuleUpdateForm({
   return (
     <details className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)]">
       <summary className="cursor-pointer list-none px-4 py-2 text-xs font-[800] uppercase tracking-[1px] text-[var(--brand)]">
-        Edit module
+        {t.editModule}
       </summary>
       <form
         className="grid gap-3 border-t border-[var(--border)] p-4"
@@ -40,21 +42,21 @@ export function ModuleUpdateForm({
           event.preventDefault();
           startTransition(async () => {
             const result = await updateModule({ courseId, moduleId, ...form });
-            setMessage(result.ok ? "Module updated. Submit the course again when ready." : result.error);
+            setMessage(result.ok ? t.moduleUpdated : result.error);
             if (result.ok) router.refresh();
           });
         }}
       >
         <div className="grid gap-2 sm:grid-cols-2">
-          <input className="pr-input" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} placeholder="English title" />
-          <input className="pr-input" value={form.titlePs} onChange={(e) => setForm({ ...form, titlePs: e.target.value })} placeholder="Pashto title" />
+          <input className="pr-input" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} placeholder={t.englishTitle} />
+          <input className="pr-input" value={form.titlePs} onChange={(e) => setForm({ ...form, titlePs: e.target.value })} placeholder={t.pashtoTitle} />
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
-          <textarea className="pr-input min-h-24" value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} placeholder="English summary" />
-          <textarea className="pr-input min-h-24" value={form.descriptionPs} onChange={(e) => setForm({ ...form, descriptionPs: e.target.value })} placeholder="Pashto summary" />
+          <textarea className="pr-input min-h-24" value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} placeholder={t.englishSummary} />
+          <textarea className="pr-input min-h-24" value={form.descriptionPs} onChange={(e) => setForm({ ...form, descriptionPs: e.target.value })} placeholder={t.pashtoSummary} />
         </div>
         <button type="submit" disabled={isPending} className="pr-btn-secondary !min-h-10">
-          {isPending ? "Saving..." : "Save module"}
+          {isPending ? t.saving : t.saveChanges}
         </button>
         {message ? <p className="text-sm font-[800] text-[var(--muted)]">{message}</p> : null}
       </form>

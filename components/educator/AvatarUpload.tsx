@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { useLanguage } from "@/components/LanguageProvider";
 
 interface AvatarUploadProps {
   name: string;
@@ -19,6 +20,7 @@ function initials(name: string) {
 
 export function AvatarUpload({ name, currentUrl, onChange }: AvatarUploadProps) {
   const inputId = useId();
+  const { t } = useLanguage();
   const [preview, setPreview] = useState<string | null>(currentUrl || null);
   const [status, setStatus] = useState<"idle" | "uploading" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -27,7 +29,6 @@ export function AvatarUpload({ name, currentUrl, onChange }: AvatarUploadProps) 
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Instant local preview
     const objectUrl = URL.createObjectURL(file);
     setPreview(objectUrl);
     setStatus("uploading");
@@ -42,7 +43,7 @@ export function AvatarUpload({ name, currentUrl, onChange }: AvatarUploadProps) 
       if (!res.ok || !data.url) {
         setPreview(currentUrl || null);
         setStatus("error");
-        setErrorMsg(data.error ?? "Upload failed. Try again.");
+        setErrorMsg(data.error ?? t.uploadFailedShort);
         return;
       }
 
@@ -52,13 +53,12 @@ export function AvatarUpload({ name, currentUrl, onChange }: AvatarUploadProps) 
     } catch {
       setPreview(currentUrl || null);
       setStatus("error");
-      setErrorMsg("Upload failed. Check your connection and try again.");
+      setErrorMsg(t.uploadFailedNetwork);
     }
   }
 
   return (
     <div className="flex items-center gap-4">
-      {/* Avatar preview */}
       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-dashed border-slate-200 bg-slate-50">
         {preview ? (
           <img src={preview} alt="" className="h-full w-full rounded-full object-cover" />
@@ -68,7 +68,6 @@ export function AvatarUpload({ name, currentUrl, onChange }: AvatarUploadProps) 
           </span>
         )}
 
-        {/* Upload overlay */}
         <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0">
           {status === "uploading" ? (
             <svg className="h-5 w-5 animate-spin text-white" viewBox="0 0 24 24" fill="none">
@@ -78,14 +77,13 @@ export function AvatarUpload({ name, currentUrl, onChange }: AvatarUploadProps) 
         </span>
       </div>
 
-      {/* Text actions */}
       <div className="grid gap-1.5">
         <label
           htmlFor={inputId}
           aria-disabled={status === "uploading"}
           className="inline-flex h-8 cursor-pointer items-center rounded-[var(--radius)] border border-slate-200 bg-white px-3 text-xs font-[800] text-slate-800 transition hover:border-[var(--brand)] hover:text-[var(--brand)] aria-disabled:pointer-events-none aria-disabled:cursor-wait aria-disabled:opacity-60"
         >
-          {status === "uploading" ? "Uploading…" : preview ? "Change photo" : "Upload photo"}
+          {status === "uploading" ? t.uploadingAvatar : preview ? t.changePhoto : t.uploadPhoto}
         </label>
 
         {preview && status !== "uploading" && (
@@ -94,18 +92,17 @@ export function AvatarUpload({ name, currentUrl, onChange }: AvatarUploadProps) 
             onClick={() => { setPreview(null); onChange(""); }}
             className="text-left text-xs font-[700] text-[var(--danger)] hover:underline"
           >
-            Remove photo
+            {t.removePhoto}
           </button>
         )}
 
-        <p className="text-[11px] font-[600] text-[var(--muted)]">JPG, PNG or WebP · max 3 MB</p>
+        <p className="text-[11px] font-[600] text-[var(--muted)]">{t.photoSizeHint}</p>
 
         {status === "error" && (
           <p className="text-[11px] font-[800] text-[var(--danger)]">{errorMsg}</p>
         )}
       </div>
 
-      {/* Hidden file input */}
       <input
         id={inputId}
         type="file"

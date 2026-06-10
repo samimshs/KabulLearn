@@ -7,16 +7,6 @@ import { requireAdmin } from "@/lib/rbac";
 
 export type ActionResult<T = void> = { ok: true; data: T } | { ok: false; error: string };
 
-export const VIDEO_KEYS = {
-  learnerSupport:           "video:learner-support",
-  educatorResources:        "video:educator-resources",
-  certificateVerification:  "video:certificate-verification",
-  catalog:                  "video:catalog",
-  educatorGuidelines:       "video:educator-guidelines",
-} as const;
-
-export type VideoKey = typeof VIDEO_KEYS[keyof typeof VIDEO_KEYS];
-
 const saveSchema = z.object({
   key: z.string().min(1),
   value: z.string().trim().max(500)

@@ -8,8 +8,7 @@ const HIDE_ON = new Set(["/", "/auth/redirect"]);
 export function BackButton() {
   const router = useRouter();
   const pathname = usePathname();
-  const { locale, setLocale, t, direction } = useLanguage();
-  const isLogin = pathname === "/login";
+  const { t, direction } = useLanguage();
 
   if (HIDE_ON.has(pathname)) return null;
 
@@ -46,38 +45,6 @@ export function BackButton() {
         {t.back}
       </button>
   );
-
-  if (isLogin) {
-    const languageOptions = [
-      { locale: "ps" as const, label: "پښتو", title: t.pashto },
-      { locale: "fa" as const, label: "دری", title: t.dari },
-      { locale: "en" as const, label: "EN", title: t.english }
-    ];
-
-    return (
-      <div dir="ltr" className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-5 pt-3 lg:px-8">
-        {backButton}
-        <div className="flex h-9 items-center rounded-full border border-[var(--border)] bg-[var(--surface)] p-1 shadow-sm" role="group" aria-label={t.language}>
-          {languageOptions.map((option) => (
-            <button
-              key={option.locale}
-              type="button"
-              title={option.title}
-              onClick={() => setLocale(option.locale)}
-              aria-pressed={locale === option.locale}
-              className={`flex h-7 min-w-9 items-center justify-center rounded-full px-2.5 text-[12px] font-[900] transition ${
-                locale === option.locale
-                  ? "bg-[var(--brand)] text-white shadow-sm"
-                  : "text-[var(--muted)] hover:bg-white hover:text-[var(--ink)]"
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="px-5 pt-2 lg:px-8 lg:pt-3">

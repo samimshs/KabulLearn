@@ -15,44 +15,57 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q")?.trim() ?? "";
-  if (query.length < 2) {
-    return NextResponse.json({ ok: true, data: [] });
-  }
 
-  const profiles = await db.creatorProfile.findMany({
-    where: {
-      userId: { not: session.user.id },
-      OR: [
-        { name: { contains: query, mode: "insensitive" } },
-        { username: { contains: query, mode: "insensitive" } },
-        { professionalTitle: { contains: query, mode: "insensitive" } }
-      ]
-    },
+  const where =
+    query.length >= 2
+      ? {
+          id: { not: session.user.id },
+          role: UserRole.EDUCATOR,
+          OR: [
+            { name: { contains: query, mode: "insensitive" as const } },
+            { email: { contains: query, mode: "insensitive" as const } },
+            { creatorProfile: { username: { contains: query, mode: "insensitive" as const } } },
+            { creatorProfile: { professionalTitle: { contains: query, mode: "insensitive" as const } } }
+          ]
+        }
+      : {
+          id: { not: session.user.id },
+          role: UserRole.EDUCATOR
+        };
+
+  const users = await db.user.findMany({
+    where,
     orderBy: { name: "asc" },
-    take: 8,
+    take: 50,
     select: {
       id: true,
-      username: true,
       name: true,
-      professionalTitle: true,
-      bio: true,
-      avatarUrl: true,
-      linkedinUrl: true,
-      youtubeUrl: true
+      image: true,
+      creatorProfile: {
+        select: {
+          id: true,
+          username: true,
+          professionalTitle: true,
+          bio: true,
+          avatarUrl: true,
+          linkedinUrl: true,
+          youtubeUrl: true
+        }
+      }
     }
   });
 
   return NextResponse.json({
     ok: true,
-    data: profiles.map((profile) => ({
-      id: profile.id,
-      username: profile.username,
-      name: profile.name,
-      title: profile.professionalTitle,
-      bio: profile.bio,
-      avatarUrl: profile.avatarUrl,
-      linkedinUrl: profile.linkedinUrl,
-      youtubeUrl: profile.youtubeUrl
+    data: users.map((user) => ({
+      id: user.creatorProfile?.id ?? user.id,
+      username: user.creatorProfile?.username ?? user.id,
+      name: user.name ?? "Educator",
+      title: user.creatorProfile?.professionalTitle ?? null,
+      bio: user.creatorProfile?.bio ?? null,
+      avatarUrl: user.creatorProfile?.avatarUrl ?? user.image ?? null,
+      linkedinUrl: user.creatorProfile?.linkedinUrl ?? null,
+      youtubeUrl: user.creatorProfile?.youtubeUrl ?? null
     }))
   });
 }

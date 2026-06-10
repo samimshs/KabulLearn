@@ -72,6 +72,7 @@ model User {
   passwordHash  String?
   role          UserRole  @default(STUDENT)
   status        UserStatus @default(ACTIVE)
+  locale        String    @default("en")
 
   accounts        Account[]
   sessions        Session[]

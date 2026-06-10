@@ -17,6 +17,7 @@ const messages = {
     validEmail: "Enter a valid email address.",
     passwordMin: "Password must be at least 8 characters.",
     invalidLogin: "Invalid login details.",
+    userNotFound: "No account found with that email. Please create an account first.",
     invalidCredentials: "Invalid email or password.",
     notAuthorized: "Not authorized.",
     signInUnavailable: "Unable to sign in right now. Please try again in a moment."
@@ -25,6 +26,7 @@ const messages = {
     validEmail: "مهرباني وکړئ سمه ایمیل پته ولیکئ.",
     passwordMin: "پټنوم باید لږ تر لږه ۸ توري وي.",
     invalidLogin: "د ننوتلو معلومات سم نه دي.",
+    userNotFound: "د دې ایمیل سره کوم حساب نه دی موندل شوی. مهرباني وکړئ لومړی حساب جوړ کړئ.",
     invalidCredentials: "ایمیل یا پټنوم سم نه دی.",
     notAuthorized: "تاسو اجازه نه لرئ.",
     signInUnavailable: "اوس ننوتل ممکن نه دي. مهرباني وکړئ لږ وروسته بیا هڅه وکړئ."
@@ -33,6 +35,7 @@ const messages = {
     validEmail: "لطفاً یک آدرس ایمیل معتبر وارد کنید.",
     passwordMin: "رمز عبور باید حداقل ۸ حرف باشد.",
     invalidLogin: "معلومات ورود درست نیست.",
+    userNotFound: "هیچ حسابی با این ایمیل یافت نشد. لطفاً ابتدا یک حساب ایجاد کنید.",
     invalidCredentials: "ایمیل یا رمز عبور درست نیست.",
     notAuthorized: "شما اجازه دسترسی ندارید.",
     signInUnavailable: "فعلاً ورود ممکن نیست. لطفاً کمی بعد دوباره تلاش کنید."
@@ -105,7 +108,11 @@ export async function loginUser(_state: LoginState, formData: FormData): Promise
       select: { role: true, passwordHash: true }
     });
 
-    if (!user?.passwordHash) {
+    if (!user) {
+      return { error: m.userNotFound };
+    }
+
+    if (!user.passwordHash) {
       return { error: m.invalidCredentials };
     }
 

@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { CourseStatus, LessonType, ProgressStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { CourseOverview } from "@/components/CourseOverview";
@@ -86,10 +86,6 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
 
   const session = await auth();
   const userId = session?.user?.id;
-
-  if (!userId) {
-    redirect(`/login?callbackUrl=${encodeURIComponent(`/courses/${courseId}`)}`);
-  }
 
   let serverPassedModuleIds: string[] = [];
   let lessonStatuses: Record<string, "IN_PROGRESS" | "COMPLETED"> = {};

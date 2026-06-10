@@ -15,7 +15,7 @@ export function RegisterPageContent({ googleOAuthEnabled = false }: { googleOAut
   return (
     <main className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-xl content-center gap-6 px-5 py-10">
       <section className="grid gap-3 text-center">
-        <img src="/poharana-icon-v3.svg" alt="" className="mx-auto h-12 w-12 rounded-[14px] shadow-[0_12px_28px_rgba(0,87,255,0.18)]" />
+        <Link href="/"><img src="/poharana-icon-v3.svg" alt="KabulLearn home" className="mx-auto h-12 w-12 rounded-[14px] shadow-[0_12px_28px_rgba(0,87,255,0.18)]" /></Link>
         <p className="pr-eyebrow">{t.joinKabulLearn}</p>
         <h1 className="text-4xl font-[800] tracking-[-0.8px] text-[var(--ink)]">{t.createYourAccount}</h1>
         <p className="pr-copy">

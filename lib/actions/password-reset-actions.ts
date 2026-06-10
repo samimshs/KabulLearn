@@ -120,7 +120,8 @@ export async function requestPasswordReset(
       await sendPasswordResetEmail({
         email: user.email,
         name: user.name,
-        resetUrl: token.resetUrl
+        resetUrl: token.resetUrl,
+        locale
       });
     }
   } catch (error) {

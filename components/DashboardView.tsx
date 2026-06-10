@@ -4,11 +4,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
-import { CourseCard, type CourseCardRow } from "@/components/CourseCard";
+import { CourseCard } from "@/components/CourseCard";
+import { RecommendedCourses } from "@/components/RecommendedCourses";
 import { MessagesInbox } from "@/components/MessagesInbox";
 import { PortalSettingsView } from "@/components/PortalSettingsView";
 import { dropEnrollment } from "@/lib/actions/enrollment-actions";
 import { localize, localizeLevel } from "@/lib/i18n";
+import type { RecommendedCourse } from "@/lib/recommendations";
 
 type DashCourse = {
   id: string;
@@ -57,7 +59,7 @@ type DashboardViewProps = {
   stats: { inProgress: number; lessonsDone: number; certificates: number; quizAttempts: number };
   overall: { percent: number; lessonsCompleted: number; totalLessons: number; coursesCompleted: number; coursesEnrolled: number };
   courses: DashCourse[];
-  recommended: CourseCardRow[];
+  recommended: RecommendedCourse[];
   certificates: DashCertificate[];
 };
 
@@ -252,11 +254,14 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
         <aside className="student-portal-sidebar" aria-label={t.myPortal}>
           <div className="student-portal-brand">
             <span className="student-portal-brand-icon">
-              <img src="/poharana-icon-v3.svg" alt="" />
+              {/* Pencil — student */}
+              <svg viewBox="0 0 24 24" fill="none" width="28" height="28" stroke="var(--brand)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                <path d="m15 5 4 4" />
+              </svg>
             </span>
             <div>
-              <p>KabulLearn</p>
-              <span>{t.myPortal}</span>
+              <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--ink)", display: "block" }}>{t.myPortal}</span>
             </div>
           </div>
           <nav className="student-portal-nav">
@@ -469,6 +474,8 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
           </>
         )}
       </section>
+
+      {recommended.length > 0 ? <RecommendedCourses courses={recommended} /> : null}
             </div>
           ) : null}
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { saveSiteVideoUrl, VIDEO_KEYS } from "@/lib/actions/site-settings-actions";
+import { saveSiteVideoUrl } from "@/lib/actions/site-settings-actions";
+import { VIDEO_KEYS } from "@/lib/site-settings-keys";
 
 type VideoEntry = {
   key: string;

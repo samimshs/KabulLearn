@@ -5,6 +5,8 @@ import { db } from "@/lib/db";
 import { CreatorDashboardView } from "@/components/CreatorDashboardView";
 import { getServerLocale } from "@/lib/server-locale";
 import { dictionaries } from "@/lib/i18n";
+import type { StudentJourney } from "@/components/CreatorDashboardView";
+import { getRecommendedCourses } from "@/lib/recommendations";
 
 export default async function EducatorDashboardPage({
   searchParams
@@ -23,7 +25,7 @@ export default async function EducatorDashboardPage({
   const locale = await getServerLocale();
   const t = dictionaries[locale];
 
-  const [courses, profile, unreadMessages, dbSessions] = await Promise.all([
+  const [courses, profile, unreadMessages, dbSessions, rawCerts, rawEnrollments, rawProgress] = await Promise.all([
     db.course.findMany({
       where: { authorId: educator.id },
       orderBy: [{ updatedAt: "desc" }],
@@ -65,6 +67,33 @@ export default async function EducatorDashboardPage({
       orderBy: { expires: "desc" },
       take: 8,
       select: { id: true, expires: true }
+    }).catch(() => []),
+    db.certificate.findMany({
+      where: { userId: educator.id },
+      orderBy: { issuedAt: "desc" },
+      select: {
+        uuid: true, grade: true, issuedAt: true,
+        courseId: true,
+        course: { select: { titleEn: true, titlePs: true, titleDa: true } }
+      }
+    }).catch(() => []),
+    db.enrollment.findMany({
+      where: { userId: educator.id },
+      orderBy: { createdAt: "desc" },
+      select: {
+        createdAt: true,
+        course: {
+          select: {
+            id: true, slug: true,
+            titleEn: true, titlePs: true, titleDa: true,
+            modules: { select: { lessons: { select: { id: true } } } }
+          }
+        }
+      }
+    }).catch(() => []),
+    db.userProgress.findMany({
+      where: { userId: educator.id, status: ProgressStatus.COMPLETED },
+      select: { lessonId: true }
     }).catch(() => [])
   ]);
 
@@ -80,6 +109,31 @@ export default async function EducatorDashboardPage({
       ]).catch(() => [0, { _avg: { rating: null }, _count: { rating: 0 } }] as const)
     : [0, { _avg: { rating: null }, _count: { rating: 0 } }] as const;
 
+  const completedLessonIds = new Set(rawProgress.map((p) => p.lessonId));
+  const certCourseIds = new Set(rawCerts.map((c) => c.courseId));
+
+  const studentJourney: StudentJourney = {
+    certificates: rawCerts.map((c) => ({
+      certificateUuid: c.uuid,
+      courseId: c.courseId,
+      courseTitle: c.course.titleEn ?? c.course.titlePs ?? c.course.titleDa ?? "Untitled",
+      grade: Math.round(c.grade),
+      issuedAt: c.issuedAt.toISOString()
+    })),
+    enrollments: rawEnrollments.map((e) => {
+      const allLessons = e.course.modules.flatMap((m) => m.lessons);
+      return {
+        courseId: e.course.id,
+        courseSlug: e.course.slug,
+        courseTitle: e.course.titleEn ?? e.course.titlePs ?? e.course.titleDa ?? "Untitled",
+        enrolledAt: e.createdAt.toISOString(),
+        totalLessons: allLessons.length,
+        completedLessons: allLessons.filter((l) => completedLessonIds.has(l.id)).length,
+        hasCertificate: certCourseIds.has(e.course.id)
+      };
+    })
+  };
+
   const totalEnrollments = courses.reduce((sum, course) => sum + course._count.enrollments, 0);
   const activeCourses = courses.filter((course) => course.status === CourseStatus.PUBLISHED).length;
   const completionRate = totalEnrollments > 0 ? Math.min(100, Math.round((completedCertificates / totalEnrollments) * 100)) : 0;
@@ -91,6 +145,10 @@ export default async function EducatorDashboardPage({
       )
     )
   ).sort((a, b) => a.localeCompare(b));
+
+  const enrolledCourseIds = rawEnrollments.map((e) => e.course.id);
+  const enrolledLevels: string[] = [];
+  const recommendedCourses = await getRecommendedCourses(enrolledCourseIds, enrolledLevels, 4).catch(() => []);
 
   return (
     <CreatorDashboardView
@@ -125,16 +183,18 @@ export default async function EducatorDashboardPage({
         image: profile?.image ?? educator.image ?? null,
         linkedinUrl: profile?.creatorProfile?.linkedinUrl ?? null
       }}
+      studentJourney={studentJourney}
+      recommendedCourses={recommendedCourses}
       sessions={[
         {
           id: "current-jwt",
-          label: "Current browser session",
-          expires: "managed by secure sign-in cookie",
+          label: t.currentBrowserSession,
+          expires: t.managedByCookie,
           current: true
         },
         ...dbSessions.map((row, index) => ({
           id: row.id,
-          label: `Stored session ${index + 1}`,
+          label: `${t.storedSession} ${index + 1}`,
           expires: row.expires.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
         }))
       ]}

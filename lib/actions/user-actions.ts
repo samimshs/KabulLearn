@@ -6,6 +6,7 @@ import { hash } from "bcryptjs";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAdmin, requireEducator } from "@/lib/rbac";
+import { auth } from "@/auth";
 import { sendEducatorWelcomeEmail } from "@/lib/email-verification";
 import { createSystemInboxMessage } from "@/lib/actions/message-actions";
 
@@ -138,6 +139,24 @@ export async function deleteUser(input: z.infer<typeof deleteUserSchema>): Promi
     return { ok: true, data: undefined };
   } catch (error) {
     return toActionError(error);
+  }
+}
+
+const localeSchema = z.enum(["en", "ps", "fa"]);
+
+export async function updateUserLocale(locale: string): Promise<ActionResult> {
+  try {
+    const parsed = localeSchema.safeParse(locale);
+    if (!parsed.success) return { ok: false, error: "Invalid locale." };
+    const session = await auth();
+    if (!session?.user?.id) return { ok: true, data: undefined };
+    await db.user.update({
+      where: { id: session.user.id },
+      data: { locale: parsed.data }
+    });
+    return { ok: true, data: undefined };
+  } catch {
+    return { ok: false, error: "Could not save locale preference." };
   }
 }
 

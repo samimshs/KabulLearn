@@ -218,7 +218,7 @@ export function CourseOverview({
                 {primaryActionLabel}
               </Link>
             ) : null
-          ) : (
+          ) : viewerId ? (
             <button
               type="button"
               onClick={handleEnroll}
@@ -228,6 +228,13 @@ export function CourseOverview({
             >
               {isPending ? "..." : t.enrollNow}
             </button>
+          ) : (
+            <Link
+              href={`/login?callbackUrl=${encodeURIComponent(`/courses/${course.id}`)}`}
+              className="pr-btn-primary"
+            >
+              {t.enrollNow}
+            </Link>
           )}
         </div>
 

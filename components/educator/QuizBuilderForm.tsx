@@ -13,6 +13,7 @@ import {
   reorderAnswerChoices,
   reorderQuizQuestions
 } from "@/lib/actions/quiz-builder-actions";
+import { useLanguage } from "@/components/LanguageProvider";
 
 type Choice = {
   id: string;
@@ -72,6 +73,7 @@ function DragOrderPanel({
   onSave: (ids: string[]) => Promise<{ ok: true; data: void } | { ok: false; error: string }>;
 }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [orderedItems, setOrderedItems] = useState(items);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
@@ -130,7 +132,7 @@ function DragOrderPanel({
               setMessage("");
               const result = await onSave(orderedItems.map((item) => item.id));
               if (result.ok) {
-                setMessage("Order saved. Submit the course again when ready.");
+                setMessage(t.orderSaved);
                 router.refresh();
               } else {
                 setMessage(result.error);
@@ -139,7 +141,7 @@ function DragOrderPanel({
           }
           className="inline-flex h-9 items-center justify-center rounded-xl bg-[#0f766e] px-4 text-xs font-black text-white transition hover:bg-[#115e59] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isPending ? "Saving..." : saveLabel}
+          {isPending ? t.saving : saveLabel}
         </button>
         {message ? <p className="text-xs font-bold text-[#607083]">{message}</p> : null}
       </div>
@@ -156,6 +158,7 @@ function ChoiceItem({
   questionId: string;
   onDeleted: (id: string) => void;
 }) {
+  const { t } = useLanguage();
   const [isPending, startTransition] = useTransition();
   const [edit, setEdit] = useState({ textEn: choice.textEn, textPs: choice.textPs, isCorrect: choice.isCorrect });
   const [message, setMessage] = useState("");
@@ -181,18 +184,18 @@ function ChoiceItem({
         aria-label="Delete answer choice"
         className="shrink-0 rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
       >
-        {isPending ? "..." : "Delete"}
+        {isPending ? "..." : t.removeLabel}
       </button>
       </div>
       <details>
-        <summary className="cursor-pointer text-xs font-black uppercase tracking-wider text-[#0f766e]">Edit answer</summary>
+        <summary className="cursor-pointer text-xs font-black uppercase tracking-wider text-[#0f766e]">{t.editAnswer}</summary>
         <form
           className="mt-3 grid gap-2"
           onSubmit={(event) => {
             event.preventDefault();
             startTransition(async () => {
               const result = await updateAnswerChoice({ choiceId: choice.id, questionId, ...edit });
-              setMessage(result.ok ? "Answer updated." : result.error);
+              setMessage(result.ok ? t.answerUpdated : result.error);
             });
           }}
         >
@@ -202,10 +205,10 @@ function ChoiceItem({
           </div>
           <label className="flex items-center gap-2 text-xs font-black text-[#1a2e42]">
             <input type="checkbox" checked={edit.isCorrect} onChange={(e) => setEdit({ ...edit, isCorrect: e.target.checked })} />
-            Correct answer
+            {t.correctAnswerLabel}
           </label>
           <button className="inline-flex h-8 items-center justify-center rounded-xl bg-[#0f766e] px-3 text-xs font-black text-white" type="submit">
-            Save answer
+            {t.saveAnswer}
           </button>
           {message ? <p className="text-xs font-bold text-[#607083]">{message}</p> : null}
         </form>
@@ -222,6 +225,7 @@ function AddChoiceForm({
   onAdded: (choice: Choice) => void;
 }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [textEn, setTextEn] = useState("");
   const [textPs, setTextPs] = useState("");
   const [isCorrect, setIsCorrect] = useState(false);
@@ -248,12 +252,12 @@ function AddChoiceForm({
       }}
       className="grid gap-3 rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-3"
     >
-      <p className="text-xs font-black uppercase tracking-wider text-[#0f766e]">Add answer choice</p>
+      <p className="text-xs font-black uppercase tracking-wider text-[#0f766e]">{t.addAnswerChoice}</p>
       <div className="grid gap-2 sm:grid-cols-2">
         <input
           value={textEn}
           onChange={(e) => setTextEn(e.target.value)}
-          placeholder="English answer"
+          placeholder={t.englishAnswer}
           required
           className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
         />
@@ -273,14 +277,14 @@ function AddChoiceForm({
             onChange={(e) => setIsCorrect(e.target.checked)}
             className="h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
           />
-          Correct answer
+          {t.correctAnswerLabel}
         </label>
         <button
           type="submit"
           disabled={isPending}
           className="inline-flex h-9 items-center justify-center rounded-xl bg-[#0f766e] px-4 text-xs font-black text-white transition hover:bg-[#115e59] disabled:opacity-70"
         >
-          {isPending ? "Adding..." : "Add choice"}
+          {isPending ? t.addingLabel : t.addChoice}
         </button>
       </div>
       {error ? <p className="text-xs font-bold text-rose-700">{error}</p> : null}
@@ -295,6 +299,7 @@ function QuestionCard({
   question: Question;
   onDeleted: (id: string) => void;
 }) {
+  const { t } = useLanguage();
   const [choices, setChoices] = useState<Choice[]>(question.choices);
   const [edit, setEdit] = useState({
     type: question.type,
@@ -314,13 +319,13 @@ function QuestionCard({
       <div className="flex items-start justify-between gap-4">
         <div className="grid gap-1">
           <p className="text-xs font-black uppercase tracking-wider text-[#0f766e]">
-            Question {question.order}
+            {t.questionLabel} {question.order}
           </p>
           <h3 className="text-lg font-black text-[#102033]">{question.promptEn}</h3>
           <p className="text-sm text-[#607083]">{question.promptPs}</p>
           {question.explanationEn ? (
             <p className="mt-1 rounded-xl bg-blue-50 p-3 text-xs font-semibold text-blue-900">
-              Explanation: {question.explanationEn}
+              {t.explanationLabel} {question.explanationEn}
             </p>
           ) : null}
         </div>
@@ -341,14 +346,14 @@ function QuestionCard({
           aria-label="Delete question"
           className="shrink-0 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-black text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
         >
-          {isDeletePending ? "..." : "Delete question"}
+          {isDeletePending ? "..." : t.deleteQuestion}
         </button>
       </div>
 
       {deleteError ? <p className="text-xs font-bold text-rose-700">{deleteError}</p> : null}
 
       <details className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-3">
-        <summary className="cursor-pointer text-xs font-black uppercase tracking-wider text-[#0f766e]">Edit question</summary>
+        <summary className="cursor-pointer text-xs font-black uppercase tracking-wider text-[#0f766e]">{t.editQuestion}</summary>
         <form
           className="mt-3 grid gap-3"
           onSubmit={(event) => {
@@ -363,28 +368,28 @@ function QuestionCard({
                 explanationEn: edit.explanationEn || undefined,
                 explanationPs: edit.explanationPs || undefined
               });
-              setEditMessage(result.ok ? "Question updated. Submit the course again when ready." : result.error);
+              setEditMessage(result.ok ? t.questionUpdated : result.error);
             });
           }}
         >
           <select className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.type} onChange={(e) => setEdit({ ...edit, type: e.target.value as QuestionType })}>
-            <option value={QuestionType.SINGLE_CHOICE}>Single choice</option>
-            <option value={QuestionType.MULTIPLE_CHOICE}>Multiple choice</option>
-            <option value={QuestionType.TEXT_INPUT}>Text / math answer</option>
+            <option value={QuestionType.SINGLE_CHOICE}>{t.singleChoice}</option>
+            <option value={QuestionType.MULTIPLE_CHOICE}>{t.multipleChoice}</option>
+            <option value={QuestionType.TEXT_INPUT}>{t.textMathAnswer}</option>
           </select>
           <div className="grid gap-2 sm:grid-cols-2">
             <textarea className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.promptEn} onChange={(e) => setEdit({ ...edit, promptEn: e.target.value })} />
             <textarea className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.promptPs} onChange={(e) => setEdit({ ...edit, promptPs: e.target.value })} />
           </div>
           {edit.type === QuestionType.TEXT_INPUT ? (
-            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.correctAnswer} onChange={(e) => setEdit({ ...edit, correctAnswer: e.target.value })} placeholder="Correct answer" />
+            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.correctAnswer} onChange={(e) => setEdit({ ...edit, correctAnswer: e.target.value })} placeholder={t.correctAnswerLabel} />
           ) : null}
           <div className="grid gap-2 sm:grid-cols-2">
-            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.explanationEn} onChange={(e) => setEdit({ ...edit, explanationEn: e.target.value })} placeholder="English explanation" />
-            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.explanationPs} onChange={(e) => setEdit({ ...edit, explanationPs: e.target.value })} placeholder="Pashto explanation" />
+            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.explanationEn} onChange={(e) => setEdit({ ...edit, explanationEn: e.target.value })} placeholder={t.explanationEnLabel} />
+            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.explanationPs} onChange={(e) => setEdit({ ...edit, explanationPs: e.target.value })} placeholder={t.explanationPsLabel} />
           </div>
           <button type="submit" disabled={isEditPending} className="inline-flex h-9 items-center justify-center rounded-xl bg-[#0f766e] px-4 text-xs font-black text-white">
-            {isEditPending ? "Saving..." : "Save question"}
+            {isEditPending ? t.saving : t.saveQuestion}
           </button>
           {editMessage ? <p className="text-xs font-bold text-[#607083]">{editMessage}</p> : null}
         </form>
@@ -392,30 +397,30 @@ function QuestionCard({
 
       {question.type === QuestionType.TEXT_INPUT ? (
         <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
-          <p className="text-xs font-black uppercase tracking-wider text-blue-700">Text or math answer</p>
-          <p className="mt-2 text-sm font-[800] text-blue-950">Correct answer: {question.correctAnswer}</p>
+          <p className="text-xs font-black uppercase tracking-wider text-blue-700">{t.textMathAnswer}</p>
+          <p className="mt-2 text-sm font-[800] text-blue-950">{t.correctAnswerLabel}: {question.correctAnswer}</p>
         </div>
       ) : (
         <div className="grid gap-2">
           <p className="text-xs font-black uppercase tracking-wider text-[#3d4a5a]">
-            Answer choices ({choices.length})
+            {t.answerChoicesCount} ({choices.length})
             {question.type === QuestionType.SINGLE_CHOICE ? (
-              <span className="ms-2 text-[#607083]">— one correct answer</span>
+              <span className="ms-2 text-[#607083]">{t.oneCorrectAnswer}</span>
             ) : (
-              <span className="ms-2 text-[#607083]">— multiple correct answers allowed</span>
+              <span className="ms-2 text-[#607083]">{t.multipleCorrectAllowed}</span>
             )}
             {choices.filter((c) => c.isCorrect).length === 0 ? (
-              <span className="ms-2 text-amber-600">— mark at least one as correct</span>
+              <span className="ms-2 text-amber-600">{t.markAtLeastOneCorrect}</span>
             ) : null}
           </p>
           <DragOrderPanel
             items={choices.map((choice) => ({
               id: choice.id,
               label: choice.textEn,
-              meta: choice.isCorrect ? "Correct answer" : "Answer choice"
+              meta: choice.isCorrect ? t.correctAnswerLabel : undefined
             }))}
-            emptyText="Add answer choices before ordering."
-            saveLabel="Save choice order"
+            emptyText={t.addChoicesBeforeOrdering}
+            saveLabel={t.saveChoiceOrder}
             onSave={(choiceIds) => reorderAnswerChoices({ questionId: question.id, choiceIds })}
           />
           {choices.map((choice) => (
@@ -443,6 +448,7 @@ function AddQuestionForm({
   lessonId: string;
   onAdded: (question: Question) => void;
 }) {
+  const { t } = useLanguage();
   const [type, setType] = useState<QuestionType>(QuestionType.SINGLE_CHOICE);
   const [promptEn, setPromptEn] = useState("");
   const [promptPs, setPromptPs] = useState("");
@@ -491,22 +497,22 @@ function AddQuestionForm({
       }}
       className="grid gap-4 rounded-3xl border border-stone-200 bg-[#fffdfa] p-5 shadow-sm"
     >
-      <p className="text-sm font-black uppercase tracking-wider text-[#0f766e]">Add new question</p>
+      <p className="text-sm font-black uppercase tracking-wider text-[#0f766e]">{t.addQuestion}</p>
       <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-        Question type
+        {t.questionType}
         <select
           value={type}
           onChange={(e) => setType(e.target.value as QuestionType)}
           className="rounded-xl border border-stone-200 bg-white px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
         >
-          <option value={QuestionType.SINGLE_CHOICE}>Single choice</option>
-          <option value={QuestionType.MULTIPLE_CHOICE}>Multiple choice</option>
-          <option value={QuestionType.TEXT_INPUT}>Text / math answer</option>
+          <option value={QuestionType.SINGLE_CHOICE}>{t.singleChoice}</option>
+          <option value={QuestionType.MULTIPLE_CHOICE}>{t.multipleChoice}</option>
+          <option value={QuestionType.TEXT_INPUT}>{t.textMathAnswer}</option>
         </select>
       </label>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          English prompt
+          {t.englishPrompt}
           <textarea
             value={promptEn}
             onChange={(e) => setPromptEn(e.target.value)}
@@ -517,7 +523,7 @@ function AddQuestionForm({
           />
         </label>
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          Pashto prompt
+          {t.pashtoPrompt}
           <textarea
             value={promptPs}
             onChange={(e) => setPromptPs(e.target.value)}
@@ -530,7 +536,7 @@ function AddQuestionForm({
       </div>
       {type === QuestionType.TEXT_INPUT ? (
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          Correct answer
+          {t.correctAnswerLabel}
           <input
             value={correctAnswer}
             onChange={(e) => setCorrectAnswer(e.target.value)}
@@ -538,12 +544,12 @@ function AddQuestionForm({
             placeholder="Example: 42 or x = 5"
             className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
-          <span className="text-xs font-[700] text-[#607083]">For math answers, use the exact answer students should type.</span>
+          <span className="text-xs font-[700] text-[#607083]">{t.mathAnswerHint}</span>
         </label>
       ) : null}
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          Explanation (EN, optional)
+          {t.explanationEnLabel}
           <input
             value={explanationEn}
             onChange={(e) => setExplanationEn(e.target.value)}
@@ -552,7 +558,7 @@ function AddQuestionForm({
           />
         </label>
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          Explanation (PS, optional)
+          {t.explanationPsLabel}
           <input
             value={explanationPs}
             onChange={(e) => setExplanationPs(e.target.value)}
@@ -567,7 +573,7 @@ function AddQuestionForm({
           disabled={isPending}
           className="inline-flex h-11 items-center justify-center rounded-xl bg-[#0f3d5e] px-5 text-sm font-black text-white transition hover:bg-[#0a2d47] disabled:opacity-70"
         >
-          {isPending ? "Adding..." : "Add question"}
+          {isPending ? t.addingLabel : t.addQuestion}
         </button>
         {error ? <p className="text-sm font-bold text-rose-700">{error}</p> : null}
       </div>
@@ -576,22 +582,23 @@ function AddQuestionForm({
 }
 
 export function QuizBuilderForm({ courseId, lessonId, questions: initialQuestions }: QuizBuilderFormProps) {
+  const { t } = useLanguage();
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
 
   return (
     <div className="grid gap-5">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-black uppercase tracking-wider text-[#0f766e]">Questions</p>
+          <p className="text-sm font-black uppercase tracking-wider text-[#0f766e]">{t.questionsEyebrow}</p>
           <p className="mt-1 text-sm text-[#607083]">
-            {questions.length} question{questions.length !== 1 ? "s" : ""} · add questions then answer choices
+            {questions.length} {questions.length !== 1 ? t.questionsEyebrow.toLowerCase() : t.questionLabel.toLowerCase()} · add questions then answer choices
           </p>
         </div>
       </div>
 
       {questions.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-stone-300 bg-stone-50 p-8 text-center font-bold text-[#3d4a5a]">
-          No questions yet. Add your first question below.
+          {t.noQuestionsYet}
         </div>
       ) : (
         <div className="grid gap-4">
@@ -601,8 +608,8 @@ export function QuizBuilderForm({ courseId, lessonId, questions: initialQuestion
               label: question.promptEn,
               meta: question.type.replace("_", " ").toLowerCase()
             }))}
-            emptyText="Add questions before ordering."
-            saveLabel="Save question order"
+            emptyText={t.addQuestionsBeforeOrdering}
+            saveLabel={t.saveQuestionOrder}
             onSave={(questionIds) => reorderQuizQuestions({ lessonId, questionIds })}
           />
           {questions.map((question) => (

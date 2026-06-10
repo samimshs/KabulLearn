@@ -3,9 +3,9 @@ import { ProgressStatus, CourseStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { DashboardView } from "@/components/DashboardView";
-import type { CourseCardRow } from "@/components/CourseCard";
 import { getCourseProgress } from "@/lib/security";
 import { getServerLocale, localizedCourseSelect, localizedLessonSelect, localizedModuleSelect } from "@/lib/server-locale";
+import { getRecommendedCourses } from "@/lib/recommendations";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -139,43 +139,13 @@ export default async function DashboardPage() {
   }
 
   const enrolledIds = enrollments.map((e) => e.course.id);
+  const enrolledLevels = enrollments.map((e) => e.course.level).filter(Boolean) as string[];
 
-  // Recommended: published courses the learner has NOT enrolled in
-  let recommended: CourseCardRow[] = [];
+  // Recommended: published courses ranked by level affinity, popularity, rating
+  let recommended: Awaited<ReturnType<typeof getRecommendedCourses>> = [];
   if (!dbError) {
     try {
-      const recRaw = await db.course.findMany({
-        where: {
-          AND: [
-            { OR: [{ status: CourseStatus.PUBLISHED }, { publishedAt: { not: null } }] },
-            enrolledIds.length > 0 ? { id: { notIn: enrolledIds } } : {}
-          ]
-        },
-        orderBy: { createdAt: "desc" },
-        take: 3,
-        select: {
-          id: true,
-          titleEn: true, titlePs: true, titleDa: true,
-          descriptionEn: true, descriptionPs: true, descriptionDa: true,
-          level: true,
-          _count: { select: { enrollments: true } },
-          instructors: { orderBy: { order: "asc" }, select: { profile: { select: { name: true, username: true, avatarUrl: true } } } },
-          modules: {
-            orderBy: { order: "asc" },
-            select: { id: true, order: true, lessons: { orderBy: { order: "asc" }, select: { id: true, order: true, isFinalTest: true } } }
-          }
-        }
-      });
-      recommended = recRaw.map((c) => ({
-        id: c.id,
-        titleEn: c.titleEn ?? "", titlePs: c.titlePs ?? "", titleDa: c.titleDa,
-        descriptionEn: c.descriptionEn ?? "", descriptionPs: c.descriptionPs ?? "", descriptionDa: c.descriptionDa,
-        level: c.level,
-        hasCertificate: c.modules.length > 0 && c.modules.every((m) => m.lessons.some((l) => l.isFinalTest)),
-        modules: c.modules.map((m) => ({ id: m.id, order: m.order, lessons: m.lessons.map((l) => ({ id: l.id, order: l.order })) })),
-        enrollmentCount: c._count.enrollments,
-        instructors: c.instructors.map((ci) => ci.profile)
-      }));
+      recommended = await getRecommendedCourses(enrolledIds, enrolledLevels, 4);
     } catch {
       /* recommended unavailable */
     }

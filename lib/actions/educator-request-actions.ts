@@ -6,7 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/rbac";
 import { auth } from "@/auth";
-import { sendEducatorWelcomeEmail } from "@/lib/email-verification";
+import { sendEducatorWelcomeEmail, sendEducatorRejectionEmail } from "@/lib/email-verification";
 import { createSystemInboxMessage } from "@/lib/actions/message-actions";
 
 export type ActionResult<T = void> =
@@ -98,17 +98,42 @@ function buildWelcomeInboxMessage(): string {
 
 export async function rejectEducatorRequest(input: z.infer<typeof decisionSchema>): Promise<ActionResult> {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const { requestId, adminNote } = decisionSchema.parse(input);
 
-    await db.educatorRequest.update({
+    const request = await db.educatorRequest.update({
       where: { id: requestId },
       data: { status: EducatorRequestStatus.REJECTED, adminNote: adminNote || null }
     });
+
+    const reason = adminNote?.trim() || "No specific reason was provided.";
+
+    const user = await db.user.findUnique({
+      where: { id: request.userId },
+      select: { email: true, name: true }
+    });
+
+    if (user) {
+      void sendEducatorRejectionEmail({ email: user.email, name: user.name, reason });
+      void createSystemInboxMessage(request.userId, admin.id, buildRejectionInboxMessage(reason));
+    }
 
     revalidatePath("/admin");
     return { ok: true, data: undefined };
   } catch (error) {
     return toActionError(error);
   }
+}
+
+function buildRejectionInboxMessage(reason: string): string {
+  return [
+    "Your educator application has not been approved at this time.",
+    "",
+    "REASON",
+    reason,
+    "",
+    "If you believe this is a mistake or would like to reapply after addressing the feedback, please contact us at info@kabulhub.com.",
+    "",
+    "— The KabulLearn Team"
+  ].join("\n");
 }

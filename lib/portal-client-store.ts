@@ -29,7 +29,11 @@ export function usePortalUnreadCount(initialValue = 0) {
   const [count, setCount] = useState(initialValue);
 
   useEffect(() => {
-    setCount(readNumber(UNREAD_KEY, initialValue));
+    // initialValue comes from the server (DB) and is always authoritative on mount.
+    // Sync it to localStorage so subsequent client-side updates start from the right baseline.
+    window.localStorage.setItem(UNREAD_KEY, String(initialValue));
+    setCount(initialValue);
+
     const onChange = (event: Event) => {
       const detail = (event as CustomEvent<number>).detail;
       setCount(typeof detail === "number" ? detail : readNumber(UNREAD_KEY, initialValue));

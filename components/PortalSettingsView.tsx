@@ -231,7 +231,7 @@ export function PortalSettingsView({ profile, sessions }: PortalSettingsViewProp
                 <textarea className="pr-input min-h-32" value={bio} onChange={(event) => setBio(event.target.value)} />
               </label>
               <label className="grid gap-2 text-sm font-[800] text-[var(--ink)]">
-                LinkedIn URL
+                {t.linkedinUrlLabel}
                 <input
                   className="pr-input"
                   type="url"

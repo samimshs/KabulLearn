@@ -53,7 +53,6 @@ export async function submitCourseRating(input: z.infer<typeof ratingSchema>): P
       }
     });
 
-    revalidatePath("/");
     revalidatePath(`/courses/${values.courseId}`);
     revalidatePath("/dashboard");
     return { ok: true, data: undefined };

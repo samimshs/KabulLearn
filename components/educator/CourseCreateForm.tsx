@@ -67,7 +67,7 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
   const [primaryInstructor, setPrimaryInstructor] = useState<InstructorProfile | null>(null);
   const [coInstructors, setCoInstructors] = useState<InstructorProfile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<InstructorSearchResult[]>([]);
+  const [allEducators, setAllEducators] = useState<InstructorSearchResult[]>([]);
   const [manualOpen, setManualOpen] = useState(false);
   const [manualInstructor, setManualInstructor] = useState<InstructorInput>(emptyManualInstructor());
 
@@ -75,6 +75,20 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
     () => primaryInstructor ? [primaryInstructor, ...coInstructors] : coInstructors,
     [primaryInstructor, coInstructors]
   );
+
+  const availableEducators = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return allEducators.filter((e) => {
+      if (e.username === primaryInstructor?.username) return false;
+      if (coInstructors.some((c) => c.username === e.username)) return false;
+      if (!q) return true;
+      return (
+        e.name.toLowerCase().includes(q) ||
+        e.username.toLowerCase().includes(q) ||
+        (e.title?.toLowerCase().includes(q) ?? false)
+      );
+    });
+  }, [allEducators, searchQuery, primaryInstructor, coInstructors]);
 
   useEffect(() => {
     let cancelled = false;
@@ -89,27 +103,18 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
   }, []);
 
   useEffect(() => {
-    const query = searchQuery.trim();
-    if (query.length < 2) {
-      setSearchResults([]);
-      return;
-    }
-    const timeout = window.setTimeout(() => {
-      fetch(`/api/educator/instructors/search?q=${encodeURIComponent(query)}`)
-        .then((res) => res.json())
-        .then((payload: { ok: boolean; data?: InstructorSearchResult[] }) => {
-          setSearchResults(payload.ok ? payload.data ?? [] : []);
-        })
-        .catch(() => setSearchResults([]));
-    }, 180);
-    return () => window.clearTimeout(timeout);
-  }, [searchQuery]);
+    fetch("/api/educator/instructors/search?q=")
+      .then((res) => res.json())
+      .then((payload: { ok: boolean; data?: InstructorSearchResult[] }) => {
+        if (payload.ok) setAllEducators(payload.data ?? []);
+      })
+      .catch(() => null);
+  }, []);
 
   function addPlatformInstructor(instructor: InstructorSearchResult) {
     if (primaryInstructor?.username === instructor.username || coInstructors.some((item) => item.username === instructor.username)) return;
     setCoInstructors((prev) => [...prev, { ...instructor, source: "platform" }]);
     setSearchQuery("");
-    setSearchResults([]);
   }
 
   function addManualInstructor() {
@@ -186,7 +191,7 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
     setMessage("");
 
     if (Object.keys(localErrors).length > 0) {
-      setMessage("Check the highlighted fields and try again.");
+      setMessage(t.checkFieldsAndRetry);
       return;
     }
 
@@ -221,13 +226,13 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
         formRef.current?.reset();
         setFieldErrors({});
         setCoInstructors([]);
-        setMessage("Course draft created. Opening the content editor...");
+        setMessage(t.courseDraftCreated);
         router.refresh();
         if (result.data?.courseId) {
           router.push(`/educator/courses/${encodeURIComponent(result.data.courseId)}`);
         }
       } catch {
-        setMessage("Could not create the course right now. Please try again.");
+        setMessage(t.couldNotCreateCourse);
       }
     });
   }
@@ -240,20 +245,17 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
         <p className="mt-2 text-sm font-[500] leading-6 text-[var(--muted)]">{t.startCourseDraftHint}</p>
       </div>
 
-      {/* Slug + Level */}
       <div className="grid gap-4 md:grid-cols-2">
         <label className="pr-label">
-          Slug
+          {t.slugLabel}
           <input name="slug" placeholder="basic-computer-skills" required className={fieldClass(Boolean(fieldErrors.slug))} />
-          <span className="text-xs font-[600] leading-5 text-[var(--muted)]">
-            URL name only: lowercase letters, numbers, hyphens.
-          </span>
+          <span className="text-xs font-[600] leading-5 text-[var(--muted)]">{t.slugHint}</span>
           <FieldError message={fieldErrors.slug} />
         </label>
         <label className="pr-label">
-          Level
+          {t.levelLabel}
           <select name="level" className={fieldClass(false)}>
-            <option value="">— Select level —</option>
+            <option value="">{t.noLevelOption}</option>
             {COURSE_LEVEL_OPTIONS.map((key) => (
               <option key={key} value={key}>
                 {COURSE_LEVELS[key].en} / {COURSE_LEVELS[key].ps} / {COURSE_LEVELS[key].fa}
@@ -263,43 +265,40 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
         </label>
       </div>
 
-      {/* Titles */}
       <div className="grid gap-4 md:grid-cols-2">
         <label className="pr-label">
-          Title English
+          {t.englishTitle}
           <input name="titleEn" required className={fieldClass(Boolean(fieldErrors.titleEn))} />
           <FieldError message={fieldErrors.titleEn} />
         </label>
         <label className="pr-label">
-          Title Pashto
+          {t.pashtoTitle}
           <input name="titlePs" required dir="rtl" className={fieldClass(Boolean(fieldErrors.titlePs))} />
           <FieldError message={fieldErrors.titlePs} />
         </label>
         <label className="pr-label md:col-span-2">
-          Title Dari
+          {t.dariTitle}
           <input name="titleDa" required dir="rtl" className={fieldClass(Boolean(fieldErrors.titleDa))} />
           <FieldError message={fieldErrors.titleDa} />
         </label>
       </div>
 
-      {/* Descriptions */}
       <label className="pr-label">
-        Description English
+        {t.englishDescLabel}
         <textarea name="descriptionEn" required rows={3} className={`${fieldClass(Boolean(fieldErrors.descriptionEn))} leading-6`} />
         <FieldError message={fieldErrors.descriptionEn} />
       </label>
       <label className="pr-label">
-        Description Pashto
+        {t.pashtoDescLabel}
         <textarea name="descriptionPs" required rows={3} dir="rtl" className={`${fieldClass(Boolean(fieldErrors.descriptionPs))} leading-6`} />
         <FieldError message={fieldErrors.descriptionPs} />
       </label>
       <label className="pr-label">
-        Description Dari
+        {t.dariDescLabel}
         <textarea name="descriptionDa" required rows={3} dir="rtl" className={`${fieldClass(Boolean(fieldErrors.descriptionDa))} leading-6`} />
         <FieldError message={fieldErrors.descriptionDa} />
       </label>
 
-      {/* Instructors */}
       <div className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
         <div>
           <p className="text-sm font-black uppercase tracking-[1.4px] text-slate-950">{t.instructors}</p>
@@ -314,17 +313,17 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="truncate text-sm font-black text-slate-950">{primaryInstructor.name}</h3>
                 <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-[var(--brand)]">
-                  Primary Instructor
+                  {t.primaryInstructorBadge}
                 </span>
               </div>
               <p className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-slate-500">
-                {primaryInstructor.bio || "Your educator profile is attached to this course draft."}
+                {primaryInstructor.bio || t.profileAttachedHint}
               </p>
             </div>
           </article>
         ) : (
           <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm font-bold text-slate-500">
-            Loading your educator profile...
+            {t.loadingProfile}
           </div>
         )}
 
@@ -337,10 +336,10 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="truncate text-sm font-black text-slate-950">{inst.name}</h3>
                     <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-slate-500">
-                      {inst.source === "platform" ? "Platform educator" : "External instructor"}
+                      {inst.source === "platform" ? t.platformEducatorBadge : t.externalInstructorBadge}
                     </span>
                   </div>
-                  <p className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-slate-500">{inst.bio || "No bio added yet."}</p>
+                  <p className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-slate-500">{inst.bio || t.noBioAddedYet}</p>
                 </div>
                 <button
                   type="button"
@@ -356,47 +355,61 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
 
         <div className="grid gap-3 rounded-2xl border border-dashed border-slate-200 bg-white p-4">
           <div className="flex flex-wrap items-end justify-between gap-3">
-            <label className="grid min-w-[220px] flex-1 gap-2 text-sm font-black text-slate-800">
-              Add Co-Instructor
-              <input
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search platform educators..."
-                className="h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-950 outline-none transition focus:border-[var(--brand)] focus:bg-white focus:ring-4 focus:ring-blue-100"
-              />
-            </label>
+            <p className="text-sm font-black text-slate-800">{t.addCoInstructor}</p>
             <button
               type="button"
               onClick={() => setManualOpen((open) => !open)}
-              className="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
+              className="h-9 rounded-xl border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:border-[var(--brand)] hover:text-[var(--brand)]"
             >
-              Add an external instructor manually
+              {t.addExternalManually}
             </button>
           </div>
 
-          {searchResults.length > 0 ? (
-            <div className="grid gap-2">
-              {searchResults.map((result) => (
-                <button
-                  key={result.id}
-                  type="button"
-                  onClick={() => addPlatformInstructor(result)}
-                  className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-start transition hover:border-[var(--brand)] hover:bg-blue-50"
-                >
-                  <InstructorAvatar instructor={result} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-black text-slate-950">{result.name}</span>
-                    <span className="block truncate text-xs font-semibold text-slate-500">{result.title || result.username}</span>
-                  </span>
-                </button>
-              ))}
+          {/* Search + in-flow list */}
+          <div className="rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
+            <div className="relative border-b border-slate-200">
+              <svg viewBox="0 0 20 20" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" aria-hidden="true">
+                <circle cx="8.5" cy="8.5" r="5.25" stroke="currentColor" strokeWidth="1.6" />
+                <path d="m13 13 3.5 3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t.searchPlatformEducators}
+                className="h-10 w-full bg-white pl-9 pr-3 text-sm font-semibold text-slate-950 outline-none"
+              />
             </div>
-          ) : null}
+            <div className="max-h-52 overflow-y-auto">
+              {allEducators.length === 0 ? (
+                <p className="px-4 py-4 text-center text-sm font-[600] text-slate-400">No other educators on the platform yet.</p>
+              ) : availableEducators.length === 0 ? (
+                <p className="px-4 py-4 text-center text-sm font-[600] text-slate-400">No educators match your search.</p>
+              ) : (
+                availableEducators.map((result) => (
+                  <button
+                    key={result.id}
+                    type="button"
+                    onClick={() => addPlatformInstructor(result)}
+                    className="flex w-full items-center gap-3 border-b border-slate-100 px-3 py-2.5 text-start transition last:border-0 hover:bg-blue-50"
+                  >
+                    <InstructorAvatar instructor={result} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-black text-slate-950">{result.name}</span>
+                      <span className="block truncate text-xs font-semibold text-slate-500">{result.title || result.username}</span>
+                    </span>
+                    <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 text-[var(--brand)]" fill="none" aria-hidden="true">
+                      <path d="M10 4v12M4 10h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
 
           {manualOpen ? (
             <div className="grid gap-3 border-t border-slate-200 pt-4 md:grid-cols-2">
               <label className="grid gap-2 text-sm font-black text-slate-800">
-                Full Name
+                {t.displayNameLabel}
                 <input
                   value={manualInstructor.name}
                   onChange={(event) => setManualInstructor((prev) => ({ ...prev, name: event.target.value }))}
@@ -404,7 +417,7 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
                 />
               </label>
               <div className="grid gap-2 text-sm font-black text-slate-800">
-                Avatar
+                {t.profilePhoto}
                 <AvatarUpload
                   name={manualInstructor.name}
                   currentUrl={manualInstructor.avatarUrl}
@@ -412,7 +425,7 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
                 />
               </div>
               <label className="grid gap-2 text-sm font-black text-slate-800 md:col-span-2">
-                Bio
+                {t.bioEnLabel}
                 <textarea
                   value={manualInstructor.bio ?? ""}
                   onChange={(event) => setManualInstructor((prev) => ({ ...prev, bio: event.target.value || undefined }))}
@@ -426,7 +439,7 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
                 disabled={!manualInstructor.name.trim()}
                 className="h-11 rounded-xl bg-[var(--brand)] px-4 text-sm font-black text-white shadow-sm transition hover:bg-[var(--brand-600)] disabled:cursor-not-allowed disabled:opacity-50 md:col-span-2"
               >
-                Add external instructor
+                {t.addInstructor}
               </button>
             </div>
           ) : null}

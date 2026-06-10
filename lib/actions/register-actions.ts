@@ -98,11 +98,12 @@ export async function registerUser(
         email,
         passwordHash,
         role: UserRole.STUDENT,
-        status: UserStatus.VERIFICATION_PENDING
+        status: UserStatus.VERIFICATION_PENDING,
+        locale
       }
     });
     const token = await createVerificationToken(email);
-    await sendVerificationEmail({ email, name, verifyUrl: token.verifyUrl });
+    await sendVerificationEmail({ email, name, verifyUrl: token.verifyUrl, locale });
   } catch {
     return { error: m.createUnavailable };
   }

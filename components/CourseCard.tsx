@@ -142,11 +142,7 @@ export function CourseCard({ course, index = 0, isAuthenticated = false }: { cou
   const thumb = THUMB_CONFIGS[index % THUMB_CONFIGS.length];
   const courseHref = `/courses/${course.id}`;
   const manageHref = `/educator/courses/${course.id}`;
-  const cardHref = course.isCreatorCourse
-    ? manageHref
-    : isAuthenticated
-      ? courseHref
-      : `/login?callbackUrl=${encodeURIComponent(courseHref)}`;
+  const cardHref = course.isCreatorCourse ? manageHref : courseHref;
   const actionLabel = course.isCreatorCourse
     ? t.manageCourse
     : course.isEnrolled

@@ -3,9 +3,11 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { submitCourseForReview } from "@/lib/actions/course-actions";
+import { useLanguage } from "@/components/LanguageProvider";
 
 export function CourseSubmitButton({ courseId }: { courseId: string }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -21,7 +23,7 @@ export function CourseSubmitButton({ courseId }: { courseId: string }) {
       }
 
       setIsError(false);
-      setMessage("Submitted for review.");
+      setMessage(t.submittedForReview);
       router.refresh();
     });
   }
@@ -34,7 +36,7 @@ export function CourseSubmitButton({ courseId }: { courseId: string }) {
         disabled={isPending}
         className="pr-btn-primary !min-h-10 px-4"
       >
-        {isPending ? "Submitting..." : "Submit for review"}
+        {isPending ? t.submitting : t.submitForReview}
       </button>
       {message ? (
         <p

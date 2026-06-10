@@ -21,7 +21,9 @@ export async function enrollInCourse(input: { courseId: string }): Promise<Actio
   try {
     const session = await auth();
     if (!session?.user?.id) throw new Error("You must be signed in to enroll.");
-    if (session.user.role !== UserRole.STUDENT) throw new Error("Only student accounts can enroll in courses.");
+    if (session.user.role !== UserRole.STUDENT && session.user.role !== UserRole.EDUCATOR) {
+      throw new Error("Only student and educator accounts can enroll in courses.");
+    }
 
     const { courseId } = enrollSchema.parse(input);
 
@@ -42,6 +44,7 @@ export async function enrollInCourse(input: { courseId: string }): Promise<Actio
 
     revalidatePath(`/courses/${courseId}`);
     revalidatePath("/dashboard");
+    revalidatePath("/educator");
 
     return { ok: true, data: { enrollmentId: enrollment.id } };
   } catch (error) {
@@ -53,7 +56,9 @@ export async function dropEnrollment(input: { courseId: string }): Promise<Actio
   try {
     const session = await auth();
     if (!session?.user?.id) throw new Error("You must be signed in to drop a course.");
-    if (session.user.role !== UserRole.STUDENT) throw new Error("Only student accounts can drop enrolled courses.");
+    if (session.user.role !== UserRole.STUDENT && session.user.role !== UserRole.EDUCATOR) {
+      throw new Error("Only student and educator accounts can drop enrolled courses.");
+    }
 
     const { courseId } = enrollSchema.parse(input);
 
@@ -74,7 +79,7 @@ export async function dropEnrollment(input: { courseId: string }): Promise<Actio
 export async function getEnrollmentStatus(courseId: string): Promise<boolean> {
   const session = await auth();
   if (!session?.user?.id) return false;
-  if (session.user.role !== UserRole.STUDENT) return false;
+  if (session.user.role !== UserRole.STUDENT && session.user.role !== UserRole.EDUCATOR) return false;
 
   const enrollment = await db.enrollment.findUnique({
     where: { userId_courseId: { userId: session.user.id, courseId } }

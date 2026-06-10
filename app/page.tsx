@@ -83,11 +83,11 @@ export default async function Home() {
 
           <div className="kl-home-cta flex flex-wrap gap-2">
             {role === "STUDENT" ? (
-              <Link href="/dashboard" className="pr-btn-primary">Resume Learning</Link>
+              <Link href="/dashboard" className="pr-btn-primary">{dict.resumeLearning}</Link>
             ) : role === "EDUCATOR" ? (
-              <Link href="/educator" className="pr-btn-primary">Go to Creator Workspace</Link>
+              <Link href="/educator" className="pr-btn-primary">{dict.goToCreatorWorkspace}</Link>
             ) : role === "ADMIN" ? (
-              <Link href="/admin" className="pr-btn-primary">Go to Admin Portal</Link>
+              <Link href="/admin" className="pr-btn-primary">{dict.goToAdminPortal}</Link>
             ) : (
               <>
                 <Link href="/courses" className="pr-btn-primary">{dict.heroCta}</Link>

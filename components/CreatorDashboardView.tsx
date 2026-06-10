@@ -8,6 +8,29 @@ import { DeleteCourseButton } from "@/components/educator/DeleteCourseButton";
 import { NewCourseModal } from "@/components/educator/NewCourseModal";
 import { MessagesInbox } from "@/components/MessagesInbox";
 import { PortalSettingsView } from "@/components/PortalSettingsView";
+import { useLanguage } from "@/components/LanguageProvider";
+import { RecommendedCourses } from "@/components/RecommendedCourses";
+import type { Dictionary } from "@/lib/i18n";
+import type { RecommendedCourse } from "@/lib/recommendations";
+
+export type StudentJourney = {
+  certificates: Array<{
+    certificateUuid: string;
+    courseId: string;
+    courseTitle: string;
+    grade: number;
+    issuedAt: string;
+  }>;
+  enrollments: Array<{
+    courseId: string;
+    courseSlug: string;
+    courseTitle: string;
+    enrolledAt: string;
+    totalLessons: number;
+    completedLessons: number;
+    hasCertificate: boolean;
+  }>;
+};
 
 type CreatorCourse = {
   id: string;
@@ -43,6 +66,8 @@ type CreatorDashboardViewProps = {
     image: string | null;
     linkedinUrl: string | null;
   };
+  studentJourney: StudentJourney;
+  recommendedCourses: RecommendedCourse[];
   sessions: Array<{
     id: string;
     label: string;
@@ -51,13 +76,13 @@ type CreatorDashboardViewProps = {
   }>;
 };
 
-type CreatorView = "dashboard" | "creator" | "submissions" | "students" | "messages" | "resources" | "settings";
+type CreatorView = "dashboard" | "creator" | "submissions" | "students" | "messages" | "resources" | "journey" | "settings";
 
-function statusLabel(status: CourseStatus, latestReview: CreatorCourse["latestReview"]) {
-  if (latestReview === "RETURNED") return "Rejected";
-  if (status === CourseStatus.PUBLISHED) return "Approved";
-  if (status === CourseStatus.PENDING_REVIEW) return "In Review";
-  return "Draft";
+function statusLabel(status: CourseStatus, latestReview: CreatorCourse["latestReview"], t: Dictionary) {
+  if (latestReview === "RETURNED") return t.statusRejected;
+  if (status === CourseStatus.PUBLISHED) return t.statusApproved;
+  if (status === CourseStatus.PENDING_REVIEW) return t.inReview;
+  return t.statusDraft;
 }
 
 function statusBadgeClass(status: CourseStatus, latestReview: CreatorCourse["latestReview"]) {
@@ -73,10 +98,10 @@ function readiness(status: CourseStatus) {
   return 40;
 }
 
-function readinessHint(status: CourseStatus) {
-  if (status === CourseStatus.PUBLISHED) return "Published & live — keep it fresh for your students";
-  if (status === CourseStatus.PENDING_REVIEW) return "Submitted — awaiting admin review";
-  return "Draft in progress — keep building modules and lessons";
+function readinessHint(status: CourseStatus, t: Dictionary) {
+  if (status === CourseStatus.PUBLISHED) return t.readinessHintPublished;
+  if (status === CourseStatus.PENDING_REVIEW) return t.readinessHintSubmitted;
+  return t.readinessHintDraft;
 }
 
 function NavIcon({ name }: { name: CreatorView }) {
@@ -87,6 +112,7 @@ function NavIcon({ name }: { name: CreatorView }) {
     students: "M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M2.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5 M15.5 6.2A2.8 2.8 0 0 1 17 11.5 M16.5 14c2.2.4 3.5 2 3.5 4.5",
     messages: "M5 5h14a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 16h-7l-4 3v-3H5a1.5 1.5 0 0 1-1.5-1.5v-8A1.5 1.5 0 0 1 5 5Z",
     resources: "M5 4h14v14.5a1.5 1.5 0 0 1-1.5 1.5H6.5A1.5 1.5 0 0 1 5 18.5V4Z M8 8h8M8 12h8M8 16h5",
+    journey: "M2 9.5L12 5l10 4.5-10 4.5L2 9.5Z M6 12v4.5c0 2 2.7 3.5 6 3.5s6-1.5 6-3.5V12 M20 9.5v5",
     settings: "M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z M19.4 15a8 8 0 0 0 .1-2l2-1.5-2-3.5-2.4 1a8 8 0 0 0-1.7-1L15 5.5h-4L10.6 8a8 8 0 0 0-1.7 1l-2.4-1-2 3.5 2 1.5a8 8 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a8 8 0 0 0 1.7 1l.4 2.5h4l.4-2.5a8 8 0 0 0 1.7-1l2.4 1 2-3.5-2.1-1.5Z"
   };
   return (
@@ -141,26 +167,26 @@ function ProgressDonut({ percent }: { percent: number }) {
   );
 }
 
-function CourseRow({ course }: { course: CreatorCourse }) {
+function CourseRow({ course, t }: { course: CreatorCourse; t: Dictionary }) {
   return (
     <article className="flex overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] transition hover:shadow-[var(--shadow)]">
       <div className="flex flex-1 flex-wrap items-start gap-4 p-5">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-[800] uppercase tracking-[1px] ${statusBadgeClass(course.status, course.latestReview)}`}>
-              {statusLabel(course.status, course.latestReview)}
+              {statusLabel(course.status, course.latestReview, t)}
             </span>
             <span className="text-[12px] font-[600] text-[var(--muted-2)]">{course.slug}</span>
           </div>
           <h3 className="mt-2 text-[16px] font-[800] tracking-tight text-[var(--ink)]">{course.title}</h3>
           <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-[var(--muted)]">{course.description}</p>
           <p className="mt-2 text-[12px] font-[700] text-[var(--muted-2)]">
-            {course.modules} modules · {course.enrollments} students enrolled
+            {course.modules} {t.modulesCount} · {course.enrollments} {t.studentsCount}
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <Link href={`/educator/courses/${course.id}`} className="pr-btn-primary !min-h-9 px-4 text-[13px]">
-            Edit course
+            {t.editCourse}
           </Link>
           {course.status === CourseStatus.DRAFT ? <CourseSubmitButton courseId={course.id} /> : null}
           <DeleteCourseButton courseId={course.id} />
@@ -177,9 +203,13 @@ export function CreatorDashboardView({
   students,
   metrics,
   profile,
+  studentJourney,
+  recommendedCourses,
   sessions
 }: CreatorDashboardViewProps) {
+  const { t } = useLanguage();
   const [activeView, setActiveView] = useState<CreatorView>("dashboard");
+  const [journeyTab, setJourneyTab] = useState<"certificates" | "courses">("certificates");
   const latestCourse = courses[0] ?? null;
   const editableCourses = useMemo(
     () => courses.filter((course) => course.status === CourseStatus.DRAFT || course.status === CourseStatus.PUBLISHED),
@@ -191,20 +221,21 @@ export function CreatorDashboardView({
   );
 
   const heroMetrics = [
-    { key: "enrollments", label: "Student Enrollments", value: metrics.enrollments.toLocaleString(), icon: "enrollments" as const, showStars: false },
-    { key: "courses", label: "Active Courses", value: metrics.activeCourses.toLocaleString(), icon: "courses" as const, showStars: false },
-    { key: "rating", label: "Average Rating", value: metrics.ratingCount ? metrics.averageRating?.toFixed(1) ?? "—" : "—", icon: "rating" as const, showStars: metrics.ratingCount > 0 },
-    { key: "messages", label: "Student Messages", value: metrics.unreadMessages.toLocaleString(), icon: "messages" as const, showStars: false },
+    { key: "enrollments", label: t.metricStudentEnrollments, value: metrics.enrollments.toLocaleString(), icon: "enrollments" as const, showStars: false },
+    { key: "courses", label: t.metricActiveCourses, value: metrics.activeCourses.toLocaleString(), icon: "courses" as const, showStars: false },
+    { key: "rating", label: t.metricAverageRating, value: metrics.ratingCount ? metrics.averageRating?.toFixed(1) ?? "—" : "—", icon: "rating" as const, showStars: metrics.ratingCount > 0 },
+    { key: "messages", label: t.metricStudentMessages, value: metrics.unreadMessages.toLocaleString(), icon: "messages" as const, showStars: false },
   ];
 
   const navItems: Array<{ key: CreatorView; label: string; icon: CreatorView }> = [
-    { key: "dashboard", label: "My Dashboard", icon: "dashboard" },
-    { key: "creator", label: "Course Creator", icon: "creator" },
-    { key: "submissions", label: "My Submissions", icon: "submissions" },
-    { key: "students", label: "My Students", icon: "students" },
-    { key: "messages", label: "My Messages", icon: "messages" },
-    { key: "resources", label: "Resources", icon: "resources" },
-    { key: "settings", label: "Creator Settings", icon: "settings" }
+    { key: "dashboard", label: t.dashboard, icon: "dashboard" },
+    { key: "creator", label: t.navCourseCreator, icon: "creator" },
+    { key: "submissions", label: t.navMySubmissions, icon: "submissions" },
+    { key: "students", label: t.navMyStudents, icon: "students" },
+    { key: "messages", label: t.messagesTitle, icon: "messages" },
+    { key: "resources", label: t.navResources, icon: "resources" },
+    { key: "journey", label: t.navMyStudentJourney, icon: "journey" },
+    { key: "settings", label: t.navCreatorSettings, icon: "settings" }
   ];
 
   useEffect(() => {
@@ -215,14 +246,17 @@ export function CreatorDashboardView({
   return (
     <main className="pr-page">
       <div className="student-portal-shell">
-        <aside className="student-portal-sidebar" aria-label="Creator portal navigation">
+        <aside className="student-portal-sidebar" aria-label={t.creatorPortal}>
           <div className="student-portal-brand">
             <span className="student-portal-brand-icon">
-              <img src="/poharana-icon-v3.svg" alt="" />
+              {/* Graduation cap — educator */}
+              <svg viewBox="0 0 24 24" fill="none" width="28" height="28" stroke="var(--brand)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                <path d="M6 12v5c3 3 9 3 12 0v-5" />
+              </svg>
             </span>
             <div>
-              <p>KabulLearn</p>
-              <span>Creator Portal</span>
+              <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--ink)", display: "block" }}>{t.creatorPortal}</span>
             </div>
           </div>
           <nav className="student-portal-nav">
@@ -245,9 +279,9 @@ export function CreatorDashboardView({
           {activeView === "dashboard" ? (
             <>
               <section className="relative overflow-hidden rounded-[var(--radius-xl)] bg-[linear-gradient(120deg,#3A1D7A_0%,#4F2BA8_45%,#5B3FC4_100%)] px-6 pb-24 pt-7 text-white shadow-[var(--shadow-lg)] lg:px-10 lg:pb-28 lg:pt-9">
-                <p className="text-[11px] font-[800] uppercase tracking-[3px] text-white/70">Creator Portal</p>
+                <p className="text-[11px] font-[800] uppercase tracking-[3px] text-white/70">{t.creatorPortal}</p>
                 <h1 className="mt-2 text-[clamp(28px,4vw,44px)] font-[800] leading-tight tracking-tight">
-                  Welcome back, {firstName}! 👋
+                  {t.welcomeBack}, {firstName}! 👋
                 </h1>
                 <p className="mt-2 max-w-xl text-[15px] font-[500] leading-relaxed text-white/80">{intro}</p>
               </section>
@@ -280,18 +314,18 @@ export function CreatorDashboardView({
                       </g>
                     </svg>
                     <p className="absolute bottom-3 start-5 text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--muted)]">
-                      Active Course Progress
+                      {t.activeCourseProgress}
                     </p>
                   </div>
                   <div className="p-5 lg:p-6">
                     {latestCourse ? (
                       <>
-                        <p className="text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--brand)]">Up Next</p>
+                        <p className="text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--brand)]">{t.upNext}</p>
                         <h2 className="mt-1 text-[22px] font-[800] tracking-[-0.4px] text-[var(--ink)]">{latestCourse.title}</h2>
-                        <p className="mt-1 text-[13px] font-[500] text-[var(--muted)]">{readinessHint(latestCourse.status)}</p>
+                        <p className="mt-1 text-[13px] font-[500] text-[var(--muted)]">{readinessHint(latestCourse.status, t)}</p>
                         <div className="mt-5">
                           <div className="mb-1.5 flex items-center justify-between text-[12px] font-[800]">
-                            <span className="text-[var(--muted)]">{statusLabel(latestCourse.status, latestCourse.latestReview)}</span>
+                            <span className="text-[var(--muted)]">{statusLabel(latestCourse.status, latestCourse.latestReview, t)}</span>
                             <span className="text-[var(--ink)]">{readiness(latestCourse.status)}%</span>
                           </div>
                           <div className="h-2 overflow-hidden rounded-full bg-[var(--surface)]">
@@ -300,17 +334,17 @@ export function CreatorDashboardView({
                         </div>
                         <div className="mt-5 flex items-center justify-between gap-3">
                           <p className="text-[12px] font-[700] text-[var(--muted-2)]">
-                            {latestCourse.modules} modules · {latestCourse.enrollments} students enrolled
+                            {latestCourse.modules} {t.modulesCount} · {latestCourse.enrollments} {t.studentsCount}
                           </p>
                           <Link href={`/educator/courses/${latestCourse.id}`} className="pr-btn-primary ms-auto !min-h-10 px-5 text-[13px]">
-                            Edit course
+                            {t.editCourse}
                           </Link>
                         </div>
                       </>
                     ) : (
                       <div className="grid place-items-center gap-3 py-8 text-center">
-                        <p className="text-[15px] font-[800] text-[var(--ink-2)]">No courses yet.</p>
-                        <p className="text-[13px] text-[var(--muted)]">Create your first draft to begin.</p>
+                        <p className="text-[15px] font-[800] text-[var(--ink-2)]">{t.noCourses}</p>
+                        <p className="text-[13px] text-[var(--muted)]">{t.createFirstDraft}</p>
                         <NewCourseModal />
                       </div>
                     )}
@@ -318,22 +352,22 @@ export function CreatorDashboardView({
                 </section>
 
                 <section className="col-span-12 grid content-start gap-4 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-6 shadow-[var(--shadow-sm)] lg:col-span-4">
-                  <p className="text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--muted)]">Analytics</p>
+                  <p className="text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--muted)]">{t.analyticsLabel}</p>
                   <div className="grid justify-items-center gap-1">
                     <ProgressDonut percent={metrics.completionRate} />
-                    <p className="mt-1 text-[12px] font-[700] text-[var(--muted)]">Aggregate completion rate</p>
+                    <p className="mt-1 text-[12px] font-[700] text-[var(--muted)]">{t.aggregateCompletionRate}</p>
                   </div>
                   <div className="grid gap-2 border-t border-[var(--border)] pt-4">
                     <div className="flex items-center justify-between text-[13px]">
-                      <span className="font-[600] text-[var(--muted)]">Students completed</span>
+                      <span className="font-[600] text-[var(--muted)]">{t.studentsCompletedLabel}</span>
                       <span className="font-[900] text-[var(--ink)]">{metrics.completedCertificates}/{metrics.enrollments}</span>
                     </div>
                     <div className="flex items-center justify-between text-[13px]">
-                      <span className="font-[600] text-[var(--muted)]">Course average rating</span>
+                      <span className="font-[600] text-[var(--muted)]">{t.courseAverageRating}</span>
                       <span className="font-[900] text-[var(--ink)]">{metrics.ratingCount ? `${metrics.averageRating?.toFixed(1)}/5.0` : "—"}</span>
                     </div>
                     <div className="flex items-center justify-between text-[13px]">
-                      <span className="font-[600] text-[var(--muted)]">Courses</span>
+                      <span className="font-[600] text-[var(--muted)]">{t.courses}</span>
                       <span className="font-[900] text-[var(--ink)]">{courses.length}</span>
                     </div>
                   </div>
@@ -346,25 +380,25 @@ export function CreatorDashboardView({
             <section className="grid gap-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="pr-eyebrow">Course Creator</p>
-                  <h1 className="pr-h2 mt-1">Editable courses</h1>
+                  <p className="pr-eyebrow">{t.navCourseCreator}</p>
+                  <h1 className="pr-h2 mt-1">{t.editableCourses}</h1>
                 </div>
                 <div className="flex flex-wrap items-center gap-4">
                   <Link
                     href="/courses"
                     className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius)] border border-slate-300 bg-white px-5 text-sm font-[900] text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.16)]"
                   >
-                    Explore existing courses
+                    {t.exploreExistingCourses}
                   </Link>
                   <NewCourseModal />
                 </div>
               </div>
               {editableCourses.length === 0 ? (
                 <div className="pr-muted-box py-16 text-center">
-                  <p className="text-[15px] font-[800] text-[var(--muted)]">No editable courses yet.</p>
+                  <p className="text-[15px] font-[800] text-[var(--muted)]">{t.noEditableCoursesYet}</p>
                 </div>
               ) : (
-                <div className="grid gap-3">{editableCourses.map((course) => <CourseRow key={course.id} course={course} />)}</div>
+                <div className="grid gap-3">{editableCourses.map((course) => <CourseRow key={course.id} course={course} t={t} />)}</div>
               )}
             </section>
           ) : null}
@@ -372,12 +406,12 @@ export function CreatorDashboardView({
           {activeView === "submissions" ? (
             <section className="grid gap-4">
               <div>
-                <p className="pr-eyebrow">My Submissions</p>
-                <h1 className="pr-h2 mt-1">Submitted courses</h1>
+                <p className="pr-eyebrow">{t.navMySubmissions}</p>
+                <h1 className="pr-h2 mt-1">{t.submittedCoursesHeading}</h1>
               </div>
               {submittedCourses.length === 0 ? (
                 <div className="pr-muted-box py-16 text-center">
-                  <p className="text-[15px] font-[800] text-[var(--muted)]">No submitted courses yet.</p>
+                  <p className="text-[15px] font-[800] text-[var(--muted)]">{t.noSubmittedCoursesYet}</p>
                 </div>
               ) : (
                 <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-white shadow-[var(--shadow-sm)]">
@@ -385,12 +419,12 @@ export function CreatorDashboardView({
                     <div key={course.id} className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border)] p-5 last:border-b-0">
                       <div className="min-w-0">
                         <span className={`rounded-full px-2.5 py-1 text-[11px] font-[900] uppercase tracking-[1px] ${statusBadgeClass(course.status, course.latestReview)}`}>
-                          {statusLabel(course.status, course.latestReview)}
+                          {statusLabel(course.status, course.latestReview, t)}
                         </span>
                         <h2 className="mt-2 text-[16px] font-[900] text-[var(--ink)]">{course.title}</h2>
                         {course.reviewNote ? <p className="mt-1 text-sm font-[650] text-[var(--muted)]">{course.reviewNote}</p> : null}
                       </div>
-                      <Link href={`/educator/courses/${course.id}`} className="pr-btn-ghost !min-h-9 px-4 text-[13px]">View</Link>
+                      <Link href={`/educator/courses/${course.id}`} className="pr-btn-ghost !min-h-9 px-4 text-[13px]">{t.viewLabel}</Link>
                     </div>
                   ))}
                 </div>
@@ -401,12 +435,12 @@ export function CreatorDashboardView({
           {activeView === "students" ? (
             <section className="grid gap-4">
               <div>
-                <p className="pr-eyebrow">My Students</p>
-                <h1 className="pr-h2 mt-1">Enrolled students</h1>
+                <p className="pr-eyebrow">{t.navMyStudents}</p>
+                <h1 className="pr-h2 mt-1">{t.enrolledStudentsHeading}</h1>
               </div>
               {students.length === 0 ? (
                 <div className="pr-muted-box py-16 text-center">
-                  <p className="text-[15px] font-[800] text-[var(--muted)]">No enrolled students yet.</p>
+                  <p className="text-[15px] font-[800] text-[var(--muted)]">{t.noEnrolledStudentsYet}</p>
                 </div>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -425,38 +459,24 @@ export function CreatorDashboardView({
           {activeView === "resources" ? (
             <section className="grid gap-5">
               <div className="pr-panel p-6 lg:p-8">
-                <p className="pr-eyebrow">Resources</p>
-                <h1 className="pr-h2 mt-1">Educator resources</h1>
-                <p className="pr-copy mt-2 max-w-2xl">
-                  Practical guidance for creating, recording, translating, and submitting KabulLearn courses.
-                </p>
+                <p className="pr-eyebrow">{t.navResources}</p>
+                <h1 className="pr-h2 mt-1">{t.navResources}</h1>
+                <p className="pr-copy mt-2 max-w-2xl">{t.educatorResourcesHint}</p>
               </div>
 
               <section className="pr-panel p-6 lg:p-8">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div>
-                    <p className="pr-eyebrow">Creator instructions</p>
-                    <h2 className="pr-h2 mt-1">Four-step publishing workflow</h2>
+                    <p className="pr-eyebrow">{t.creatorInstructions}</p>
+                    <h2 className="pr-h2 mt-1">{t.fourStepWorkflow}</h2>
                   </div>
                 </div>
                 <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                   {[
-                    {
-                      title: "1. Register",
-                      description: "Create a free KabulLearn account with your real name and reachable email address."
-                    },
-                    {
-                      title: "2. Request Access",
-                      description: "Submit a request explaining what you would like to teach. Admin will upgrade your existing account."
-                    },
-                    {
-                      title: "3. Create",
-                      description: "Build course modules, lessons, readings, videos, quizzes, and certificate-ready milestones."
-                    },
-                    {
-                      title: "4. Publish",
-                      description: "Submit the course for review, complete requested revisions, and publish after approval."
-                    }
+                    { title: t.resStep1Title, description: t.resStep1Desc },
+                    { title: t.resStep2Title, description: t.resStep2Desc },
+                    { title: t.resStep3Title, description: t.resStep3Desc },
+                    { title: t.resStep4Title, description: t.resStep4Desc }
                   ].map((step) => (
                     <article key={step.title} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)]">
                       <h3 className="text-lg font-[900] text-[var(--ink)]">{step.title}</h3>
@@ -467,14 +487,14 @@ export function CreatorDashboardView({
               </section>
 
               <section className="pr-panel p-6 lg:p-8">
-                <p className="pr-eyebrow">Before submitting</p>
-                <h2 className="pr-h2 mt-1">Course readiness checklist</h2>
+                <p className="pr-eyebrow">{t.beforeSubmitting}</p>
+                <h2 className="pr-h2 mt-1">{t.courseReadinessChecklist}</h2>
                 <ul className="mt-5 grid gap-3 text-sm font-[650] leading-6 text-[var(--muted)] md:grid-cols-2">
-                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">Prepare a short description of the course you want to teach.</li>
-                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">List the language versions you can support: English, Pashto, Dari, or a combination.</li>
-                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">Confirm that you own or have permission to use all course materials.</li>
-                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">Plan quizzes or validation checkpoints that prove learner understanding.</li>
-                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4 md:col-span-2">Review the instructor guidelines before uploading videos, readings, datasets, or slides.</li>
+                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">{t.checklistItem1}</li>
+                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">{t.checklistItem2}</li>
+                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">{t.checklistItem3}</li>
+                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">{t.checklistItem4}</li>
+                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4 md:col-span-2">{t.checklistItem5}</li>
                 </ul>
               </section>
 
@@ -486,12 +506,10 @@ export function CreatorDashboardView({
                   <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--brand-50)] text-[var(--brand)]">
                     <NavIcon name="resources" />
                   </span>
-                  <h2 className="mt-5 text-2xl font-[900] tracking-[-0.5px] text-[var(--ink)]">Instructor guidelines</h2>
-                  <p className="mt-2 text-sm font-[650] leading-7 text-[var(--muted)]">
-                    Review standards for lesson structure, trilingual content, quizzes, media quality, copyright, and submission readiness.
-                  </p>
+                  <h2 className="mt-5 text-2xl font-[900] tracking-[-0.5px] text-[var(--ink)]">{t.creatorInstructions}</h2>
+                  <p className="mt-2 text-sm font-[650] leading-7 text-[var(--muted)]">{t.instructorGuidelinesDesc}</p>
                   <span className="mt-5 inline-flex text-sm font-[900] text-[var(--brand)] group-hover:text-[var(--brand-hover)]">
-                    Open guidelines →
+                    {t.openGuidelines}
                   </span>
                 </Link>
 
@@ -504,9 +522,9 @@ export function CreatorDashboardView({
                             <path d="M9 7.5v9l7-4.5-7-4.5Z" />
                           </svg>
                         </span>
-                        <h2 className="mt-4 text-xl font-[900] text-[var(--ink)]">Educator onboarding video</h2>
+                        <h2 className="mt-4 text-xl font-[900] text-[var(--ink)]">{t.educatorOnboardingVideo}</h2>
                         <p className="mx-auto mt-2 max-w-md text-sm font-[650] leading-6 text-[var(--muted)]">
-                          Add a short walkthrough showing how approved instructors create drafts, add lessons, and submit for review.
+                          {t.educatorOnboardingVideoDesc}
                         </p>
                       </div>
                     </div>
@@ -516,7 +534,158 @@ export function CreatorDashboardView({
             </section>
           ) : null}
 
-          {activeView === "settings" ? <PortalSettingsView profile={profile} sessions={sessions} /> : null}
+          {activeView === "journey" ? (
+            <section className="portal-settings">
+              <div className="pr-panel p-6 lg:p-8">
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <p className="pr-eyebrow">{t.yourLearningHistory}</p>
+                    <h1 className="pr-h2 mt-1">{t.myStudentJourneyTitle}</h1>
+                    <p className="pr-copy mt-2 max-w-2xl">{t.studentJourneyDesc}</p>
+                  </div>
+                  <div className="portal-settings-tabs" role="tablist" aria-label={t.myStudentJourneyTitle}>
+                    {([["certificates", t.journeyTabCertificates], ["courses", t.journeyTabCourses]] as const).map(([key, label]) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setJourneyTab(key)}
+                        className={journeyTab === key ? "is-active" : ""}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {journeyTab === "certificates" ? (
+                <section className="pr-panel portal-settings-section">
+                  <div>
+                    <p className="pr-eyebrow">{t.achievementsEyebrow}</p>
+                    <h2 className="mt-2 text-2xl font-[900] text-[var(--ink)]">{t.myCertificatesHeading}</h2>
+                  </div>
+                  {studentJourney.certificates.length === 0 ? (
+                    <div className="pr-muted-box py-12 text-center">
+                      <p className="text-[14px] font-[700] text-[var(--muted)]">{t.noCertificatesYetHint}</p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                      {studentJourney.certificates.map((cert) => (
+                        <article key={cert.certificateUuid} className="grid gap-4 rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)]">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#FFF8E8]">
+                              <svg viewBox="0 0 24 24" className="h-5 w-5 text-[#C9A84C]" fill="none" aria-hidden="true">
+                                <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 0 0 1.946-.806 3.42 3.42 0 0 1 4.438 0 3.42 3.42 0 0 0 1.946.806 3.42 3.42 0 0 1 3.138 3.138 3.42 3.42 0 0 0 .806 1.946 3.42 3.42 0 0 1 0 4.438 3.42 3.42 0 0 0-.806 1.946 3.42 3.42 0 0 1-3.138 3.138 3.42 3.42 0 0 0-1.946.806 3.42 3.42 0 0 1-4.438 0 3.42 3.42 0 0 0-1.946-.806 3.42 3.42 0 0 1-3.138-3.138 3.42 3.42 0 0 0-.806-1.946 3.42 3.42 0 0 1 0-4.438 3.42 3.42 0 0 0 .806-1.946 3.42 3.42 0 0 1 3.138-3.138Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </div>
+                            <span className="rounded-full bg-[#FFF8E8] px-2.5 py-1 text-[11px] font-[900] text-[#C9A84C]">
+                              {cert.grade}%
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-[15px] font-[900] leading-snug text-[var(--ink)]">{cert.courseTitle}</p>
+                            <p className="mt-1 text-[12px] font-[700] text-[var(--muted)]">
+                              {t.issuedLabel2} {new Date(cert.issuedAt).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}
+                            </p>
+                          </div>
+                          <a
+                            href={`/courses/${encodeURIComponent(cert.courseId)}/certificate/download`}
+                            className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-4 text-[13px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.3)] hover:bg-white"
+                          >
+                            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
+                              <path d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1M16 12l-4 4-4-4M12 16V4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            {t.downloadPdf}
+                          </a>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              ) : null}
+
+              {journeyTab === "courses" ? (
+                <section className="pr-panel portal-settings-section">
+                  <div>
+                    <p className="pr-eyebrow">{t.enrolledAsStudent}</p>
+                    <h2 className="mt-2 text-2xl font-[900] text-[var(--ink)]">{t.enrolledCoursesHeading}</h2>
+                  </div>
+                  {studentJourney.enrollments.length === 0 ? (
+                    <div className="pr-muted-box py-12 text-center">
+                      <p className="text-[15px] font-[800] text-[var(--muted)]">{t.noEnrolledCoursesYet}</p>
+                      <p className="mt-1 text-[13px] text-[var(--muted)]">
+                        <Link href="/courses" className="font-[800] text-[var(--brand)] underline-offset-2 hover:underline">
+                          {t.browseCourses}
+                        </Link>{" "}
+                        {t.toStartLearning}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-3">
+                      {studentJourney.enrollments.map((enr) => {
+                        const pct = enr.totalLessons > 0 ? Math.round((enr.completedLessons / enr.totalLessons) * 100) : 0;
+                        return (
+                          <article key={enr.courseId} className="flex flex-wrap items-center gap-5 rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)]">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="text-[15px] font-[900] text-[var(--ink)]">{enr.courseTitle}</p>
+                                {enr.hasCertificate && (
+                                  <span className="rounded-full bg-[#FFF8E8] px-2 py-0.5 text-[11px] font-[900] text-[#C9A84C]">
+                                    {t.certifiedBadge}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-1 text-[12px] font-[700] text-[var(--muted)]">
+                                {enr.completedLessons} / {enr.totalLessons} {t.lessonsCompletedShort}
+                              </p>
+                              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--surface)]">
+                                <div className="h-1.5 rounded-full bg-[var(--brand)] transition-all" style={{ width: `${pct}%` }} />
+                              </div>
+                            </div>
+                            <Link
+                              href={`/courses/${encodeURIComponent(enr.courseId)}`}
+                              className="shrink-0 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[13px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.3)] hover:bg-white"
+                            >
+                              {pct === 100 ? t.reviewCourse : t.continueLearning}
+                            </Link>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {recommendedCourses.length > 0 ? (
+                    <RecommendedCourses courses={recommendedCourses} />
+                  ) : null}
+                </section>
+              ) : null}
+            </section>
+          ) : null}
+
+          {activeView === "settings" ? (
+            <>
+              <PortalSettingsView profile={profile} sessions={sessions} />
+              <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] p-6">
+                <div className="flex flex-wrap items-start gap-4">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white shadow-[var(--shadow-sm)] text-[var(--muted)]">
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-[900] text-[var(--ink)]">{t.steppingDownTitle}</p>
+                    <p className="mt-1 text-[13px] font-[600] leading-6 text-[var(--muted)]">
+                      {t.steppingDownBody.split("info@kabulhub.com")[0]}
+                      <a href="mailto:info@kabulhub.com" className="font-[800] text-[var(--brand)] underline-offset-2 hover:underline">
+                        info@kabulhub.com
+                      </a>
+                      {t.steppingDownBody.split("info@kabulhub.com")[1]}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
     </main>

@@ -83,20 +83,19 @@ export function CourseUpdateForm({
         <p className="text-sm text-[#525f6e]">{t.updateCourseHint}</p>
       </div>
 
-      {/* Slug */}
       <div className="grid gap-2 sm:grid-cols-2">
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          Slug
+          {t.slugLabel}
           <input value={formState.slug} onChange={(e) => setFormState({ ...formState, slug: e.target.value })} placeholder="course-slug" className={inputCls} />
         </label>
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          Level
+          {t.levelLabel}
           <select
             value={formState.level}
             onChange={(e) => setFormState({ ...formState, level: e.target.value })}
             className={inputCls}
           >
-            <option value="">— No level —</option>
+            <option value="">{t.noLevelOption}</option>
             {COURSE_LEVEL_OPTIONS.map((key) => (
               <option key={key} value={key}>
                 {COURSE_LEVELS[key].en} / {COURSE_LEVELS[key].ps} / {COURSE_LEVELS[key].fa}
@@ -105,44 +104,41 @@ export function CourseUpdateForm({
           </select>
         </label>
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          Current status
+          {t.currentStatusLabel}
           <input value={status} readOnly className="rounded-xl border border-stone-200 bg-stone-100 px-3 py-3 text-sm text-[#525f6e]" />
         </label>
       </div>
 
-      {/* Titles */}
       <div className="grid gap-2 sm:grid-cols-2">
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          Title English
+          {t.englishTitle}
           <input value={formState.titleEn} onChange={(e) => setFormState({ ...formState, titleEn: e.target.value })} placeholder="English title" className={inputCls} />
         </label>
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          Title Pashto
+          {t.pashtoTitle}
           <input value={formState.titlePs} dir="rtl" onChange={(e) => setFormState({ ...formState, titlePs: e.target.value })} placeholder="د کورس سرلیک" className={inputCls} />
         </label>
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a] sm:col-span-2">
-          Title Dari
+          {t.dariTitle}
           <input value={formState.titleDa} dir="rtl" onChange={(e) => setFormState({ ...formState, titleDa: e.target.value })} placeholder="عنوان دری کورس" className={inputCls} />
         </label>
       </div>
 
-      {/* Descriptions */}
       <div className="grid gap-2 sm:grid-cols-2">
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          Description English
+          {t.englishDescLabel}
           <textarea value={formState.descriptionEn} onChange={(e) => setFormState({ ...formState, descriptionEn: e.target.value })} rows={3} placeholder="Course summary in English" className={`min-h-[90px] ${inputCls}`} />
         </label>
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-          Description Pashto
+          {t.pashtoDescLabel}
           <textarea value={formState.descriptionPs} dir="rtl" onChange={(e) => setFormState({ ...formState, descriptionPs: e.target.value })} rows={3} placeholder="پدې کورس کې څه زده کوئ" className={`min-h-[90px] ${inputCls}`} />
         </label>
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a] sm:col-span-2">
-          Description Dari
+          {t.dariDescLabel}
           <textarea value={formState.descriptionDa} dir="rtl" onChange={(e) => setFormState({ ...formState, descriptionDa: e.target.value })} rows={3} placeholder="خلاصه‌ی کورس به دری" className={`min-h-[90px] ${inputCls}`} />
         </label>
       </div>
 
-      {/* Instructors */}
       <div className="grid gap-3 rounded-2xl border border-stone-200 bg-stone-50 p-4">
         <div>
           <p className="text-sm font-black uppercase tracking-wider text-[#0f766e]">{t.instructors}</p>
@@ -152,7 +148,7 @@ export function CourseUpdateForm({
           <div key={idx} className="rounded-xl border border-stone-200 bg-white p-4">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-xs font-[800] uppercase tracking-[1.2px] text-[#0f766e]">
-                Instructor {idx + 1}{idx === 0 ? " (primary)" : ""}
+                {t.instructors} {idx + 1}
               </p>
               {instructors.length > 1 && (
                 <button
@@ -166,19 +162,19 @@ export function CourseUpdateForm({
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-                Name *
+                {t.displayNameLabel} *
                 <input value={inst.name} onChange={(e) => updateInstructor(idx, { name: e.target.value })} placeholder="Instructor name" className={inputCls} />
               </label>
               <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-                Username *
+                {t.username} *
                 <input value={inst.username} onChange={(e) => updateInstructor(idx, { username: e.target.value })} placeholder="instructor-username" className={inputCls} />
               </label>
               <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-                Professional title (English)
+                {t.professionalTitleEn}
                 <input value={inst.title ?? ""} onChange={(e) => updateInstructor(idx, { title: e.target.value || undefined })} placeholder="Senior Data Scientist" className={inputCls} />
               </label>
               <div className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-                Profile photo
+                {t.profilePhoto}
                 <AvatarUpload
                   name={inst.name}
                   currentUrl={inst.avatarUrl}
@@ -186,31 +182,31 @@ export function CourseUpdateForm({
                 />
               </div>
               <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-                Professional title (Pashto)
+                {t.professionalTitlePs}
                 <input dir="rtl" value={inst.titlePs ?? ""} onChange={(e) => updateInstructor(idx, { titlePs: e.target.value || undefined })} placeholder="د مسلک سرلیک" className={inputCls} />
               </label>
               <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-                Professional title (Dari)
+                {t.professionalTitleDa}
                 <input dir="rtl" value={inst.titleDa ?? ""} onChange={(e) => updateInstructor(idx, { titleDa: e.target.value || undefined })} placeholder="عنوان حرفه‌ای" className={inputCls} />
               </label>
               <label className="grid gap-1 text-sm font-medium text-[#3d4a5a] sm:col-span-2">
-                Bio (English)
+                {t.bioEnLabel}
                 <textarea value={inst.bio ?? ""} onChange={(e) => updateInstructor(idx, { bio: e.target.value || undefined })} rows={2} className={`min-h-[70px] ${inputCls}`} />
               </label>
               <label className="grid gap-1 text-sm font-medium text-[#3d4a5a] sm:col-span-2">
-                Bio (Pashto)
+                {t.bioPsLabel}
                 <textarea dir="rtl" value={inst.bioPs ?? ""} onChange={(e) => updateInstructor(idx, { bioPs: e.target.value || undefined })} rows={2} className={`min-h-[70px] ${inputCls}`} />
               </label>
               <label className="grid gap-1 text-sm font-medium text-[#3d4a5a] sm:col-span-2">
-                Bio (Dari)
+                {t.bioDaLabel}
                 <textarea dir="rtl" value={inst.bioDa ?? ""} onChange={(e) => updateInstructor(idx, { bioDa: e.target.value || undefined })} rows={2} className={`min-h-[70px] ${inputCls}`} />
               </label>
               <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-                LinkedIn URL
+                {t.linkedinUrlLabel}
                 <input value={inst.linkedinUrl ?? ""} onChange={(e) => updateInstructor(idx, { linkedinUrl: e.target.value || undefined })} placeholder="https://linkedin.com/in/..." className={inputCls} />
               </label>
               <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-                YouTube URL
+                {t.youtubeUrlLabel}
                 <input value={inst.youtubeUrl ?? ""} onChange={(e) => updateInstructor(idx, { youtubeUrl: e.target.value || undefined })} placeholder="https://youtube.com/..." className={inputCls} />
               </label>
             </div>

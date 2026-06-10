@@ -2,8 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { deleteLesson } from "@/lib/actions/course-actions";
+import { useLanguage } from "@/components/LanguageProvider";
 
 export function DeleteLessonButton({ lessonId }: { lessonId: string }) {
+  const { t } = useLanguage();
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -18,13 +20,13 @@ export function DeleteLessonButton({ lessonId }: { lessonId: string }) {
               setMessage(result.error);
               return;
             }
-            setMessage("Lesson removed.");
+            setMessage(t.lessonRemoved);
           })
         }
         disabled={isPending}
         className="pr-btn-ghost !min-h-9 px-3 text-xs uppercase tracking-[1px] text-[var(--muted)]"
       >
-        {isPending ? "Removing..." : "Remove"}
+        {isPending ? t.removingLabel : t.removeLabel}
       </button>
       {message ? <p className="text-xs font-[700] text-[var(--danger)]">{message}</p> : null}
     </div>

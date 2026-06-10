@@ -16,7 +16,7 @@ export default async function TermsPage() {
     <main className="pr-page space-y-6 py-10 lg:py-14">
       <InfoHero eyebrow={content.eyebrow} title={content.title} description={content.description}>
         <Link href="/privacy" className="pr-btn-primary">{content.privacy}</Link>
-        <Link href="/support" className="pr-btn-ghost">{content.contact}</Link>
+        <Link href="/contact" className="pr-btn-ghost">{content.contact}</Link>
       </InfoHero>
 
       <div className="rounded-[var(--radius-lg)] border border-[rgba(150,96,0,0.22)] bg-[var(--warning-50)] p-5 text-sm font-[700] leading-7 text-[var(--ink-2)]">

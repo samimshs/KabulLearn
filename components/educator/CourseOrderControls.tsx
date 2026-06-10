@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { reorderLessons, reorderModules } from "@/lib/actions/course-actions";
+import { useLanguage } from "@/components/LanguageProvider";
 
 type OrderItem = {
   id: string;
@@ -32,6 +33,7 @@ function moveItem(items: OrderItem[], draggedId: string, targetId: string) {
 }
 
 function OrderList({ items, emptyText, saveLabel, onSave }: OrderListProps) {
+  const { t } = useLanguage();
   const router = useRouter();
   const [orderedItems, setOrderedItems] = useState(items);
   const [draggedId, setDraggedId] = useState<string | null>(null);
@@ -92,7 +94,7 @@ function OrderList({ items, emptyText, saveLabel, onSave }: OrderListProps) {
               setMessage("");
               const result = await onSave(orderedItems.map((item) => item.id));
               if (result.ok) {
-                setMessage("Order saved. Submit the course again when ready.");
+                setMessage(t.orderSaved);
                 router.refresh();
               } else {
                 setMessage(result.error);
@@ -101,7 +103,7 @@ function OrderList({ items, emptyText, saveLabel, onSave }: OrderListProps) {
           }
           className="inline-flex min-h-9 items-center justify-center rounded-xl bg-[var(--brand)] px-4 text-xs font-[900] text-white transition hover:bg-[var(--brand-2)] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isPending ? "Saving..." : saveLabel}
+          {isPending ? t.saving : saveLabel}
         </button>
         {message ? <p className="text-xs font-[800] text-[var(--muted)]">{message}</p> : null}
       </div>
@@ -110,16 +112,16 @@ function OrderList({ items, emptyText, saveLabel, onSave }: OrderListProps) {
 }
 
 export function ModuleOrderControl({ courseId, modules }: { courseId: string; modules: OrderItem[] }) {
+  const { t } = useLanguage();
   return (
     <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-4">
       <div className="mb-3">
-        <p className="pr-eyebrow">Drag order</p>
-        <h3 className="mt-1 text-base font-[850] text-[var(--ink)]">Modules</h3>
+        <h3 className="text-base font-[850] text-[var(--ink)]">{t.modules}</h3>
       </div>
       <OrderList
         items={modules}
-        emptyText="Add modules before ordering."
-        saveLabel="Save module order"
+        emptyText={t.addModulesBeforeOrdering}
+        saveLabel={t.saveModuleOrder}
         onSave={(moduleIds) => reorderModules({ courseId, moduleIds })}
       />
     </div>
@@ -127,16 +129,16 @@ export function ModuleOrderControl({ courseId, modules }: { courseId: string; mo
 }
 
 export function LessonOrderControl({ moduleId, lessons }: { moduleId: string; lessons: OrderItem[] }) {
+  const { t } = useLanguage();
   return (
     <div className="rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-white p-3">
       <div className="mb-3">
-        <p className="text-xs font-[900] uppercase tracking-[1.2px] text-[var(--brand)]">Drag order</p>
-        <h4 className="mt-1 text-sm font-[850] text-[var(--ink)]">Lessons</h4>
+        <h4 className="text-sm font-[850] text-[var(--ink)]">{t.lessons}</h4>
       </div>
       <OrderList
         items={lessons}
-        emptyText="Add lessons before ordering."
-        saveLabel="Save lesson order"
+        emptyText={t.addLessonsBeforeOrdering}
+        saveLabel={t.saveLessonOrder}
         onSave={(lessonIds) => reorderLessons({ moduleId, lessonIds })}
       />
     </div>

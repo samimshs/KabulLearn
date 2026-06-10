@@ -89,14 +89,14 @@ export function MessagesInbox() {
   }
 
   return (
-    <div className="grid h-[calc(100vh-220px)] min-h-[480px] grid-cols-1 overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] md:grid-cols-[300px_1fr]">
+    <div className="flex h-[calc(100vh-220px)] min-h-[480px] overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
 
       {/* Conversation list */}
-      <aside className={`flex flex-col border-e border-[var(--border)] ${activeId ? "hidden md:flex" : "flex"}`}>
-        <div className="border-b border-[var(--border)] px-4 py-3">
+      <aside className={`flex-col overflow-hidden border-e border-[var(--border)] md:w-[300px] md:shrink-0 ${activeId ? "hidden md:flex" : "flex flex-1"}`}>
+        <div className="shrink-0 border-b border-[var(--border)] px-4 py-3">
           <h2 className="text-[15px] font-[800] text-[var(--ink)]">{t.conversations}</h2>
         </div>
-        <div className="flex-1 overflow-y-auto">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {conversations.length === 0 ? (
             <div className="grid place-content-center gap-1 p-8 text-center">
               <p className="text-[13px] font-[700] text-[var(--muted)]">{t.noConversationsYet}</p>
@@ -139,7 +139,7 @@ export function MessagesInbox() {
       </aside>
 
       {/* Thread */}
-      <section className={`flex flex-col ${activeId ? "flex" : "hidden md:flex"}`}>
+      <section className={`flex-col flex-1 overflow-hidden min-w-0 ${activeId ? "flex" : "hidden md:flex"}`}>
         {!partner ? (
           <div className="grid flex-1 place-content-center gap-2 p-8 text-center">
             <p className="text-[14px] font-[800] text-[var(--ink-2)]">{t.selectConversation}</p>
@@ -162,7 +162,7 @@ export function MessagesInbox() {
             </div>
 
             {/* Messages */}
-            <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto bg-[var(--surface)] p-4">
+            <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-[var(--surface)] p-4">
               {loadingThread ? (
                 <p className="text-center text-[12px] font-[600] text-[var(--muted)]">{t.loadingShort}</p>
               ) : messages.length === 0 ? (
@@ -189,31 +189,43 @@ export function MessagesInbox() {
               )}
             </div>
 
-            {/* Composer */}
-            <div className="border-t border-[var(--border)] p-3">
-              <form
-                className="flex items-end gap-2"
-                onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-              >
-                <textarea
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
-                  }}
-                  rows={1}
-                  placeholder={t.typeMessage}
-                  className="max-h-32 min-h-[42px] flex-1 resize-none rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] font-[500] text-[var(--ink)] outline-none focus:border-[var(--brand)] focus:bg-white"
-                />
-                <button
-                  type="submit"
-                  disabled={isSending || !draft.trim()}
-                  className="pr-btn-primary !min-h-[42px] shrink-0 px-4 text-[13px] disabled:opacity-50"
+            {/* Composer — hidden for admin conversations (one-way) */}
+            {partner.role === "ADMIN" ? (
+              <div className="border-t border-[var(--border)] px-4 py-3 text-center">
+                <p className="text-[12px] font-[600] text-[var(--muted)]">
+                  {t.adminMessageReadOnly.split("info@kabulhub.com")[0]}
+                  <a href="mailto:info@kabulhub.com" className="font-[700] text-[var(--brand)] hover:underline">
+                    info@kabulhub.com
+                  </a>
+                  {t.adminMessageReadOnly.split("info@kabulhub.com")[1]}
+                </p>
+              </div>
+            ) : (
+              <div className="border-t border-[var(--border)] p-3">
+                <form
+                  className="flex items-end gap-2"
+                  onSubmit={(e) => { e.preventDefault(); handleSend(); }}
                 >
-                  {isSending ? "…" : t.sendLabel}
-                </button>
-              </form>
-            </div>
+                  <textarea
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
+                    }}
+                    rows={1}
+                    placeholder={t.typeMessage}
+                    className="max-h-32 min-h-[42px] flex-1 resize-none rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] font-[500] text-[var(--ink)] outline-none focus:border-[var(--brand)] focus:bg-white"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSending || !draft.trim()}
+                    className="pr-btn-primary !min-h-[42px] shrink-0 px-4 text-[13px] disabled:opacity-50"
+                  >
+                    {isSending ? "…" : t.sendLabel}
+                  </button>
+                </form>
+              </div>
+            )}
           </>
         )}
       </section>

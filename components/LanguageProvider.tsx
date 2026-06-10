@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { dictionaries, getDirection, type Dictionary, type Locale } from "@/lib/i18n";
+import { updateUserLocale } from "@/lib/actions/user-actions";
 
 type LanguageContextValue = {
   locale: Locale;
@@ -22,6 +23,7 @@ export function LanguageProvider({ children, initialLocale = "en" }: { children:
   function setLocale(nextLocale: Locale) {
     document.cookie = `poharana-locale=${nextLocale}; path=/; max-age=31536000; SameSite=Lax`;
     setLocaleState(nextLocale);
+    void updateUserLocale(nextLocale);
     startTransition(() => {
       router.refresh();
     });

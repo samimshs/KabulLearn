@@ -19,9 +19,9 @@ export async function POST(request: Request) {
     );
   }
 
-  if (session.user.role !== UserRole.STUDENT) {
+  if (session.user.role !== UserRole.STUDENT && session.user.role !== UserRole.EDUCATOR) {
     return NextResponse.json(
-      { ok: false, error: "Only student accounts can enroll in courses." },
+      { ok: false, error: "Only student and educator accounts can enroll in courses." },
       { status: 403 }
     );
   }

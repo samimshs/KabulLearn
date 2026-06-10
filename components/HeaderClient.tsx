@@ -4,37 +4,56 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
-// search removed — discovery lives on /courses with full filters
 import { logout } from "@/lib/actions/auth-actions";
 import { usePortalAvatarUrl, usePortalUnreadCount } from "@/lib/portal-client-store";
+import type { MessagePreview } from "@/components/Header";
 
 type HeaderClientProps = {
   user: { name: string | null; role: string; image: string | null } | null;
   initialUnread?: number;
+  messagePreviews?: MessagePreview[];
 };
 
-export function HeaderClient({ user, initialUnread = 0 }: HeaderClientProps) {
+function timeAgo(isoString: string): string {
+  const diff = Date.now() - new Date(isoString).getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return "now";
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h`;
+  return `${Math.floor(hrs / 24)}d`;
+}
+
+function SenderInitials({ name, role }: { name: string | null; role: string }) {
+  const label = name ?? role;
+  const initials = label.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("") || "?";
+  const isAdmin = role === "ADMIN";
+  return (
+    <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11px] font-[900] text-white ${isAdmin ? "bg-[var(--danger)]" : "bg-[var(--brand)]"}`}>
+      {initials}
+    </span>
+  );
+}
+
+export function HeaderClient({ user, initialUnread = 0, messagePreviews = [] }: HeaderClientProps) {
   const pathname = usePathname();
   const { locale, setLocale, t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
   const unreadCount = usePortalUnreadCount(initialUnread);
   const avatarUrl = usePortalAvatarUrl(user?.image ?? null);
 
-  // Must be above the early return — hooks must be called unconditionally
   useEffect(() => {
-    if (!menuOpen) return;
+    if (!menuOpen && !notifOpen) return;
     function handleClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [menuOpen]);
-
-  // Header is intentionally hidden on the homepage (full-screen hero owns that space)
-  if (pathname === "/" || pathname === "/login") return null;
+  }, [menuOpen, notifOpen]);
 
   const languageOptions = [
     { locale: "ps" as const, label: "پښتو", title: t.pashto },
@@ -42,12 +61,41 @@ export function HeaderClient({ user, initialUnread = 0 }: HeaderClientProps) {
     { locale: "en" as const, label: "EN", title: t.english }
   ];
 
+  if (pathname === "/") return null;
+
+  if (pathname === "/login" || pathname === "/register") {
+    return (
+      <header dir="ltr" className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-end gap-2 px-4 sm:px-5 lg:px-8">
+          <Link href="/support" className="h-9 items-center rounded-[var(--radius)] px-3 text-[13px] font-[700] text-[var(--muted)] transition hover:text-[var(--brand)] inline-flex">
+            {t.supportUs}
+          </Link>
+          <div className="flex h-9 items-center rounded-full border border-[var(--border)] bg-[var(--surface)] p-1 shadow-sm" role="group" aria-label={t.language}>
+            {languageOptions.map((option) => (
+              <button
+                key={option.locale}
+                type="button"
+                title={option.title}
+                onClick={() => setLocale(option.locale)}
+                aria-pressed={locale === option.locale}
+                className={`flex h-7 min-w-9 items-center justify-center rounded-full px-2.5 text-[12px] font-[900] transition ${
+                  locale === option.locale
+                    ? "bg-[var(--brand)] text-white shadow-sm"
+                    : "text-[var(--muted)] hover:bg-white hover:text-[var(--ink)]"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   const initials = (user?.name ?? user?.role ?? "Student")
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("") || "ST";
+    .split(/\s+/).filter(Boolean).slice(0, 2)
+    .map((part) => part[0]?.toUpperCase()).join("") || "ST";
 
   const portalHref =
     user?.role === "ADMIN" ? "/admin" :
@@ -58,6 +106,11 @@ export function HeaderClient({ user, initialUnread = 0 }: HeaderClientProps) {
     user?.role === "ADMIN" ? "Admin panel" :
     user?.role === "EDUCATOR" ? "Educator portal" :
     t.myPortal;
+
+  const inboxHref =
+    user?.role === "EDUCATOR" ? "/educator/messages" :
+    user?.role === "ADMIN" ? "/admin" :
+    "/dashboard/messages";
 
   return (
     <header dir="ltr" className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl">
@@ -85,22 +138,107 @@ export function HeaderClient({ user, initialUnread = 0 }: HeaderClientProps) {
         <div className="kl-header-actions flex min-w-0 shrink items-center justify-end gap-1.5 sm:gap-2">
           {user ? (
             <>
-              {/* Messages bell */}
-              <Link
-                href={user.role === "EDUCATOR" ? "/educator/messages" : "/dashboard/messages"}
-                aria-label={t.messagesTitle}
-                className="relative grid h-9 w-9 place-items-center rounded-full border border-[var(--border)] bg-white text-[var(--muted)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)]"
-              >
-                <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
-                  <path d="M6 8a4 4 0 0 1 8 0c0 3 1.2 4.2 1.2 4.2H4.8S6 11 6 8Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M8.3 14.3a2 2 0 0 0 3.4 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                </svg>
-                {unreadCount > 0 && (
-                  <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[var(--danger)] px-1 text-[9px] font-[900] leading-none text-white">
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                )}
+              {/* Support link */}
+              <Link href="/support" className="hidden h-9 items-center rounded-[var(--radius)] px-3 text-[13px] font-[700] text-[var(--muted)] transition hover:text-[var(--brand)] sm:inline-flex">
+                {t.supportUs}
               </Link>
+
+              {/* Notification bell */}
+              <div className="relative" ref={notifRef}>
+                <button
+                  type="button"
+                  aria-label={t.notificationsLabel}
+                  aria-expanded={notifOpen}
+                  onClick={() => { setNotifOpen((o) => !o); setMenuOpen(false); }}
+                  className="relative grid h-9 w-9 place-items-center rounded-full border border-[var(--border)] bg-white text-[var(--muted)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)]"
+                >
+                  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
+                    <path d="M6 8a4 4 0 0 1 8 0c0 3 1.2 4.2 1.2 4.2H4.8S6 11 6 8Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M8.3 14.3a2 2 0 0 0 3.4 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                  </svg>
+                  {unreadCount > 0 && (
+                    <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[var(--danger)] px-1 text-[9px] font-[900] leading-none text-white">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {notifOpen && (
+                  <div
+                    role="dialog"
+                    aria-label={t.notificationsLabel}
+                    className="absolute right-0 top-[calc(100%+8px)] z-50 w-[320px] overflow-hidden rounded-[14px] border border-[var(--border)] bg-white shadow-[0_8px_32px_rgba(10,9,20,0.12),0_2px_8px_rgba(10,9,20,0.06)]"
+                  >
+                    {/* Panel header */}
+                    <div className="border-b border-[var(--border)] px-4 py-3">
+                      <p className="text-[13px] font-[800] text-[var(--ink)]">{t.notificationsLabel}</p>
+                    </div>
+
+                    {/* Messages section */}
+                    <div className="px-4 pt-3 pb-1">
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="text-[11px] font-[800] uppercase tracking-wide text-[var(--muted)]">
+                          {t.messagesTitle}
+                        </span>
+                        {unreadCount > 0 && (
+                          <span className="grid h-4 min-w-4 place-items-center rounded-full bg-[var(--danger)] px-1 text-[9px] font-[900] leading-none text-white">
+                            {unreadCount > 9 ? "9+" : unreadCount}
+                          </span>
+                        )}
+                      </div>
+
+                      {messagePreviews.length > 0 ? (
+                        <ul className="grid gap-1">
+                          {messagePreviews.map((msg) => (
+                            <li key={msg.senderId}>
+                              <Link
+                                href={inboxHref}
+                                onClick={() => setNotifOpen(false)}
+                                className="flex items-start gap-2.5 rounded-[10px] p-2 transition hover:bg-[var(--surface)]"
+                              >
+                                <SenderInitials name={msg.senderName} role={msg.senderRole} />
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-baseline justify-between gap-1">
+                                    <span className="truncate text-[12px] font-[800] text-[var(--ink)]">
+                                      {msg.senderName ?? msg.senderRole.toLowerCase()}
+                                    </span>
+                                    <span className="shrink-0 text-[10px] font-[600] text-[var(--muted)]">
+                                      {timeAgo(msg.createdAt)}
+                                    </span>
+                                  </div>
+                                  <p className="line-clamp-1 text-[11px] font-[500] text-[var(--muted)]">
+                                    {msg.snippet}
+                                  </p>
+                                </div>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="py-2 text-[12px] text-[var(--muted)]">{t.noNewMessages}</p>
+                      )}
+
+                      <Link
+                        href={inboxHref}
+                        onClick={() => setNotifOpen(false)}
+                        className="mt-2 mb-1 block text-[12px] font-[800] text-[var(--brand)] hover:underline underline-offset-2"
+                      >
+                        {t.seeAllMessages} →
+                      </Link>
+                    </div>
+
+                    <div className="mx-4 border-t border-[var(--border)]" />
+
+                    {/* Announcements section */}
+                    <div className="px-4 py-3">
+                      <p className="mb-1 text-[11px] font-[800] uppercase tracking-wide text-[var(--muted)]">
+                        {t.platformAnnouncements}
+                      </p>
+                      <p className="text-[12px] text-[var(--muted)]">{t.noAnnouncements}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Avatar → dropdown menu */}
               <div className="relative" ref={menuRef}>
@@ -109,7 +247,7 @@ export function HeaderClient({ user, initialUnread = 0 }: HeaderClientProps) {
                   aria-haspopup="true"
                   aria-expanded={menuOpen}
                   aria-label="Account menu"
-                  onClick={() => setMenuOpen((o) => !o)}
+                  onClick={() => { setMenuOpen((o) => !o); setNotifOpen(false); }}
                   className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--brand)] text-xs font-[900] text-white shadow-[0_10px_24px_rgba(0,87,255,0.22)] transition hover:ring-2 hover:ring-[var(--brand)] hover:ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-2"
                 >
                   {avatarUrl
@@ -168,6 +306,9 @@ export function HeaderClient({ user, initialUnread = 0 }: HeaderClientProps) {
             <>
               <Link href="/login?callbackUrl=%2Feducator" className="hidden h-9 items-center rounded-[var(--radius)] px-4 text-[13px] font-[700] text-[var(--muted)] transition hover:text-[var(--ink)] sm:inline-flex">
                 {t.educatorPortal}
+              </Link>
+              <Link href="/support" className="hidden h-9 items-center rounded-[var(--radius)] px-3 text-[13px] font-[700] text-[var(--muted)] transition hover:text-[var(--brand)] sm:inline-flex">
+                {t.supportUs}
               </Link>
               <Link href="/login" className="pr-btn-ghost !min-h-9 px-4">
                 {t.signIn}

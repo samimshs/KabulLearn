@@ -2,7 +2,8 @@ import Link from "next/link";
 import { InfoHero, InfoSection, VideoPlaceholder } from "@/components/InfoPage";
 import { getPublicInfoContent } from "@/lib/info-translations";
 import { getServerLocale } from "@/lib/server-locale";
-import { getSiteVideoUrls, VIDEO_KEYS } from "@/lib/actions/site-settings-actions";
+import { getSiteVideoUrls } from "@/lib/actions/site-settings-actions";
+import { VIDEO_KEYS } from "@/lib/site-settings-keys";
 
 export const metadata = {
   title: "Instructor Guidelines - KabulLearn",

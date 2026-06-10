@@ -668,7 +668,6 @@ export default async function AdminDashboardPage({
                         <div className="flex flex-col gap-2 lg:min-w-56">
                           <form action={handleApproveEducatorRequest} className="grid gap-2">
                             <input type="hidden" name="requestId" value={req.id} />
-                            <input name="adminNote" placeholder="Optional note to user" className="pr-input text-[12px]" />
                             <button type="submit" className="pr-btn-primary !min-h-9 w-full text-[12px]">
                               ✓ Approve — upgrade to Educator
                             </button>

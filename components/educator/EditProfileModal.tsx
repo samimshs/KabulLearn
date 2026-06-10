@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Modal } from "./Modal";
 import { EducatorProfileForm } from "./EducatorProfileForm";
+import { useLanguage } from "@/components/LanguageProvider";
 
 type Props = { name?: string | null; bio?: string | null; image?: string | null };
 
@@ -12,11 +13,11 @@ function Initials({ name }: { name?: string | null }) {
 }
 
 export function EditProfileModal({ name, bio, image }: Props) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      {/* Profile preview card */}
       <div className="flex flex-wrap items-center gap-5 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-6 shadow-[var(--shadow-sm)]">
         {image ? (
           <img src={image} alt="" className="h-16 w-16 shrink-0 rounded-full border border-[var(--border)] object-cover" />
@@ -26,19 +27,19 @@ export function EditProfileModal({ name, bio, image }: Props) {
           </span>
         )}
         <div className="min-w-0 flex-1">
-          <p className="text-[16px] font-[800] text-[var(--ink)]">{name || <span className="text-[var(--muted)]">No name set</span>}</p>
-          <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-[var(--muted)]">{bio || "No bio yet."}</p>
+          <p className="text-[16px] font-[800] text-[var(--ink)]">{name || <span className="text-[var(--muted)]">{t.noNameSet}</span>}</p>
+          <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-[var(--muted)]">{bio || t.noBioYet}</p>
         </div>
         <button
           type="button"
           onClick={() => setOpen(true)}
           className="pr-btn-ghost shrink-0"
         >
-          Edit Profile
+          {t.editProfileBtn}
         </button>
       </div>
 
-      <Modal isOpen={open} onClose={() => setOpen(false)} title="Edit educator profile" size="sm">
+      <Modal isOpen={open} onClose={() => setOpen(false)} title={t.editEducatorProfile} size="sm">
         <EducatorProfileForm name={name} bio={bio} image={image} className="grid gap-4" />
       </Modal>
     </>

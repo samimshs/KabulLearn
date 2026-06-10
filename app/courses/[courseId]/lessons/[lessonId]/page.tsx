@@ -114,25 +114,27 @@ export default async function LessonPage({
 
   let serverPassedModuleIds: string[] = [];
   let lessonStatuses: Record<string, "IN_PROGRESS" | "COMPLETED"> = {};
-  try {
-    const rows = await db.userProgress.findMany({
-      where: { userId, lesson: { module: { courseId } } },
-      select: { lessonId: true, status: true, lesson: { select: { moduleId: true, type: true } } }
-    });
-    serverPassedModuleIds = Array.from(
-      new Set(
-        rows
-          .filter((r) => r.status === ProgressStatus.COMPLETED && r.lesson.type === "QUIZ")
-          .map((r) => r.lesson.moduleId)
-      )
-    );
-    for (const r of rows) {
-      if (r.status === ProgressStatus.COMPLETED || r.status === ProgressStatus.IN_PROGRESS) {
-        lessonStatuses[r.lessonId] = r.status;
+  if (userId) {
+    try {
+      const rows = await db.userProgress.findMany({
+        where: { userId, lesson: { module: { courseId } } },
+        select: { lessonId: true, status: true, lesson: { select: { moduleId: true, type: true } } }
+      });
+      serverPassedModuleIds = Array.from(
+        new Set(
+          rows
+            .filter((r) => r.status === ProgressStatus.COMPLETED && r.lesson.type === "QUIZ")
+            .map((r) => r.lesson.moduleId)
+        )
+      );
+      for (const r of rows) {
+        if (r.status === ProgressStatus.COMPLETED || r.status === ProgressStatus.IN_PROGRESS) {
+          lessonStatuses[r.lessonId] = r.status;
+        }
       }
+    } catch {
+      // progress unavailable — gating falls back to localStorage
     }
-  } catch {
-    // progress unavailable — gating falls back to localStorage
   }
 
   // If the student passed a quiz in every module, the course is complete

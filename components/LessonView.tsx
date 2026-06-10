@@ -150,15 +150,17 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
     setPassedQuizzes(new Set([...localPassed, ...serverPassedModuleIds]));
   }, [course.id, moduleIds.join("|"), serverPassedModuleIds.join("|")]);
 
-  // On open: record visit (resume) + mark IN_PROGRESS server-side, and reflect it instantly.
+  // On open: record visit (resume) + mark IN_PROGRESS server-side for enrolled users only.
   useEffect(() => {
     markLessonVisited(course.id, lesson.id);
-    markLessonInProgress({ courseId: course.id, lessonId: lesson.id }).catch(() => {});
-    setStatuses(() => {
-      const next: Record<string, "IN_PROGRESS" | "COMPLETED"> = { ...lessonStatuses };
-      if (next[lesson.id] !== "COMPLETED") next[lesson.id] = "IN_PROGRESS";
-      return next;
-    });
+    if (!isPreviewLesson) {
+      markLessonInProgress({ courseId: course.id, lessonId: lesson.id }).catch(() => {});
+      setStatuses(() => {
+        const next: Record<string, "IN_PROGRESS" | "COMPLETED"> = { ...lessonStatuses };
+        if (next[lesson.id] !== "COMPLETED") next[lesson.id] = "IN_PROGRESS";
+        return next;
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [course.id, lesson.id]);
 

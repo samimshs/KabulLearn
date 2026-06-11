@@ -12,6 +12,7 @@ import { DeleteUserButton } from "@/components/admin/DeleteUserButton";
 import { DeleteCourseButton } from "@/components/educator/DeleteCourseButton";
 import { AdminComposeForm } from "@/components/admin/AdminComposeForm";
 import { AdminSiteVideosForm } from "@/components/admin/AdminSiteVideosForm";
+import { ReindexButton } from "@/components/admin/ReindexButton";
 
 function statusLabel(status: CourseStatus) {
   return status.split("_").map((w) => w[0] + w.slice(1).toLowerCase()).join(" ");
@@ -359,6 +360,18 @@ export default async function AdminDashboardPage({
 
           {/* ── Platform Analytics ──────────────────────────────── */}
           <section className="grid gap-6 lg:grid-cols-2">
+            {/* AI content index */}
+            <div className="pr-card overflow-hidden">
+              <div className="border-b border-[var(--border)] p-5">
+                <p className="pr-eyebrow">Content AI</p>
+                <h2 className="pr-h2 mt-1">AI lesson index</h2>
+                <p className="mt-1 text-[13px] text-[var(--muted)]">Builds the semantic search index used by the AI chatbox on lesson pages. Run this after adding or editing lesson content.</p>
+              </div>
+              <div className="p-5">
+                <ReindexButton />
+              </div>
+            </div>
+
             {/* DAU / WAU / Totals */}
             <div className="pr-card overflow-hidden">
               <div className="border-b border-[var(--border)] p-5">

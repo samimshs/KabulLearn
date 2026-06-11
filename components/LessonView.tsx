@@ -11,6 +11,7 @@ import { usesPashtoContent } from "@/lib/i18n";
 import { completeReadingLesson, markLessonInProgress } from "@/lib/actions/video-actions";
 import { upsertLessonNote } from "@/lib/actions/note-actions";
 import { LessonStateIcon, lessonKindOf, type LessonState } from "@/components/LessonStateIcon";
+import { CourseChatbox } from "@/components/CourseChatbox";
 import type { Course, Lesson, Module } from "@prisma/client";
 
 type LessonCourse = Pick<
@@ -103,12 +104,15 @@ function getLessonIcon(lesson: LessonCourse) {
 
 
 /* ── Study Notes ───────────────────────────────────────────── */
-function LessonNotes({ lessonId, initialNote, sidePanel = false, stretch = false }: { lessonId: string; initialNote: string; sidePanel?: boolean; stretch?: boolean }) {
+function LessonNotes({ lessonId, initialNote, sidePanel = false, stretch = false, className = "" }: { lessonId: string; initialNote: string; sidePanel?: boolean; stretch?: boolean; className?: string }) {
   const { t, direction } = useLanguage();
   const [open, setOpen] = useState(false);
   const [body, setBody] = useState(initialNote);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{ startY: number; startH: number } | null>(null);
+  const [panelH, setPanelH] = useState<number | null>(null);
 
   function handleChange(value: string) {
     setBody(value);
@@ -119,6 +123,25 @@ function LessonNotes({ lessonId, initialNote, sidePanel = false, stretch = false
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2000);
     }, 1200);
+  }
+
+  function startResize(clientY: number) {
+    const panel = panelRef.current;
+    if (!panel) return;
+    dragRef.current = { startY: clientY, startH: panel.offsetHeight };
+    function onMove(e: MouseEvent) {
+      if (!dragRef.current) return;
+      const delta = e.clientY - dragRef.current.startY;
+      const newH = Math.max(120, Math.min(window.innerHeight - 96, dragRef.current.startH + delta));
+      setPanelH(newH);
+    }
+    function onUp() {
+      dragRef.current = null;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    }
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
   }
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
@@ -132,7 +155,11 @@ function LessonNotes({ lessonId, initialNote, sidePanel = false, stretch = false
   // Side-panel mode: always open, no toggle button
   if (sidePanel) {
     return (
-      <div className={`flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] ${stretch ? "lg:sticky lg:top-[5.5rem] lg:h-[calc(100vh-6.5rem)]" : "lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-7rem)]"}`}>
+      <div
+        ref={panelRef}
+        style={panelH !== null ? { height: panelH, maxHeight: "none" } : undefined}
+        className={`flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] ${stretch ? "lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-6.5rem)]" : "lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-7rem)]"} ${className}`}
+      >
         <div className="flex items-center gap-2 border-b border-[var(--border)] px-4 py-3">
           {noteIcon}
           <span className="text-[13px] font-[800] text-[var(--ink-2)]">{t.notesLabel}</span>
@@ -142,14 +169,23 @@ function LessonNotes({ lessonId, initialNote, sidePanel = false, stretch = false
             </span>
           )}
         </div>
-        <div className="flex-1 p-4">
+        <div className="flex-1 min-h-0 p-4">
           <textarea
             value={body}
             onChange={(e) => handleChange(e.target.value)}
             placeholder={t.notesPlaceholder}
             dir={direction}
-            className="h-full min-h-[200px] w-full resize-none rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] leading-relaxed text-[var(--ink)] placeholder:text-[var(--muted-2)] focus:border-[var(--brand)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+            className="h-full min-h-[120px] w-full resize-none rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] leading-relaxed text-[var(--ink)] placeholder:text-[var(--muted-2)] focus:border-[var(--brand)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
           />
+        </div>
+        {/* Drag handle */}
+        <div
+          onMouseDown={(e) => { e.preventDefault(); startResize(e.clientY); }}
+          className="flex h-4 shrink-0 cursor-ns-resize items-center justify-center border-t border-[var(--border)] transition-colors hover:bg-[var(--surface)]"
+          aria-hidden="true"
+          title="Drag to resize"
+        >
+          <div className="h-[3px] w-8 rounded-full bg-[var(--border)]" />
         </div>
       </div>
     );
@@ -280,6 +316,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
   }
 
   return (
+  <>
     <main className="mx-auto grid w-full max-w-[1700px] grid-cols-1 gap-6 px-5 pb-16 pt-3 lg:grid-cols-[300px_minmax(0,1fr)] lg:px-8 lg:pb-20">
 
       {/* ── Sidebar ──────────────────────────────────────────── */}
@@ -437,11 +474,10 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
           )}
         </div>
 
-        {/* Video + notes side by side; nav footer is inside col-1 so it matches video width */}
+        {/* Video + notes side by side */}
         {isVideoLesson(lesson) ? (
-          <div className="grid scroll-mt-24 gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-stretch">
-            {/* Col 1: video + nav stacked */}
-            <div className="grid gap-4" style={{ gridTemplateRows: "auto 1fr" }}>
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
+            <div className="grid gap-4">
               <section id="video" className="overflow-hidden rounded-[var(--radius-xl)] shadow-[var(--shadow)]">
                 <VideoPlayer
                   video={lesson.youtubeUrl!}
@@ -471,17 +507,15 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                 )}
               </div>
             </div>
-            {/* Col 2: notes — stretches to full height of col 1 */}
             {!isPreviewLesson && (
               <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel stretch />
             )}
           </div>
         ) : null}
 
-        {/* Reading content + notes side by side; nav inside col-1 to match article width */}
+        {/* Reading + notes side by side */}
         {isReadingLesson(lesson) && lessonContent ? (
-          <div className="grid scroll-mt-24 gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
-            {/* Col 1: article + nav stacked */}
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
             <div className="grid gap-4">
               <article id="content" className="pr-card p-6 lg:p-8">
                 <h2 className="text-[18px] font-[800] tracking-tight text-[var(--ink-2)]">{t.lessonContent}</h2>
@@ -530,7 +564,6 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                 )}
               </div>
             </div>
-            {/* Col 2: sticky notes panel */}
             {!isPreviewLesson && (
               <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel />
             )}
@@ -538,5 +571,9 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
         ) : null}
       </section>
     </main>
+
+    {/* AI chatbox — only for enrolled users */}
+    {!isPreviewLesson && <CourseChatbox courseId={course.id} />}
+  </>
   );
 }

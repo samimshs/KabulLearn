@@ -134,10 +134,12 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
     user?.role === "ADMIN" ? "/admin" :
     "/dashboard/messages";
 
+  const isLessonPage = /\/courses\/[^/]+\/lessons\//.test(pathname);
+
   return (
     <>
     <header dir="ltr" className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:gap-5 sm:px-5 lg:px-8">
+      <div className={`mx-auto flex h-16 w-full items-center justify-between gap-3 px-4 sm:gap-5 sm:px-5 lg:px-8 ${isLessonPage ? "max-w-[1700px]" : "max-w-7xl"}`}>
 
         {/* Wordmark */}
         <Link

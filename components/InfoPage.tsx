@@ -122,10 +122,3 @@ export function LinkGrid({ items }: { items: LinkItem[] }) {
   );
 }
 
-export function PolicyNote() {
-  return (
-    <div className="rounded-[var(--radius-lg)] border border-[rgba(150,96,0,0.22)] bg-[var(--warning-50)] p-5 text-sm font-[700] leading-7 text-[var(--ink-2)]">
-      These pages are drafted as operational policy templates for KabulLearn. They should be reviewed by a qualified attorney before you rely on them as final legal terms.
-    </div>
-  );
-}

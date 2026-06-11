@@ -138,7 +138,6 @@ export type PublicInfoContent = {
     description: string;
     privacy: string;
     contact: string;
-    note: string;
     sections: TextSection[];
   };
   privacy: {
@@ -147,7 +146,6 @@ export type PublicInfoContent = {
     description: string;
     terms: string;
     help: string;
-    note: string;
     sections: TextSection[];
   };
 };
@@ -471,7 +469,6 @@ const en: Omit<PublicInfoContent, "footer"> = {
     description: "These terms explain the rules for using KabulLearn, including learner accounts, educator tools, interactive validation, course content, and certificate verification.",
     privacy: "Privacy Policy",
     contact: "Contact Support",
-    note: "These pages are drafted as operational policy templates for KabulLearn. They should be reviewed by a qualified attorney before you rely on them as final legal terms.",
     sections: [
       { title: "1. Acceptance of these terms", paragraphs: ["By accessing KabulLearn, creating an account, enrolling in a course, submitting educator content, completing quizzes, or using certificate verification, you agree to these Terms of Service and linked policies.", "KabulLearn is operated by KabulHub LLC. We may update these terms as the platform, laws, or operations change."] },
       { title: "2. Accounts and eligibility", paragraphs: ["You are responsible for your login credentials and all activity under your account. You must provide accurate information and may not impersonate others or misuse accounts.", "Educator accounts may require approval, identity review, sample content, or compliance checks before publishing privileges are granted."] },
@@ -495,7 +492,6 @@ const en: Omit<PublicInfoContent, "footer"> = {
     description: "This policy explains what data KabulLearn collects, why we use it, how we share it, how long we keep it, and what choices learners and educators have.",
     terms: "Terms of Service",
     help: "Request help",
-    note: "These pages are drafted as operational policy templates for KabulLearn. They should be reviewed by a qualified attorney before you rely on them as final legal terms.",
     sections: [
       { title: "1. Who operates KabulLearn", paragraphs: ["KabulLearn is a learning platform operated by KabulHub LLC. References to KabulLearn, we, us, and our mean the platform and team operating it.", "Privacy questions, account requests, security reports, and data-rights requests can be sent to info@kabulhub.com."] },
       { title: "2. Information we collect", paragraphs: ["Account data includes name, email, password authentication records, OAuth profile data, language preference, role, status, and profile settings.", "Learning data includes enrollments, course progress, lesson completion, quiz answers, attempts, scores, timestamps, certificates, and learning activity.", "Educator data includes profiles, course drafts, lesson materials, review history, uploaded assets, publishing status, analytics, and approval communications.", "Technical data includes IP address, device/browser data, logs, security events, cookies or local storage identifiers, error reports, and usage data."] },
@@ -703,7 +699,6 @@ const ps: Omit<PublicInfoContent, "footer"> = {
     description: "دا شرایط د کابل‌لرن د کارولو اصول تشریح کوي، لکه حسابونه، د ښوونکو وسایل، ازموینې، کورس منځپانګه، او د سند تصدیق.",
     privacy: "د محرمیت تګلاره",
     contact: "ملاتړ سره اړیکه",
-    note: "دا پاڼې د کابل‌لرن لپاره د عملیاتي پالیسۍ مسودې دي. مخکې له قانوني کارونې باید د وړ وکیل له خوا وکتل شي.",
     sections: en.terms.sections.map((section) => ({
       title: section.title.replace(/Acceptance of these terms/, "د دې شرایطو منل").replace(/Accounts and eligibility/, "حسابونه او وړتیا").replace(/Learning content and validation/, "زده کړه او تایید").replace(/Certificates and verification/, "سندونه او تصدیق").replace(/Educator content/, "د ښوونکي منځپانګه").replace(/User conduct/, "د کاروونکي چلند").replace(/Intellectual property/, "فکري ملکیت").replace(/Payments and payouts/, "تادیات او ورکړې").replace(/Privacy and data use/, "محرمیت او د ډاټا کارول").replace(/Third-party services/, "درېیم اړخ خدمتونه").replace(/Suspension and termination/, "ځنډول او پای").replace(/Disclaimers and limitation of liability/, "مسؤولیت محدودول").replace(/Governing law and disputes/, "حاکم قانون او شخړې").replace(/Contact/, "اړیکه"),
       paragraphs: section.paragraphs?.map(() => "دا برخه د کابل‌لرن د کارولو اړوند اصول، حقونه، مسؤولیتونه، محدودیتونه، او د ملاتړ له لارې د ستونزو د حل لاره تشریح کوي. د حساب، کورس، سند، محرمیت، یا ښوونکي منځپانګې په اړه پوښتنې info@kabulhub.com ته ولېږئ.")
@@ -716,7 +711,6 @@ const ps: Omit<PublicInfoContent, "footer"> = {
     description: "دا تګلاره تشریح کوي چې کابل‌لرن کوم معلومات راټولوي، ولې یې کاروي، څنګه یې شریکوي، څومره یې ساتي، او کاروونکي کوم انتخابونه لري.",
     terms: "د خدمت شرایط",
     help: "مرسته وغواړئ",
-    note: "دا پاڼې د کابل‌لرن لپاره د عملیاتي پالیسۍ مسودې دي. مخکې له قانوني کارونې باید د وړ وکیل له خوا وکتل شي.",
     sections: en.privacy.sections.map((section) => ({
       title: section.title.replace(/Who operates KabulLearn/, "کابل‌لرن څوک چلوي").replace(/Information we collect/, "کوم معلومات راټولوو").replace(/How we use information/, "معلومات څنګه کاروو").replace(/How information is shared/, "معلومات څنګه شریکېږي").replace(/Cookies and similar technology/, "کوکیز او ورته ټکنالوژي").replace(/Data retention/, "د معلوماتو ساتل").replace(/Security/, "امنیت").replace(/Your choices and rights/, "ستاسو انتخابونه او حقونه").replace(/International users/, "نړیوال کاروونکي").replace(/Children and students/, "ماشومان او زده کوونکي").replace(/Changes to this policy/, "د تګلارې بدلونونه"),
       paragraphs: section.paragraphs?.map(() => "کابل‌لرن د حساب، زده کړې، ازموینو، سندونو، ښوونکو، ملاتړ، امنیت، او تخنیکي کارونو لپاره اړین معلومات کاروي. موږ شخصي معلومات نه پلورو. د لاسرسي، سمون، ړنګولو، یا صادرولو غوښتنې info@kabulhub.com ته ولېږئ.")
@@ -922,7 +916,6 @@ const fa: Omit<PublicInfoContent, "footer"> = {
     description: "این شرایط قواعد استفاده از کابل‌لرن را توضیح می‌دهد، از جمله حساب‌ها، ابزار استادان، آزمون‌ها، محتوای دوره، و تصدیق گواهی.",
     privacy: "خط مشی رازداری",
     contact: "تماس با پشتیبانی",
-    note: "این صفحه‌ها به‌عنوان مسوده سیاست عملیاتی کابل‌لرن تهیه شده‌اند و پیش از استفاده حقوقی باید توسط وکیل واجد شرایط بررسی شوند.",
     sections: ps.terms.sections.map((section) => ({
       title: section.title.replace("د خدمت", "شرایط").replace("د دې شرایطو منل", "پذیرش این شرایط").replace("حسابونه او وړتیا", "حساب‌ها و واجد شرایط بودن").replace("زده کړه او تایید", "محتوای آموزشی و سنجش").replace("سندونه او تصدیق", "گواهی‌ها و تصدیق").replace("د ښوونکي منځپانګه", "محتوای استاد").replace("د کاروونکي چلند", "رفتار کاربر").replace("فکري ملکیت", "مالکیت فکری").replace("تادیات او ورکړې", "پرداخت‌ها و پرداختی‌ها").replace("محرمیت او د ډاټا کارول", "رازداری و استفاده از داده").replace("درېیم اړخ خدمتونه", "خدمات طرف سوم").replace("ځنډول او پای", "تعلیق و پایان").replace("مسؤولیت محدودول", "سلب مسئولیت و محدودیت مسئولیت").replace("حاکم قانون او شخړې", "قانون حاکم و اختلافات").replace("اړیکه", "تماس"),
       paragraphs: section.paragraphs?.map(() => "این بخش قواعد، حقوق، مسئولیت‌ها، محدودیت‌ها، و راه حل پشتیبانی مربوط به استفاده از کابل‌لرن را توضیح می‌دهد. پرسش‌های حساب، دوره، گواهی، رازداری، یا محتوای استاد را به info@kabulhub.com بفرستید.")
@@ -935,7 +928,6 @@ const fa: Omit<PublicInfoContent, "footer"> = {
     description: "این خط مشی توضیح می‌دهد کابل‌لرن چه اطلاعاتی جمع می‌کند، چرا استفاده می‌کند، چگونه شریک می‌سازد، چه مدت نگه می‌دارد، و کاربران چه انتخاب‌هایی دارند.",
     terms: "شرایط خدمات",
     help: "درخواست کمک",
-    note: "این صفحه‌ها به‌عنوان مسوده سیاست عملیاتی کابل‌لرن تهیه شده‌اند و پیش از استفاده حقوقی باید توسط وکیل واجد شرایط بررسی شوند.",
     sections: ps.privacy.sections.map((section) => ({
       title: section.title.replace("کابل‌لرن څوک چلوي", "کابل‌لرن را چه کسی اداره می‌کند").replace("کوم معلومات راټولوو", "چه اطلاعاتی جمع می‌کنیم").replace("معلومات څنګه کاروو", "اطلاعات را چگونه استفاده می‌کنیم").replace("معلومات څنګه شریکېږي", "اطلاعات چگونه شریک می‌شود").replace("کوکیز او ورته ټکنالوژي", "کوکی‌ها و فناوری مشابه").replace("د معلوماتو ساتل", "نگهداری داده").replace("امنیت", "امنیت").replace("ستاسو انتخابونه او حقونه", "انتخاب‌ها و حقوق شما").replace("نړیوال کاروونکي", "کاربران بین‌المللی").replace("ماشومان او زده کوونکي", "کودکان و دانش‌آموزان").replace("د تګلارې بدلونونه", "تغییرات این خط مشی"),
       paragraphs: section.paragraphs?.map(() => "کابل‌لرن اطلاعات لازم برای حساب، یادگیری، آزمون‌ها، گواهی‌ها، استادان، پشتیبانی، امنیت، و کارهای فنی را استفاده می‌کند. ما اطلاعات شخصی را نمی‌فروشیم. درخواست دسترسی، اصلاح، حذف، یا صدور داده را به info@kabulhub.com بفرستید.")

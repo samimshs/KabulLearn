@@ -105,7 +105,21 @@ function getLessonIcon(lesson: LessonCourse) {
 
 
 /* ── Study Notes ───────────────────────────────────────────── */
-function LessonNotes({ lessonId, initialNote, sidePanel = false, stretch = false, className = "" }: { lessonId: string; initialNote: string; sidePanel?: boolean; stretch?: boolean; className?: string }) {
+function LessonNotes({
+  lessonId,
+  initialNote,
+  sidePanel = false,
+  stretch = false,
+  className = "",
+  disabled = false
+}: {
+  lessonId: string;
+  initialNote: string;
+  sidePanel?: boolean;
+  stretch?: boolean;
+  className?: string;
+  disabled?: boolean;
+}) {
   const { t, direction } = useLanguage();
   const [open, setOpen] = useState(false);
   const [body, setBody] = useState(initialNote);
@@ -116,6 +130,7 @@ function LessonNotes({ lessonId, initialNote, sidePanel = false, stretch = false
   const [panelH, setPanelH] = useState<number | null>(null);
 
   function handleChange(value: string) {
+    if (disabled) return;
     setBody(value);
     setSaveStatus("saving");
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -127,6 +142,7 @@ function LessonNotes({ lessonId, initialNote, sidePanel = false, stretch = false
   }
 
   function startResize(clientY: number) {
+    if (disabled) return;
     const panel = panelRef.current;
     if (!panel) return;
     dragRef.current = { startY: clientY, startH: panel.offsetHeight };
@@ -170,19 +186,25 @@ function LessonNotes({ lessonId, initialNote, sidePanel = false, stretch = false
             </span>
           )}
         </div>
-        <div className="flex-1 min-h-0 p-4">
+        <div className="flex min-h-0 flex-1 flex-col p-4">
+          {disabled ? (
+            <p className="mb-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[12px] font-[700] leading-relaxed text-[var(--muted)]">
+              {t.notesDisabledHint}
+            </p>
+          ) : null}
           <textarea
             value={body}
             onChange={(e) => handleChange(e.target.value)}
             placeholder={t.notesPlaceholder}
             dir={direction}
-            className="h-full min-h-[120px] w-full resize-none rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] leading-relaxed text-[var(--ink)] placeholder:text-[var(--muted-2)] focus:border-[var(--brand)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+            disabled={disabled}
+            className="min-h-[120px] w-full flex-1 resize-none rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] leading-relaxed text-[var(--ink)] placeholder:text-[var(--muted-2)] focus:border-[var(--brand)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)] disabled:cursor-not-allowed disabled:opacity-60"
           />
         </div>
         {/* Drag handle */}
         <div
           onMouseDown={(e) => { e.preventDefault(); startResize(e.clientY); }}
-          className="flex h-4 shrink-0 cursor-ns-resize items-center justify-center border-t border-[var(--border)] transition-colors hover:bg-[var(--surface)]"
+          className={`flex h-4 shrink-0 items-center justify-center border-t border-[var(--border)] transition-colors ${disabled ? "cursor-not-allowed opacity-60" : "cursor-ns-resize hover:bg-[var(--surface)]"}`}
           aria-hidden="true"
           title="Drag to resize"
         >
@@ -215,8 +237,12 @@ function LessonNotes({ lessonId, initialNote, sidePanel = false, stretch = false
             placeholder={t.notesPlaceholder}
             dir={direction}
             rows={6}
-            className="w-full resize-y rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] leading-relaxed text-[var(--ink)] placeholder:text-[var(--muted-2)] focus:border-[var(--brand)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+            disabled={disabled}
+            className="w-full resize-y rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] leading-relaxed text-[var(--ink)] placeholder:text-[var(--muted-2)] focus:border-[var(--brand)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)] disabled:cursor-not-allowed disabled:opacity-60"
           />
+          {disabled ? (
+            <p className="mt-2 text-[12px] font-[700] leading-relaxed text-[var(--muted)]">{t.notesDisabledHint}</p>
+          ) : null}
           {saveStatus !== "idle" && (
             <p className="mt-1.5 text-[11px] font-[700] text-[var(--muted)]">
               {saveStatus === "saving" ? t.notesSaving : t.notesSaved}
@@ -533,9 +559,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                 )}
               </div>
             </div>
-            {!isPreviewLesson && (
-              <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel stretch />
-            )}
+            <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel stretch disabled={isPreviewLesson} />
           </div>
         ) : null}
 
@@ -590,9 +614,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                 )}
               </div>
             </div>
-            {!isPreviewLesson && (
-              <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel />
-            )}
+            <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel disabled={isPreviewLesson} />
           </div>
         ) : null}
       </section>

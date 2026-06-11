@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
 
 type Message = { role: "user" | "assistant"; content: string };
@@ -31,8 +32,9 @@ function linkify(text: string) {
   return parts;
 }
 
-export function CourseChatbox({ courseId }: { courseId: string }) {
+export function CourseChatbox({ courseId }: { courseId?: string }) {
   const { t, direction } = useLanguage();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -57,6 +59,7 @@ export function CourseChatbox({ courseId }: { courseId: string }) {
   async function send() {
     const text = input.trim();
     if (!text || streaming) return;
+    const activeCourseId = courseId ?? pathname.match(/^\/courses\/([^/]+)/)?.[1];
 
     setInput("");
     setMessages(prev => [...prev, { role: "user", content: text }]);
@@ -66,7 +69,7 @@ export function CourseChatbox({ courseId }: { courseId: string }) {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, courseId })
+        body: JSON.stringify({ message: text, courseId: activeCourseId ? decodeURIComponent(activeCourseId) : undefined })
       });
 
       if (!res.ok || !res.body) throw new Error("Request failed");

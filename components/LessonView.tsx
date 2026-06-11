@@ -11,7 +11,6 @@ import { usesPashtoContent } from "@/lib/i18n";
 import { completeReadingLesson, markLessonInProgress } from "@/lib/actions/video-actions";
 import { upsertLessonNote } from "@/lib/actions/note-actions";
 import { LessonStateIcon, lessonKindOf, type LessonState } from "@/components/LessonStateIcon";
-import { CourseChatbox } from "@/components/CourseChatbox";
 import type { Course, Lesson, Module } from "@prisma/client";
 
 type LessonCourse = Pick<
@@ -571,9 +570,6 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
         ) : null}
       </section>
     </main>
-
-    {/* AI chatbox — only for enrolled users */}
-    {!isPreviewLesson && <CourseChatbox courseId={course.id} />}
   </>
   );
 }

@@ -355,6 +355,11 @@ async function upsertEmbedding(
   });
 }
 
+function languageBlock(label: string, parts: Array<string | null | undefined>) {
+  const text = parts.filter((part) => part?.trim()).join("\n\n");
+  return text ? `## ${label}\n${text}` : "";
+}
+
 export async function POST() {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
@@ -375,61 +380,135 @@ export async function POST() {
     select: {
       id: true,
       titleEn: true,
+      titlePs: true,
+      titleDa: true,
       descriptionEn: true,
+      descriptionPs: true,
+      descriptionDa: true,
       readingEn: true,
-      module: { select: { titleEn: true, course: { select: { titleEn: true } } } }
+      readingPs: true,
+      readingDa: true,
+      module: {
+        select: {
+          titleEn: true,
+          titlePs: true,
+          titleDa: true,
+          course: { select: { id: true, titleEn: true, titlePs: true, titleDa: true } }
+        }
+      }
     }
   });
 
+  const activeLessonKeys: string[] = [];
   for (const lesson of lessons) {
+    const sourceKey = `${lesson.module.course.id}:${lesson.id}`;
     const text = [
-      `Course: ${lesson.module.course.titleEn}`,
-      `Module: ${lesson.module.titleEn}`,
-      `Lesson: ${lesson.titleEn}`,
-      lesson.descriptionEn ?? "",
-      lesson.readingEn ?? ""
+      languageBlock("English", [
+        `Course: ${lesson.module.course.titleEn}`,
+        `Module: ${lesson.module.titleEn}`,
+        `Lesson: ${lesson.titleEn}`,
+        lesson.descriptionEn,
+        lesson.readingEn
+      ]),
+      languageBlock("Pashto", [
+        `کورس: ${lesson.module.course.titlePs}`,
+        `ماډیول: ${lesson.module.titlePs}`,
+        `درس: ${lesson.titlePs}`,
+        lesson.descriptionPs,
+        lesson.readingPs
+      ]),
+      languageBlock("Dari", [
+        `کورس: ${lesson.module.course.titleDa ?? lesson.module.course.titleEn}`,
+        `ماژول: ${lesson.module.titleDa ?? lesson.module.titleEn}`,
+        `درس: ${lesson.titleDa ?? lesson.titleEn}`,
+        lesson.descriptionDa,
+        lesson.readingDa
+      ])
     ].filter(Boolean).join("\n\n");
 
     if (!text.trim()) continue;
-    await upsertEmbedding("lesson", lesson.id, lesson.titleEn, text);
+    await upsertEmbedding(
+      "lesson",
+      sourceKey,
+      [lesson.titleEn, lesson.titlePs, lesson.titleDa].filter(Boolean).join(" / "),
+      text
+    );
+    activeLessonKeys.push(sourceKey);
     counts.lessons++;
   }
 
+  await db.contentEmbedding.deleteMany({
+    where: {
+      source: "lesson",
+      sourceKey: { notIn: activeLessonKeys }
+    }
+  });
+
   // ── 2. Courses ────────────────────────────────────────────────
   const courses = await db.course.findMany({
-    select: { id: true, titleEn: true, descriptionEn: true, level: true }
+    select: {
+      id: true,
+      titleEn: true,
+      titlePs: true,
+      titleDa: true,
+      descriptionEn: true,
+      descriptionPs: true,
+      descriptionDa: true,
+      level: true
+    }
   });
 
   for (const course of courses) {
     const text = [
-      `Course: ${course.titleEn}`,
-      course.level ? `Level: ${course.level}` : "",
-      course.descriptionEn
+      languageBlock("English", [
+        `Course: ${course.titleEn}`,
+        course.level ? `Level: ${course.level}` : "",
+        course.descriptionEn
+      ]),
+      languageBlock("Pashto", [
+        `کورس: ${course.titlePs}`,
+        course.level ? `کچه: ${course.level}` : "",
+        course.descriptionPs
+      ]),
+      languageBlock("Dari", [
+        `کورس: ${course.titleDa ?? course.titleEn}`,
+        course.level ? `سطح: ${course.level}` : "",
+        course.descriptionDa
+      ])
     ].filter(Boolean).join("\n\n");
 
-    await upsertEmbedding("course", course.id, course.titleEn, text);
+    await upsertEmbedding(
+      "course",
+      course.id,
+      [course.titleEn, course.titlePs, course.titleDa].filter(Boolean).join(" / "),
+      text
+    );
     counts.courses++;
   }
 
   // ── 3. Terms of Service + Privacy Policy ─────────────────────
-  const info = getPublicInfoContent("en");
+  for (const locale of ["en", "ps", "fa"] as const) {
+    const info = getPublicInfoContent(locale);
 
-  for (let i = 0; i < info.terms.sections.length; i++) {
-    const section = info.terms.sections[i];
-    const paragraphs = section.paragraphs?.join("\n\n") ?? "";
-    const bullets = section.bullets?.join("\n") ?? "";
-    const text = `Terms of Service — ${section.title}\n\n${paragraphs}${bullets ? "\n\n" + bullets : ""}`;
-    await upsertEmbedding("terms", `section-${i}`, `Terms: ${section.title}`, text);
-    counts.policy++;
-  }
+    for (let i = 0; i < info.terms.sections.length; i++) {
+      const section = info.terms.sections[i];
+      const paragraphs = section.paragraphs?.join("\n\n") ?? "";
+      const bullets = section.bullets?.join("\n") ?? "";
+      const text = `Terms of Service — ${section.title}\n\n${paragraphs}${bullets ? "\n\n" + bullets : ""}`;
+      const sourceKey = locale === "en" ? `section-${i}` : `${locale}-section-${i}`;
+      await upsertEmbedding("terms", sourceKey, `Terms: ${section.title}`, text);
+      counts.policy++;
+    }
 
-  for (let i = 0; i < info.privacy.sections.length; i++) {
-    const section = info.privacy.sections[i];
-    const paragraphs = section.paragraphs?.join("\n\n") ?? "";
-    const bullets = section.bullets?.join("\n") ?? "";
-    const text = `Privacy Policy — ${section.title}\n\n${paragraphs}${bullets ? "\n\n" + bullets : ""}`;
-    await upsertEmbedding("privacy", `section-${i}`, `Privacy: ${section.title}`, text);
-    counts.policy++;
+    for (let i = 0; i < info.privacy.sections.length; i++) {
+      const section = info.privacy.sections[i];
+      const paragraphs = section.paragraphs?.join("\n\n") ?? "";
+      const bullets = section.bullets?.join("\n") ?? "";
+      const text = `Privacy Policy — ${section.title}\n\n${paragraphs}${bullets ? "\n\n" + bullets : ""}`;
+      const sourceKey = locale === "en" ? `section-${i}` : `${locale}-section-${i}`;
+      await upsertEmbedding("privacy", sourceKey, `Privacy: ${section.title}`, text);
+      counts.policy++;
+    }
   }
 
   // ── 4. Platform guides ────────────────────────────────────────

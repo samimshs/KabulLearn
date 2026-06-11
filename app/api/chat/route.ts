@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     return new Response("Please verify your email before using AI chat.", { status: 403 });
   }
 
-  const { message } = (await req.json()) as {
+  const { message, courseId } = (await req.json()) as {
     message: string;
     courseId?: string;
   };
@@ -36,8 +36,18 @@ export async function POST(req: NextRequest) {
 
   // 2. Load all stored embeddings (all content types — similarity search handles relevance)
   const rows = await db.contentEmbedding.findMany({
+    where: courseId
+      ? {
+          OR: [
+            { source: "course", sourceKey: courseId },
+            { source: "lesson", sourceKey: { startsWith: `${courseId}:` } },
+            { source: { in: ["terms", "privacy", "guide"] } }
+          ]
+        }
+      : undefined,
     select: {
       source: true,
+      sourceKey: true,
       title: true,
       chunkText: true,
       embedding: true
@@ -59,7 +69,7 @@ export async function POST(req: NextRequest) {
   // 3. Score and pick the top 5 most relevant chunks
   const scored = rows.map(row => ({
     text: row.chunkText,
-    label: `[${row.source}] ${row.title}`,
+    label: `[${row.source}:${row.sourceKey}] ${row.title}`,
     score: cosineSimilarity(queryVec, JSON.parse(row.embedding) as number[])
   }));
   scored.sort((a, b) => b.score - a.score);

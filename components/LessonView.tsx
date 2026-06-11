@@ -103,7 +103,7 @@ function getLessonIcon(lesson: LessonCourse) {
 
 
 /* ── Study Notes ───────────────────────────────────────────── */
-function LessonNotes({ lessonId, initialNote, sidePanel = false }: { lessonId: string; initialNote: string; sidePanel?: boolean }) {
+function LessonNotes({ lessonId, initialNote, sidePanel = false, stretch = false }: { lessonId: string; initialNote: string; sidePanel?: boolean; stretch?: boolean }) {
   const { t, direction } = useLanguage();
   const [open, setOpen] = useState(false);
   const [body, setBody] = useState(initialNote);
@@ -129,10 +129,10 @@ function LessonNotes({ lessonId, initialNote, sidePanel = false }: { lessonId: s
     </svg>
   );
 
-  // Side-panel mode: always open, no toggle button, sticky alongside video
+  // Side-panel mode: always open, no toggle button
   if (sidePanel) {
     return (
-      <div className="flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-7rem)]">
+      <div className={`flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] ${stretch ? "h-full" : "lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-7rem)]"}`}>
         <div className="flex items-center gap-2 border-b border-[var(--border)] px-4 py-3">
           {noteIcon}
           <span className="text-[13px] font-[800] text-[var(--ink-2)]">{t.notesLabel}</span>
@@ -437,93 +437,105 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
           )}
         </div>
 
-        {/* Video + notes side by side */}
+        {/* Video + notes side by side; nav footer is inside col-1 so it matches video width */}
         {isVideoLesson(lesson) ? (
-          <div className="grid scroll-mt-24 gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
-            <section id="video" className="overflow-hidden rounded-[var(--radius-xl)] shadow-[var(--shadow)]">
-              <VideoPlayer
-                video={lesson.youtubeUrl!}
-                courseId={course.id}
-                lessonId={lesson.id}
-                initialCompleted={statuses[lesson.id] === "COMPLETED"}
-                onComplete={() => {
-                  setStatuses((prev) => ({ ...prev, [lesson.id]: "COMPLETED" }));
-                  router.refresh();
-                }}
-              />
-            </section>
-            {!isPreviewLesson && (
-              <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel />
-            )}
-          </div>
-        ) : null}
-
-        {/* Reading content + notes side by side */}
-        {isReadingLesson(lesson) && lessonContent ? (
-          <div className="grid scroll-mt-24 gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
-            <article id="content" className="pr-card p-6 lg:p-8">
-              <h2 className="text-[18px] font-[800] tracking-tight text-[var(--ink-2)]">{t.lessonContent}</h2>
-              <div className="mt-5 border-t border-[var(--border)] pt-5">
-                <SimpleMarkdown content={lessonContent} />
-              </div>
-
-              {/* Mark as Complete */}
-              <div className="mt-8 border-t border-[var(--border)] pt-6">
-                {readingDone ? (
-                  <div className="flex items-center gap-2 text-[14px] font-[800] text-[var(--success)]">
-                    <IconCheck />
-                    {t.lessonCompleteProgressSaved}
-                  </div>
+          <div className="grid scroll-mt-24 gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-stretch">
+            {/* Col 1: video + nav stacked */}
+            <div className="grid gap-4" style={{ gridTemplateRows: "auto 1fr" }}>
+              <section id="video" className="overflow-hidden rounded-[var(--radius-xl)] shadow-[var(--shadow)]">
+                <VideoPlayer
+                  video={lesson.youtubeUrl!}
+                  courseId={course.id}
+                  lessonId={lesson.id}
+                  initialCompleted={statuses[lesson.id] === "COMPLETED"}
+                  onComplete={() => {
+                    setStatuses((prev) => ({ ...prev, [lesson.id]: "COMPLETED" }));
+                    router.refresh();
+                  }}
+                />
+              </section>
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)]">
+                {previousLesson ? (
+                  <Link href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(previousLesson.id)}${fromParam}`} className="pr-btn-ghost !min-h-10 px-4 text-[13px]">
+                    {t.previousLesson}
+                  </Link>
+                ) : <span />}
+                {nextLessonInModule ? (
+                  <Link href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(nextLessonInModule.id)}${fromParam}`} className="pr-btn-primary !min-h-10 px-5 text-[13px]">
+                    {t.nextLesson}
+                  </Link>
                 ) : (
-                  <button
-                    type="button"
-                    disabled={isPendingComplete}
-                    onClick={() => {
-                      startCompleteTransition(async () => {
-                        await completeReadingLesson({ courseId: course.id, lessonId: lesson.id });
-                        setStatuses((prev) => ({ ...prev, [lesson.id]: "COMPLETED" }));
-                        setReadingDone(true);
-                        router.refresh();
-                      });
-                    }}
-                    className="pr-btn-primary"
-                  >
-                    {isPendingComplete ? t.savingLabel : t.markAsComplete}
-                  </button>
+                  <Link href={`${quizHref}${fromParam}`} className="pr-btn-primary !min-h-10 px-5 text-[13px]">
+                    {t.nextRequiredQuiz}
+                  </Link>
                 )}
               </div>
-            </article>
+            </div>
+            {/* Col 2: notes — stretches to full height of col 1 */}
+            {!isPreviewLesson && (
+              <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel stretch />
+            )}
+          </div>
+        ) : null}
+
+        {/* Reading content + notes side by side; nav inside col-1 to match article width */}
+        {isReadingLesson(lesson) && lessonContent ? (
+          <div className="grid scroll-mt-24 gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
+            {/* Col 1: article + nav stacked */}
+            <div className="grid gap-4">
+              <article id="content" className="pr-card p-6 lg:p-8">
+                <h2 className="text-[18px] font-[800] tracking-tight text-[var(--ink-2)]">{t.lessonContent}</h2>
+                <div className="mt-5 border-t border-[var(--border)] pt-5">
+                  <SimpleMarkdown content={lessonContent} />
+                </div>
+                <div className="mt-8 border-t border-[var(--border)] pt-6">
+                  {readingDone ? (
+                    <div className="flex items-center gap-2 text-[14px] font-[800] text-[var(--success)]">
+                      <IconCheck />
+                      {t.lessonCompleteProgressSaved}
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isPendingComplete}
+                      onClick={() => {
+                        startCompleteTransition(async () => {
+                          await completeReadingLesson({ courseId: course.id, lessonId: lesson.id });
+                          setStatuses((prev) => ({ ...prev, [lesson.id]: "COMPLETED" }));
+                          setReadingDone(true);
+                          router.refresh();
+                        });
+                      }}
+                      className="pr-btn-primary"
+                    >
+                      {isPendingComplete ? t.savingLabel : t.markAsComplete}
+                    </button>
+                  )}
+                </div>
+              </article>
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)]">
+                {previousLesson ? (
+                  <Link href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(previousLesson.id)}${fromParam}`} className="pr-btn-ghost !min-h-10 px-4 text-[13px]">
+                    {t.previousLesson}
+                  </Link>
+                ) : <span />}
+                {nextLessonInModule ? (
+                  <Link href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(nextLessonInModule.id)}${fromParam}`} className="pr-btn-primary !min-h-10 px-5 text-[13px]">
+                    {t.nextLesson}
+                  </Link>
+                ) : (
+                  <Link href={`${quizHref}${fromParam}`} className="pr-btn-primary !min-h-10 px-5 text-[13px]">
+                    {t.nextRequiredQuiz}
+                  </Link>
+                )}
+              </div>
+            </div>
+            {/* Col 2: sticky notes panel */}
             {!isPreviewLesson && (
               <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel />
             )}
           </div>
         ) : null}
-
-        {/* Navigation footer — right below the content, no scrolling back up */}
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)]">
-          {previousLesson ? (
-            <Link
-              href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(previousLesson.id)}${fromParam}`}
-              className="pr-btn-ghost !min-h-10 px-4 text-[13px]"
-            >
-              {t.previousLesson}
-            </Link>
-          ) : (
-            <span />
-          )}
-          {nextLessonInModule ? (
-            <Link
-              href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(nextLessonInModule.id)}${fromParam}`}
-              className="pr-btn-primary !min-h-10 px-5 text-[13px]"
-            >
-              {t.nextLesson}
-            </Link>
-          ) : (
-            <Link href={`${quizHref}${fromParam}`} className="pr-btn-primary !min-h-10 px-5 text-[13px]">
-              {t.nextRequiredQuiz}
-            </Link>
-          )}
-        </div>
       </section>
     </main>
   );

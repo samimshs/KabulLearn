@@ -4,10 +4,10 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageProvider";
 import { CourseCard, type CourseCardRow } from "@/components/CourseCard";
-import { usesPashtoContent, localizeLevel } from "@/lib/i18n";
+import { localize, localizeLevel } from "@/lib/i18n";
 
 type CourseModule = {
-  id: string; titleEn: string; titlePs: string; order: number;
+  id: string; titleEn: string; titlePs: string; titleDa?: string | null; order: number;
   lessons: Array<{ id: string; order: number }>;
 };
 
@@ -26,16 +26,16 @@ type SectionKey = typeof SECTION_ORDER[number];
 function matchesCategory(course: CourseRow, key: string): boolean {
   if (key === "all") return true;
   const haystack = [
-    course.titleEn, course.titlePs,
-    course.descriptionEn, course.descriptionPs,
+    course.titleEn, course.titlePs, course.titleDa ?? "",
+    course.descriptionEn, course.descriptionPs, course.descriptionDa ?? "",
   ].join(" ").toLowerCase();
   return (CATEGORY_KEYWORDS[key] ?? []).some(kw => haystack.includes(kw));
 }
 
 function getPrimaryCategory(course: CourseRow): SectionKey {
   const haystack = [
-    course.titleEn, course.titlePs,
-    course.descriptionEn, course.descriptionPs,
+    course.titleEn, course.titlePs, course.titleDa ?? "",
+    course.descriptionEn, course.descriptionPs, course.descriptionDa ?? "",
   ].join(" ").toLowerCase();
   for (const key of ["data-science", "statistics", "computer-basics", "physics"] as const) {
     if (CATEGORY_KEYWORDS[key].some(kw => haystack.includes(kw))) return key;
@@ -134,21 +134,23 @@ export function CourseDashboard({ courses, dbError, isAuthenticated = false, ava
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const result = courses.filter((c) => {
-      const title = usesPashtoContent(locale) ? c.titlePs : c.titleEn;
-      const desc  = usesPashtoContent(locale) ? c.descriptionPs : c.descriptionEn;
+      const desc  = localize(locale, c.descriptionEn, c.descriptionPs, c.descriptionDa ?? undefined);
+      const localizedTitle = localize(locale, c.titleEn, c.titlePs, c.titleDa ?? undefined);
+      const titleDa = c.titleDa ?? "";
+      const descDa = c.descriptionDa ?? "";
       const level = localizeLevel(c.level, locale);
       const authorName = c.instructors?.[0]?.name ?? "";
       const authorUsername = c.instructors?.[0]?.username ?? "";
       return (
-        (!q || title.toLowerCase().includes(q) || desc.toLowerCase().includes(q) || authorName.toLowerCase().includes(q) || authorUsername.toLowerCase().includes(q))
+        (!q || localizedTitle.toLowerCase().includes(q) || desc.toLowerCase().includes(q) || titleDa.toLowerCase().includes(q) || descDa.toLowerCase().includes(q) || authorName.toLowerCase().includes(q) || authorUsername.toLowerCase().includes(q))
         && (!levelFilter || level === levelFilter)
         && matchesCategory(c, activeCategory)
       );
     });
     if (sortBy === "az") {
       result.sort((a, b) => {
-        const ta = usesPashtoContent(locale) ? a.titlePs : a.titleEn;
-        const tb = usesPashtoContent(locale) ? b.titlePs : b.titleEn;
+        const ta = localize(locale, a.titleEn, a.titlePs, a.titleDa ?? undefined);
+        const tb = localize(locale, b.titleEn, b.titlePs, b.titleDa ?? undefined);
         return ta.localeCompare(tb);
       });
     } else {

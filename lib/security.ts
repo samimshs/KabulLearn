@@ -2,13 +2,15 @@ import { createHmac } from "crypto";
 import { LessonType, ProgressStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 
-function rateLimitWindowMs() {
-  return 60_000;
-}
+const DEFAULT_RATE_LIMIT_WINDOW_MS = 60_000;
 
 export async function assertRateLimit(key: string, limit = 30) {
+  return assertRateLimitWindow(key, limit, DEFAULT_RATE_LIMIT_WINDOW_MS);
+}
+
+export async function assertRateLimitWindow(key: string, limit: number, windowMs: number) {
   const now = new Date();
-  const resetAt = new Date(now.getTime() + rateLimitWindowMs());
+  const resetAt = new Date(now.getTime() + windowMs);
 
   // Reset expired window first so the subsequent increment starts from 1
   await db.rateLimitBucket.updateMany({
@@ -25,6 +27,12 @@ export async function assertRateLimit(key: string, limit = 30) {
   if (bucket.count > limit) {
     throw new Error("Too many requests. Please wait a moment and try again.");
   }
+}
+
+export function getClientIpFromHeaders(headers: Headers) {
+  return headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headers.get("x-real-ip") ||
+    "unknown";
 }
 
 export function signHeartbeat(input: {

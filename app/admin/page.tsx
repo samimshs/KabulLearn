@@ -334,6 +334,14 @@ export default async function AdminDashboardPage({
             <p>session.role = ADMIN</p>
             <p>access.scope = privileged</p>
             <p>review.queue = {reviewCount}</p>
+            <div className="mt-3 flex flex-wrap gap-2 font-sans">
+              <Link href="/admin/audit" className="rounded-full border border-[#26364f] px-3 py-1 text-[11px] font-[800] text-white hover:bg-white/10">
+                Audit logs
+              </Link>
+              <Link href="/admin/ai" className="rounded-full border border-[#26364f] px-3 py-1 text-[11px] font-[800] text-white hover:bg-white/10">
+                AI review
+              </Link>
+            </div>
           </div>
         </div>
       </section>

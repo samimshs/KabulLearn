@@ -3,10 +3,43 @@ import { UserStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { openai, EMBED_MODEL, CHAT_MODEL, cosineSimilarity } from "@/lib/openai";
-import { assertRateLimit } from "@/lib/security";
+import { assertRateLimit, assertRateLimitWindow } from "@/lib/security";
 
 const EDUCATOR_INTENT_RE = /\b(educator|teacher|instructor|teach|creator|course creator|create course)\b|استاد|ښوونک|کورس جوړ|کورس جوړوون|مدرس|آموزگار|ساختن کورس|سازنده کورس/i;
 const MAX_MESSAGE_CHARS = 1200;
+const DAILY_AI_LIMIT = 100;
+
+type SourceRef = {
+  source: string;
+  sourceKey: string;
+  title: string;
+  href: string;
+};
+
+function detectLocale(text: string) {
+  if (/[\u0600-\u06FF]/.test(text)) {
+    return /[ۀؤئيېۍټډړږښګڼ]/.test(text) ? "ps" : "fa";
+  }
+  return "en";
+}
+
+function sourceHref(source: string, sourceKey: string) {
+  if (source === "course") return `/courses/${encodeURIComponent(sourceKey)}`;
+  if (source === "lesson") {
+    const [courseId, lessonId] = sourceKey.split(":");
+    if (courseId && lessonId) return `/courses/${encodeURIComponent(courseId)}/lessons/${encodeURIComponent(lessonId)}`;
+  }
+  if (source === "terms") return "/terms";
+  if (source === "privacy") return "/privacy";
+  if (source === "guide") return "/learner-support";
+  return "/";
+}
+
+function formatSources(locale: string, sources: SourceRef[]) {
+  if (sources.length === 0) return "";
+  const heading = locale === "ps" ? "سرچینې" : locale === "fa" ? "منابع" : "Sources";
+  return `\n\n${heading}:\n${sources.slice(0, 4).map((s, i) => `${i + 1}. ${s.title} (${s.href})`).join("\n")}`;
+}
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -36,9 +69,18 @@ export async function POST(req: NextRequest) {
   }
   try {
     await assertRateLimit(`ai-chat:${session.user.id}`, 20);
+    await assertRateLimitWindow(`ai-chat-day:${session.user.id}`, DAILY_AI_LIMIT, 24 * 60 * 60 * 1000);
   } catch {
     return new Response("Too many AI chat requests. Please wait a moment and try again.", { status: 429 });
   }
+
+  const resolvedCourse = courseId
+    ? await db.course.findFirst({
+        where: { OR: [{ id: courseId }, { slug: courseId }] },
+        select: { id: true }
+      }).catch(() => null)
+    : null;
+  const scopedCourseId = resolvedCourse?.id ?? courseId;
 
   // 1. Embed the user's question
   const embResponse = await openai.embeddings.create({
@@ -49,11 +91,11 @@ export async function POST(req: NextRequest) {
 
   // 2. Load all stored embeddings (all content types — similarity search handles relevance)
   const rows = await db.contentEmbedding.findMany({
-    where: courseId
+    where: scopedCourseId
       ? {
           OR: [
-            { source: "course", sourceKey: courseId },
-            { source: "lesson", sourceKey: { startsWith: `${courseId}:` } },
+            { source: "course", sourceKey: scopedCourseId },
+            { source: "lesson", sourceKey: { startsWith: `${scopedCourseId}:` } },
             { source: { in: ["terms", "privacy", "guide"] } }
           ]
         }
@@ -90,6 +132,24 @@ export async function POST(req: NextRequest) {
   }));
   scored.sort((a, b) => b.score - a.score);
   const top = scored.slice(0, 8);
+  const sourceRefs: SourceRef[] = top.map((item) => {
+    const match = item.label.match(/^\[(.+?):(.+?)\] (.*)$/);
+    const source = match?.[1] ?? "content";
+    const sourceKey = match?.[2] ?? "";
+    const title = match?.[3] ?? item.label;
+    return { source, sourceKey, title, href: sourceHref(source, sourceKey) };
+  });
+  const locale = detectLocale(trimmedMessage);
+  const chatLog = await db.aiChatLog.create({
+    data: {
+      userId: session.user.id,
+      courseId: resolvedCourse?.id ?? null,
+      question: trimmedMessage,
+      locale,
+      sources: sourceRefs
+    },
+    select: { id: true }
+  }).catch(() => null);
 
   const context = top
     .map(c => `[${c.label}]\n${c.text}`)
@@ -127,15 +187,33 @@ ${context}`
   const readable = new ReadableStream({
     async start(controller) {
       const enc = new TextEncoder();
+      let fullAnswer = "";
       for await (const chunk of stream) {
         const delta = chunk.choices[0]?.delta?.content ?? "";
-        if (delta) controller.enqueue(enc.encode(delta));
+        if (delta) {
+          fullAnswer += delta;
+          controller.enqueue(enc.encode(delta));
+        }
+      }
+      const sourceText = formatSources(locale, sourceRefs);
+      if (sourceText) {
+        fullAnswer += sourceText;
+        controller.enqueue(enc.encode(sourceText));
+      }
+      if (chatLog) {
+        await db.aiChatLog.update({
+          where: { id: chatLog.id },
+          data: { answer: fullAnswer }
+        }).catch(() => null);
       }
       controller.close();
     }
   });
 
   return new Response(readable, {
-    headers: { "Content-Type": "text/plain; charset=utf-8" }
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      ...(chatLog ? { "X-KabulLearn-Chat-Log-Id": chatLog.id } : {})
+    }
   });
 }

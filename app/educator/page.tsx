@@ -8,6 +8,55 @@ import { dictionaries } from "@/lib/i18n";
 import type { StudentJourney } from "@/components/CreatorDashboardView";
 import { getRecommendedCourses } from "@/lib/recommendations";
 
+function textReady(value: string | null | undefined) {
+  return Boolean(value?.trim());
+}
+
+function courseQuality(course: {
+  titleEn: string;
+  titlePs: string;
+  titleDa: string | null;
+  descriptionEn: string;
+  descriptionPs: string;
+  descriptionDa: string | null;
+  modules: Array<{
+    titleEn: string;
+    titlePs: string;
+    titleDa: string | null;
+    lessons: Array<{
+      titleEn: string;
+      titlePs: string;
+      titleDa: string | null;
+      type: string;
+      readingEn: string | null;
+      readingPs: string | null;
+      readingDa: string | null;
+    }>;
+  }>;
+}) {
+  const checks: Array<{ ok: boolean; issue: string }> = [
+    { ok: textReady(course.titleEn) && textReady(course.titlePs) && textReady(course.titleDa), issue: "Course title missing translation" },
+    { ok: textReady(course.descriptionEn) && textReady(course.descriptionPs) && textReady(course.descriptionDa), issue: "Course description missing translation" }
+  ];
+
+  for (const module of course.modules) {
+    checks.push({ ok: textReady(module.titleEn) && textReady(module.titlePs) && textReady(module.titleDa), issue: "Module title missing translation" });
+    for (const lesson of module.lessons) {
+      checks.push({ ok: textReady(lesson.titleEn) && textReady(lesson.titlePs) && textReady(lesson.titleDa), issue: "Lesson title missing translation" });
+      if (lesson.type === "READING") {
+        checks.push({ ok: textReady(lesson.readingEn) && textReady(lesson.readingPs) && textReady(lesson.readingDa), issue: "Reading lesson missing trilingual content" });
+      }
+    }
+  }
+
+  const passed = checks.filter((check) => check.ok).length;
+  const issues = Array.from(new Set(checks.filter((check) => !check.ok).map((check) => check.issue)));
+  return {
+    score: checks.length > 0 ? Math.round((passed / checks.length) * 100) : 0,
+    issues
+  };
+}
+
 export default async function EducatorDashboardPage({
   searchParams
 }: {
@@ -47,6 +96,24 @@ export default async function EducatorDashboardPage({
           select: { type: true }
         },
         _count: { select: { modules: true, enrollments: true } },
+        modules: {
+          select: {
+            titleEn: true,
+            titlePs: true,
+            titleDa: true,
+            lessons: {
+              select: {
+                titleEn: true,
+                titlePs: true,
+                titleDa: true,
+                type: true,
+                readingEn: true,
+                readingPs: true,
+                readingDa: true
+              }
+            }
+          }
+        },
         enrollments: {
           select: {
             user: { select: { name: true, email: true } }
@@ -185,16 +252,23 @@ export default async function EducatorDashboardPage({
       firstName={profile?.name?.split(/\s+/)[0] ?? educator.name?.split(/\s+/)[0] ?? "there"}
       intro={t.educatorIntro}
       courses={courses.map((course) => ({
-        id: course.id,
-        slug: course.slug,
-        status: course.status,
-        title: course.titleEn ?? course.titlePs ?? course.titleDa ?? "Untitled course",
-        description: course.descriptionEn ?? course.descriptionPs ?? course.descriptionDa ?? "",
-        modules: course._count.modules,
-        enrollments: course._count.enrollments,
-        updatedAt: course.updatedAt.toISOString(),
-        reviewNote: course.reviewNote,
-        latestReview: course.reviewEvents[0]?.type ?? null
+        ...(() => {
+          const quality = courseQuality(course);
+          return {
+            id: course.id,
+            slug: course.slug,
+            status: course.status,
+            title: course.titleEn ?? course.titlePs ?? course.titleDa ?? "Untitled course",
+            description: course.descriptionEn ?? course.descriptionPs ?? course.descriptionDa ?? "",
+            modules: course._count.modules,
+            enrollments: course._count.enrollments,
+            updatedAt: course.updatedAt.toISOString(),
+            reviewNote: course.reviewNote,
+            latestReview: course.reviewEvents[0]?.type ?? null,
+            qualityScore: quality.score,
+            qualityIssues: quality.issues
+          };
+        })()
       }))}
       students={studentNames}
       metrics={{

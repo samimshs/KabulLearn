@@ -6,6 +6,7 @@ import { localizeLevel } from "@/lib/i18n";
 
 export type CourseCardRow = {
   id: string;
+  slug?: string;
   titleEn: string;
   titlePs: string;
   titleDa?: string | null;
@@ -140,7 +141,7 @@ export function CourseCard({ course, index = 0, isAuthenticated = false }: { cou
   const level = localizeLevel(course.level, locale);
   const lessonCount = course.modules.reduce((n, m) => n + m.lessons.length, 0);
   const thumb = THUMB_CONFIGS[index % THUMB_CONFIGS.length];
-  const courseHref = `/courses/${course.id}`;
+  const courseHref = `/courses/${encodeURIComponent(course.slug ?? course.id)}`;
   const manageHref = `/educator/courses/${course.id}`;
   const cardHref = course.isCreatorCourse ? manageHref : courseHref;
   const actionLabel = course.isCreatorCourse

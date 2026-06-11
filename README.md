@@ -73,6 +73,47 @@ Status legend: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` block
 - [x] Upgrade vulnerable dev dependencies reported by `npm audit`.
 - [ ] Add 2FA/passkeys for admins and educators. Skipped for now by request.
 
+## World-Class Product Improvement To-Do
+
+Status legend: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blocked or needs review.
+
+### Discovery, Localization, and SEO
+
+- [x] Make course discovery search and category matching include Dari fields everywhere.
+- [x] Make learning path cards and details localize course titles in English, Pashto, and Dari.
+- [x] Add dedicated learning path detail pages with ordered course sequences.
+- [x] Support public course URLs by slug while keeping ID-based links backward compatible.
+- [x] Generate sitemap course URLs with slugs.
+- [x] Add richer course metadata and structured data for search engines.
+
+### AI Learning Assistant
+
+- [x] Add daily AI usage caps in addition to per-minute rate limits.
+- [x] Save AI chat interactions for quality review without exposing secrets.
+- [x] Append source references to AI answers.
+- [x] Add trilingual suggested questions in the chatbox.
+- [x] Add thumbs up/down AI response feedback.
+- [x] Add an admin AI quality dashboard for recent questions, answers, sources, and feedback.
+
+### Learner Experience
+
+- [x] Add lesson bookmarks so learners can save important lessons.
+- [x] Show bookmark controls directly inside lesson pages.
+- [x] Preserve the existing trilingual notes, progress, certificate, and recommendation flows.
+
+### Educator Experience
+
+- [x] Add translation completeness scoring to the educator dashboard.
+- [x] Surface course-quality signals before admin review.
+- [x] Keep educator analytics for enrollments, completion, ratings, and lesson completion.
+
+### Admin and Operations
+
+- [x] Add an admin audit-log viewer with actor, action, target, metadata, and timestamps.
+- [x] Add IP-based login rate limiting in addition to email-based login rate limiting.
+- [x] Add admin navigation entry points for audit logs and AI quality review.
+- [x] Keep dependency audit, typecheck, tests, and production build green after changes.
+
 ## Language Policy
 
 - Student-facing content supports English, Pashto, and Dari.

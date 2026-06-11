@@ -10,6 +10,7 @@ import { getPassedQuizzes, isModuleUnlocked, markLessonVisited } from "@/lib/pro
 import { usesPashtoContent } from "@/lib/i18n";
 import { completeReadingLesson, markLessonInProgress } from "@/lib/actions/video-actions";
 import { upsertLessonNote } from "@/lib/actions/note-actions";
+import { toggleLessonBookmark } from "@/lib/actions/bookmark-actions";
 import { LessonStateIcon, lessonKindOf, type LessonState } from "@/components/LessonStateIcon";
 import type { Course, Lesson, Module } from "@prisma/client";
 
@@ -41,6 +42,7 @@ type LessonViewProps = {
   isComplete?: boolean;
   isPreviewLesson?: boolean;
   initialNote?: string;
+  initialBookmarked?: boolean;
 };
 
 /* ── Inline icons ──────────────────────────────────────────── */
@@ -227,7 +229,7 @@ function LessonNotes({ lessonId, initialNote, sidePanel = false, stretch = false
 }
 
 /* ── Component ─────────────────────────────────────────────── */
-export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonStatuses = {}, isComplete = false, isPreviewLesson = false, initialNote = "" }: LessonViewProps) {
+export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonStatuses = {}, isComplete = false, isPreviewLesson = false, initialNote = "", initialBookmarked = false }: LessonViewProps) {
   const { locale, t, direction } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -238,6 +240,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
   const [passedQuizzes, setPassedQuizzes] = useState<Set<string>>(new Set());
   const [statuses, setStatuses] = useState<Record<string, "IN_PROGRESS" | "COMPLETED">>(lessonStatuses);
   const [readingDone, setReadingDone] = useState(false);
+  const [bookmarked, setBookmarked] = useState(initialBookmarked);
   const [isPendingComplete, startCompleteTransition] = useTransition();
 
   // Resolve the visual state of any lesson in the sidebar
@@ -270,6 +273,14 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
   const lessonDescription = usesPashtoContent(locale) ? lesson.descriptionPs ?? "" : lesson.descriptionEn ?? "";
   const lessonContent = usesPashtoContent(locale) ? lesson.readingPs : lesson.readingEn;
   const courseTitle = usesPashtoContent(locale) ? course.titlePs : course.titleEn;
+
+  function onToggleBookmark() {
+    const next = !bookmarked;
+    setBookmarked(next);
+    toggleLessonBookmark({ lessonId: lesson.id, bookmarked: next }).then((result) => {
+      if (!result.ok) setBookmarked(!next);
+    }).catch(() => setBookmarked(!next));
+  }
 
   useEffect(() => {
     const localPassed = getPassedQuizzes(course.id, moduleIds);
@@ -465,9 +476,25 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
             {lesson.isFinalTest && <span className="pr-badge pr-badge-gold">{t.requiredQuiz}</span>}
           </div>
 
-          <h1 className="mt-3 text-[clamp(18px,1.9vw,25px)] font-[800] leading-snug tracking-[-0.4px] text-[var(--ink)]">
-            {lessonTitle}
-          </h1>
+          <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
+            <h1 className="text-[clamp(18px,1.9vw,25px)] font-[800] leading-snug tracking-[-0.4px] text-[var(--ink)]">
+              {lessonTitle}
+            </h1>
+            {!isPreviewLesson ? (
+              <button
+                type="button"
+                onClick={onToggleBookmark}
+                className={`rounded-full border px-3 py-1.5 text-[12px] font-[900] transition ${
+                  bookmarked
+                    ? "border-[rgba(0,87,255,0.24)] bg-[var(--brand-50)] text-[var(--brand)]"
+                    : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[rgba(0,87,255,0.3)] hover:text-[var(--brand)]"
+                }`}
+                aria-pressed={bookmarked}
+              >
+                {bookmarked ? "Saved" : "Save lesson"}
+              </button>
+            ) : null}
+          </div>
           {lessonDescription && (
             <p className="mt-1.5 max-w-2xl text-[13px] leading-relaxed text-[var(--muted)]">{lessonDescription}</p>
           )}

@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { LessonView } from "@/components/LessonView";
 import { db } from "@/lib/db";
 import { getLessonNote } from "@/lib/actions/note-actions";
+import { getLessonBookmark } from "@/lib/actions/bookmark-actions";
 import { getServerLocale, localizedCourseSelect, localizedLessonSelect, localizedModuleSelect } from "@/lib/server-locale";
 
 type LessonInPage = {
@@ -39,8 +40,8 @@ export default async function LessonPage({
   let course: CourseForLesson | null = null;
 
   try {
-    course = await db.course.findUnique({
-      where: { id: courseId },
+    course = await db.course.findFirst({
+      where: { OR: [{ id: courseId }, { slug: courseId }] },
       select: {
         id: true,
         ...localizedCourseSelect(locale),
@@ -72,6 +73,7 @@ export default async function LessonPage({
   if (!course || (course.status !== CourseStatus.PUBLISHED && !course.publishedAt)) {
     return notFound();
   }
+  const resolvedCourseId = course.id;
 
   const lesson = course.modules.flatMap((m) => m.lessons).find((l) => l.id === lessonId);
   if (!lesson) {
@@ -101,7 +103,7 @@ export default async function LessonPage({
   if (userId) {
     try {
       const enrollment = await db.enrollment.findUnique({
-        where: { userId_courseId: { userId, courseId } }
+        where: { userId_courseId: { userId, courseId: resolvedCourseId } }
       });
       isEnrolled = Boolean(enrollment);
     } catch {
@@ -121,7 +123,7 @@ export default async function LessonPage({
   if (userId) {
     try {
       const rows = await db.userProgress.findMany({
-        where: { userId, lesson: { module: { courseId } } },
+        where: { userId, lesson: { module: { courseId: resolvedCourseId } } },
         select: { lessonId: true, status: true, lesson: { select: { moduleId: true, type: true } } }
       });
       serverPassedModuleIds = Array.from(
@@ -181,7 +183,12 @@ export default async function LessonPage({
   };
   const normalizedLesson = normalizedCourse.modules.flatMap((module) => module.lessons).find((item) => item.id === lesson.id) ?? lesson;
 
-  const initialNote = isEnrolled && userId ? await getLessonNote(lessonId).catch(() => "") : "";
+  const [initialNote, initialBookmarked] = isEnrolled && userId
+    ? await Promise.all([
+        getLessonNote(lessonId).catch(() => ""),
+        getLessonBookmark(lessonId).catch(() => false)
+      ])
+    : ["", false] as const;
 
-  return <LessonView course={normalizedCourse} lesson={normalizedLesson} serverPassedModuleIds={serverPassedModuleIds} lessonStatuses={lessonStatuses} isComplete={isComplete} isPreviewLesson={isPreviewLesson} initialNote={initialNote} />;
+  return <LessonView course={normalizedCourse} lesson={normalizedLesson} serverPassedModuleIds={serverPassedModuleIds} lessonStatuses={lessonStatuses} isComplete={isComplete} isPreviewLesson={isPreviewLesson} initialNote={initialNote} initialBookmarked={initialBookmarked} />;
 }

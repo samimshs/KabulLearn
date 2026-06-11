@@ -19,7 +19,7 @@ export default async function LearningPathsPage() {
     coverColor: string;
     courses: Array<{
       order: number;
-      course: { id: string; titleEn: string; titlePs: string; level: string | null };
+      course: { id: string; slug: string; titleEn: string; titlePs: string; titleDa?: string | null; level: string | null };
     }>;
   }> = [];
 
@@ -36,7 +36,7 @@ export default async function LearningPathsPage() {
           select: {
             order: true,
             course: {
-              select: { id: true, titleEn: true, titlePs: true, level: true }
+              select: { id: true, slug: true, titleEn: true, titlePs: true, titleDa: true, level: true }
             }
           }
         }
@@ -62,7 +62,6 @@ export default async function LearningPathsPage() {
           {paths.map((path) => {
             const title = localize(locale, path.titleEn, path.titlePs, path.titleDa ?? undefined);
             const desc = localize(locale, path.descriptionEn, path.descriptionPs, path.descriptionDa ?? undefined);
-            const firstCourseId = path.courses[0]?.course.id;
 
             return (
               <article
@@ -86,7 +85,7 @@ export default async function LearningPathsPage() {
                   {/* Course list */}
                   <ol className="grid gap-1.5">
                     {path.courses.slice(0, 5).map(({ order, course }) => {
-                      const courseTitle = localize(locale, course.titleEn, course.titlePs);
+                      const courseTitle = localize(locale, course.titleEn, course.titlePs, course.titleDa ?? undefined);
                       return (
                         <li key={course.id} className="flex items-center gap-2 text-[12px] font-[700] text-[var(--ink-2)]">
                           <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-[10px] font-[800] text-[var(--muted)]">
@@ -104,7 +103,7 @@ export default async function LearningPathsPage() {
                   </ol>
 
                   <Link
-                    href={firstCourseId ? `/courses/${encodeURIComponent(firstCourseId)}` : "/courses"}
+                    href={`/learning-paths/${encodeURIComponent(path.slug)}`}
                     className="pr-btn-primary mt-2 w-full justify-center text-center text-[13px]"
                   >
                     {t.learningPathEnroll}

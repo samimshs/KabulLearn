@@ -15,14 +15,14 @@ export async function generateMetadata({ params }: { params: Promise<{ courseId:
   const { courseId: rawCourseId } = await params;
   const courseId = decodeURIComponent(rawCourseId);
   try {
-    const c = await db.course.findUnique({
-      where: { id: courseId },
-      select: { titleEn: true, titlePs: true, descriptionEn: true, descriptionPs: true }
+    const c = await db.course.findFirst({
+      where: { OR: [{ id: courseId }, { slug: courseId }] },
+      select: { slug: true, titleEn: true, titlePs: true, titleDa: true, descriptionEn: true, descriptionPs: true, descriptionDa: true }
     });
     if (!c) return {};
-    const title = c.titleEn || c.titlePs || "Course";
-    const description = (c.descriptionEn || c.descriptionPs || "").slice(0, 160);
-    const url = `${BASE_URL}/courses/${encodeURIComponent(courseId)}`;
+    const title = c.titleEn || c.titlePs || c.titleDa || "Course";
+    const description = (c.descriptionEn || c.descriptionPs || c.descriptionDa || "").slice(0, 160);
+    const url = `${BASE_URL}/courses/${encodeURIComponent(c.slug)}`;
     return {
       title: `${title} — KabulLearn`,
       description,
@@ -53,6 +53,7 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
 
   let course: {
     id: string;
+    slug: string;
     titleEn?: string; titlePs?: string; titleDa?: string | null;
     descriptionEn?: string; descriptionPs?: string; descriptionDa?: string | null;
     level?: string | null;
@@ -70,10 +71,11 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
   } | null = null;
 
   try {
-    course = await db.course.findUnique({
-      where: { id: courseId },
+    course = await db.course.findFirst({
+      where: { OR: [{ id: courseId }, { slug: courseId }] },
       select: {
         id: true,
+        slug: true,
         ...localizedCourseSelect(locale),
         status: true,
         publishedAt: true,
@@ -130,6 +132,8 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
   if (!course || (course.status !== CourseStatus.PUBLISHED && !course.publishedAt)) {
     return notFound();
   }
+  const resolvedCourseId = course.id;
+  const publicCourseRef = course.slug || course.id;
 
   const session = await auth();
   const userId = session?.user?.id;
@@ -159,12 +163,12 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
   try {
     const [ratingAggregate, ratingRows, threads] = await Promise.all([
       db.courseRating.aggregate({
-        where: { courseId },
+        where: { courseId: resolvedCourseId },
         _avg: { rating: true },
         _count: { rating: true }
       }),
       db.courseRating.findMany({
-        where: { courseId },
+        where: { courseId: resolvedCourseId },
         orderBy: { createdAt: "desc" },
         take: 8,
         select: {
@@ -175,7 +179,7 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
         }
       }),
       db.discussionThread.findMany({
-        where: { courseId },
+        where: { courseId: resolvedCourseId },
         orderBy: { createdAt: "desc" },
         take: 10,
         select: {
@@ -213,18 +217,18 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
     try {
       const [progressRows, certStatus, enrollStatus, ratingRow, progress] = await Promise.all([
         db.userProgress.findMany({
-          where: { userId, lesson: { module: { courseId } } },
+          where: { userId, lesson: { module: { courseId: resolvedCourseId } } },
           select: { lessonId: true, status: true, lesson: { select: { moduleId: true, type: true } } }
         }),
-        getCourseCertificateStatus(courseId, userId),
-        getEnrollmentStatus(courseId),
+        getCourseCertificateStatus(resolvedCourseId, userId),
+        getEnrollmentStatus(resolvedCourseId),
         db.courseRating.findUnique({
           where: {
-            userId_courseId: { userId, courseId }
+            userId_courseId: { userId, courseId: resolvedCourseId }
           },
           select: { rating: true, comment: true }
         }),
-        getCourseProgress(userId, courseId)
+        getCourseProgress(userId, resolvedCourseId)
       ]);
       serverPassedModuleIds = Array.from(new Set(
         progressRows
@@ -250,14 +254,14 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
   let relatedCourses: RelatedCourse[] = [];
   try {
     const courseEnrollments = await db.enrollment.findMany({
-      where: { courseId },
+      where: { courseId: resolvedCourseId },
       select: { userId: true },
       take: 300
     });
     const enrolledUserIds = courseEnrollments.map((e) => e.userId);
     if (enrolledUserIds.length > 0) {
       const otherEnrollments = await db.enrollment.findMany({
-        where: { userId: { in: enrolledUserIds }, courseId: { not: courseId } },
+        where: { userId: { in: enrolledUserIds }, courseId: { not: resolvedCourseId } },
         select: { courseId: true }
       });
       const counts: Record<string, number> = {};
@@ -295,7 +299,7 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
     "@type": "Course",
     name: course.titleEn || course.titlePs || "",
     description: (course.descriptionEn || course.descriptionPs || "").slice(0, 500),
-    url: `${BASE_URL}/courses/${encodeURIComponent(courseId)}`,
+    url: `${BASE_URL}/courses/${encodeURIComponent(publicCourseRef)}`,
     provider: { "@type": "Organization", name: "KabulLearn", url: BASE_URL },
     instructor: instructorList.map((p) => ({ "@type": "Person", name: p.name, url: `${BASE_URL}/creators/${encodeURIComponent(p.username)}` })),
     inLanguage: ["en", "ps", "fa"],
@@ -311,7 +315,7 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: BASE_URL },
       { "@type": "ListItem", position: 2, name: "Courses", item: `${BASE_URL}/courses` },
-      { "@type": "ListItem", position: 3, name: course.titleEn || course.titlePs || "Course", item: `${BASE_URL}/courses/${encodeURIComponent(courseId)}` }
+      { "@type": "ListItem", position: 3, name: course.titleEn || course.titlePs || "Course", item: `${BASE_URL}/courses/${encodeURIComponent(publicCourseRef)}` }
     ]
   };
 

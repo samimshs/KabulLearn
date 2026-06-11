@@ -61,7 +61,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
   const search = useCallback((q: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!q || q.length < 2) { setResults(null); setLoading(false); return; }
+    if (!q || q.length < 3) { setResults(null); setLoading(false); return; }
     setLoading(true);
     debounceRef.current = setTimeout(async () => {
       try {
@@ -104,7 +104,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
   if (!open) return null;
 
-  const isEmpty = query.length >= 2 && !loading && flat.length === 0;
+  const isEmpty = query.length >= 3 && !loading && flat.length === 0;
   const showGroups = flat.length > 0;
   let cursor = 0;
 
@@ -184,7 +184,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
         {/* Results */}
         <div className="max-h-[60vh] overflow-y-auto">
-          {!query || query.length < 2 ? (
+          {!query || query.length < 3 ? (
             <p className="px-4 py-8 text-center text-sm font-[600] text-[var(--muted-2)]">{t.searchTypeToStart}</p>
           ) : isEmpty ? (
             <p className="px-4 py-8 text-center text-sm font-[600] text-[var(--muted-2)]">{t.searchNoResults}</p>

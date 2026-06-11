@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
 
-type Message = { role: "user" | "assistant"; content: string };
+type Message = { role: "user" | "assistant"; content: string; chatLogId?: string; feedback?: 1 | -1 };
 
 const URL_RE = /https?:\/\/[^\s)>\]"']+/g;
 
@@ -33,7 +33,7 @@ function linkify(text: string) {
 }
 
 export function CourseChatbox({ courseId }: { courseId?: string }) {
-  const { t, direction } = useLanguage();
+  const { t, direction, locale } = useLanguage();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -41,6 +41,11 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
   const [streaming, setStreaming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const suggestions = locale === "ps"
+    ? ["څنګه کورس پیل کړم؟", "څنګه استاد شم؟", "زما سند څنګه ترلاسه کړم؟"]
+    : locale === "fa"
+      ? ["چگونه یک کورس را شروع کنم؟", "چگونه استاد شوم؟", "چگونه سندم را دریافت کنم؟"]
+      : ["How do I start a course?", "How do I become an educator?", "How do I get my certificate?"];
 
   useEffect(() => {
     if (open && messages.length === 0) {
@@ -56,8 +61,8 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
     if (open) inputRef.current?.focus();
   }, [open]);
 
-  async function send() {
-    const text = input.trim();
+  async function send(overrideText?: string) {
+    const text = (overrideText ?? input).trim();
     if (!text || streaming) return;
     const activeCourseId = courseId ?? pathname.match(/^\/courses\/([^/]+)/)?.[1];
 
@@ -73,8 +78,9 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
       });
 
       if (!res.ok || !res.body) throw new Error("Request failed");
+      const chatLogId = res.headers.get("X-KabulLearn-Chat-Log-Id") ?? undefined;
 
-      setMessages(prev => [...prev, { role: "assistant", content: "" }]);
+      setMessages(prev => [...prev, { role: "assistant", content: "", chatLogId }]);
 
       const reader = res.body.getReader();
       const dec = new TextDecoder();
@@ -87,7 +93,8 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
           const next = [...prev];
           next[next.length - 1] = {
             role: "assistant",
-            content: next[next.length - 1].content + chunk
+            content: next[next.length - 1].content + chunk,
+            chatLogId: next[next.length - 1].chatLogId
           };
           return next;
         });
@@ -97,6 +104,17 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
     } finally {
       setStreaming(false);
     }
+  }
+
+  async function sendFeedback(index: number, rating: 1 | -1) {
+    const message = messages[index];
+    if (!message?.chatLogId) return;
+    setMessages(prev => prev.map((item, i) => i === index ? { ...item, feedback: rating } : item));
+    await fetch("/api/chat/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chatLogId: message.chatLogId, rating })
+    }).catch(() => {});
   }
 
   function onKeyDown(e: React.KeyboardEvent) {
@@ -154,24 +172,60 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {messages.length <= 1 && (
+              <div className="grid gap-2">
+                {suggestions.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => send(suggestion)}
+                    className="rounded-full border border-[var(--border)] bg-white px-3 py-2 text-start text-[12px] font-[700] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.3)] hover:text-[var(--brand)]"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            )}
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
-                    msg.role === "user"
-                      ? "bg-[var(--brand)] text-white rounded-br-sm"
-                      : "bg-[var(--surface)] text-[var(--ink)] rounded-bl-sm border border-[var(--border)]"
-                  }`}
-                >
-                  {msg.content
-                    ? (msg.role === "assistant" ? linkify(msg.content) : msg.content)
-                    : (
-                    <span className="flex gap-1 items-center text-[var(--muted)]">
-                      <span className="animate-bounce [animation-delay:0ms]">·</span>
-                      <span className="animate-bounce [animation-delay:150ms]">·</span>
-                      <span className="animate-bounce [animation-delay:300ms]">·</span>
-                    </span>
-                  )}
+                <div className="grid max-w-[85%] gap-1">
+                  <div
+                    className={`rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
+                      msg.role === "user"
+                        ? "bg-[var(--brand)] text-white rounded-br-sm"
+                        : "bg-[var(--surface)] text-[var(--ink)] rounded-bl-sm border border-[var(--border)]"
+                    }`}
+                  >
+                    {msg.content
+                      ? (msg.role === "assistant" ? linkify(msg.content) : msg.content)
+                      : (
+                      <span className="flex gap-1 items-center text-[var(--muted)]">
+                        <span className="animate-bounce [animation-delay:0ms]">·</span>
+                        <span className="animate-bounce [animation-delay:150ms]">·</span>
+                        <span className="animate-bounce [animation-delay:300ms]">·</span>
+                      </span>
+                    )}
+                  </div>
+                  {msg.role === "assistant" && msg.chatLogId && msg.content ? (
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => sendFeedback(i, 1)}
+                        className={`rounded-full px-2 py-0.5 text-[11px] font-[800] ${msg.feedback === 1 ? "bg-[var(--success-50)] text-[var(--success)]" : "text-[var(--muted)] hover:bg-[var(--surface)]"}`}
+                        aria-label="Helpful answer"
+                      >
+                        Good
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => sendFeedback(i, -1)}
+                        className={`rounded-full px-2 py-0.5 text-[11px] font-[800] ${msg.feedback === -1 ? "bg-[var(--danger-50)] text-[var(--danger)]" : "text-[var(--muted)] hover:bg-[var(--surface)]"}`}
+                        aria-label="Unhelpful answer"
+                      >
+                        Needs work
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             ))}
@@ -195,7 +249,7 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
               />
               <button
                 type="button"
-                onClick={send}
+                onClick={() => send()}
                 disabled={!input.trim() || streaming}
                 className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--brand)] text-white transition hover:bg-[var(--brand-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
                 aria-label={t.chatSend}

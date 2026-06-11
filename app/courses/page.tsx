@@ -6,6 +6,7 @@ import { getCourseProgress } from "@/lib/security";
 
 type CourseRow = {
   id: string;
+  slug?: string;
   titleEn: string;
   titlePs: string;
   titleDa?: string | null;
@@ -36,12 +37,13 @@ export default async function CoursesPage({
 
   let rawCourses: Array<{
     id: string;
+    slug: string;
     authorId: string;
     titleEn?: string; titlePs?: string; titleDa?: string | null;
     descriptionEn?: string; descriptionPs?: string; descriptionDa?: string | null;
     level?: string | null;
     _count: { enrollments: number };
-    modules: Array<{ id: string; titleEn?: string; titlePs?: string; order: number; lessons: Array<{ id: string; order: number; isFinalTest: boolean }> }>;
+    modules: Array<{ id: string; titleEn?: string; titlePs?: string; titleDa?: string | null; order: number; lessons: Array<{ id: string; order: number; isFinalTest: boolean }> }>;
     author: { name: string | null; email: string };
     authorProfile: { name: string; username: string; avatarUrl: string | null } | null;
     instructors: Array<{ order: number; profile: { name: string; username: string; avatarUrl: string | null; userId: string | null } }>;
@@ -67,8 +69,10 @@ export default async function CoursesPage({
                   OR: [
                     { titleEn: { contains: searchTerm, mode: "insensitive" } },
                     { titlePs: { contains: searchTerm, mode: "insensitive" } },
+                    { titleDa: { contains: searchTerm, mode: "insensitive" } },
                     { descriptionEn: { contains: searchTerm, mode: "insensitive" } },
                     { descriptionPs: { contains: searchTerm, mode: "insensitive" } },
+                    { descriptionDa: { contains: searchTerm, mode: "insensitive" } },
                     { authorProfile: { is: { name: { contains: searchTerm, mode: "insensitive" } } } },
                     { authorProfile: { is: { username: { contains: searchTerm, mode: "insensitive" } } } },
                     { author: { is: { name: { contains: searchTerm, mode: "insensitive" } } } }
@@ -81,6 +85,7 @@ export default async function CoursesPage({
         orderBy: [{ createdAt: "desc" }],
         select: {
           id: true,
+          slug: true,
           authorId: true,
           titleEn: true, titlePs: true, titleDa: true,
           descriptionEn: true, descriptionPs: true, descriptionDa: true,
@@ -93,7 +98,7 @@ export default async function CoursesPage({
             orderBy: [{ order: "asc" }],
             select: {
               id: true,
-              titleEn: true, titlePs: true,
+              titleEn: true, titlePs: true, titleDa: true,
               order: true,
               lessons: { orderBy: [{ order: "asc" }], select: { id: true, order: true, isFinalTest: true } }
             }
@@ -164,6 +169,7 @@ export default async function CoursesPage({
 
     return {
       id: course.id,
+      slug: course.slug,
       titleEn: course.titleEn ?? course.titlePs ?? "",
       titlePs: course.titlePs ?? course.titleEn ?? "",
       titleDa: course.titleDa,
@@ -177,6 +183,7 @@ export default async function CoursesPage({
         id: module.id,
         titleEn: module.titleEn ?? module.titlePs ?? "",
         titlePs: module.titlePs ?? module.titleEn ?? "",
+        titleDa: module.titleDa,
         order: module.order,
         lessons: module.lessons.map((lesson) => ({ id: lesson.id, order: lesson.order }))
       })),

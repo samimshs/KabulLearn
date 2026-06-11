@@ -44,6 +44,8 @@ type CreatorCourse = {
   updatedAt: string;
   reviewNote: string | null;
   latestReview: "SUBMITTED" | "PUBLISHED" | "RETURNED" | null;
+  qualityScore: number;
+  qualityIssues: string[];
 };
 
 type CreatorDashboardViewProps = {
@@ -199,6 +201,19 @@ function CourseRow({ course, t }: { course: CreatorCourse; t: Dictionary }) {
           <p className="mt-2 text-[12px] font-[700] text-[var(--muted-2)]">
             {course.modules} {t.modulesCount} · {course.enrollments} {t.studentsCount}
           </p>
+          <div className="mt-3 grid gap-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-[900] uppercase tracking-[1px] text-[var(--muted)]">Quality</span>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-[900] ${course.qualityScore >= 90 ? "bg-[var(--success-50)] text-[var(--success)]" : course.qualityScore >= 70 ? "bg-[var(--warning-50)] text-[var(--warning)]" : "bg-[var(--danger-50)] text-[var(--danger)]"}`}>
+                {course.qualityScore}%
+              </span>
+            </div>
+            {course.qualityIssues.length > 0 ? (
+              <p className="line-clamp-1 text-[11px] font-[700] text-[var(--muted)]">{course.qualityIssues.slice(0, 2).join(" · ")}</p>
+            ) : (
+              <p className="text-[11px] font-[700] text-[var(--success)]">Trilingual content looks complete.</p>
+            )}
+          </div>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <Link href={`/educator/courses/${course.id}`} className="pr-btn-primary !min-h-9 px-4 text-[13px]">

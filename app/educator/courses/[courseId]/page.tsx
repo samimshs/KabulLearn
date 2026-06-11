@@ -337,8 +337,10 @@ export default async function EducatorCoursePage(props: EducatorCoursePageProps)
                         moduleId={module.id}
                         titleEn={module.titleEn}
                         titlePs={module.titlePs}
+                        titleDa={module.titleDa}
                         descriptionEn={module.descriptionEn}
                         descriptionPs={module.descriptionPs}
+                        descriptionDa={module.descriptionDa}
                       />
                     </div>
                   </details>

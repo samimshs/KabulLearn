@@ -16,11 +16,14 @@ export function LessonUpdateForm({
     type: LessonType;
     titleEn: string;
     titlePs: string;
+    titleDa?: string | null;
     descriptionEn?: string | null;
     descriptionPs?: string | null;
+    descriptionDa?: string | null;
     youtubeUrl?: string | null;
     readingEn?: string | null;
     readingPs?: string | null;
+    readingDa?: string | null;
     isFinalTest: boolean;
     passingScore?: number | null;
   };
@@ -30,11 +33,14 @@ export function LessonUpdateForm({
   const [form, setForm] = useState({
     titleEn: lesson.titleEn,
     titlePs: lesson.titlePs,
+    titleDa: lesson.titleDa ?? "",
     descriptionEn: lesson.descriptionEn ?? "",
     descriptionPs: lesson.descriptionPs ?? "",
+    descriptionDa: lesson.descriptionDa ?? "",
     youtubeUrl: lesson.youtubeUrl ?? "",
     readingEn: lesson.readingEn ?? "",
     readingPs: lesson.readingPs ?? "",
+    readingDa: lesson.readingDa ?? "",
     isFinalTest: lesson.isFinalTest,
     passingScore: lesson.passingScore ?? 70
   });
@@ -62,13 +68,15 @@ export function LessonUpdateForm({
           });
         }}
       >
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-2 sm:grid-cols-3">
           <input className="pr-input" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} placeholder={t.englishTitle} />
-          <input className="pr-input" value={form.titlePs} onChange={(e) => setForm({ ...form, titlePs: e.target.value })} placeholder={t.pashtoTitle} />
+          <input className="pr-input" dir="rtl" value={form.titlePs} onChange={(e) => setForm({ ...form, titlePs: e.target.value })} placeholder={t.pashtoTitle} />
+          <input className="pr-input" dir="rtl" value={form.titleDa} onChange={(e) => setForm({ ...form, titleDa: e.target.value })} placeholder={t.dariTitle} />
         </div>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-2 sm:grid-cols-3">
           <input className="pr-input" value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} placeholder={t.englishDescLabel} />
-          <input className="pr-input" value={form.descriptionPs} onChange={(e) => setForm({ ...form, descriptionPs: e.target.value })} placeholder={t.pashtoDescLabel} />
+          <input className="pr-input" dir="rtl" value={form.descriptionPs} onChange={(e) => setForm({ ...form, descriptionPs: e.target.value })} placeholder={t.pashtoDescLabel} />
+          <input className="pr-input" dir="rtl" value={form.descriptionDa} onChange={(e) => setForm({ ...form, descriptionDa: e.target.value })} placeholder={t.dariDescLabel} />
         </div>
         {lesson.type === LessonType.VIDEO ? (
           <input className="pr-input" value={form.youtubeUrl} onChange={(e) => setForm({ ...form, youtubeUrl: e.target.value })} placeholder={t.youtubeUrlLabel} />
@@ -78,9 +86,10 @@ export function LessonUpdateForm({
             <p className="text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
               Markdown supported: # heading, ## section, - bullets, 1. steps, **bold**
             </p>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2 sm:grid-cols-3">
               <textarea className="pr-input min-h-40" value={form.readingEn} onChange={(e) => setForm({ ...form, readingEn: e.target.value })} placeholder={t.englishContentLabel} />
-              <textarea className="pr-input min-h-40" value={form.readingPs} onChange={(e) => setForm({ ...form, readingPs: e.target.value })} placeholder={t.pashtoContentLabel} />
+              <textarea className="pr-input min-h-40" dir="rtl" value={form.readingPs} onChange={(e) => setForm({ ...form, readingPs: e.target.value })} placeholder={t.pashtoContentLabel} />
+              <textarea className="pr-input min-h-40" dir="rtl" value={form.readingDa} onChange={(e) => setForm({ ...form, readingDa: e.target.value })} placeholder={t.dariContentLabel} />
             </div>
             {form.readingEn ? (
               <details className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-3">

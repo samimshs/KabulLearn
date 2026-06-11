@@ -12,11 +12,14 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
   const [type, setType] = useState<LessonType>(LessonType.VIDEO);
   const [titleEn, setTitleEn] = useState("");
   const [titlePs, setTitlePs] = useState("");
+  const [titleDa, setTitleDa] = useState("");
   const [descriptionEn, setDescriptionEn] = useState("");
   const [descriptionPs, setDescriptionPs] = useState("");
+  const [descriptionDa, setDescriptionDa] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [readingEn, setReadingEn] = useState("");
   const [readingPs, setReadingPs] = useState("");
+  const [readingDa, setReadingDa] = useState("");
   const [isFinalTest, setIsFinalTest] = useState(false);
   const [passingScore, setPassingScore] = useState(70);
   const [message, setMessage] = useState<string | null>(null);
@@ -38,11 +41,14 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
             type,
             titleEn,
             titlePs,
+            titleDa,
             descriptionEn,
             descriptionPs,
+            descriptionDa,
             youtubeUrl: type === LessonType.VIDEO ? youtubeUrl : undefined,
             readingEn: type === LessonType.READING ? readingEn : undefined,
             readingPs: type === LessonType.READING ? readingPs : undefined,
+            readingDa: type === LessonType.READING ? readingDa : undefined,
             isFinalTest: type === LessonType.QUIZ ? isFinalTest : false,
             passingScore: type === LessonType.QUIZ ? passingScore : undefined
           });
@@ -54,11 +60,14 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
 
           setTitleEn("");
           setTitlePs("");
+          setTitleDa("");
           setDescriptionEn("");
           setDescriptionPs("");
+          setDescriptionDa("");
           setYoutubeUrl("");
           setReadingEn("");
           setReadingPs("");
+          setReadingDa("");
           setIsFinalTest(false);
           setPassingScore(70);
           if (type === LessonType.QUIZ) {
@@ -109,11 +118,25 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
           {t.pashtoTitle}
           <input
             value={titlePs}
+            dir="rtl"
             onChange={(event) => setTitlePs(event.target.value)}
             placeholder="د درس سرلیک"
             className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.dariTitle}
+          <input
+            value={titleDa}
+            dir="rtl"
+            onChange={(event) => setTitleDa(event.target.value)}
+            placeholder="عنوان درس"
+            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+          />
+        </label>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-3">
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
           {t.englishDescLabel}
           <input
@@ -123,17 +146,27 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
             className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.pashtoDescLabel}
+          <input
+            value={descriptionPs}
+            dir="rtl"
+            onChange={(event) => setDescriptionPs(event.target.value)}
+            placeholder="اختیاري پښتو توضیحات"
+            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+          />
+        </label>
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.dariDescLabel}
+          <input
+            value={descriptionDa}
+            dir="rtl"
+            onChange={(event) => setDescriptionDa(event.target.value)}
+            placeholder="توضیح اختیاری دری"
+            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+          />
+        </label>
       </div>
-
-      <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
-        {t.pashtoDescLabel}
-        <input
-          value={descriptionPs}
-          onChange={(event) => setDescriptionPs(event.target.value)}
-          placeholder="Optional Pashto description"
-          className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
-        />
-      </label>
 
       {type === LessonType.VIDEO ? (
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
@@ -148,7 +181,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
       ) : null}
 
       {type === LessonType.READING ? (
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-2 sm:grid-cols-3">
           <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
             {t.englishContentLabel}
             <textarea
@@ -163,9 +196,21 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
             {t.pashtoContentLabel}
             <textarea
               value={readingPs}
+              dir="rtl"
               onChange={(event) => setReadingPs(event.target.value)}
               rows={3}
               placeholder="لیکنه"
+              className="min-h-[90px] rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+            {t.dariContentLabel}
+            <textarea
+              value={readingDa}
+              dir="rtl"
+              onChange={(event) => setReadingDa(event.target.value)}
+              rows={3}
+              placeholder="محتوای خواندنی"
               className="min-h-[90px] rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
             />
           </label>

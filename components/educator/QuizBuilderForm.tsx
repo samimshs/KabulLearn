@@ -20,6 +20,7 @@ type Choice = {
   order: number;
   textEn: string;
   textPs: string;
+  textDa?: string | null;
   isCorrect: boolean;
 };
 
@@ -29,9 +30,11 @@ type Question = {
   type: QuestionType;
   promptEn: string;
   promptPs: string;
+  promptDa?: string | null;
   correctAnswer: string | null;
   explanationEn: string | null;
   explanationPs: string | null;
+  explanationDa?: string | null;
   choices: Choice[];
 };
 
@@ -160,7 +163,7 @@ function ChoiceItem({
 }) {
   const { t } = useLanguage();
   const [isPending, startTransition] = useTransition();
-  const [edit, setEdit] = useState({ textEn: choice.textEn, textPs: choice.textPs, isCorrect: choice.isCorrect });
+  const [edit, setEdit] = useState({ textEn: choice.textEn, textPs: choice.textPs, textDa: choice.textDa ?? "", isCorrect: choice.isCorrect });
   const [message, setMessage] = useState("");
 
   return (
@@ -171,6 +174,7 @@ function ChoiceItem({
           {choice.isCorrect ? "✓ " : ""}{choice.textEn}
         </span>
         <span className="text-xs text-[#607083]">{choice.textPs}</span>
+        {choice.textDa ? <span className="text-xs text-[#607083]">{choice.textDa}</span> : null}
       </div>
       <button
         type="button"
@@ -199,9 +203,10 @@ function ChoiceItem({
             });
           }}
         >
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-2 sm:grid-cols-3">
             <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.textEn} onChange={(e) => setEdit({ ...edit, textEn: e.target.value })} />
-            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.textPs} onChange={(e) => setEdit({ ...edit, textPs: e.target.value })} />
+            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" dir="rtl" value={edit.textPs} onChange={(e) => setEdit({ ...edit, textPs: e.target.value })} />
+            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" dir="rtl" value={edit.textDa} onChange={(e) => setEdit({ ...edit, textDa: e.target.value })} placeholder="دری" />
           </div>
           <label className="flex items-center gap-2 text-xs font-black text-[#1a2e42]">
             <input type="checkbox" checked={edit.isCorrect} onChange={(e) => setEdit({ ...edit, isCorrect: e.target.checked })} />
@@ -228,6 +233,7 @@ function AddChoiceForm({
   const { t } = useLanguage();
   const [textEn, setTextEn] = useState("");
   const [textPs, setTextPs] = useState("");
+  const [textDa, setTextDa] = useState("");
   const [isCorrect, setIsCorrect] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -238,11 +244,12 @@ function AddChoiceForm({
         e.preventDefault();
         startTransition(async () => {
           setError(null);
-          const result = await addAnswerChoice({ questionId, textEn, textPs, isCorrect });
+          const result = await addAnswerChoice({ questionId, textEn, textPs, textDa, isCorrect });
           if (result.ok) {
-            onAdded({ id: result.data.choiceId, order: 999, textEn, textPs, isCorrect });
+            onAdded({ id: result.data.choiceId, order: 999, textEn, textPs, textDa, isCorrect });
             setTextEn("");
             setTextPs("");
+            setTextDa("");
             setIsCorrect(false);
             router.refresh();
           } else {
@@ -253,7 +260,7 @@ function AddChoiceForm({
       className="grid gap-3 rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-3"
     >
       <p className="text-xs font-black uppercase tracking-wider text-[#0f766e]">{t.addAnswerChoice}</p>
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid gap-2 sm:grid-cols-3">
         <input
           value={textEn}
           onChange={(e) => setTextEn(e.target.value)}
@@ -263,9 +270,17 @@ function AddChoiceForm({
         />
         <input
           value={textPs}
+          dir="rtl"
           onChange={(e) => setTextPs(e.target.value)}
           placeholder="د ځواب متن"
           required
+          className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+        />
+        <input
+          value={textDa}
+          dir="rtl"
+          onChange={(e) => setTextDa(e.target.value)}
+          placeholder="متن پاسخ"
           className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
         />
       </div>
@@ -305,9 +320,11 @@ function QuestionCard({
     type: question.type,
     promptEn: question.promptEn,
     promptPs: question.promptPs,
+    promptDa: question.promptDa ?? "",
     correctAnswer: question.correctAnswer ?? "",
     explanationEn: question.explanationEn ?? "",
-    explanationPs: question.explanationPs ?? ""
+    explanationPs: question.explanationPs ?? "",
+    explanationDa: question.explanationDa ?? ""
   });
   const [editMessage, setEditMessage] = useState("");
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -364,9 +381,11 @@ function QuestionCard({
                 type: edit.type,
                 promptEn: edit.promptEn,
                 promptPs: edit.promptPs,
+                promptDa: edit.promptDa || undefined,
                 correctAnswer: edit.type === QuestionType.TEXT_INPUT ? edit.correctAnswer : undefined,
                 explanationEn: edit.explanationEn || undefined,
-                explanationPs: edit.explanationPs || undefined
+                explanationPs: edit.explanationPs || undefined,
+                explanationDa: edit.explanationDa || undefined
               });
               setEditMessage(result.ok ? t.questionUpdated : result.error);
             });
@@ -377,16 +396,18 @@ function QuestionCard({
             <option value={QuestionType.MULTIPLE_CHOICE}>{t.multipleChoice}</option>
             <option value={QuestionType.TEXT_INPUT}>{t.textMathAnswer}</option>
           </select>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-2 sm:grid-cols-3">
             <textarea className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.promptEn} onChange={(e) => setEdit({ ...edit, promptEn: e.target.value })} />
-            <textarea className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.promptPs} onChange={(e) => setEdit({ ...edit, promptPs: e.target.value })} />
+            <textarea className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" dir="rtl" value={edit.promptPs} onChange={(e) => setEdit({ ...edit, promptPs: e.target.value })} />
+            <textarea className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" dir="rtl" value={edit.promptDa} onChange={(e) => setEdit({ ...edit, promptDa: e.target.value })} placeholder={t.dariPrompt} />
           </div>
           {edit.type === QuestionType.TEXT_INPUT ? (
             <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.correctAnswer} onChange={(e) => setEdit({ ...edit, correctAnswer: e.target.value })} placeholder={t.correctAnswerLabel} />
           ) : null}
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid gap-2 sm:grid-cols-3">
             <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.explanationEn} onChange={(e) => setEdit({ ...edit, explanationEn: e.target.value })} placeholder={t.explanationEnLabel} />
-            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.explanationPs} onChange={(e) => setEdit({ ...edit, explanationPs: e.target.value })} placeholder={t.explanationPsLabel} />
+            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" dir="rtl" value={edit.explanationPs} onChange={(e) => setEdit({ ...edit, explanationPs: e.target.value })} placeholder={t.explanationPsLabel} />
+            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" dir="rtl" value={edit.explanationDa} onChange={(e) => setEdit({ ...edit, explanationDa: e.target.value })} placeholder={t.explanationDaLabel} />
           </div>
           <button type="submit" disabled={isEditPending} className="inline-flex h-9 items-center justify-center rounded-xl bg-[#0f766e] px-4 text-xs font-black text-white">
             {isEditPending ? t.saving : t.saveQuestion}
@@ -452,9 +473,11 @@ function AddQuestionForm({
   const [type, setType] = useState<QuestionType>(QuestionType.SINGLE_CHOICE);
   const [promptEn, setPromptEn] = useState("");
   const [promptPs, setPromptPs] = useState("");
+  const [promptDa, setPromptDa] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [explanationEn, setExplanationEn] = useState("");
   const [explanationPs, setExplanationPs] = useState("");
+  const [explanationDa, setExplanationDa] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -469,9 +492,11 @@ function AddQuestionForm({
             type,
             promptEn,
             promptPs,
+            promptDa: promptDa || undefined,
             correctAnswer: type === QuestionType.TEXT_INPUT ? correctAnswer : undefined,
             explanationEn: explanationEn || undefined,
-            explanationPs: explanationPs || undefined
+            explanationPs: explanationPs || undefined,
+            explanationDa: explanationDa || undefined
           });
           if (result.ok) {
             onAdded({
@@ -480,16 +505,20 @@ function AddQuestionForm({
               type,
               promptEn,
               promptPs,
+              promptDa: promptDa || null,
               correctAnswer: type === QuestionType.TEXT_INPUT ? correctAnswer : null,
               explanationEn: explanationEn || null,
               explanationPs: explanationPs || null,
+              explanationDa: explanationDa || null,
               choices: []
             });
             setPromptEn("");
             setPromptPs("");
+            setPromptDa("");
             setCorrectAnswer("");
             setExplanationEn("");
             setExplanationPs("");
+            setExplanationDa("");
           } else {
             setError(result.error);
           }
@@ -510,7 +539,7 @@ function AddQuestionForm({
           <option value={QuestionType.TEXT_INPUT}>{t.textMathAnswer}</option>
         </select>
       </label>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-3">
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
           {t.englishPrompt}
           <textarea
@@ -526,10 +555,22 @@ function AddQuestionForm({
           {t.pashtoPrompt}
           <textarea
             value={promptPs}
+            dir="rtl"
             onChange={(e) => setPromptPs(e.target.value)}
             required
             rows={2}
             placeholder="... دی؟"
+            className="min-h-[72px] rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+          />
+        </label>
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.dariPrompt}
+          <textarea
+            value={promptDa}
+            dir="rtl"
+            onChange={(e) => setPromptDa(e.target.value)}
+            rows={2}
+            placeholder="... است؟"
             className="min-h-[72px] rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
@@ -547,7 +588,7 @@ function AddQuestionForm({
           <span className="text-xs font-[700] text-[#607083]">{t.mathAnswerHint}</span>
         </label>
       ) : null}
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-3">
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
           {t.explanationEnLabel}
           <input
@@ -561,8 +602,19 @@ function AddQuestionForm({
           {t.explanationPsLabel}
           <input
             value={explanationPs}
+            dir="rtl"
             onChange={(e) => setExplanationPs(e.target.value)}
             placeholder="د ځواب وروسته ښودل کیږي"
+            className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+          />
+        </label>
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.explanationDaLabel}
+          <input
+            value={explanationDa}
+            dir="rtl"
+            onChange={(e) => setExplanationDa(e.target.value)}
+            placeholder="بعد از پاسخ دانش‌آموز نشان داده می‌شود"
             className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>

@@ -21,9 +21,11 @@ const addQuestionSchema = z.object({
   type: z.nativeEnum(QuestionType),
   promptEn: z.string().min(1, "English prompt is required"),
   promptPs: z.string().min(1, "Pashto prompt is required"),
+  promptDa: z.string().trim().optional(),
   correctAnswer: z.string().trim().optional(),
   explanationEn: z.string().optional(),
-  explanationPs: z.string().optional()
+  explanationPs: z.string().optional(),
+  explanationDa: z.string().optional()
 }).superRefine((data, ctx) => {
   if (data.type === QuestionType.TEXT_INPUT && !data.correctAnswer) {
     ctx.addIssue({
@@ -38,6 +40,7 @@ const addChoiceSchema = z.object({
   questionId: z.string().min(1),
   textEn: z.string().min(1, "English text is required"),
   textPs: z.string().min(1, "Pashto text is required"),
+  textDa: z.string().trim().optional(),
   isCorrect: z.boolean()
 });
 
@@ -113,9 +116,11 @@ export async function addQuizQuestion(
         type: values.type,
         promptEn: values.promptEn,
         promptPs: values.promptPs,
+        promptDa: values.promptDa,
         correctAnswer: values.type === QuestionType.TEXT_INPUT ? values.correctAnswer : null,
         explanationEn: values.explanationEn,
-        explanationPs: values.explanationPs
+        explanationPs: values.explanationPs,
+        explanationDa: values.explanationDa
       },
       select: { id: true }
     });
@@ -137,9 +142,11 @@ export async function updateQuizQuestion(input: {
   type: QuestionType;
   promptEn: string;
   promptPs: string;
+  promptDa?: string;
   correctAnswer?: string;
   explanationEn?: string;
   explanationPs?: string;
+  explanationDa?: string;
 }): Promise<ActionResult> {
   try {
     const educator = await requireEducator();
@@ -169,9 +176,11 @@ export async function updateQuizQuestion(input: {
         type: values.type,
         promptEn: values.promptEn,
         promptPs: values.promptPs,
+        promptDa: values.promptDa,
         correctAnswer: values.type === QuestionType.TEXT_INPUT ? values.correctAnswer : null,
         explanationEn: values.explanationEn,
         explanationPs: values.explanationPs,
+        explanationDa: values.explanationDa,
         choices: values.type === QuestionType.TEXT_INPUT ? { deleteMany: {} } : undefined
       }
     });
@@ -266,6 +275,7 @@ export async function addAnswerChoice(
         order: maxOrder + 1,
         textEn: values.textEn,
         textPs: values.textPs,
+        textDa: values.textDa,
         isCorrect: values.isCorrect
       },
       select: { id: true }
@@ -316,7 +326,7 @@ export async function updateAnswerChoice(
 
     await db.answerChoice.update({
       where: { id: values.choiceId },
-      data: { textEn: values.textEn, textPs: values.textPs, isCorrect: values.isCorrect }
+      data: { textEn: values.textEn, textPs: values.textPs, textDa: values.textDa, isCorrect: values.isCorrect }
     });
 
     await sendCourseBackToReview(course.id);

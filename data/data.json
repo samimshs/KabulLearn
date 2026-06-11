@@ -4,47 +4,56 @@
       "id": "intro-physics",
       "title": {
         "en": "Intro to Physics",
-        "ps": "د فزیک پېژندنه"
+        "ps": "د فزیک پېژندنه",
+        "fa": "آشنایی با فیزیک"
       },
       "description": {
         "en": "Build a practical foundation in motion, forces, energy, and simple problem solving.",
-        "ps": "د حرکت، قوو، انرژۍ او ساده مسئلو د حل عملي بنسټ زده کړئ."
+        "ps": "د حرکت، قوو، انرژۍ او ساده مسئلو د حل عملي بنسټ زده کړئ.",
+        "fa": "پایه‌ای عملی در حرکت، نیروها، انرژی و حل مسائل ساده بنا کنید."
       },
       "level": {
         "en": "Beginner",
-        "ps": "پیل کوونکی"
+        "ps": "پیل کوونکی",
+        "fa": "مبتدی"
       },
       "modules": [
         {
           "id": "kinematics",
           "title": {
             "en": "Kinematics",
-            "ps": "حرکت پېژندنه"
+            "ps": "حرکت پېژندنه",
+            "fa": "حرکت‌شناسی"
           },
           "lessons": [
             {
               "id": "position-velocity",
               "title": {
                 "en": "Position, Distance, and Velocity",
-                "ps": "موقعیت، واټن او سرعت"
+                "ps": "موقعیت، واټن او سرعت",
+                "fa": "موقعیت، فاصله و سرعت"
               },
               "description": {
                 "en": "Learn how physicists describe where an object is and how quickly it moves.",
-                "ps": "زده کړئ چې فزیک پوهان د شي موقعیت او حرکت سرعت څنګه تشریح کوي."
+                "ps": "زده کړئ چې فزیک پوهان د شي موقعیت او حرکت سرعت څنګه تشریح کوي.",
+                "fa": "بیاموزید که فیزیکدانان چگونه موقعیت و سرعت حرکت یک جسم را توصیف می‌کنند."
               },
               "youtubeId": "ZM8ECpBuQYE",
               "content": [
                 {
                   "en": "Position describes where an object is compared with a reference point.",
-                  "ps": "موقعیت ښيي چې یو شی د یوې ټاکلې نښې په پرتله چېرته دی."
+                  "ps": "موقعیت ښيي چې یو شی د یوې ټاکلې نښې په پرتله چېرته دی.",
+                  "fa": "موقعیت نشان می‌دهد که یک جسم نسبت به یک نقطه مرجع کجاست."
                 },
                 {
                   "en": "Distance measures how much ground an object covers, while displacement also includes direction.",
-                  "ps": "واټن د تېر شوي ځای اندازه ده، خو بې ځایه کېدل لوری هم لري."
+                  "ps": "واټن د تېر شوي ځای اندازه ده، خو بې ځایه کېدل لوری هم لري.",
+                  "fa": "فاصله اندازه مسافت طی شده است، در حالی که جابجایی شامل جهت نیز می‌شود."
                 },
                 {
                   "en": "Velocity describes both speed and direction, so it can change when either one changes.",
-                  "ps": "سرعت چټکتیا او لوری دواړه ښيي، نو د هر یوه په بدلون سره بدلېږي."
+                  "ps": "سرعت چټکتیا او لوری دواړه ښيي، نو د هر یوه په بدلون سره بدلېږي.",
+                  "fa": "سرعت هم مقدار حرکت و هم جهت را نشان می‌دهد، پس با تغییر هر کدام تغییر می‌کند."
                 }
               ]
             },
@@ -52,25 +61,30 @@
               "id": "acceleration",
               "title": {
                 "en": "Acceleration",
-                "ps": "تعجیل"
+                "ps": "تعجیل",
+                "fa": "شتاب"
               },
               "description": {
                 "en": "Understand acceleration as a change in velocity over time.",
-                "ps": "تعجیل د وخت په تېرېدو د سرعت بدلون په توګه وپېژنئ."
+                "ps": "تعجیل د وخت په تېرېدو د سرعت بدلون په توګه وپېژنئ.",
+                "fa": "شتاب را به عنوان تغییر سرعت در طول زمان درک کنید."
               },
               "youtubeId": "FOkQszg1-j8",
               "content": [
                 {
                   "en": "Acceleration means velocity is changing.",
-                  "ps": "تعجیل یعنې سرعت بدلېږي."
+                  "ps": "تعجیل یعنې سرعت بدلېږي.",
+                  "fa": "شتاب یعنی سرعت در حال تغییر است."
                 },
                 {
                   "en": "An object can accelerate by speeding up, slowing down, or changing direction.",
-                  "ps": "یو شی د چټکېدو، ورو کېدو یا د لوري بدلولو له لارې تعجیل لري."
+                  "ps": "یو شی د چټکېدو، ورو کېدو یا د لوري بدلولو له لارې تعجیل لري.",
+                  "fa": "یک جسم می‌تواند با تند شدن، کند شدن یا تغییر جهت شتاب داشته باشد."
                 },
                 {
                   "en": "Acceleration is measured over time, so the time interval matters.",
-                  "ps": "تعجیل د وخت په موده کې اندازه کېږي، نو د وخت واټن مهم دی."
+                  "ps": "تعجیل د وخت په موده کې اندازه کېږي، نو د وخت واټن مهم دی.",
+                  "fa": "شتاب در طول زمان اندازه‌گیری می‌شود، پس بازه زمانی اهمیت دارد."
                 }
               ]
             }
@@ -79,11 +93,13 @@
             "id": "kinematics-quiz",
             "title": {
               "en": "Kinematics Quiz",
-              "ps": "حرکت پېژندنه ازموینه"
+              "ps": "حرکت پېژندنه ازموینه",
+              "fa": "آزمون حرکت‌شناسی"
             },
             "description": {
               "en": "Pass this required checkpoint with 70% or higher to continue.",
-              "ps": "د دوام لپاره دا اړینه ازموینه لږ تر لږه په ۷۰٪ نمره تېره کړئ."
+              "ps": "د دوام لپاره دا اړینه ازموینه لږ تر لږه په ۷۰٪ نمره تېره کړئ.",
+              "fa": "این ایست‌گاه اجباری را با ۷۰٪ یا بالاتر بگذرانید تا ادامه دهید."
             },
             "passScore": 70,
             "questions": [
@@ -91,20 +107,24 @@
                 "id": "position-reference",
                 "question": {
                   "en": "What does position describe?",
-                  "ps": "موقعیت څه شی تشریح کوي؟"
+                  "ps": "موقعیت څه شی تشریح کوي؟",
+                  "fa": "موقعیت چه چیزی را توصیف می‌کند؟"
                 },
                 "options": [
                   {
                     "en": "Where an object is compared with a reference point",
-                    "ps": "یو شی د یوې ټاکلې نښې په پرتله چېرته دی"
+                    "ps": "یو شی د یوې ټاکلې نښې په پرتله چېرته دی",
+                    "fa": "کجاست یک جسم نسبت به نقطه مرجع"
                   },
                   {
                     "en": "How heavy an object is",
-                    "ps": "یو شی څومره دروند دی"
+                    "ps": "یو شی څومره دروند دی",
+                    "fa": "یک جسم چقدر سنگین است"
                   },
                   {
                     "en": "The color of an object",
-                    "ps": "د یوه شي رنګ"
+                    "ps": "د یوه شي رنګ",
+                    "fa": "رنگ یک جسم"
                   }
                 ],
                 "answerIndex": 0
@@ -113,20 +133,24 @@
                 "id": "acceleration-change",
                 "question": {
                   "en": "Which change can create acceleration?",
-                  "ps": "کوم بدلون تعجیل رامنځته کولی شي؟"
+                  "ps": "کوم بدلون تعجیل رامنځته کولی شي؟",
+                  "fa": "کدام تغییر می‌تواند شتاب ایجاد کند؟"
                 },
                 "options": [
                   {
                     "en": "A change in velocity",
-                    "ps": "په سرعت کې بدلون"
+                    "ps": "په سرعت کې بدلون",
+                    "fa": "تغییر در سرعت"
                   },
                   {
                     "en": "A change in color",
-                    "ps": "په رنګ کې بدلون"
+                    "ps": "په رنګ کې بدلون",
+                    "fa": "تغییر در رنگ"
                   },
                   {
                     "en": "A change in name",
-                    "ps": "په نوم کې بدلون"
+                    "ps": "په نوم کې بدلون",
+                    "fa": "تغییر در نام"
                   }
                 ],
                 "answerIndex": 0
@@ -138,32 +162,38 @@
           "id": "forces",
           "title": {
             "en": "Forces",
-            "ps": "قوې"
+            "ps": "قوې",
+            "fa": "نیروها"
           },
           "lessons": [
             {
               "id": "newtons-laws",
               "title": {
                 "en": "Newton's Laws",
-                "ps": "د نیوټن قانونونه"
+                "ps": "د نیوټن قانونونه",
+                "fa": "قانون‌های نیوتن"
               },
               "description": {
                 "en": "Explore the three laws that explain how forces affect motion.",
-                "ps": "هغه درې قانونونه زده کړئ چې قوې او حرکت تشریح کوي."
+                "ps": "هغه درې قانونونه زده کړئ چې قوې او حرکت تشریح کوي.",
+                "fa": "سه قانونی که توضیح می‌دهد چطور نیروها بر حرکت تأثیر می‌گذارند را بررسی کنید."
               },
               "youtubeId": "kKKM8Y-u7ds",
               "content": [
                 {
                   "en": "Newton's first law says an object keeps its motion unless a net force acts on it.",
-                  "ps": "د نیوټن لومړی قانون وايي یو شی خپل حرکت ساتي، تر څو خالصه قوه پرې عمل ونه کړي."
+                  "ps": "د نیوټن لومړی قانون وايي یو شی خپل حرکت ساتي، تر څو خالصه قوه پرې عمل ونه کړي.",
+                  "fa": "قانون اول نیوتن می‌گوید یک جسم حرکتش را حفظ می‌کند مگر اینکه نیروی خالص بر آن عمل کند."
                 },
                 {
                   "en": "Newton's second law connects force, mass, and acceleration.",
-                  "ps": "د نیوټن دویم قانون قوه، کتله او تعجیل سره تړي."
+                  "ps": "د نیوټن دویم قانون قوه، کتله او تعجیل سره تړي.",
+                  "fa": "قانون دوم نیوتن نیرو، جرم و شتاب را به هم ربط می‌دهد."
                 },
                 {
                   "en": "Newton's third law says forces come in equal and opposite pairs.",
-                  "ps": "د نیوټن درېیم قانون وايي قوې په مساوي او مخالفو جوړو کې راځي."
+                  "ps": "د نیوټن درېیم قانون وايي قوې په مساوي او مخالفو جوړو کې راځي.",
+                  "fa": "قانون سوم نیوتن می‌گوید نیروها در جفت‌های مساوی و مخالف می‌آیند."
                 }
               ]
             }
@@ -172,11 +202,13 @@
             "id": "forces-quiz",
             "title": {
               "en": "Forces Quiz",
-              "ps": "قوې ازموینه"
+              "ps": "قوې ازموینه",
+              "fa": "آزمون نیروها"
             },
             "description": {
               "en": "Pass this required checkpoint with 70% or higher to continue.",
-              "ps": "د دوام لپاره دا اړینه ازموینه لږ تر لږه په ۷۰٪ نمره تېره کړئ."
+              "ps": "د دوام لپاره دا اړینه ازموینه لږ تر لږه په ۷۰٪ نمره تېره کړئ.",
+              "fa": "این ایست‌گاه اجباری را با ۷۰٪ یا بالاتر بگذرانید تا ادامه دهید."
             },
             "passScore": 70,
             "questions": [
@@ -184,20 +216,24 @@
                 "id": "third-law",
                 "question": {
                   "en": "Newton's third law says forces are...",
-                  "ps": "د نیوټن درېیم قانون وايي قوې..."
+                  "ps": "د نیوټن درېیم قانون وايي قوې...",
+                  "fa": "قانون سوم نیوتن می‌گوید نیروها..."
                 },
                 "options": [
                   {
                     "en": "Equal and opposite",
-                    "ps": "مساوي او مخالفې دي"
+                    "ps": "مساوي او مخالفې دي",
+                    "fa": "مساوی و مخالف هستند"
                   },
                   {
                     "en": "Always zero",
-                    "ps": "تل صفر وي"
+                    "ps": "تل صفر وي",
+                    "fa": "همیشه صفر هستند"
                   },
                   {
                     "en": "Only visible in space",
-                    "ps": "یوازې په فضا کې لیدل کېږي"
+                    "ps": "یوازې په فضا کې لیدل کېږي",
+                    "fa": "فقط در فضا قابل مشاهده هستند"
                   }
                 ],
                 "answerIndex": 0
@@ -211,47 +247,56 @@
       "id": "digital-literacy",
       "title": {
         "en": "Digital Literacy",
-        "ps": "ډیجیټل سواد"
+        "ps": "ډیجیټل سواد",
+        "fa": "سواد دیجیتال"
       },
       "description": {
         "en": "Learn core computer, internet, email, and online safety skills for study and work.",
-        "ps": "د زده کړې او کار لپاره د کمپیوټر، انټرنېټ، ایمېل او آنلاین خوندیتوب بنسټیز مهارتونه زده کړئ."
+        "ps": "د زده کړې او کار لپاره د کمپیوټر، انټرنېټ، ایمېل او آنلاین خوندیتوب بنسټیز مهارتونه زده کړئ.",
+        "fa": "مهارت‌های پایه کامپیوتر، اینترنت، ایمیل و امنیت آنلاین را برای تحصیل و کار بیاموزید."
       },
       "level": {
         "en": "Foundational",
-        "ps": "بنسټیز"
+        "ps": "بنسټیز",
+        "fa": "پایه"
       },
       "modules": [
         {
           "id": "computer-basics",
           "title": {
             "en": "Computer Basics",
-            "ps": "د کمپیوټر بنسټونه"
+            "ps": "د کمپیوټر بنسټونه",
+            "fa": "مبانی کامپیوتر"
           },
           "lessons": [
             {
               "id": "hardware-software",
               "title": {
                 "en": "Hardware and Software",
-                "ps": "هارډویر او سافټویر"
+                "ps": "هارډویر او سافټویر",
+                "fa": "سخت‌افزار و نرم‌افزار"
               },
               "description": {
                 "en": "Understand the difference between physical computer parts and the programs that run on them.",
-                "ps": "د کمپیوټر د فزیکي برخو او هغو پروګرامونو توپیر وپېژنئ چې پرې چلېږي."
+                "ps": "د کمپیوټر د فزیکي برخو او هغو پروګرامونو توپیر وپېژنئ چې پرې چلېږي.",
+                "fa": "تفاوت بین اجزای فیزیکی کامپیوتر و برنامه‌هایی که روی آنها اجرا می‌شوند را درک کنید."
               },
               "youtubeId": "vG_qmtdBPTU",
               "content": [
                 {
                   "en": "Hardware includes the physical parts of a computer, such as a screen, keyboard, and storage.",
-                  "ps": "هارډویر د کمپیوټر فزیکي برخې دي، لکه سکرین، کیبورډ او زېرمه."
+                  "ps": "هارډویر د کمپیوټر فزیکي برخې دي، لکه سکرین، کیبورډ او زېرمه.",
+                  "fa": "سخت‌افزار شامل اجزای فیزیکی کامپیوتر مانند صفحه‌نمایش، کیبورد و حافظه می‌شود."
                 },
                 {
                   "en": "Software includes apps and operating systems that tell hardware what to do.",
-                  "ps": "سافټویر هغه اپونه او عملیاتي سیستمونه دي چې هارډویر ته د کار لارښوونه کوي."
+                  "ps": "سافټویر هغه اپونه او عملیاتي سیستمونه دي چې هارډویر ته د کار لارښوونه کوي.",
+                  "fa": "نرم‌افزار شامل برنامه‌ها و سیستم‌های عامل است که به سخت‌افزار می‌گوید چه کار کند."
                 },
                 {
                   "en": "Most digital tasks need hardware and software working together.",
-                  "ps": "ډېری ډیجیټل کارونه د هارډویر او سافټویر ګډ کار ته اړتیا لري."
+                  "ps": "ډېری ډیجیټل کارونه د هارډویر او سافټویر ګډ کار ته اړتیا لري.",
+                  "fa": "اکثر کارهای دیجیتال نیاز به همکاری سخت‌افزار و نرم‌افزار دارند."
                 }
               ]
             },
@@ -259,25 +304,30 @@
               "id": "internet-safety",
               "title": {
                 "en": "Internet Safety",
-                "ps": "د انټرنېټ خوندیتوب"
+                "ps": "د انټرنېټ خوندیتوب",
+                "fa": "امنیت اینترنت"
               },
               "description": {
                 "en": "Practice safer browsing, stronger passwords, and careful sharing online.",
-                "ps": "خوندي لټون، پیاوړي پاسورډونه او په آنلاین ډول محتاط شریکول تمرین کړئ."
+                "ps": "خوندي لټون، پیاوړي پاسورډونه او په آنلاین ډول محتاط شریکول تمرین کړئ.",
+                "fa": "مرور ایمن‌تر، رمزهای عبور قوی‌تر و به‌اشتراک‌گذاری محتاطانه آنلاین را تمرین کنید."
               },
               "youtubeId": "yiKeLOKc1tw",
               "content": [
                 {
                   "en": "Use strong, unique passwords for important accounts.",
-                  "ps": "د مهمو اکاونټونو لپاره پیاوړي او جلا پاسورډونه وکاروئ."
+                  "ps": "د مهمو اکاونټونو لپاره پیاوړي او جلا پاسورډونه وکاروئ.",
+                  "fa": "از رمزهای عبور قوی و منحصر به فرد برای حساب‌های مهم استفاده کنید."
                 },
                 {
                   "en": "Be careful before opening unknown links or downloading unexpected files.",
-                  "ps": "د نااشنا لینکونو پرانیستلو یا ناڅاپي فایلونو ډاونلوډولو مخکې احتیاط وکړئ."
+                  "ps": "د نااشنا لینکونو پرانیستلو یا ناڅاپي فایلونو ډاونلوډولو مخکې احتیاط وکړئ.",
+                  "fa": "قبل از باز کردن لینک‌های ناشناس یا دانلود فایل‌های غیرمنتظره احتیاط کنید."
                 },
                 {
                   "en": "Share personal information only with services and people you trust.",
-                  "ps": "شخصي معلومات یوازې له باوري خدمتونو او کسانو سره شریک کړئ."
+                  "ps": "شخصي معلومات یوازې له باوري خدمتونو او کسانو سره شریک کړئ.",
+                  "fa": "اطلاعات شخصی را فقط با خدمات و افرادی که به آنها اعتماد دارید به اشتراک بگذارید."
                 }
               ]
             }
@@ -286,11 +336,13 @@
             "id": "computer-basics-quiz",
             "title": {
               "en": "Computer Basics Quiz",
-              "ps": "د کمپیوټر بنسټونه ازموینه"
+              "ps": "د کمپیوټر بنسټونه ازموینه",
+              "fa": "آزمون مبانی کامپیوتر"
             },
             "description": {
               "en": "Pass this required checkpoint with 70% or higher to continue.",
-              "ps": "د دوام لپاره دا اړینه ازموینه لږ تر لږه په ۷۰٪ نمره تېره کړئ."
+              "ps": "د دوام لپاره دا اړینه ازموینه لږ تر لږه په ۷۰٪ نمره تېره کړئ.",
+              "fa": "این ایست‌گاه اجباری را با ۷۰٪ یا بالاتر بگذرانید تا ادامه دهید."
             },
             "passScore": 70,
             "questions": [
@@ -298,20 +350,24 @@
                 "id": "hardware-example",
                 "question": {
                   "en": "Which item is hardware?",
-                  "ps": "کوم شی هارډویر دی؟"
+                  "ps": "کوم شی هارډویر دی؟",
+                  "fa": "کدام مورد سخت‌افزار است؟"
                 },
                 "options": [
                   {
                     "en": "Keyboard",
-                    "ps": "کیبورډ"
+                    "ps": "کیبورډ",
+                    "fa": "کیبورد"
                   },
                   {
                     "en": "Email account",
-                    "ps": "ایمېل اکاونټ"
+                    "ps": "ایمېل اکاونټ",
+                    "fa": "حساب ایمیل"
                   },
                   {
                     "en": "Web browser history",
-                    "ps": "د وېب براوزر تاریخچه"
+                    "ps": "د وېب براوزر تاریخچه",
+                    "fa": "تاریخچه مرورگر وب"
                   }
                 ],
                 "answerIndex": 0
@@ -320,20 +376,24 @@
                 "id": "safe-password",
                 "question": {
                   "en": "What is a safer password habit?",
-                  "ps": "د پاسورډ کوم عادت خوندي دی؟"
+                  "ps": "د پاسورډ کوم عادت خوندي دی؟",
+                  "fa": "کدام عادت رمز عبور امن‌تر است؟"
                 },
                 "options": [
                   {
                     "en": "Use a strong, unique password",
-                    "ps": "پیاوړی او جلا پاسورډ کارول"
+                    "ps": "پیاوړی او جلا پاسورډ کارول",
+                    "fa": "استفاده از رمز عبور قوی و منحصر به فرد"
                   },
                   {
                     "en": "Use the same password everywhere",
-                    "ps": "هر ځای یو شان پاسورډ کارول"
+                    "ps": "هر ځای یو شان پاسورډ کارول",
+                    "fa": "استفاده از یک رمز عبور در همه جا"
                   },
                   {
                     "en": "Share your password with friends",
-                    "ps": "خپل پاسورډ له ملګرو سره شریکول"
+                    "ps": "خپل پاسورډ له ملګرو سره شریکول",
+                    "fa": "به اشتراک گذاشتن رمز عبور با دوستان"
                   }
                 ],
                 "answerIndex": 0

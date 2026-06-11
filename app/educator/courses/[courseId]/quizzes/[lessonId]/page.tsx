@@ -51,12 +51,14 @@ export default async function QuizBuilderPage({ params }: Props) {
               type: true,
               promptEn: true,
               promptPs: true,
+              promptDa: true,
               correctAnswer: true,
               explanationEn: true,
               explanationPs: true,
+              explanationDa: true,
               choices: {
                 orderBy: { order: "asc" },
-                select: { id: true, order: true, textEn: true, textPs: true, isCorrect: true }
+                select: { id: true, order: true, textEn: true, textPs: true, textDa: true, isCorrect: true }
               }
             }
           }

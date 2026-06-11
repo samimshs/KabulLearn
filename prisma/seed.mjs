@@ -99,8 +99,10 @@ async function seedCurriculum(authorId) {
         level: normalizeLevel(course.level?.en),
         titleEn: course.title.en,
         titlePs: course.title.ps,
+        titleDa: course.title.fa ?? null,
         descriptionEn: course.description.en,
         descriptionPs: course.description.ps,
+        descriptionDa: course.description.fa ?? null,
         authorId,
         authorProfileId: authorProfile.id,
         publishedAt: new Date()
@@ -112,8 +114,10 @@ async function seedCurriculum(authorId) {
         level: normalizeLevel(course.level?.en),
         titleEn: course.title.en,
         titlePs: course.title.ps,
+        titleDa: course.title.fa ?? null,
         descriptionEn: course.description.en,
         descriptionPs: course.description.ps,
+        descriptionDa: course.description.fa ?? null,
         authorId,
         authorProfileId: authorProfile.id,
         publishedAt: new Date()
@@ -130,14 +134,16 @@ async function seedCurriculum(authorId) {
           courseId: course.id,
           order: moduleIndex + 1,
           titleEn: module.title.en,
-          titlePs: module.title.ps
+          titlePs: module.title.ps,
+          titleDa: module.title.fa ?? null
         },
         create: {
           id: moduleId,
           courseId: course.id,
           order: moduleIndex + 1,
           titleEn: module.title.en,
-          titlePs: module.title.ps
+          titlePs: module.title.ps,
+          titleDa: module.title.fa ?? null
         }
       });
       moduleCount += 1;
@@ -153,11 +159,14 @@ async function seedCurriculum(authorId) {
             type: LessonType.VIDEO,
             titleEn: lesson.title.en,
             titlePs: lesson.title.ps,
+            titleDa: lesson.title.fa ?? null,
             descriptionEn: lesson.description.en,
             descriptionPs: lesson.description.ps,
+            descriptionDa: lesson.description.fa ?? null,
             youtubeUrl: lesson.youtubeId,
             readingEn: markdownList(lesson.content, "en"),
             readingPs: markdownList(lesson.content, "ps"),
+            readingDa: lesson.content[0]?.fa != null ? markdownList(lesson.content, "fa") : null,
             isFinalTest: false,
             passingScore: null
           },
@@ -168,11 +177,14 @@ async function seedCurriculum(authorId) {
             type: LessonType.VIDEO,
             titleEn: lesson.title.en,
             titlePs: lesson.title.ps,
+            titleDa: lesson.title.fa ?? null,
             descriptionEn: lesson.description.en,
             descriptionPs: lesson.description.ps,
+            descriptionDa: lesson.description.fa ?? null,
             youtubeUrl: lesson.youtubeId,
             readingEn: markdownList(lesson.content, "en"),
-            readingPs: markdownList(lesson.content, "ps")
+            readingPs: markdownList(lesson.content, "ps"),
+            readingDa: lesson.content[0]?.fa != null ? markdownList(lesson.content, "fa") : null
           }
         });
         lessonCount += 1;
@@ -188,8 +200,10 @@ async function seedCurriculum(authorId) {
           type: LessonType.QUIZ,
           titleEn: module.quiz.title.en,
           titlePs: module.quiz.title.ps,
+          titleDa: module.quiz.title.fa ?? null,
           descriptionEn: module.quiz.description.en,
           descriptionPs: module.quiz.description.ps,
+          descriptionDa: module.quiz.description.fa ?? null,
           youtubeUrl: null,
           readingEn: null,
           readingPs: null,
@@ -203,8 +217,10 @@ async function seedCurriculum(authorId) {
           type: LessonType.QUIZ,
           titleEn: module.quiz.title.en,
           titlePs: module.quiz.title.ps,
+          titleDa: module.quiz.title.fa ?? null,
           descriptionEn: module.quiz.description.en,
           descriptionPs: module.quiz.description.ps,
+          descriptionDa: module.quiz.description.fa ?? null,
           isFinalTest: true,
           passingScore: module.quiz.passScore
         }
@@ -235,7 +251,8 @@ async function seedCurriculum(authorId) {
             order: questionIndex + 1,
             type: QuestionType.SINGLE_CHOICE,
             promptEn: question.question.en,
-            promptPs: question.question.ps
+            promptPs: question.question.ps,
+            promptDa: question.question.fa ?? null
           },
           create: {
             id: questionId,
@@ -243,7 +260,8 @@ async function seedCurriculum(authorId) {
             order: questionIndex + 1,
             type: QuestionType.SINGLE_CHOICE,
             promptEn: question.question.en,
-            promptPs: question.question.ps
+            promptPs: question.question.ps,
+            promptDa: question.question.fa ?? null
           }
         });
         questionCount += 1;
@@ -258,6 +276,7 @@ async function seedCurriculum(authorId) {
               order: choiceIndex + 1,
               textEn: option.en,
               textPs: option.ps,
+              textDa: option.fa ?? null,
               isCorrect: choiceIndex === question.answerIndex
             },
             create: {
@@ -266,6 +285,7 @@ async function seedCurriculum(authorId) {
               order: choiceIndex + 1,
               textEn: option.en,
               textPs: option.ps,
+              textDa: option.fa ?? null,
               isCorrect: choiceIndex === question.answerIndex
             }
           });

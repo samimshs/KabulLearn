@@ -10,8 +10,10 @@ export function ModuleCreateForm({ courseId }: { courseId: string }) {
   const { t } = useLanguage();
   const [titleEn, setTitleEn] = useState("");
   const [titlePs, setTitlePs] = useState("");
+  const [titleDa, setTitleDa] = useState("");
   const [descriptionEn, setDescriptionEn] = useState("");
   const [descriptionPs, setDescriptionPs] = useState("");
+  const [descriptionDa, setDescriptionDa] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -25,8 +27,10 @@ export function ModuleCreateForm({ courseId }: { courseId: string }) {
             courseId,
             titleEn,
             titlePs,
+            titleDa,
             descriptionEn,
-            descriptionPs
+            descriptionPs,
+            descriptionDa
           });
 
           if (!result.ok) {
@@ -36,8 +40,10 @@ export function ModuleCreateForm({ courseId }: { courseId: string }) {
 
           setTitleEn("");
           setTitlePs("");
+          setTitleDa("");
           setDescriptionEn("");
           setDescriptionPs("");
+          setDescriptionDa("");
           setMessage(t.moduleCreated);
           router.refresh();
         });
@@ -48,7 +54,7 @@ export function ModuleCreateForm({ courseId }: { courseId: string }) {
         <p className="text-sm text-[#525f6e]">{t.addAsManyModules}</p>
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid gap-2 sm:grid-cols-3">
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
           {t.englishTitle}
           <input
@@ -68,9 +74,19 @@ export function ModuleCreateForm({ courseId }: { courseId: string }) {
             className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.dariTitle}
+          <input
+            value={titleDa}
+            dir="rtl"
+            onChange={(event) => setTitleDa(event.target.value)}
+            placeholder="عنوان ماژول"
+            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+          />
+        </label>
       </div>
 
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid gap-2 sm:grid-cols-3">
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
           {t.englishSummary}
           <textarea
@@ -89,6 +105,17 @@ export function ModuleCreateForm({ courseId }: { courseId: string }) {
             onChange={(event) => setDescriptionPs(event.target.value)}
             rows={3}
             placeholder="لنډه توضیحات"
+            className="min-h-[90px] rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+          />
+        </label>
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.dariSummary}
+          <textarea
+            value={descriptionDa}
+            dir="rtl"
+            onChange={(event) => setDescriptionDa(event.target.value)}
+            rows={3}
+            placeholder="توضیح کوتاه ماژول"
             className="min-h-[90px] rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>

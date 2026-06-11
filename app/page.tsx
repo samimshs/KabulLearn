@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { HomeHeroVisual } from "@/components/HomeHeroVisual";
-import { HeroLangPills } from "@/components/HeroLangPills";
 import { CourseCard, type CourseCardRow } from "@/components/CourseCard";
 import { EducatorCta } from "@/components/CourseDashboard";
 import { auth } from "@/auth";
@@ -167,9 +166,6 @@ export default async function Home() {
             ))}
           </ul>
 
-          <div className="kl-home-lang">
-            <HeroLangPills />
-          </div>
         </div>
 
         <div className="kl-home-art">

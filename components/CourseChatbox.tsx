@@ -5,6 +5,32 @@ import { useLanguage } from "@/components/LanguageProvider";
 
 type Message = { role: "user" | "assistant"; content: string };
 
+const URL_RE = /https?:\/\/[^\s)>\]"']+/g;
+
+function linkify(text: string) {
+  const parts: React.ReactNode[] = [];
+  let last = 0;
+  let match: RegExpExecArray | null;
+  URL_RE.lastIndex = 0;
+  while ((match = URL_RE.exec(text)) !== null) {
+    if (match.index > last) parts.push(text.slice(last, match.index));
+    parts.push(
+      <a
+        key={match.index}
+        href={match[0]}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline underline-offset-2 hover:opacity-80 break-all"
+      >
+        {match[0]}
+      </a>
+    );
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts;
+}
+
 export function CourseChatbox({ courseId }: { courseId: string }) {
   const { t, direction } = useLanguage();
   const [open, setOpen] = useState(false);
@@ -134,7 +160,9 @@ export function CourseChatbox({ courseId }: { courseId: string }) {
                       : "bg-[var(--surface)] text-[var(--ink)] rounded-bl-sm border border-[var(--border)]"
                   }`}
                 >
-                  {msg.content || (
+                  {msg.content
+                    ? (msg.role === "assistant" ? linkify(msg.content) : msg.content)
+                    : (
                     <span className="flex gap-1 items-center text-[var(--muted)]">
                       <span className="animate-bounce [animation-delay:0ms]">·</span>
                       <span className="animate-bounce [animation-delay:150ms]">·</span>

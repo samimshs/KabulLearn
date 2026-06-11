@@ -4,6 +4,16 @@ import { authConfig } from "@/auth.config";
 
 const { auth } = NextAuth(authConfig);
 
+function applyCourseEmbedHeaders(response: NextResponse, pathname: string) {
+  if (!pathname.startsWith("/courses")) return response;
+
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  response.headers.set("Cross-Origin-Opener-Policy", "unsafe-none");
+  response.headers.set("Cross-Origin-Resource-Policy", "cross-origin");
+
+  return response;
+}
+
 export default auth((request) => {
   const { pathname } = request.nextUrl;
   const role = request.auth?.user?.role;
@@ -22,25 +32,25 @@ export default auth((request) => {
     if (request.auth?.user?.email) {
       verifyUrl.searchParams.set("email", request.auth.user.email);
     }
-    return NextResponse.redirect(verifyUrl);
+    return applyCourseEmbedHeaders(NextResponse.redirect(verifyUrl), pathname);
   }
 
   if (pathname.startsWith("/admin") || pathname.startsWith("/educator")) {
     if (!role) {
       const loginUrl = new URL("/login", request.nextUrl);
       loginUrl.searchParams.set("callbackUrl", `${pathname}${request.nextUrl.search}`);
-      return NextResponse.redirect(loginUrl);
+      return applyCourseEmbedHeaders(NextResponse.redirect(loginUrl), pathname);
     }
     // Strict separation: admins → /admin only, educators → /educator only
     if (pathname.startsWith("/admin") && role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/dashboard", request.nextUrl));
+      return applyCourseEmbedHeaders(NextResponse.redirect(new URL("/dashboard", request.nextUrl)), pathname);
     }
     if (pathname.startsWith("/educator") && role !== "EDUCATOR") {
-      return NextResponse.redirect(new URL(role === "ADMIN" ? "/admin" : "/dashboard", request.nextUrl));
+      return applyCourseEmbedHeaders(NextResponse.redirect(new URL(role === "ADMIN" ? "/admin" : "/dashboard", request.nextUrl)), pathname);
     }
   }
 
-  return NextResponse.next();
+  return applyCourseEmbedHeaders(NextResponse.next(), pathname);
 });
 
 export const config = {

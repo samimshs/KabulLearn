@@ -50,6 +50,11 @@ const nextConfig = {
             ].join(", ")
           },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+          // YouTube embeds need cross-origin media, script, and postMessage flows.
+          // Use explicit non-isolating values so stale/merged platform headers cannot
+          // fall back to same-origin isolation and freeze playback.
+          { key: "Cross-Origin-Opener-Policy", value: "unsafe-none" },
+          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
           { key: "Content-Security-Policy", value: csp }
         ]
       }

@@ -4,8 +4,15 @@ import { useState, useTransition } from "react";
 import { adminSendMessage, adminBroadcast } from "@/lib/actions/admin-message-actions";
 
 type User = { id: string; name: string | null; email: string; role: string };
+export type AdminMessageHistoryItem = {
+  id: string;
+  body: string;
+  createdAt: string;
+  recipientCount: number;
+  recipients: string[];
+};
 
-export function AdminComposeForm({ users }: { users: User[] }) {
+export function AdminComposeForm({ users, history = [] }: { users: User[]; history?: AdminMessageHistoryItem[] }) {
   const [tab, setTab] = useState<"direct" | "broadcast">("direct");
   const [recipientId, setRecipientId] = useState("");
   const [broadcastRole, setBroadcastRole] = useState<"STUDENT" | "EDUCATOR">("EDUCATOR");
@@ -95,6 +102,41 @@ export function AdminComposeForm({ users }: { users: User[] }) {
           {isPending ? "Sending…" : "Send message"}
         </button>
         {status && <p className="text-sm font-[700] text-[var(--muted)]">{status}</p>}
+      </div>
+
+      <div className="mt-4 border-t border-[var(--border)] pt-5">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[12px] font-[900] uppercase tracking-[1px] text-[var(--muted)]">Sent history</p>
+            <p className="mt-1 text-xs font-[600] text-[var(--muted)]">Recent messages and broadcasts sent by admins.</p>
+          </div>
+        </div>
+        {history.length > 0 ? (
+          <div className="grid gap-2">
+            {history.map((item) => (
+              <article key={item.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-[12px] font-[800] text-[var(--ink)]">
+                    {item.recipientCount > 1 ? `Broadcast to ${item.recipientCount} users` : `To ${item.recipients[0] ?? "user"}`}
+                  </p>
+                  <time className="text-[11px] font-[700] text-[var(--muted)]">
+                    {new Date(item.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                  </time>
+                </div>
+                {item.recipientCount > 1 ? (
+                  <p className="mt-1 text-[11px] font-[600] text-[var(--muted)]">
+                    {item.recipients.slice(0, 4).join(", ")}{item.recipientCount > 4 ? ` +${item.recipientCount - 4} more` : ""}
+                  </p>
+                ) : null}
+                <p className="mt-2 whitespace-pre-wrap text-sm font-[600] leading-6 text-[var(--ink-2)]">{item.body}</p>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--surface)] p-4 text-sm font-[700] text-[var(--muted)]">
+            No sent messages yet.
+          </p>
+        )}
       </div>
     </div>
   );

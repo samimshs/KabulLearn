@@ -165,16 +165,27 @@ export default async function EducatorDashboardPage({
   ]);
 
   const courseIds = courses.map((course) => course.id);
-  const [completedCertificates, ratingAggregate] = courseIds.length > 0
+  const [completedCertificates, ratingAggregate, announcementRows] = courseIds.length > 0
     ? await Promise.all([
         db.certificate.count({ where: { courseId: { in: courseIds } } }),
         db.courseRating.aggregate({
           where: { courseId: { in: courseIds } },
           _avg: { rating: true },
           _count: { rating: true }
+        }),
+        db.courseAnnouncement.findMany({
+          where: { courseId: { in: courseIds } },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+          select: {
+            id: true,
+            body: true,
+            createdAt: true,
+            course: { select: { titleEn: true, titlePs: true, titleDa: true } }
+          }
         })
-      ]).catch(() => [0, { _avg: { rating: null }, _count: { rating: 0 } }] as const)
-    : [0, { _avg: { rating: null }, _count: { rating: 0 } }] as const;
+      ]).catch(() => [0, { _avg: { rating: null }, _count: { rating: 0 } }, []] as const)
+    : [0, { _avg: { rating: null }, _count: { rating: 0 } }, []] as const;
 
   // Per-lesson analytics for educator courses
   const analyticsData = courseIds.length > 0
@@ -306,6 +317,12 @@ export default async function EducatorDashboardPage({
         )
       }))}
       recommendedCourses={recommendedCourses}
+      announcementHistory={announcementRows.map((announcement) => ({
+        id: announcement.id,
+        courseTitle: announcement.course.titleEn ?? announcement.course.titlePs ?? announcement.course.titleDa ?? "Untitled course",
+        body: announcement.body,
+        createdAt: announcement.createdAt.toISOString()
+      }))}
       sessions={[
         {
           id: "current-jwt",

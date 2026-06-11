@@ -84,6 +84,12 @@ type CreatorDashboardViewProps = {
     }>;
   }>;
   recommendedCourses: RecommendedCourse[];
+  announcementHistory: Array<{
+    id: string;
+    courseTitle: string;
+    body: string;
+    createdAt: string;
+  }>;
   sessions: Array<{
     id: string;
     label: string;
@@ -229,7 +235,15 @@ function CourseRow({ course, t }: { course: CreatorCourse; t: Dictionary }) {
 
 type AnnounceViewCourse = { id: string; title: string; enrollments: number };
 
-function AnnounceView({ courses, t }: { courses: AnnounceViewCourse[]; t: Dictionary }) {
+function AnnounceView({
+  courses,
+  history,
+  t
+}: {
+  courses: AnnounceViewCourse[];
+  history: CreatorDashboardViewProps["announcementHistory"];
+  t: Dictionary;
+}) {
   const [courseId, setCourseId] = useState(courses[0]?.id ?? "");
   const [body, setBody] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -301,6 +315,30 @@ function AnnounceView({ courses, t }: { courses: AnnounceViewCourse[]; t: Dictio
           </div>
         )}
       </div>
+
+      <div className="pr-panel p-6 lg:p-8">
+        <p className="pr-eyebrow">{t.sentHistory}</p>
+        <h2 className="pr-h2 mt-1">{t.announcementHistoryTitle}</h2>
+        {history.length > 0 ? (
+          <div className="mt-5 grid gap-3">
+            {history.map((item) => (
+              <article key={item.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-[13px] font-[900] text-[var(--ink)]">{item.courseTitle}</p>
+                  <time className="text-[11px] font-[700] text-[var(--muted)]">
+                    {new Date(item.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                  </time>
+                </div>
+                <p className="mt-2 whitespace-pre-wrap text-sm font-[600] leading-6 text-[var(--ink-2)]">{item.body}</p>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-4 rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--surface)] p-4 text-sm font-[700] text-[var(--muted)]">
+            {t.noSentAnnouncements}
+          </p>
+        )}
+      </div>
     </section>
   );
 }
@@ -315,6 +353,7 @@ export function CreatorDashboardView({
   studentJourney,
   analyticsData,
   recommendedCourses,
+  announcementHistory,
   sessions
 }: CreatorDashboardViewProps) {
   const { t } = useLanguage();
@@ -722,7 +761,7 @@ export function CreatorDashboardView({
           ) : null}
 
           {activeView === "announce" ? (
-            <AnnounceView courses={courses} t={t} />
+            <AnnounceView courses={courses} history={announcementHistory} t={t} />
           ) : null}
 
           {activeView === "resources" ? (

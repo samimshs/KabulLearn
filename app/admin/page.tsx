@@ -10,7 +10,7 @@ import { approveEducatorRequest, rejectEducatorRequest } from "@/lib/actions/edu
 import { getSiteVideoUrls } from "@/lib/actions/site-settings-actions";
 import { DeleteUserButton } from "@/components/admin/DeleteUserButton";
 import { DeleteCourseButton } from "@/components/educator/DeleteCourseButton";
-import { AdminComposeForm } from "@/components/admin/AdminComposeForm";
+import { AdminComposeForm, type AdminMessageHistoryItem } from "@/components/admin/AdminComposeForm";
 import { AdminSiteVideosForm } from "@/components/admin/AdminSiteVideosForm";
 import { ReindexButton } from "@/components/admin/ReindexButton";
 
@@ -182,6 +182,7 @@ export default async function AdminDashboardPage({
   let wau = 0;
   let topCourses: Array<{ id: string; titleEn: string; _count: { enrollments: number } }> = [];
   let recentSignups: Array<{ id: string; name: string | null; email: string; createdAt: Date; role: UserRole }> = [];
+  let adminMessageHistory: AdminMessageHistoryItem[] = [];
   let dbError = false;
 
   const today = new Date();
@@ -189,7 +190,7 @@ export default async function AdminDashboardPage({
   const sevenDaysAgo = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
 
   try {
-    const [c, u, e, s, er, sv, tu, dauCount, wauCount, tc, rs] = await Promise.all([
+    const [c, u, e, s, er, sv, tu, dauCount, wauCount, tc, rs, sentMessages] = await Promise.all([
       db.course.findMany({
         orderBy: [{ submittedAt: "desc" }, { updatedAt: "desc" }],
         select: {
@@ -285,6 +286,17 @@ export default async function AdminDashboardPage({
         orderBy: { createdAt: "desc" },
         take: 8,
         select: { id: true, name: true, email: true, createdAt: true, role: true }
+      }),
+      db.directMessage.findMany({
+        where: { senderId: session.user.id },
+        orderBy: { createdAt: "desc" },
+        take: 200,
+        select: {
+          id: true,
+          body: true,
+          createdAt: true,
+          recipient: { select: { name: true, email: true } }
+        }
       })
     ]);
     courses = c as AdminCourse[];
@@ -298,6 +310,26 @@ export default async function AdminDashboardPage({
     wau = wauCount;
     topCourses = tc;
     recentSignups = rs;
+    const grouped = new Map<string, AdminMessageHistoryItem>();
+    for (const message of sentMessages) {
+      const bucketTime = Math.floor(message.createdAt.getTime() / 1000);
+      const key = `${bucketTime}:${message.body}`;
+      const recipient = message.recipient.name ?? message.recipient.email;
+      const current = grouped.get(key);
+      if (current) {
+        current.recipientCount += 1;
+        current.recipients.push(recipient);
+      } else {
+        grouped.set(key, {
+          id: message.id,
+          body: message.body,
+          createdAt: message.createdAt.toISOString(),
+          recipientCount: 1,
+          recipients: [recipient]
+        });
+      }
+    }
+    adminMessageHistory = Array.from(grouped.values()).slice(0, 12);
   } catch {
     dbError = true;
   }
@@ -965,7 +997,7 @@ export default async function AdminDashboardPage({
               </div>
             </div>
             <div className="p-5 lg:p-6">
-              <AdminComposeForm users={users} />
+              <AdminComposeForm users={users} history={adminMessageHistory} />
             </div>
           </section>
 

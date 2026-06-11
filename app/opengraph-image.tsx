@@ -1,15 +1,18 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
+// Node runtime (not edge): the OG rendering engine + font exceed the 1 MB
+// edge function limit on the current Vercel plan.
 export const alt = "KabulLearn — Learn Without Limits";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function OgImage() {
   // Vazirmatn covers both Latin and Arabic script (Pashto/Dari pills below)
-  const vazirmatn = await fetch(
-    new URL("../font/Vazirmatn/static/Vazirmatn-Bold.ttf", import.meta.url)
-  ).then((res) => res.arrayBuffer());
+  const { readFile } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+  const vazirmatn = await readFile(
+    join(process.cwd(), "font", "Vazirmatn", "static", "Vazirmatn-Bold.ttf")
+  );
 
   return new ImageResponse(
     (
@@ -100,7 +103,7 @@ export default async function OgImage() {
     ),
     {
       ...size,
-      fonts: [{ name: "Vazirmatn", data: vazirmatn, weight: 700, style: "normal" }]
+      fonts: [{ name: "Vazirmatn", data: vazirmatn.buffer as ArrayBuffer, weight: 700, style: "normal" }]
     }
   );
 }

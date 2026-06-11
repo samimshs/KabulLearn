@@ -3,6 +3,11 @@ const nextConfig = {
   // pdfkit ships .afm font metric files that webpack can't bundle — load it as a
   // native CommonJS module in the Node runtime instead.
   serverExternalPackages: ["pdfkit"],
+  // The OG image route reads this font at runtime via process.cwd() — make
+  // sure Vercel's file tracing bundles it with the function.
+  outputFileTracingIncludes: {
+    "/opengraph-image": ["./font/Vazirmatn/static/Vazirmatn-Bold.ttf"]
+  },
   images: {
     remotePatterns: [
       // Vercel Blob (user-uploaded avatars)

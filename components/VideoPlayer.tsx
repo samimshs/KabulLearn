@@ -30,17 +30,23 @@ declare global {
 }
 
 function getYouTubeId(value: string) {
-  if (!value.includes("youtube.com") && !value.includes("youtu.be")) {
-    return value;
+  const raw = value.trim();
+  if (!raw.includes("youtube.com") && !raw.includes("youtube-nocookie.com") && !raw.includes("youtu.be")) {
+    return raw;
   }
   try {
-    const url = new URL(value);
+    const url = new URL(raw);
     if (url.hostname.includes("youtu.be")) {
-      return url.pathname.replace("/", "");
+      return url.pathname.split("/").filter(Boolean)[0] ?? raw;
     }
-    return url.searchParams.get("v") ?? value;
+    const fromQuery = url.searchParams.get("v");
+    if (fromQuery) return fromQuery;
+    const parts = url.pathname.split("/").filter(Boolean);
+    const marker = parts.findIndex((part) => ["embed", "shorts", "live", "v"].includes(part));
+    if (marker >= 0 && parts[marker + 1]) return parts[marker + 1];
+    return parts[0] ?? raw;
   } catch {
-    return value;
+    return raw;
   }
 }
 

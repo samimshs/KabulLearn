@@ -280,7 +280,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
   }
 
   return (
-    <main className="pr-page grid grid-cols-1 gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+    <main className="mx-auto grid w-full max-w-[1700px] grid-cols-1 gap-6 px-5 pb-16 pt-3 lg:grid-cols-[300px_minmax(0,1fr)] lg:px-8 lg:pb-20">
 
       {/* ── Sidebar ──────────────────────────────────────────── */}
       <aside className="order-2 min-w-0 overflow-x-hidden lg:order-1 lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-6.5rem)] lg:overflow-y-auto">
@@ -458,46 +458,46 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
           </div>
         ) : null}
 
-        {/* Reading content — only rendered when there is actual markdown */}
+        {/* Reading content + notes side by side */}
         {isReadingLesson(lesson) && lessonContent ? (
-          <article id="content" className="pr-card scroll-mt-24 p-6 lg:p-8">
-            <h2 className="text-[18px] font-[800] tracking-tight text-[var(--ink-2)]">{t.lessonContent}</h2>
-            <div className="mt-5 border-t border-[var(--border)] pt-5">
-              <SimpleMarkdown content={lessonContent} />
-            </div>
+          <div className="grid scroll-mt-24 gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
+            <article id="content" className="pr-card p-6 lg:p-8">
+              <h2 className="text-[18px] font-[800] tracking-tight text-[var(--ink-2)]">{t.lessonContent}</h2>
+              <div className="mt-5 border-t border-[var(--border)] pt-5">
+                <SimpleMarkdown content={lessonContent} />
+              </div>
 
-            {/* Mark as Complete */}
-            <div className="mt-8 border-t border-[var(--border)] pt-6">
-              {readingDone ? (
-                <div className="flex items-center gap-2 text-[14px] font-[800] text-[var(--success)]">
-                  <IconCheck />
-                  {t.lessonCompleteProgressSaved}
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  disabled={isPendingComplete}
-                  onClick={() => {
-                    startCompleteTransition(async () => {
-                      await completeReadingLesson({ courseId: course.id, lessonId: lesson.id });
-                      setStatuses((prev) => ({ ...prev, [lesson.id]: "COMPLETED" }));
-                      setReadingDone(true);
-                      router.refresh();
-                    });
-                  }}
-                  className="pr-btn-primary"
-                >
-                  {isPendingComplete ? t.savingLabel : t.markAsComplete}
-                </button>
-              )}
-            </div>
-          </article>
+              {/* Mark as Complete */}
+              <div className="mt-8 border-t border-[var(--border)] pt-6">
+                {readingDone ? (
+                  <div className="flex items-center gap-2 text-[14px] font-[800] text-[var(--success)]">
+                    <IconCheck />
+                    {t.lessonCompleteProgressSaved}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={isPendingComplete}
+                    onClick={() => {
+                      startCompleteTransition(async () => {
+                        await completeReadingLesson({ courseId: course.id, lessonId: lesson.id });
+                        setStatuses((prev) => ({ ...prev, [lesson.id]: "COMPLETED" }));
+                        setReadingDone(true);
+                        router.refresh();
+                      });
+                    }}
+                    className="pr-btn-primary"
+                  >
+                    {isPendingComplete ? t.savingLabel : t.markAsComplete}
+                  </button>
+                )}
+              </div>
+            </article>
+            {!isPreviewLesson && (
+              <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel />
+            )}
+          </div>
         ) : null}
-
-        {/* Notes below content for reading lessons */}
-        {isReadingLesson(lesson) && !isPreviewLesson && (
-          <LessonNotes lessonId={lesson.id} initialNote={initialNote} />
-        )}
 
         {/* Navigation footer — right below the content, no scrolling back up */}
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)]">

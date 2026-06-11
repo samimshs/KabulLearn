@@ -5,17 +5,24 @@ import { useState } from "react";
 export function ReindexButton() {
   const [status, setStatus] = useState<"idle" | "running" | "done" | "error">("idle");
   const [result, setResult] = useState<{ counts: { lessons: number; courses: number; policy: number; guides: number } } | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   async function run() {
     setStatus("running");
     setResult(null);
+    setErrorMsg(null);
     try {
       const res = await fetch("/api/admin/reindex", { method: "POST" });
-      if (!res.ok) throw new Error("Failed");
-      const data = await res.json() as { ok: boolean; counts: { lessons: number; courses: number; policy: number; guides: number } };
-      setResult({ counts: data.counts });
+      const data = await res.json() as { ok?: boolean; error?: string; counts?: { lessons: number; courses: number; policy: number; guides: number } };
+      if (!res.ok) {
+        setErrorMsg(data.error ?? `Server error ${res.status}`);
+        setStatus("error");
+        return;
+      }
+      setResult({ counts: data.counts! });
       setStatus("done");
-    } catch {
+    } catch (e) {
+      setErrorMsg(e instanceof Error ? e.message : "Network error");
       setStatus("error");
     }
   }
@@ -45,7 +52,7 @@ export function ReindexButton() {
       )}
       {status === "error" && (
         <p className="text-[13px] font-[700] text-[var(--danger)]">
-          Failed — check that OPENAI_API_KEY is set and try again.
+          Failed: {errorMsg ?? "Unknown error"}
         </p>
       )}
     </div>

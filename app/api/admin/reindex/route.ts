@@ -150,7 +150,13 @@ export async function POST() {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json({ error: "OPENAI_API_KEY is not set in environment variables" }, { status: 500 });
+  }
+
   const counts = { lessons: 0, courses: 0, policy: 0, guides: 0 };
+
+  try {
 
   // ── 1. Lessons ────────────────────────────────────────────────
   const lessons = await db.lesson.findMany({
@@ -222,4 +228,10 @@ export async function POST() {
   }
 
   return NextResponse.json({ ok: true, counts });
+
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[reindex] error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

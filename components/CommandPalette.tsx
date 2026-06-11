@@ -7,19 +7,27 @@ import { useLanguage } from "@/components/LanguageProvider";
 import { localize } from "@/lib/i18n";
 
 type SearchResults = {
-  courses: Array<{ id: string; titleEn?: string; titlePs?: string; titleDa?: string | null; level: string | null }>;
+  pages: Array<{ id: string; title: string; description: string; href: string; category: string }>;
+  courses: Array<{ id: string; slug?: string; titleEn?: string; titlePs?: string; titleDa?: string | null; level: string | null }>;
   lessons: Array<{
     id: string;
     titleEn?: string; titlePs?: string; titleDa?: string | null;
-    module: { id: string; course: { id: string; titleEn?: string; titlePs?: string; titleDa?: string | null } };
+    module: { id: string; course: { id: string; slug?: string; titleEn?: string; titlePs?: string; titleDa?: string | null } };
   }>;
   creators: Array<{ username: string; name: string; professionalTitle: string | null; avatarUrl: string | null }>;
+  learningPaths: Array<{
+    slug: string;
+    titleEn?: string; titlePs?: string; titleDa?: string | null;
+    descriptionEn?: string; descriptionPs?: string; descriptionDa?: string | null;
+  }>;
 };
 
 type FlatResult =
+  | { kind: "page";     id: string; title: string; sub: string; href: string }
   | { kind: "course";   id: string; title: string; sub: string; href: string }
   | { kind: "lesson";   id: string; title: string; sub: string; href: string }
-  | { kind: "creator";  id: string; title: string; sub: string; href: string; avatarUrl: string | null };
+  | { kind: "creator";  id: string; title: string; sub: string; href: string; avatarUrl: string | null }
+  | { kind: "path";     id: string; title: string; sub: string; href: string };
 
 export function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { locale, t } = useLanguage();
@@ -34,19 +42,33 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
   const flat: FlatResult[] = results
     ? [
+        ...results.pages.map((p) => ({
+          kind: "page" as const,
+          id: p.id,
+          title: p.title,
+          sub: p.category || p.description,
+          href: p.href
+        })),
         ...results.courses.map((c) => ({
           kind: "course" as const,
           id: c.id,
           title: localize(locale, c.titleEn, c.titlePs, c.titleDa),
           sub: t.searchCourses,
-          href: `/courses/${encodeURIComponent(c.id)}`
+          href: `/courses/${encodeURIComponent(c.slug ?? c.id)}`
+        })),
+        ...results.learningPaths.map((path) => ({
+          kind: "path" as const,
+          id: path.slug,
+          title: localize(locale, path.titleEn, path.titlePs, path.titleDa),
+          sub: t.learningPathsTitle,
+          href: `/learning-paths/${encodeURIComponent(path.slug)}`
         })),
         ...results.lessons.map((l) => ({
           kind: "lesson" as const,
           id: l.id,
           title: localize(locale, l.titleEn, l.titlePs, l.titleDa),
           sub: localize(locale, l.module.course.titleEn, l.module.course.titlePs, l.module.course.titleDa),
-          href: `/courses/${encodeURIComponent(l.module.course.id)}/lessons/${encodeURIComponent(l.id)}`
+          href: `/courses/${encodeURIComponent(l.module.course.slug ?? l.module.course.id)}/lessons/${encodeURIComponent(l.id)}`
         })),
         ...results.creators.map((c) => ({
           kind: "creator" as const,
@@ -61,7 +83,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
   const search = useCallback((q: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!q || q.length < 3) { setResults(null); setLoading(false); return; }
+    if (!q || q.length < 2) { setResults(null); setLoading(false); return; }
     setLoading(true);
     debounceRef.current = setTimeout(async () => {
       try {
@@ -132,9 +154,14 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
                 <path d="M14 7 8 4 2 7l6 3 6-3Z" stroke={active ? "#fff" : "var(--brand)"} strokeWidth="1.5" strokeLinejoin="round" />
                 <path d="M4 8.5v3.3c1.2.9 2.4 1.2 4 1.2s2.8-.3 4-1.2V8.5" stroke={active ? "#fff" : "var(--brand)"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            ) : (
+            ) : item.kind === "lesson" ? (
               <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
                 <path d="M4 4h8M4 7h8M4 10h5" stroke={active ? "#fff" : "var(--brand)"} strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
+                <path d="M8 2.5 13.5 6v7.5h-11V6L8 2.5Z" stroke={active ? "#fff" : "var(--brand)"} strokeWidth="1.4" strokeLinejoin="round" />
+                <path d="M6 13.5V9h4v4.5" stroke={active ? "#fff" : "var(--brand)"} strokeWidth="1.4" strokeLinejoin="round" />
               </svg>
             )}
           </span>
@@ -184,16 +211,28 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
         {/* Results */}
         <div className="max-h-[60vh] overflow-y-auto">
-          {!query || query.length < 3 ? (
+          {!query || query.length < 2 ? (
             <p className="px-4 py-8 text-center text-sm font-[600] text-[var(--muted-2)]">{t.searchTypeToStart}</p>
           ) : isEmpty ? (
             <p className="px-4 py-8 text-center text-sm font-[600] text-[var(--muted-2)]">{t.searchNoResults}</p>
           ) : showGroups ? (
             <>
+              {results!.pages.length > 0 && (
+                <div>
+                  <p className="px-4 pt-3 pb-1 text-[10px] font-[900] uppercase tracking-[1.5px] text-[var(--muted-2)]">{t.searchPages}</p>
+                  {results!.pages.map((_, i) => { const idx = cursor++; return <Row key={flat[idx].id + idx} item={flat[idx]} index={idx} />; })}
+                </div>
+              )}
               {results!.courses.length > 0 && (
                 <div>
                   <p className="px-4 pt-3 pb-1 text-[10px] font-[900] uppercase tracking-[1.5px] text-[var(--muted-2)]">{t.searchCourses}</p>
                   {results!.courses.map((_, i) => { const idx = cursor++; return <Row key={flat[idx].id + idx} item={flat[idx]} index={idx} />; })}
+                </div>
+              )}
+              {results!.learningPaths.length > 0 && (
+                <div>
+                  <p className="px-4 pt-3 pb-1 text-[10px] font-[900] uppercase tracking-[1.5px] text-[var(--muted-2)]">{t.learningPathsTitle}</p>
+                  {results!.learningPaths.map((_, i) => { const idx = cursor++; return <Row key={flat[idx].id + idx} item={flat[idx]} index={idx} />; })}
                 </div>
               )}
               {results!.lessons.length > 0 && (

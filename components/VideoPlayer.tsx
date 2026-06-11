@@ -21,6 +21,7 @@ declare global {
       ) => {
         getCurrentTime: () => number;
         getDuration: () => number;
+        getIframe?: () => HTMLIFrameElement;
         getPlayerState: () => number;
         seekTo: (seconds: number, allowSeekAhead: boolean) => void;
         destroy: () => void;
@@ -75,6 +76,8 @@ function youtubeErrorMessage(code: number, fallback: string) {
   return fallback;
 }
 
+const YOUTUBE_IFRAME_ALLOW = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen";
+
 export function VideoPlayer({
   video,
   courseId,
@@ -118,6 +121,7 @@ export function VideoPlayer({
     function sampleNow() {
       const player = playerRef.current;
       if (!player) return;
+      if (player.getPlayerState() !== 1) return;
       captureHeartbeat(player.getCurrentTime(), player.getDuration());
     }
 
@@ -144,9 +148,13 @@ export function VideoPlayer({
       // Step 3: create the player. resumePos is now definitely known.
       playerRef.current = new window.YT.Player(elementId, {
         videoId,
-        playerVars: { modestbranding: 1, rel: 0, origin: window.location.origin },
+        playerVars: { modestbranding: 1, rel: 0, playsinline: 1, origin: window.location.origin },
         events: {
           onReady: () => {
+            const iframe = playerRef.current?.getIframe?.();
+            iframe?.setAttribute("allow", YOUTUBE_IFRAME_ALLOW);
+            iframe?.setAttribute("allowfullscreen", "true");
+            iframe?.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
             if (resumePos > 5) {
               playerRef.current?.seekTo(resumePos, true);
             }

@@ -132,7 +132,7 @@ function LessonNotes({ lessonId, initialNote, sidePanel = false, stretch = false
   // Side-panel mode: always open, no toggle button
   if (sidePanel) {
     return (
-      <div className={`flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] ${stretch ? "h-full" : "lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-7rem)]"}`}>
+      <div className={`flex flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] ${stretch ? "lg:sticky lg:top-[5.5rem] lg:h-[calc(100vh-6.5rem)]" : "lg:sticky lg:top-[5.5rem] lg:max-h-[calc(100vh-7rem)]"}`}>
         <div className="flex items-center gap-2 border-b border-[var(--border)] px-4 py-3">
           {noteIcon}
           <span className="text-[13px] font-[800] text-[var(--ink-2)]">{t.notesLabel}</span>

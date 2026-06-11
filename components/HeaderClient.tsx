@@ -46,6 +46,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
   const [menuOpen, setMenuOpen]   = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [isMac, setIsMac] = useState(true); // default to Mac (most common); corrected on mount
   const [appNotifUnread, setAppNotifUnread] = useState(unreadAppNotifications);
   const menuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -53,8 +54,10 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
   const avatarUrl = usePortalAvatarUrl(user?.image ?? null);
   const totalBellBadge = unreadCount + appNotifUnread;
 
-  // Global Cmd+K / Ctrl+K shortcut
+  // Global Cmd+K / Ctrl+K shortcut + OS detection
   useEffect(() => {
+    setIsMac(/Mac|iPhone|iPad|iPod/.test(navigator.platform));
+
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
@@ -175,7 +178,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                   <path d="m10 10 2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
                 <span className="hidden lg:block">Search</span>
-                <kbd className="hidden rounded border border-[var(--border)] bg-white px-1 py-0.5 text-[10px] font-[800] text-[var(--muted-2)] lg:block">⌘K</kbd>
+                <kbd className="hidden rounded border border-[var(--border)] bg-white px-1 py-0.5 text-[10px] font-[800] text-[var(--muted-2)] lg:block">{isMac ? "⌘K" : "Ctrl K"}</kbd>
               </button>
 
               {/* Support link */}

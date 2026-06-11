@@ -122,6 +122,37 @@ Pashto and Dari are displayed right-to-left (RTL) automatically.
 
 Course content is available in the languages the educator has added. If a course has Pashto
 or Dari content, it will display in your chosen language automatically.`
+  },
+  {
+    key: "guide-sitemap",
+    title: "KabulLearn page links and URLs",
+    text: `KabulLearn Page Directory — Links and URLs
+
+Below is a complete list of pages on KabulLearn and their direct links.
+
+PUBLIC PAGES (no login required):
+- Homepage: https://kabullearn.com/
+- Course catalog (all courses): https://kabullearn.com/courses
+- Register (create account): https://kabullearn.com/register
+- Sign in (login): https://kabullearn.com/login
+- Terms of Service: https://kabullearn.com/terms
+- Privacy Policy: https://kabullearn.com/privacy
+- Certificate verification: https://kabullearn.com/verify
+
+STUDENT PAGES (login required):
+- Student dashboard / My Courses: https://kabullearn.com/dashboard
+- A specific course page: https://kabullearn.com/courses/[course-id]
+- A specific lesson: https://kabullearn.com/courses/[course-id]/lessons/[lesson-id]
+
+EDUCATOR PAGES (educator account required):
+- Educator portal: https://kabullearn.com/educator
+- Manage courses: https://kabullearn.com/educator/courses
+- Create new course: https://kabullearn.com/educator/courses/new
+
+CONTACT & SUPPORT:
+- Email: info@kabulhub.com
+- Website: https://kabullearn.com
+- Operated by: KabulHub LLC`
   }
 ];
 

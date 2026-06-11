@@ -18,29 +18,32 @@ loadEnvConfig(path.join(__dirname, ".."));
 
 const db = new PrismaClient();
 
-// ─── Author ──────────────────────────────────────────────────────────────────
 const AUTHOR_EMAIL     = "samimshs@gmail.com";
 const CREATOR_USERNAME = "sami-samim";
 
-// ─── Course data ─────────────────────────────────────────────────────────────
 const COURSE = {
-  id:          "web-dev-fundamentals",
-  titleEn:     "Web Development Fundamentals",
-  titlePs:     "د ویب پراختیا بنسټونه",
+  id:            "web-dev-fundamentals",
+  titleEn:       "Web Development Fundamentals",
+  titlePs:       "د ویب پراختیا بنسټونه",
   descriptionEn: "Learn HTML, CSS, and JavaScript from scratch. Build real web pages, style them with modern CSS, and make them interactive with JavaScript. Perfect for absolute beginners.",
   descriptionPs: "د HTML، CSS، او JavaScript له صفره زده کړئ. د زده کړې پروسه کې د ریښتیني ویب پاڼو جوړول، د عصري CSS سره یې سینګار کول، او د JavaScript له لارې یې فعال کول زده کړئ.",
   level: "beginner",
 
   modules: [
-    // ── Module 1: HTML Basics ─────────────────────────────────────────────────
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // MODULE 1 — HTML Basics
+    // ══════════════════════════════════════════════════════════════════════════
     {
       id:      "html-basics",
       titleEn: "HTML Basics",
-      titlePs:  "د HTML بنسټونه",
+      titlePs: "د HTML بنسټونه",
       order:   1,
       lessons: [
+        // ── Video 1 ──────────────────────────────────────────────────────────
         {
           id:            "what-is-html",
+          type:          "VIDEO",
           titleEn:       "What Is HTML?",
           titlePs:       "HTML څه دی؟",
           descriptionEn: "Understand what HTML is, why it exists, and how browsers use it to display web pages.",
@@ -82,11 +85,29 @@ HTML (HyperText Markup Language) د هرې ویب پاڼې بنسټ دی. دا �
 - HTML د عناصرو لخوا جوړه شوې چې د ټاګونو له لارې لیکل کیږي: \`<h1>سلام</h1>\`
 - ټاګونه معمولاً جوړه وي: د **پرانیستلو ټاګ** او **تړلو ټاګ**
 - لټوونکي HTML له پورته لاندې لولي او هغه چې موييي ښيي
-- HTML د پروګرامولو ژبه نه ده — دا یوه **مارکپ** ژبه ده چې جوړښت تشریح کوي`,
+- HTML د پروګرامولو ژبه نه ده — دا یوه **مارکپ** ژبه ده چې جوړښت تشریح کوي
+
+### یوه ساده HTML پاڼه
+
+\`\`\`html
+<!DOCTYPE html>
+<html lang="ps">
+  <head>
+    <title>زما لومړۍ پاڼه</title>
+  </head>
+  <body>
+    <h1>سلام نړۍ!</h1>
+    <p>دا زما لومړۍ ویب پاڼه ده.</p>
+  </body>
+</html>
+\`\`\``,
           order: 1
         },
+
+        // ── Video 2 ──────────────────────────────────────────────────────────
         {
           id:            "html-elements-tags",
+          type:          "VIDEO",
           titleEn:       "Elements, Tags & Attributes",
           titlePs:       "عناصر، ټاګونه او خصوصیتونه",
           descriptionEn: "Learn the core building blocks: headings, paragraphs, links, images, lists, and how attributes add extra information.",
@@ -96,42 +117,61 @@ HTML (HyperText Markup Language) د هرې ویب پاڼې بنسټ دی. دا �
 
 ### Common text elements
 
-| Tag | Purpose |
-|-----|---------|
-| \`<h1>\` – \`<h6>\` | Headings (h1 = largest) |
-| \`<p>\` | Paragraph |
-| \`<strong>\` | Bold / important |
-| \`<em>\` | Italic / emphasis |
-| \`<br>\` | Line break (no closing tag) |
+| Tag | Purpose | Example |
+|-----|---------|---------|
+| \`<h1>\` – \`<h6>\` | Headings (h1 = largest) | \`<h1>Title</h1>\` |
+| \`<p>\` | Paragraph | \`<p>Some text.</p>\` |
+| \`<strong>\` | Bold / important | \`<strong>Warning</strong>\` |
+| \`<em>\` | Italic / emphasis | \`<em>Note this</em>\` |
+| \`<br>\` | Line break (self-closing) | \`<br>\` |
+| \`<hr>\` | Horizontal divider | \`<hr>\` |
 
 ### Links
 
 \`\`\`html
-<a href="https://example.com">Visit Example</a>
+<a href="https://example.com" target="_blank">Visit Example</a>
 \`\`\`
 
-The \`href\` attribute holds the destination URL. Attributes always go inside the **opening tag** as \`name="value"\` pairs.
+The \`href\` attribute holds the destination URL. \`target="_blank"\` opens the link in a new tab. Attributes always go inside the **opening tag** as \`name="value"\` pairs.
 
 ### Images
 
 \`\`\`html
-<img src="photo.jpg" alt="A mountain landscape" width="600">
+<img src="photo.jpg" alt="A mountain landscape" width="600" height="400">
 \`\`\`
 
-\`src\` = file path, \`alt\` = text shown if the image fails to load (also used by screen readers).
+- \`src\` — path to the image file
+- \`alt\` — text shown if the image fails, also read by screen readers (always include it)
+- \`width\` / \`height\` — optional size hints; helps browser reserve space while loading
 
 ### Lists
 
 \`\`\`html
-<ul>          <!-- unordered (bullet) list -->
+<!-- Unordered (bullet) list -->
+<ul>
   <li>HTML</li>
   <li>CSS</li>
+  <li>JavaScript</li>
 </ul>
 
-<ol>          <!-- ordered (numbered) list -->
+<!-- Ordered (numbered) list -->
+<ol>
   <li>Learn HTML</li>
   <li>Learn CSS</li>
+  <li>Build projects</li>
 </ol>
+\`\`\`
+
+### Nesting
+
+Elements can be placed inside other elements. The inner element must close before the outer one:
+
+\`\`\`html
+<!-- ✓ Correct nesting -->
+<p>Visit <a href="https://example.com"><strong>our site</strong></a> today.</p>
+
+<!-- ✗ Wrong — tags overlap -->
+<p>Visit <a href="#">our <strong>site</a> today</strong>.</p>
 \`\`\``,
           readingPs: `## عناصر، ټاګونه او خصوصیتونه
 
@@ -147,18 +187,30 @@ The \`href\` attribute holds the destination URL. Attributes always go inside th
 ### لینکونه
 
 \`\`\`html
-<a href="https://example.com">بیلګه وګورئ</a>
+<a href="https://example.com" target="_blank">بیلګه وګورئ</a>
 \`\`\`
 
 ### انځورونه
 
 \`\`\`html
 <img src="photo.jpg" alt="د غرونو منظره" width="600">
+\`\`\`
+
+### لیستونه
+
+\`\`\`html
+<ul>
+  <li>HTML</li>
+  <li>CSS</li>
+</ul>
 \`\`\``,
           order: 2
         },
+
+        // ── Video 3 ──────────────────────────────────────────────────────────
         {
           id:            "html-forms",
+          type:          "VIDEO",
           titleEn:       "HTML Forms",
           titlePs:       "د HTML فورمونه",
           descriptionEn: "Build forms that collect user input: text fields, dropdowns, checkboxes, and the submit button.",
@@ -173,10 +225,21 @@ Forms let users send data to a server — login boxes, search bars, contact form
 \`\`\`html
 <form action="/submit" method="post">
   <label for="name">Your name:</label>
-  <input type="text" id="name" name="name" placeholder="e.g. Ahmad">
+  <input type="text" id="name" name="name" placeholder="e.g. Ahmad" required>
 
-  <label for="email">Email:</label>
-  <input type="email" id="email" name="email">
+  <label for="email">Email address:</label>
+  <input type="email" id="email" name="email" required>
+
+  <label for="level">Experience level:</label>
+  <select id="level" name="level">
+    <option value="beginner">Beginner</option>
+    <option value="intermediate">Intermediate</option>
+    <option value="advanced">Advanced</option>
+  </select>
+
+  <label>
+    <input type="checkbox" name="newsletter"> Subscribe to newsletter
+  </label>
 
   <button type="submit">Send</button>
 </form>
@@ -184,20 +247,39 @@ Forms let users send data to a server — login boxes, search bars, contact form
 
 ### Common input types
 
-| type | What it accepts |
-|------|----------------|
-| \`text\` | Any text |
-| \`email\` | Email address (auto-validated) |
-| \`password\` | Hidden characters |
-| \`number\` | Numeric values |
-| \`checkbox\` | True / false tick |
-| \`radio\` | One option from a group |
-| \`select\` | Dropdown menu |
+| type | What it accepts | Notes |
+|------|----------------|-------|
+| \`text\` | Any text | General purpose |
+| \`email\` | Email address | Browser auto-validates format |
+| \`password\` | Hidden characters | Characters shown as dots |
+| \`number\` | Numeric values | Shows up/down arrows |
+| \`tel\` | Phone number | Shows numeric keyboard on mobile |
+| \`url\` | Web address | Browser validates format |
+| \`date\` | Calendar date | Shows date picker |
+| \`checkbox\` | True / false | Multi-select; use \`name\` arrays |
+| \`radio\` | One of a group | Share the same \`name\` attribute |
+| \`file\` | File upload | Add \`accept=".jpg,.png"\` to filter |
 
-Always pair every \`<input>\` with a \`<label>\` — it improves accessibility and lets users click the label to focus the field.`,
+### Accessibility rule
+
+Always pair every \`<input>\` with a \`<label>\`. The \`for\` attribute on the label must match the \`id\` on the input — this lets users click the label text to focus the field, and screen readers announce the label when the field is focused.`,
           readingPs: `## د HTML فورمونه
 
-فورمونه کارونکو ته اجازه ورکوي چې معلومات سرور ته واستوي. د ننوتلو بکسونه، د لټون بارونه، د اړیکې فورمونه، او د ثبت پاڼې ټولې د \`<form>\` سره جوړیږي.
+فورمونه کارونکو ته اجازه ورکوي چې معلومات سرور ته واستوي.
+
+### د فورم بنسټیز جوړښت
+
+\`\`\`html
+<form action="/submit" method="post">
+  <label for="name">ستاسو نوم:</label>
+  <input type="text" id="name" name="name" required>
+
+  <label for="email">ایمیل پته:</label>
+  <input type="email" id="email" name="email" required>
+
+  <button type="submit">واستوئ</button>
+</form>
+\`\`\`
 
 ### عام د ننوتلو ډولونه
 
@@ -206,10 +288,295 @@ Always pair every \`<input>\` with a \`<label>\` — it improves accessibility a
 | \`text\` | هر ډول متن |
 | \`email\` | د ایمیل پته |
 | \`password\` | پټ حروف |
-| \`checkbox\` | سم / غلط |`,
+| \`checkbox\` | سم / غلط |
+| \`radio\` | له ډلې یو |`,
           order: 3
+        },
+
+        // ── Reading lesson ────────────────────────────────────────────────────
+        {
+          id:            "html-practice",
+          type:          "READING",
+          titleEn:       "Practice: Build a Personal Profile Page",
+          titlePs:       "تمرین: د شخصي پروفایل پاڼه جوړه کړئ",
+          descriptionEn: "Put your HTML knowledge together by building a complete personal profile page from scratch — step by step with full code.",
+          descriptionPs: "خپله د HTML پوهه یو ځای کړئ او د ګام پر ګام بشپړ کوډ سره د شخصي پروفایل پاڼه له صفره جوړه کړئ.",
+          youtubeId:     null,
+          readingEn: `## Practice: Build a Personal Profile Page
+
+In this lesson you will build a complete personal profile page using only HTML. No CSS or JavaScript yet — just clean, well-structured markup.
+
+---
+
+### What you will build
+
+A page that includes:
+- Your name as the main heading
+- A short bio paragraph
+- A profile photo (placeholder image used below)
+- A list of your skills
+- A list of your favourite links
+- A simple contact form
+
+---
+
+### Step 1 — Create the file
+
+Create a new file called \`profile.html\` and add the HTML skeleton:
+
+\`\`\`html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ahmad Karimi — Profile</title>
+  </head>
+  <body>
+
+    <!-- your content goes here -->
+
+  </body>
+</html>
+\`\`\`
+
+---
+
+### Step 2 — Add the header section
+
+Inside \`<body>\`, add your name and a short bio:
+
+\`\`\`html
+<header>
+  <img src="https://placehold.co/120x120" alt="Profile photo of Ahmad Karimi">
+  <h1>Ahmad Karimi</h1>
+  <p>
+    I'm a Computer Science student at Kabul University, passionate about
+    web development and building tools that help Afghan communities.
+  </p>
+</header>
+\`\`\`
+
+---
+
+### Step 3 — Add your skills
+
+\`\`\`html
+<section>
+  <h2>Skills</h2>
+  <ul>
+    <li>HTML5</li>
+    <li>CSS3</li>
+    <li>JavaScript</li>
+    <li>Python (beginner)</li>
+    <li>Git & GitHub</li>
+  </ul>
+</section>
+\`\`\`
+
+---
+
+### Step 4 — Add favourite links
+
+\`\`\`html
+<section>
+  <h2>Useful Resources</h2>
+  <ol>
+    <li><a href="https://developer.mozilla.org" target="_blank">MDN Web Docs</a> — the best HTML/CSS/JS reference</li>
+    <li><a href="https://css-tricks.com" target="_blank">CSS-Tricks</a> — deep CSS guides</li>
+    <li><a href="https://javascript.info" target="_blank">JavaScript.info</a> — thorough JS tutorial</li>
+  </ol>
+</section>
+\`\`\`
+
+---
+
+### Step 5 — Add a contact form
+
+\`\`\`html
+<section>
+  <h2>Contact Me</h2>
+  <form action="#" method="post">
+    <p>
+      <label for="visitor-name">Your name:</label><br>
+      <input type="text" id="visitor-name" name="visitor-name" placeholder="Your name" required>
+    </p>
+    <p>
+      <label for="visitor-email">Your email:</label><br>
+      <input type="email" id="visitor-email" name="visitor-email" placeholder="you@example.com" required>
+    </p>
+    <p>
+      <label for="message">Message:</label><br>
+      <textarea id="message" name="message" rows="5" cols="40" placeholder="Write your message here..."></textarea>
+    </p>
+    <button type="submit">Send message</button>
+  </form>
+</section>
+\`\`\`
+
+---
+
+### Step 6 — Add a footer
+
+\`\`\`html
+<footer>
+  <p>&copy; 2026 Ahmad Karimi. Built with HTML.</p>
+</footer>
+\`\`\`
+
+---
+
+### Complete file
+
+Here is the full \`profile.html\` assembled:
+
+\`\`\`html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ahmad Karimi — Profile</title>
+  </head>
+  <body>
+
+    <header>
+      <img src="https://placehold.co/120x120" alt="Profile photo of Ahmad Karimi">
+      <h1>Ahmad Karimi</h1>
+      <p>
+        I'm a Computer Science student at Kabul University, passionate about
+        web development and building tools that help Afghan communities.
+      </p>
+    </header>
+
+    <section>
+      <h2>Skills</h2>
+      <ul>
+        <li>HTML5</li>
+        <li>CSS3</li>
+        <li>JavaScript</li>
+        <li>Python (beginner)</li>
+        <li>Git &amp; GitHub</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Useful Resources</h2>
+      <ol>
+        <li><a href="https://developer.mozilla.org" target="_blank">MDN Web Docs</a></li>
+        <li><a href="https://css-tricks.com" target="_blank">CSS-Tricks</a></li>
+        <li><a href="https://javascript.info" target="_blank">JavaScript.info</a></li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Contact Me</h2>
+      <form action="#" method="post">
+        <p>
+          <label for="visitor-name">Your name:</label><br>
+          <input type="text" id="visitor-name" name="visitor-name" required>
+        </p>
+        <p>
+          <label for="visitor-email">Your email:</label><br>
+          <input type="email" id="visitor-email" name="visitor-email" required>
+        </p>
+        <p>
+          <label for="message">Message:</label><br>
+          <textarea id="message" name="message" rows="5" cols="40"></textarea>
+        </p>
+        <button type="submit">Send message</button>
+      </form>
+    </section>
+
+    <footer>
+      <p>&copy; 2026 Ahmad Karimi. Built with HTML.</p>
+    </footer>
+
+  </body>
+</html>
+\`\`\`
+
+---
+
+### What to try next
+
+- Change the name, bio, and skills to match your own profile
+- Add a second section for "Education" or "Projects" using the same pattern
+- Open the file in your browser by double-clicking it — it works with no server needed`,
+          readingPs: `## تمرین: د شخصي پروفایل پاڼه جوړه کړئ
+
+پدې درس کې به تاسو یوازې د HTML سره بشپړه شخصي پروفایل پاڼه جوړ کړئ.
+
+---
+
+### ګام ۱ — فایل جوړ کړئ
+
+یو نوی فایل \`profile.html\` جوړ کړئ:
+
+\`\`\`html
+<!DOCTYPE html>
+<html lang="ps">
+  <head>
+    <meta charset="UTF-8">
+    <title>احمد کریمي — پروفایل</title>
+  </head>
+  <body>
+    <!-- ستاسو محتوا دلته راځي -->
+  </body>
+</html>
+\`\`\`
+
+---
+
+### ګام ۲ — سرلیک برخه زیاته کړئ
+
+\`\`\`html
+<header>
+  <img src="https://placehold.co/120x120" alt="د احمد کریمي انځور">
+  <h1>احمد کریمي</h1>
+  <p>زه د کابل پوهنتون د کمپیوټر ساینس محصل یم.</p>
+</header>
+\`\`\`
+
+---
+
+### ګام ۳ — مهارتونه زیاتئ
+
+\`\`\`html
+<section>
+  <h2>مهارتونه</h2>
+  <ul>
+    <li>HTML5</li>
+    <li>CSS3</li>
+    <li>JavaScript</li>
+  </ul>
+</section>
+\`\`\`
+
+---
+
+### ګام ۴ — د اړیکې فورم زیاتئ
+
+\`\`\`html
+<section>
+  <h2>راسره اړیکه ونیسئ</h2>
+  <form action="#" method="post">
+    <p>
+      <label for="name">ستاسو نوم:</label><br>
+      <input type="text" id="name" name="name" required>
+    </p>
+    <p>
+      <label for="email">ایمیل:</label><br>
+      <input type="email" id="email" name="email" required>
+    </p>
+    <button type="submit">واستوئ</button>
+  </form>
+</section>
+\`\`\``,
+          order: 4
         }
       ],
+
       quiz: {
         id:            "html-basics-quiz",
         titleEn:       "HTML Basics Quiz",
@@ -219,68 +586,62 @@ Always pair every \`<input>\` with a \`<label>\` — it improves accessibility a
         passScore: 70,
         questions: [
           {
-            id:       "html-q1",
-            promptEn: "What does HTML stand for?",
-            promptPs:  "HTML لنډیز د کومو کلمو دی؟",
+            id: "html-q1", promptEn: "What does HTML stand for?", promptPs: "HTML لنډیز د کومو کلمو دی؟",
             options: [
-              { en: "HyperText Markup Language", ps: "HyperText Markup Language", correct: true },
+              { en: "HyperText Markup Language",    ps: "HyperText Markup Language",    correct: true  },
               { en: "High Transfer Markup Language", ps: "High Transfer Markup Language", correct: false },
-              { en: "HyperText Machine Learning", ps: "HyperText Machine Learning", correct: false }
+              { en: "HyperText Machine Learning",    ps: "HyperText Machine Learning",    correct: false }
             ]
           },
           {
-            id:       "html-q2",
-            promptEn: "Which tag creates a hyperlink?",
-            promptPs:  "کوم ټاګ هایپرلینک جوړوي؟",
+            id: "html-q2", promptEn: "Which tag creates a hyperlink?", promptPs: "کوم ټاګ هایپرلینک جوړوي؟",
             options: [
               { en: "<link>", ps: "<link>", correct: false },
-              { en: "<a>", ps: "<a>", correct: true },
+              { en: "<a>",    ps: "<a>",    correct: true  },
               { en: "<href>", ps: "<href>", correct: false }
             ]
           },
           {
-            id:       "html-q3",
-            promptEn: "What attribute holds the URL in an anchor tag?",
-            promptPs:  "د انکر ټاګ کې کوم خصوصیت URL لري؟",
+            id: "html-q3", promptEn: "What attribute holds the URL in an anchor tag?", promptPs: "د انکر ټاګ کې کوم خصوصیت URL لري؟",
             options: [
-              { en: "src", ps: "src", correct: false },
+              { en: "src",  ps: "src",  correct: false },
               { en: "link", ps: "link", correct: false },
-              { en: "href", ps: "href", correct: true }
+              { en: "href", ps: "href", correct: true  }
             ]
           },
           {
-            id:       "html-q4",
-            promptEn: "Which input type hides the characters the user types?",
-            promptPs:  "کوم د ننوتلو ډول د کارونکي لیکل شوي حروف پټوي؟",
+            id: "html-q4", promptEn: "Which input type hides the characters the user types?", promptPs: "کوم د ننوتلو ډول د کارونکي لیکل شوي حروف پټوي؟",
             options: [
-              { en: "hidden", ps: "hidden", correct: false },
-              { en: "password", ps: "password", correct: true },
-              { en: "secret", ps: "secret", correct: false }
+              { en: "hidden",   ps: "hidden",   correct: false },
+              { en: "password", ps: "password", correct: true  },
+              { en: "secret",   ps: "secret",   correct: false }
             ]
           },
           {
-            id:       "html-q5",
-            promptEn: "What is the purpose of the alt attribute on an <img> tag?",
-            promptPs:  "د <img> ټاګ د alt خصوصیت موخه څه ده؟",
+            id: "html-q5", promptEn: "What is the purpose of the alt attribute on an <img> tag?", promptPs: "د <img> ټاګ د alt خصوصیت موخه څه ده؟",
             options: [
-              { en: "Sets the image width", ps: "د انځور عرض ټاکي", correct: false },
-              { en: "Provides alternative text if the image cannot load", ps: "که انځور بار نشي، بدیل متن وړاندې کوي", correct: true },
-              { en: "Links the image to another page", ps: "انځور بل پاڼه سره تړي", correct: false }
+              { en: "Sets the image width",                              ps: "د انځور عرض ټاکي",               correct: false },
+              { en: "Provides alternative text if the image cannot load", ps: "که انځور بار نشي، بدیل متن وړاندې کوي", correct: true  },
+              { en: "Links the image to another page",                   ps: "انځور بل پاڼه سره تړي",           correct: false }
             ]
           }
         ]
       }
     },
 
-    // ── Module 2: CSS Styling ─────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    // MODULE 2 — CSS Styling
+    // ══════════════════════════════════════════════════════════════════════════
     {
       id:      "css-styling",
       titleEn: "CSS Styling",
-      titlePs:  "د CSS سینګار",
+      titlePs: "د CSS سینګار",
       order:   2,
       lessons: [
+        // ── Video 1 ──────────────────────────────────────────────────────────
         {
           id:            "css-intro",
+          type:          "VIDEO",
           titleEn:       "Introduction to CSS",
           titlePs:       "د CSS پېژندنه",
           descriptionEn: "Learn what CSS is, how to link a stylesheet to HTML, and how selectors target elements.",
@@ -292,9 +653,23 @@ CSS (Cascading Style Sheets) controls how HTML elements **look** — colors, fon
 
 ### Three ways to add CSS
 
-1. **External stylesheet** (recommended): \`<link rel="stylesheet" href="style.css">\` in the \`<head>\`
-2. **Internal**: a \`<style>\` block inside \`<head>\`
-3. **Inline**: a \`style\` attribute directly on an element
+1. **External stylesheet** (recommended)
+   \`\`\`html
+   <link rel="stylesheet" href="style.css">
+   \`\`\`
+   Place inside \`<head>\`. One file styles the whole site.
+
+2. **Internal** — a \`<style>\` block inside \`<head>\`
+   \`\`\`html
+   <style>
+     h1 { color: navy; }
+   </style>
+   \`\`\`
+
+3. **Inline** — a \`style\` attribute directly on an element (avoid for anything beyond quick tests)
+   \`\`\`html
+   <p style="color: red;">Warning</p>
+   \`\`\`
 
 ### Anatomy of a CSS rule
 
@@ -303,9 +678,11 @@ selector {
   property: value;
 }
 
+/* Example */
 h1 {
   color: #1a73e8;
   font-size: 2rem;
+  font-weight: 700;
 }
 \`\`\`
 
@@ -313,13 +690,24 @@ h1 {
 
 | Selector | Example | Targets |
 |----------|---------|---------|
-| Element | \`p\` | All \`<p>\` tags |
-| Class | \`.card\` | Elements with \`class="card"\` |
-| ID | \`#hero\` | The element with \`id="hero"\` |
-| Descendant | \`.nav a\` | \`<a>\` tags inside \`.nav\` |`,
+| Element  | \`p\`      | All \`<p>\` elements |
+| Class    | \`.card\`  | All elements with \`class="card"\` |
+| ID       | \`#hero\`  | The one element with \`id="hero"\` |
+| Descendant | \`.nav a\` | \`<a>\` tags anywhere inside \`.nav\` |
+| Child    | \`ul > li\` | \`<li>\` that are direct children of \`<ul>\` |
+| Pseudo-class | \`a:hover\` | \`<a>\` when the cursor is on it |
+
+### Specificity — which rule wins?
+
+When two rules target the same element, the more *specific* selector wins:
+
+\`\`\`
+Inline style  > ID  > Class  > Element
+    1000      > 100 >   10   >    1
+\`\`\``,
           readingPs: `## د CSS پېژندنه
 
-CSS (Cascading Style Sheets) کنترولوي چې HTML عناصر **څنګه ښکاري** — رنګونه، فونتونه، فاصلې، ترتیب، او نور. پرته له CSS یوه ویب پاڼه د سپینې شاتمینې پر سر ساده تور متن دی.
+CSS (Cascading Style Sheets) کنترولوي چې HTML عناصر **څنګه ښکاري**.
 
 ### د CSS قاعدې جوړښت
 
@@ -328,11 +716,22 @@ h1 {
   color: #1a73e8;
   font-size: 2rem;
 }
-\`\`\``,
+\`\`\`
+
+### عام سلیکټرونه
+
+| سلیکټر | بیلګه | هدف |
+|--------|-------|-----|
+| عنصر   | \`p\`   | ټول \`<p>\` عناصر |
+| کلاس   | \`.card\` | د \`class="card"\` ټول عناصر |
+| ID     | \`#hero\` | د \`id="hero"\` عنصر |`,
           order: 1
         },
+
+        // ── Video 2 ──────────────────────────────────────────────────────────
         {
           id:            "css-box-model",
+          type:          "VIDEO",
           titleEn:       "The Box Model & Spacing",
           titlePs:       "د بکس ماډل او فاصله",
           descriptionEn: "Every HTML element is a box. Understand margin, border, padding, and width to control layout with precision.",
@@ -343,33 +742,53 @@ h1 {
 Every element is surrounded by four layers — from inside out:
 
 \`\`\`
-┌────────────────────────────┐
-│          MARGIN            │  (space outside the border)
-│  ┌──────────────────────┐  │
-│  │       BORDER         │  │
-│  │  ┌────────────────┐  │  │
-│  │  │    PADDING     │  │  │  (space inside the border)
-│  │  │  ┌──────────┐  │  │  │
-│  │  │  │ CONTENT  │  │  │  │
-│  │  │  └──────────┘  │  │  │
-│  │  └────────────────┘  │  │
-│  └──────────────────────┘  │
-└────────────────────────────┘
+┌────────────────────────────────┐
+│            MARGIN              │  space outside the border
+│  ┌────────────────────────┐   │
+│  │         BORDER         │   │
+│  │  ┌──────────────────┐  │   │
+│  │  │     PADDING      │  │   │  space inside the border
+│  │  │  ┌────────────┐  │  │   │
+│  │  │  │  CONTENT   │  │  │   │
+│  │  │  └────────────┘  │  │   │
+│  │  └──────────────────┘  │   │
+│  └────────────────────────┘   │
+└────────────────────────────────┘
 \`\`\`
+
+### Example
 
 \`\`\`css
 .card {
   width: 320px;
-  padding: 20px;          /* space inside */
-  border: 2px solid #ddd; /* visible edge */
-  margin: 16px auto;      /* center + space outside */
-  box-sizing: border-box; /* width includes padding & border */
+  padding: 24px;           /* inner breathing room */
+  border: 1px solid #ddd;  /* visible edge */
+  margin: 16px auto;       /* 16px top/bottom, centered left/right */
+  border-radius: 8px;      /* rounded corners */
+  box-sizing: border-box;  /* width includes padding & border */
 }
 \`\`\`
 
-### Tip: always use \`box-sizing: border-box\`
+### Shorthand for margin and padding
 
-Without it, adding padding increases the element's total width — which surprises many beginners. Set it globally:
+\`\`\`css
+/* Four values: top right bottom left (clockwise) */
+margin: 10px 20px 10px 20px;
+
+/* Two values: top/bottom  left/right */
+padding: 12px 24px;
+
+/* One value: all four sides */
+margin: 16px;
+
+/* Individual sides */
+padding-top: 8px;
+margin-left: 0;
+\`\`\`
+
+### Always use box-sizing: border-box
+
+Without it, adding padding increases the element's total rendered width beyond what \`width\` says, which breaks layouts. Set it globally once at the top of your stylesheet:
 
 \`\`\`css
 *, *::before, *::after {
@@ -378,16 +797,28 @@ Without it, adding padding increases the element's total width — which surpris
 \`\`\``,
           readingPs: `## د CSS بکس ماډل
 
-هر عنصر له څلورو پوښونو لخوا احاطه شوی — له دننه بهر:
+هر عنصر له څلورو پوښونو لخوا احاطه شوی:
 
 - **محتوا** (Content): اصلي متن یا انځور
 - **پیډینګ** (Padding): د بارډر دننه فاصله
 - **بارډر** (Border): لیدل کیدونکی کناره
-- **مارجین** (Margin): د بارډر بهر فاصله`,
+- **مارجین** (Margin): د بارډر بهر فاصله
+
+\`\`\`css
+.card {
+  padding: 24px;
+  border: 1px solid #ddd;
+  margin: 16px auto;
+  box-sizing: border-box;
+}
+\`\`\``,
           order: 2
         },
+
+        // ── Video 3 ──────────────────────────────────────────────────────────
         {
           id:            "css-flexbox",
+          type:          "VIDEO",
           titleEn:       "Flexbox Layout",
           titlePs:       "د فلیکس‌باکس ترتیب",
           descriptionEn: "Master the Flexbox system to align and distribute elements in rows and columns without manual calculation.",
@@ -395,7 +826,7 @@ Without it, adding padding increases the element's total width — which surpris
           youtubeId:     "phWxA89Dy94",
           readingEn: `## Flexbox Layout
 
-Flexbox is the most practical tool for one-dimensional layouts (a row OR a column).
+Flexbox is the most practical tool for one-dimensional layouts (a row **or** a column).
 
 ### Enabling Flexbox
 
@@ -405,32 +836,63 @@ Flexbox is the most practical tool for one-dimensional layouts (a row OR a colum
 }
 \`\`\`
 
-All direct children of \`.container\` become **flex items**.
+All direct children of \`.container\` become **flex items** and line up in a row by default.
 
-### Key container properties
+### Container properties
 
-| Property | Values | Effect |
-|----------|--------|--------|
-| \`flex-direction\` | row / column | Axis direction |
-| \`justify-content\` | flex-start / center / space-between / space-around | Align on main axis |
-| \`align-items\` | flex-start / center / stretch | Align on cross axis |
-| \`gap\` | \`16px\` | Space between items |
-| \`flex-wrap\` | wrap / nowrap | Allow items to wrap |
+| Property | Common values | Effect |
+|----------|--------------|--------|
+| \`flex-direction\` | \`row\` / \`column\` | Main axis direction |
+| \`justify-content\` | \`flex-start\` \`center\` \`space-between\` \`space-around\` \`space-evenly\` | Align on main axis |
+| \`align-items\` | \`flex-start\` \`center\` \`stretch\` \`flex-end\` | Align on cross axis |
+| \`gap\` | \`16px\` | Space between items (no margin hacks needed) |
+| \`flex-wrap\` | \`wrap\` \`nowrap\` | Allow items to wrap to next row |
 
-### Practical example — navigation bar
+### Item properties
 
+| Property | Example | Effect |
+|----------|---------|--------|
+| \`flex: 1\` | \`flex: 1\` | Item grows to fill available space |
+| \`flex: 0 0 200px\` | — | Fixed width, no grow/shrink |
+| \`align-self\` | \`align-self: flex-end\` | Override container's \`align-items\` for this item |
+| \`order\` | \`order: -1\` | Change visual order without changing HTML order |
+
+### Practical examples
+
+**Navigation bar**
 \`\`\`css
 nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 24px;
-  height: 60px;
+  height: 64px;
+}
+\`\`\`
+
+**Centered card**
+\`\`\`css
+.page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+\`\`\`
+
+**Equal-width columns**
+\`\`\`css
+.columns {
+  display: flex;
+  gap: 24px;
+}
+.columns > * {
+  flex: 1;
 }
 \`\`\``,
           readingPs: `## د فلیکس‌باکس ترتیب
 
-فلیکس‌باکس د یو اړخیزو ترتیبونو (یوه ورته یا یو کالم) لپاره تر ټولو عملي وسیله ده.
+فلیکس‌باکس د یو اړخیزو ترتیبونو لپاره تر ټولو عملي وسیله ده.
 
 \`\`\`css
 .container {
@@ -439,11 +901,23 @@ nav {
   align-items: center;
   gap: 16px;
 }
-\`\`\``,
+\`\`\`
+
+### د کنتینر خصوصیتونه
+
+| خصوصیت | اغیز |
+|---------|------|
+| \`flex-direction\` | د اصلي محور لوری |
+| \`justify-content\` | د اصلي محور پر سر سمون |
+| \`align-items\` | د متقاطع محور پر سر سمون |
+| \`gap\` | د آیټمونو ترمنځ فاصله |`,
           order: 3
         },
+
+        // ── Video 4 ──────────────────────────────────────────────────────────
         {
           id:            "css-responsive",
+          type:          "VIDEO",
           titleEn:       "Responsive Design & Media Queries",
           titlePs:       "ځوابند ډیزاین او میډیا کویریز",
           descriptionEn: "Make web pages look good on phones, tablets, and desktops using media queries and relative units.",
@@ -451,36 +925,40 @@ nav {
           youtubeId:     "bn-DQCifeQQ",
           readingEn: `## Responsive Design
 
-A responsive site adapts to the screen size of the device. The key tools are **media queries** and **relative units**.
+A responsive site adapts to whatever screen size the user has. The key tools are **media queries** and **relative units**.
 
 ### Relative units
 
-| Unit | Meaning |
-|------|---------|
-| \`%\` | Percentage of parent |
-| \`vw\` / \`vh\` | % of viewport width / height |
-| \`rem\` | Relative to root font size |
-| \`em\` | Relative to element's font size |
+| Unit | Meaning | Best for |
+|------|---------|---------|
+| \`%\` | Percentage of parent width | Fluid widths |
+| \`vw\` | % of viewport width | Full-width sections |
+| \`vh\` | % of viewport height | Full-height sections |
+| \`rem\` | Multiple of root font size (usually 16px) | Font sizes, spacing |
+| \`em\` | Multiple of current element's font size | Component-relative spacing |
 
 ### Media queries
 
 \`\`\`css
-/* default: mobile */
+/* ── Mobile first (default styles, no query needed) ── */
 .grid {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* tablet (≥ 768px) */
-@media (min-width: 768px) {
+/* ── Tablet (≥ 640px) ── */
+@media (min-width: 640px) {
   .grid {
     flex-direction: row;
     flex-wrap: wrap;
   }
+  .grid > * {
+    flex: 1 1 calc(50% - 8px);
+  }
 }
 
-/* desktop (≥ 1024px) */
+/* ── Desktop (≥ 1024px) ── */
 @media (min-width: 1024px) {
   .grid {
     display: grid;
@@ -489,96 +967,421 @@ A responsive site adapts to the screen size of the device. The key tools are **m
 }
 \`\`\`
 
-### Mobile-first approach
+### The viewport meta tag
 
-Write styles for the smallest screen first, then add \`min-width\` media queries to enhance for larger screens. This is the industry standard.`,
+Without this tag, mobile browsers zoom out to show the desktop version. Always include it:
+
+\`\`\`html
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+\`\`\`
+
+### Mobile-first vs desktop-first
+
+**Mobile-first** (recommended): write base styles for phones, then use \`min-width\` queries to enhance for larger screens. You add features as space grows.
+
+**Desktop-first**: write base styles for large screens, then use \`max-width\` queries to strip things back. You subtract features as space shrinks — harder to manage.`,
           readingPs: `## ځوابند ډیزاین
 
-یو ځوابند سایټ د وسیلې د سکرین اندازې سره برابریږي. اصلي وسیلې **میډیا کویریز** او **اړونده واحدونه** دي.
+یو ځوابند سایټ د کارونکي د سکرین اندازې سره برابریږي.
+
+### اړونده واحدونه
+
+| واحد | مفهوم |
+|------|-------|
+| \`%\` | د والدین د عرض سلنه |
+| \`vw\` | د لیدغاه د عرض سلنه |
+| \`rem\` | د اصلي فونټ اندازې ضرب |
+
+### میډیا کویریز
 
 \`\`\`css
-@media (min-width: 768px) {
-  .grid {
-    flex-direction: row;
+/* ګرځنده (پیش فرض) */
+.grid { flex-direction: column; }
+
+/* ټبلیټ */
+@media (min-width: 640px) {
+  .grid { flex-direction: row; }
+}
+
+/* ډیسکټاپ */
+@media (min-width: 1024px) {
+  .grid { grid-template-columns: repeat(3, 1fr); }
+}
+\`\`\``,
+          order: 4
+        },
+
+        // ── Reading lesson ────────────────────────────────────────────────────
+        {
+          id:            "css-practice",
+          type:          "READING",
+          titleEn:       "Practice: Style the Profile Page with CSS",
+          titlePs:       "تمرین: د CSS سره د پروفایل پاڼه سینګار کړئ",
+          descriptionEn: "Take the HTML profile page you built in Module 1 and transform it into a polished, styled page using everything you have learned in this module.",
+          descriptionPs: "هغه HTML پروفایل پاڼه واخلئ چې تاسو د لومړي ماډیول کې جوړه کړه او د دې ماډیول زده کړو د کارولو سره یې جذابه سینګار شوې پاڼه کې بدل کړئ.",
+          youtubeId:     null,
+          readingEn: `## Practice: Style the Profile Page with CSS
+
+In this lesson you will create \`style.css\` and link it to your \`profile.html\` to apply real styling.
+
+---
+
+### Step 1 — Create style.css and link it
+
+Add this line inside \`<head>\` of your HTML file:
+
+\`\`\`html
+<link rel="stylesheet" href="style.css">
+\`\`\`
+
+Create a new file called \`style.css\` in the same folder.
+
+---
+
+### Step 2 — CSS reset and global styles
+
+Start every stylesheet with a reset so browsers render consistently:
+
+\`\`\`css
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Base ── */
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #1a1a2e;
+  background-color: #f5f5f5;
+}
+
+h1, h2, h3 {
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+a {
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+\`\`\`
+
+---
+
+### Step 3 — Center the page content
+
+\`\`\`css
+/* ── Layout wrapper ── */
+body > * {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 20px;
+}
+\`\`\`
+
+---
+
+### Step 4 — Style the header
+
+\`\`\`css
+/* ── Header ── */
+header {
+  text-align: center;
+  padding: 48px 20px 32px;
+  background: white;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+header img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;          /* circular photo */
+  object-fit: cover;
+  border: 3px solid #1a73e8;
+  display: block;
+  margin: 0 auto 16px;
+}
+
+header h1 {
+  font-size: 2rem;
+  color: #1a1a2e;
+}
+
+header p {
+  color: #555;
+  max-width: 480px;
+  margin: 8px auto 0;
+}
+\`\`\`
+
+---
+
+### Step 5 — Style sections and lists
+
+\`\`\`css
+/* ── Sections ── */
+section {
+  background: white;
+  padding: 32px 24px;
+  margin: 24px 0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+section h2 {
+  font-size: 1.25rem;
+  color: #1a73e8;
+  border-bottom: 2px solid #e8f0fe;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+
+ul, ol {
+  padding-left: 24px;
+}
+
+li {
+  margin-bottom: 8px;
+  color: #333;
+}
+\`\`\`
+
+---
+
+### Step 6 — Style the contact form
+
+\`\`\`css
+/* ── Form ── */
+form p {
+  margin-bottom: 16px;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #444;
+  margin-bottom: 4px;
+}
+
+input[type="text"],
+input[type="email"],
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15);
+}
+
+button[type="submit"] {
+  background: #1a73e8;
+  color: white;
+  border: none;
+  padding: 10px 28px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button[type="submit"]:hover {
+  background: #1558b0;
+}
+\`\`\`
+
+---
+
+### Step 7 — Style the footer
+
+\`\`\`css
+/* ── Footer ── */
+footer {
+  text-align: center;
+  padding: 24px;
+  color: #888;
+  font-size: 0.875rem;
+  border-top: 1px solid #e8e8e8;
+  margin-top: 40px;
+}
+\`\`\`
+
+---
+
+### Step 8 — Add a responsive breakpoint
+
+At narrow widths the header text should feel less cramped:
+
+\`\`\`css
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1.5rem;
+  }
+
+  section {
+    padding: 20px 16px;
+    border-radius: 8px;
   }
 }
 \`\`\`
 
-د موبایل-لومړی لار: د تر ټولو کوچني سکرین لپاره سټایل لیکئ، بیا د لویو سکرینونو لپاره \`min-width\` میډیا کویریز زیاتئ.`,
-          order: 4
+---
+
+### What to experiment with
+
+- Try changing \`#1a73e8\` to a different brand color throughout
+- Add a \`background: linear-gradient(135deg, #667eea, #764ba2)\` to the header
+- Set \`font-family: 'Georgia', serif\` on the \`body\` for a different feel
+- Add \`transition: transform 0.2s\` and \`transform: translateY(-2px)\` on \`li:hover\` in the skills list`,
+          readingPs: `## تمرین: د CSS سره د پروفایل پاڼه سینګار کړئ
+
+### ګام ۱ — style.css جوړ کړئ او تړلو
+
+د HTML فایل \`<head>\` کې دا کرښه زیاته کړئ:
+
+\`\`\`html
+<link rel="stylesheet" href="style.css">
+\`\`\`
+
+### ګام ۲ — CSS ریسیټ او عمومي سټایلونه
+
+\`\`\`css
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  background: #f5f5f5;
+}
+\`\`\`
+
+### ګام ۳ — د سرلیک سینګار
+
+\`\`\`css
+header {
+  text-align: center;
+  padding: 48px 20px;
+  background: white;
+}
+
+header img {
+  width: 120px;
+  border-radius: 50%;
+  border: 3px solid #1a73e8;
+  display: block;
+  margin: 0 auto 16px;
+}
+\`\`\`
+
+### ګام ۴ — د تڼۍ سینګار
+
+\`\`\`css
+button[type="submit"] {
+  background: #1a73e8;
+  color: white;
+  border: none;
+  padding: 10px 28px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+\`\`\``,
+          order: 5
         }
       ],
+
       quiz: {
         id:            "css-styling-quiz",
         titleEn:       "CSS Styling Quiz",
         titlePs:       "د CSS سینګار ازموینه",
         descriptionEn: "Test your CSS knowledge — selectors, box model, Flexbox, and responsive design. Pass with 70% or higher to unlock Module 3.",
-        descriptionPs: "خپله د CSS پوهه وازمویئ — سلیکټرونه، بکس ماډل، فلیکس‌باکس، او ځوابند ډیزاین. د درېیم ماډیول لپاره ۷۰٪ یا لوړ نمره ترلاسه کړئ.",
+        descriptionPs: "خپله د CSS پوهه وازمویئ. د درېیم ماډیول لپاره ۷۰٪ یا لوړ نمره ترلاسه کړئ.",
         passScore: 70,
         questions: [
           {
-            id:       "css-q1",
-            promptEn: "Which CSS property changes text color?",
-            promptPs:  "کوم CSS خصوصیت د متن رنګ بدلوي؟",
+            id: "css-q1", promptEn: "Which CSS property changes text color?", promptPs: "کوم CSS خصوصیت د متن رنګ بدلوي؟",
             options: [
-              { en: "font-color", ps: "font-color", correct: false },
-              { en: "text-color", ps: "text-color", correct: false },
-              { en: "color", ps: "color", correct: true }
+              { en: "font-color",  ps: "font-color",  correct: false },
+              { en: "text-color",  ps: "text-color",  correct: false },
+              { en: "color",       ps: "color",        correct: true  }
             ]
           },
           {
-            id:       "css-q2",
-            promptEn: "In the box model, which layer is directly outside the content?",
-            promptPs:  "د بکس ماډل کې، کوم پوښ مستقیم د محتوا بهر دی؟",
+            id: "css-q2", promptEn: "In the box model, which layer is directly outside the content?", promptPs: "د بکس ماډل کې، کوم پوښ مستقیم د محتوا بهر دی؟",
             options: [
-              { en: "Margin", ps: "مارجین", correct: false },
-              { en: "Border", ps: "بارډر", correct: false },
-              { en: "Padding", ps: "پیډینګ", correct: true }
+              { en: "Margin",  ps: "مارجین",  correct: false },
+              { en: "Border",  ps: "بارډر",   correct: false },
+              { en: "Padding", ps: "پیډینګ",  correct: true  }
             ]
           },
           {
-            id:       "css-q3",
-            promptEn: "Which CSS property enables Flexbox on a container?",
-            promptPs:  "کوم CSS خصوصیت د کنتینر پر سر فلیکس‌باکس فعالوي؟",
+            id: "css-q3", promptEn: "Which CSS property enables Flexbox on a container?", promptPs: "کوم CSS خصوصیت د کنتینر پر سر فلیکس‌باکس فعالوي؟",
             options: [
-              { en: "display: flex", ps: "display: flex", correct: true },
-              { en: "flex: true", ps: "flex: true", correct: false },
-              { en: "layout: flex", ps: "layout: flex", correct: false }
+              { en: "display: flex", ps: "display: flex", correct: true  },
+              { en: "flex: true",    ps: "flex: true",    correct: false },
+              { en: "layout: flex",  ps: "layout: flex",  correct: false }
             ]
           },
           {
-            id:       "css-q4",
-            promptEn: "What does a media query allow you to do?",
-            promptPs:  "میډیا کویري تاسو ته اجازه ورکوي چې څه وکړئ؟",
+            id: "css-q4", promptEn: "What does a media query allow you to do?", promptPs: "میډیا کویري تاسو ته اجازه ورکوي چې څه وکړئ؟",
             options: [
-              { en: "Query a database from CSS", ps: "له CSS نه ډیټابیس پوښتنه کول", correct: false },
-              { en: "Apply different styles based on screen size", ps: "د سکرین اندازې پر بنسټ مختلف سټایلونه پلي کول", correct: true },
-              { en: "Load images faster", ps: "انځورونه ژر بارول", correct: false }
+              { en: "Query a database from CSS",                           ps: "له CSS نه ډیټابیس پوښتنه کول",               correct: false },
+              { en: "Apply different styles based on screen size",          ps: "د سکرین اندازې پر بنسټ مختلف سټایلونه پلي کول", correct: true  },
+              { en: "Load images faster",                                   ps: "انځورونه ژر بارول",                             correct: false }
             ]
           },
           {
-            id:       "css-q5",
-            promptEn: "What does justify-content: space-between do in Flexbox?",
-            promptPs:  "د فلیکس‌باکس کې justify-content: space-between څه کوي؟",
+            id: "css-q5", promptEn: "What does justify-content: space-between do in Flexbox?", promptPs: "د فلیکس‌باکس کې justify-content: space-between څه کوي؟",
             options: [
-              { en: "Adds padding inside each item", ps: "د هر آیټم دننه پیډینګ زیاتوي", correct: false },
-              { en: "Spreads items so space is equal between them, with first and last at edges", ps: "آیټمونه خوروي نو منځ کې برابره فاصله وي، لومړی او وروستی پر سرحدونو", correct: true },
-              { en: "Centers all items in the container", ps: "ټول آیټمونه د کنتینر مرکز ته اړوي", correct: false }
+              { en: "Adds padding inside each item",                                                    ps: "د هر آیټم دننه پیډینګ زیاتوي",                                           correct: false },
+              { en: "Spreads items with equal space between them, first and last at the edges",          ps: "آیټمونه یې خوروي نو منځ کې برابره فاصله وي، لومړی او وروستی پر سرحدونو", correct: true  },
+              { en: "Centers all items",                                                                  ps: "ټول آیټمونه مرکز ته اړوي",                                                correct: false }
             ]
           }
         ]
       }
     },
 
-    // ── Module 3: JavaScript Fundamentals ────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    // MODULE 3 — JavaScript Fundamentals
+    // ══════════════════════════════════════════════════════════════════════════
     {
       id:      "javascript-fundamentals",
       titleEn: "JavaScript Fundamentals",
-      titlePs:  "د JavaScript بنسټونه",
+      titlePs: "د JavaScript بنسټونه",
       order:   3,
       lessons: [
+        // ── Video 1 ──────────────────────────────────────────────────────────
         {
           id:            "js-intro-variables",
+          type:          "VIDEO",
           titleEn:       "Variables, Data Types & Operators",
           titlePs:       "متغیرونه، د معلوماتو ډولونه او عملیات",
           descriptionEn: "Learn how to store values in variables, the basic JavaScript data types, and how to work with them using operators.",
@@ -589,26 +1392,38 @@ Write styles for the smallest screen first, then add \`min-width\` media queries
 ### Declaring variables
 
 \`\`\`js
-let name = "Ahmad";      // can be reassigned
-const age  = 24;         // cannot be reassigned
-var city   = "Kabul";    // old style — avoid in modern code
+let   name = "Ahmad";  // can be reassigned
+const age  = 24;       // cannot be reassigned — use this by default
+var   city = "Kabul";  // old style — avoid in modern code
 \`\`\`
 
-Always prefer \`const\` by default. Use \`let\` only when you know the value will change.
+> **Rule of thumb:** always start with \`const\`. Change to \`let\` only when you know the value will be reassigned. Never use \`var\`.
 
-### Data types
+### Primitive data types
 
-| Type | Example |
-|------|---------|
-| String | \`"Hello"\`, \`'World'\` |
-| Number | \`42\`, \`3.14\` |
-| Boolean | \`true\`, \`false\` |
-| Null | \`null\` (intentionally empty) |
-| Undefined | variable declared but not assigned |
-| Array | \`[1, 2, 3]\` |
-| Object | \`{ name: "Ahmad", age: 24 }\` |
+| Type | Example | Notes |
+|------|---------|-------|
+| \`string\` | \`"Ahmad"\`, \`'hello'\` | Text; use template literals with \${} to embed values |
+| \`number\` | \`42\`, \`3.14\`, \`-7\` | All numbers (integer and float) share one type |
+| \`boolean\` | \`true\`, \`false\` | Yes/no, on/off |
+| \`null\` | \`null\` | Intentionally empty — you set it |
+| \`undefined\` | \`undefined\` | Variable declared but not assigned — JS sets it |
 
-### Common operators
+### Reference types (objects)
+
+\`\`\`js
+// Array — ordered list of values
+const skills = ["HTML", "CSS", "JavaScript"];
+skills[0]; // "HTML"
+skills.length; // 3
+
+// Object — key/value pairs
+const user = { name: "Ahmad", age: 24, city: "Kabul" };
+user.name;       // "Ahmad" — dot notation
+user["city"];    // "Kabul" — bracket notation
+\`\`\`
+
+### Operators
 
 \`\`\`js
 // Arithmetic
@@ -616,107 +1431,199 @@ Always prefer \`const\` by default. Use \`let\` only when you know the value wil
 10 - 4  // 6
 6 * 7   // 42
 9 / 3   // 3
-10 % 3  // 1  (remainder)
+10 % 3  // 1  (remainder / modulo)
+2 ** 8  // 256 (exponentiation)
 
-// Comparison (always use ===, not ==)
-5 === 5   // true
-5 === "5" // false (strict equality — checks type too)
-5 !== 3   // true
+// String concatenation
+"Hello" + " " + "Ahmad"  // "Hello Ahmad"
+\`Hello \${name}!\`         // template literal — same result, cleaner
+
+// Comparison — always use === (strict), never == (loose)
+5 === 5    // true  — same value AND same type
+5 === "5"  // false — number ≠ string
+5 !== 3    // true
+5 > 3      // true
+5 >= 5     // true
 
 // Logical
-true && false // false
-true || false // true
-!true         // false
+true && false  // false (AND — both must be true)
+true || false  // true  (OR  — either can be true)
+!true          // false (NOT — flips the boolean)
 \`\`\``,
           readingPs: `## متغیرونه، د معلوماتو ډولونه او عملیات
 
 ### د متغیرونو اعلان
 
 \`\`\`js
-let name = "احمد";     // بیا ټاکل کیدی شي
-const age  = 24;       // بیا ټاکل نه شي
+const name = "احمد";  // بیا ټاکل نه شي
+let   age  = 24;      // بیا ټاکل کیدی شي
 \`\`\`
 
-تل د پیل \`const\` غوره کړئ. یوازې هله \`let\` وکاروئ چې پوهیئ ارزښت به بدل شي.
+**قاعده:** تل \`const\` پیل کړئ، یوازې هله \`let\` وکاروئ چې ارزښت به بدل شي.
 
-### د معلوماتو ډولونه
+### بنسټیز ډولونه
 
 | ډول | بیلګه |
 |-----|-------|
-| String | \`"سلام"\` |
-| Number | \`42\`, \`3.14\` |
-| Boolean | \`true\`, \`false\` |
-| Array | \`[1, 2, 3]\` |
-| Object | \`{ name: "احمد" }\` |`,
-          order: 1
-        },
-        {
-          id:            "js-functions",
-          titleEn:       "Functions",
-          titlePs:       "فنکشنونه",
-          descriptionEn: "Write reusable blocks of code with functions. Learn declarations, expressions, arrow functions, and parameters.",
-          descriptionPs: "د فنکشنونو سره د کوډ د بیاکارونې وړ بلاکونه ولیکئ. اعلانات، بیانونه، تیروونکي فنکشنونه، او پارامترونه زده کړئ.",
-          youtubeId:     "xUI5Tsl2JpY",
-          readingEn: `## Functions
+| \`string\` | \`"احمد"\` |
+| \`number\` | \`42\`, \`3.14\` |
+| \`boolean\` | \`true\`, \`false\` |
 
-A function is a named, reusable block of code. You define it once and call it as many times as you like.
-
-### Function declaration
+### عملیات
 
 \`\`\`js
+5 + 3   // 8
+5 === 5  // true (سخت مساواتو)
+5 !== 3  // true
+\`\`\``,
+          order: 1
+        },
+
+        // ── Video 2 ──────────────────────────────────────────────────────────
+        {
+          id:            "js-functions",
+          type:          "VIDEO",
+          titleEn:       "Functions & Control Flow",
+          titlePs:       "فنکشنونه او د جریان کنترول",
+          descriptionEn: "Write reusable functions and learn how to make decisions with if/else and loop through data with for loops.",
+          descriptionPs: "د بیاکارونې وړ فنکشنونه ولیکئ او د if/else سره پریکړه کول او د for لوپونو سره د معلوماتو له لارې تیریدل زده کړئ.",
+          youtubeId:     "xUI5Tsl2JpY",
+          readingEn: `## Functions & Control Flow
+
+### Functions
+
+A function is a named, reusable block of code.
+
+\`\`\`js
+// Declaration — hoisted (can be called before it's defined)
 function greet(name) {
   return "Hello, " + name + "!";
 }
 
-console.log(greet("Ahmad")); // "Hello, Ahmad!"
-\`\`\`
-
-### Function expression
-
-\`\`\`js
+// Expression — not hoisted
 const greet = function(name) {
   return "Hello, " + name + "!";
 };
-\`\`\`
 
-### Arrow function (modern shorthand)
-
-\`\`\`js
+// Arrow function — modern shorthand
 const greet = (name) => "Hello, " + name + "!";
 
-// Multiple lines need curly braces and explicit return
+// Arrow function with multiple lines
 const add = (a, b) => {
   const result = a + b;
   return result;
 };
-\`\`\`
 
-### Default parameters
-
-\`\`\`js
+// Default parameters
 function greet(name = "stranger") {
-  return "Hello, " + name + "!";
+  return \`Hello, \${name}!\`;
 }
-
 greet();         // "Hello, stranger!"
 greet("Fatima"); // "Hello, Fatima!"
-\`\`\``,
-          readingPs: `## فنکشنونه
+\`\`\`
 
-یو فنکشن د کوډ یو نومول شوی، بیاکارونې وړ بلاک دی. یو ځل یې تعریف کړئ او هر وخت چې غواړئ یې غوښتنه وکړئ.
+### if / else if / else
 
 \`\`\`js
+const score = 85;
+
+if (score >= 90) {
+  console.log("A — Excellent!");
+} else if (score >= 70) {
+  console.log("B — Good pass");
+} else if (score >= 50) {
+  console.log("C — Needs improvement");
+} else {
+  console.log("F — Please retake");
+}
+\`\`\`
+
+### Ternary operator — one-line if/else
+
+\`\`\`js
+const label = score >= 70 ? "Pass" : "Fail";
+\`\`\`
+
+### for loop
+
+\`\`\`js
+for (let i = 0; i < 5; i++) {
+  console.log("Count:", i);  // 0, 1, 2, 3, 4
+}
+
+// Loop over an array
+const fruits = ["apple", "banana", "mango"];
+for (const fruit of fruits) {
+  console.log(fruit);
+}
+
+// forEach (common for arrays)
+fruits.forEach((fruit, index) => {
+  console.log(index, fruit);
+});
+\`\`\`
+
+### while loop
+
+\`\`\`js
+let count = 0;
+while (count < 3) {
+  console.log("count is", count);
+  count++;
+}
+\`\`\``,
+          readingPs: `## فنکشنونه او د جریان کنترول
+
+### فنکشنونه
+
+\`\`\`js
+// اعلان
 function greet(name) {
   return "سلام، " + name + "!";
 }
 
-// د تیرو فنکشنونو (Arrow) لنډه لار
-const add = (a, b) => a + b;
+// د تیرو فنکشن (Arrow)
+const greet = (name) => \`سلام، \${name}!\`;
+
+// د پیش فرض پارامتر
+function greet(name = "لیدونکی") {
+  return \`سلام، \${name}!\`;
+}
+\`\`\`
+
+### if / else if / else
+
+\`\`\`js
+const score = 85;
+
+if (score >= 90) {
+  console.log("ممتاز!");
+} else if (score >= 70) {
+  console.log("ښه!");
+} else {
+  console.log("نور هڅه وکړئ");
+}
+\`\`\`
+
+### for لوپ
+
+\`\`\`js
+for (let i = 0; i < 5; i++) {
+  console.log(i);
+}
+
+const fruits = ["مڼه", "کیله", "انبه"];
+for (const fruit of fruits) {
+  console.log(fruit);
+}
 \`\`\``,
           order: 2
         },
+
+        // ── Video 3 ──────────────────────────────────────────────────────────
         {
           id:            "js-dom",
+          type:          "VIDEO",
           titleEn:       "DOM Manipulation",
           titlePs:       "د DOM اداره کول",
           descriptionEn: "Use JavaScript to select HTML elements, change their content and styles, and respond to user events like clicks.",
@@ -729,112 +1636,527 @@ The DOM (Document Object Model) is the browser's live tree of all HTML elements.
 ### Selecting elements
 
 \`\`\`js
-const heading = document.querySelector("h1");          // first match
-const buttons = document.querySelectorAll(".btn");     // NodeList of all matches
-const byId    = document.getElementById("hero");
+// Single element — returns first match or null
+const heading   = document.querySelector("h1");
+const btn       = document.querySelector("#submitBtn");
+const firstCard = document.querySelector(".card");
+
+// Multiple elements — returns a NodeList (like an array)
+const allCards  = document.querySelectorAll(".card");
+const allLinks  = document.querySelectorAll("a");
 \`\`\`
 
 ### Reading & changing content
 
 \`\`\`js
-heading.textContent = "Welcome!";    // change text
-heading.innerHTML   = "<em>Hi</em>"; // change HTML (use carefully)
+// Text content (safe — no HTML injection risk)
+heading.textContent = "Welcome!";
+console.log(heading.textContent);
 
-// Classes
-heading.classList.add("active");
-heading.classList.remove("active");
-heading.classList.toggle("active");
+// HTML content (use carefully — avoid user-supplied values)
+heading.innerHTML = "<em>Welcome</em>, <strong>Ahmad!</strong>";
 
 // Attributes
 const img = document.querySelector("img");
 img.setAttribute("src", "new-photo.jpg");
-img.getAttribute("alt");
+img.setAttribute("alt", "Updated photo");
+const src = img.getAttribute("src");
+
+// Styles
+heading.style.color = "navy";
+heading.style.fontSize = "2.5rem";
+\`\`\`
+
+### Classes
+
+\`\`\`js
+const card = document.querySelector(".card");
+
+card.classList.add("active");      // add a class
+card.classList.remove("active");   // remove a class
+card.classList.toggle("active");   // add if absent, remove if present
+card.classList.contains("active"); // true / false
+\`\`\`
+
+### Creating & inserting elements
+
+\`\`\`js
+const li = document.createElement("li");
+li.textContent = "New skill";
+li.classList.add("skill-item");
+
+const list = document.querySelector("ul");
+list.appendChild(li);   // add at end
+list.prepend(li);        // add at beginning
 \`\`\`
 
 ### Event listeners
 
 \`\`\`js
-const btn = document.querySelector("#submitBtn");
+const btn = document.querySelector("#saveBtn");
 
 btn.addEventListener("click", (event) => {
-  console.log("Button clicked!", event);
-  alert("Form submitted!");
+  event.preventDefault();   // stop default action (e.g. form submit)
+  console.log("Saved!", event.target);
 });
+
+// Remove listener when done
+const handler = () => console.log("clicked");
+btn.addEventListener("click", handler);
+btn.removeEventListener("click", handler);
 \`\`\`
 
-Common events: \`click\`, \`input\`, \`submit\`, \`keydown\`, \`mouseover\`, \`load\``,
+### Common events
+
+| Event | Fires when... |
+|-------|--------------|
+| \`click\` | User clicks the element |
+| \`dblclick\` | User double-clicks |
+| \`input\` | Value of input/textarea changes |
+| \`change\` | Select or checkbox changes |
+| \`submit\` | Form is submitted |
+| \`keydown\` | Any key is pressed |
+| \`keyup\` | Any key is released |
+| \`mouseover\` | Cursor enters element |
+| \`mouseout\` | Cursor leaves element |
+| \`load\` | Page or image finishes loading |
+| \`DOMContentLoaded\` | HTML parsed, before images load |`,
           readingPs: `## د DOM اداره کول
 
-DOM (Document Object Model) د ټولو HTML عناصرو د لطبي ونې ژوند بڼه ده. JavaScript یې لوستلی او بدلولی شي ترڅو پاڼې فعالې کړي.
+DOM د ټولو HTML عناصرو د لطبي ونې ژوند بڼه ده. JavaScript یې لوستلی او بدلولی شي.
+
+### عناصر انتخابول
 
 \`\`\`js
 const heading = document.querySelector("h1");
-heading.textContent = "ښه راغلاست!";
+const allCards = document.querySelectorAll(".card");
+\`\`\`
 
-const btn = document.querySelector("#myBtn");
-btn.addEventListener("click", () => {
-  alert("کلیک وشو!");
+### محتوا او سټایل بدلول
+
+\`\`\`js
+heading.textContent = "ښه راغلاست!";
+heading.style.color = "navy";
+
+const card = document.querySelector(".card");
+card.classList.add("active");
+card.classList.toggle("active");
+\`\`\`
+
+### د پیښو اورونکي
+
+\`\`\`js
+const btn = document.querySelector("#saveBtn");
+
+btn.addEventListener("click", (event) => {
+  event.preventDefault();
+  console.log("خوندي شو!");
 });
 \`\`\``,
           order: 3
+        },
+
+        // ── Reading lesson ────────────────────────────────────────────────────
+        {
+          id:            "js-practice",
+          type:          "READING",
+          titleEn:       "Practice: Build an Interactive To-Do List",
+          titlePs:       "تمرین: د تعاملي کارونو لیست جوړ کړئ",
+          descriptionEn: "Combine HTML, CSS, and JavaScript to build a fully working to-do list app — add tasks, mark them done, and delete them.",
+          descriptionPs: "HTML، CSS، او JavaScript یو ځای کړئ او د بشپړ کارونو لیست اپ جوړ کړئ — کارونه زیاتئ، بشپړ شوي یې نښه کړئ، او ړنګ یې کړئ.",
+          youtubeId:     null,
+          readingEn: `## Practice: Build an Interactive To-Do List
+
+This is your capstone project for the course. You will combine HTML structure, CSS styling, and JavaScript DOM manipulation to build a working to-do list app from scratch.
+
+### Features
+
+- Type a task and press **Enter** or click **Add** to add it to the list
+- Click a task to toggle it as **done** (strikethrough)
+- Click the **✕** button to delete a task
+- Shows a live count of remaining tasks
+
+---
+
+### Step 1 — HTML (index.html)
+
+\`\`\`html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="todo.css">
+  </head>
+  <body>
+    <div class="app">
+      <h1>My Tasks</h1>
+
+      <div class="input-row">
+        <input
+          type="text"
+          id="taskInput"
+          placeholder="What needs to be done?"
+          autocomplete="off"
+        >
+        <button id="addBtn">Add</button>
+      </div>
+
+      <p class="count" id="taskCount">0 tasks remaining</p>
+
+      <ul id="taskList"></ul>
+    </div>
+
+    <script src="todo.js"></script>
+  </body>
+</html>
+\`\`\`
+
+---
+
+### Step 2 — CSS (todo.css)
+
+\`\`\`css
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #f0f4ff;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px;
+}
+
+.app {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: 32px;
+  width: 100%;
+  max-width: 480px;
+}
+
+h1 {
+  font-size: 1.75rem;
+  color: #1a1a2e;
+  margin-bottom: 24px;
+}
+
+/* ── Input row ── */
+.input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.input-row input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.input-row input:focus {
+  outline: none;
+  border-color: #4f46e5;
+}
+
+.input-row button {
+  padding: 10px 20px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.input-row button:hover {
+  background: #3730a3;
+}
+
+/* ── Count ── */
+.count {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 16px;
+}
+
+/* ── Task list ── */
+#taskList {
+  list-style: none;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.task-text {
+  flex: 1;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #1a1a2e;
+  transition: color 0.2s;
+}
+
+.task-item.done .task-text {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.delete-btn:hover {
+  color: #ef4444;
+}
+\`\`\`
+
+---
+
+### Step 3 — JavaScript (todo.js)
+
+\`\`\`js
+// ── State ──────────────────────────────────────────────────
+let tasks = [];  // each task: { id, text, done }
+
+// ── DOM references ──────────────────────────────────────────
+const input     = document.getElementById("taskInput");
+const addBtn    = document.getElementById("addBtn");
+const taskList  = document.getElementById("taskList");
+const taskCount = document.getElementById("taskCount");
+
+// ── Add task ───────────────────────────────────────────────
+function addTask() {
+  const text = input.value.trim();
+  if (!text) return;              // ignore empty input
+
+  const task = {
+    id:   Date.now(),             // unique id from timestamp
+    text: text,
+    done: false
+  };
+
+  tasks.push(task);
+  input.value = "";               // clear the input
+  renderTasks();
+}
+
+// ── Toggle done ────────────────────────────────────────────
+function toggleTask(id) {
+  const task = tasks.find(t => t.id === id);
+  if (task) task.done = !task.done;
+  renderTasks();
+}
+
+// ── Delete task ────────────────────────────────────────────
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  renderTasks();
+}
+
+// ── Render list ────────────────────────────────────────────
+function renderTasks() {
+  taskList.innerHTML = "";         // clear existing list
+
+  tasks.forEach(task => {
+    const li = document.createElement("li");
+    li.className = "task-item" + (task.done ? " done" : "");
+
+    li.innerHTML = \`
+      <span class="task-text">\${escapeHtml(task.text)}</span>
+      <button class="delete-btn" aria-label="Delete task">✕</button>
+    \`;
+
+    // Click task text to toggle done
+    li.querySelector(".task-text")
+      .addEventListener("click", () => toggleTask(task.id));
+
+    // Click ✕ to delete
+    li.querySelector(".delete-btn")
+      .addEventListener("click", () => deleteTask(task.id));
+
+    taskList.appendChild(li);
+  });
+
+  // Update count
+  const remaining = tasks.filter(t => !t.done).length;
+  taskCount.textContent =
+    remaining === 1 ? "1 task remaining" : \`\${remaining} tasks remaining\`;
+}
+
+// ── Helpers ────────────────────────────────────────────────
+function escapeHtml(text) {
+  // Prevent XSS by escaping < > & " in user input
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// ── Event listeners ────────────────────────────────────────
+addBtn.addEventListener("click", addTask);
+
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") addTask();
+});
+
+// ── Initial render ─────────────────────────────────────────
+renderTasks();
+\`\`\`
+
+---
+
+### How it all works together
+
+1. **State array** — \`tasks\` is the single source of truth. Every change updates this array, then calls \`renderTasks()\`.
+2. **renderTasks** — clears the \`<ul>\` and rebuilds it from the current \`tasks\` array. This pattern (state → render) is the foundation of every modern JavaScript framework.
+3. **escapeHtml** — never inject user input directly into \`innerHTML\` without escaping it first.
+
+---
+
+### Extend it yourself
+
+- **Persist tasks**: save \`tasks\` to \`localStorage\` after every change and load it on page start with \`JSON.parse(localStorage.getItem("tasks") ?? "[]")\`
+- **Filter tabs**: add "All / Active / Completed" buttons that filter the visible tasks
+- **Drag to reorder**: explore the HTML Drag and Drop API
+- **Edit in place**: double-click a task text to turn it into an \`<input>\`, save on blur`,
+          readingPs: `## تمرین: د تعاملي کارونو لیست جوړ کړئ
+
+دا د کورس ستاسو وروستۍ پروژه ده. تاسو به HTML، CSS، او JavaScript یو ځای کوئ.
+
+### ب: د اساسي جوړښت (HTML)
+
+\`\`\`html
+<div class="app">
+  <h1>زما کارونه</h1>
+  <div class="input-row">
+    <input type="text" id="taskInput" placeholder="کوم کار؟">
+    <button id="addBtn">زیاتول</button>
+  </div>
+  <ul id="taskList"></ul>
+</div>
+\`\`\`
+
+### JavaScript
+
+\`\`\`js
+let tasks = [];
+
+function addTask() {
+  const text = document.getElementById("taskInput").value.trim();
+  if (!text) return;
+  tasks.push({ id: Date.now(), text, done: false });
+  document.getElementById("taskInput").value = "";
+  renderTasks();
+}
+
+function toggleTask(id) {
+  const task = tasks.find(t => t.id === id);
+  if (task) task.done = !task.done;
+  renderTasks();
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  renderTasks();
+}
+
+function renderTasks() {
+  const list = document.getElementById("taskList");
+  list.innerHTML = "";
+  tasks.forEach(task => {
+    const li = document.createElement("li");
+    li.textContent = task.text;
+    if (task.done) li.style.textDecoration = "line-through";
+    li.addEventListener("click", () => toggleTask(task.id));
+    list.appendChild(li);
+  });
+}
+
+document.getElementById("addBtn").addEventListener("click", addTask);
+renderTasks();
+\`\`\``,
+          order: 4
         }
       ],
+
       quiz: {
         id:            "javascript-fundamentals-quiz",
         titleEn:       "JavaScript Fundamentals Quiz",
         titlePs:       "د JavaScript بنسټونو ازموینه",
-        descriptionEn: "Test your JavaScript knowledge — variables, functions, and DOM manipulation. Pass with 70% or higher to complete the course and earn your certificate.",
-        descriptionPs: "خپله د JavaScript پوهه وازمویئ — متغیرونه، فنکشنونه، او DOM اداره کول. د کورس د بشپړولو او سند د ترلاسه کولو لپاره ۷۰٪ یا لوړ نمره ترلاسه کړئ.",
+        descriptionEn: "Test your JavaScript knowledge — variables, functions, control flow, and DOM manipulation. Pass with 70% or higher to complete the course and earn your certificate.",
+        descriptionPs: "خپله د JavaScript پوهه وازمویئ. د کورس د بشپړولو او سند د ترلاسه کولو لپاره ۷۰٪ یا لوړ نمره ترلاسه کړئ.",
         passScore: 70,
         questions: [
           {
-            id:       "js-q1",
-            promptEn: "Which keyword declares a variable that cannot be reassigned?",
-            promptPs:  "کوم کلیدي کلمه داسې متغیر اعلانوي چې بیا ټاکل نه شي؟",
+            id: "js-q1", promptEn: "Which keyword declares a variable that cannot be reassigned?", promptPs: "کوم کلیدي کلمه داسې متغیر اعلانوي چې بیا ټاکل نه شي؟",
             options: [
-              { en: "let", ps: "let", correct: false },
-              { en: "var", ps: "var", correct: false },
-              { en: "const", ps: "const", correct: true }
+              { en: "let",   ps: "let",   correct: false },
+              { en: "var",   ps: "var",   correct: false },
+              { en: "const", ps: "const", correct: true  }
             ]
           },
           {
-            id:       "js-q2",
-            promptEn: "What does === check compared to ==?",
-            promptPs:  "=== د == سره پرتله کې څه کنټرولوي؟",
+            id: "js-q2", promptEn: "What does === check compared to ==?", promptPs: "=== د == سره پرتله کې څه کنترولوي؟",
             options: [
-              { en: "It also checks the data type, not just the value", ps: "دا یوازې ارزښت نه، د معلوماتو ډول هم کنټرولوي", correct: true },
-              { en: "It is slower than ==", ps: "دا د == نه ورو دی", correct: false },
-              { en: "It only works with numbers", ps: "یوازې د شمیرو سره کار کوي", correct: false }
+              { en: "It also checks the data type, not just the value", ps: "دا یوازې ارزښت نه، د معلوماتو ډول هم کنترولوي", correct: true  },
+              { en: "It is slower than ==",                              ps: "دا د == نه ورو دی",                               correct: false },
+              { en: "It only works with numbers",                        ps: "یوازې د شمیرو سره کار کوي",                      correct: false }
             ]
           },
           {
-            id:       "js-q3",
-            promptEn: "What is an arrow function?",
-            promptPs:  "د تیرو فنکشن (Arrow function) څه دی؟",
+            id: "js-q3", promptEn: "What is an arrow function?", promptPs: "د تیرو فنکشن (Arrow function) څه دی؟",
             options: [
-              { en: "A function with no parameters", ps: "پارامتر پرته فنکشن", correct: false },
-              { en: "A concise syntax for writing functions using =>", ps: "د => له کارولو سره د فنکشنونو د لیکلو لنډه ترکیب", correct: true },
-              { en: "A function that only runs once", ps: "فنکشن چې یوازې یو ځل چلیږي", correct: false }
+              { en: "A function with no parameters",                          ps: "پارامتر پرته فنکشن",                               correct: false },
+              { en: "A concise syntax for writing functions using =>",         ps: "د => له کارولو سره د فنکشنونو د لیکلو لنډه ترکیب", correct: true  },
+              { en: "A function that only runs once",                          ps: "فنکشن چې یوازې یو ځل چلیږي",                     correct: false }
             ]
           },
           {
-            id:       "js-q4",
-            promptEn: "Which method selects the first matching HTML element?",
-            promptPs:  "کوم میتود لومړی سم شوی HTML عنصر انتخابوي؟",
+            id: "js-q4", promptEn: "Which method selects the first matching HTML element?", promptPs: "کوم میتود لومړی سم شوی HTML عنصر انتخابوي؟",
             options: [
-              { en: "document.getElement()", ps: "document.getElement()", correct: false },
-              { en: "document.querySelector()", ps: "document.querySelector()", correct: true },
-              { en: "document.findElement()", ps: "document.findElement()", correct: false }
+              { en: "document.getElement()",   ps: "document.getElement()",   correct: false },
+              { en: "document.querySelector()", ps: "document.querySelector()", correct: true  },
+              { en: "document.findElement()",   ps: "document.findElement()",   correct: false }
             ]
           },
           {
-            id:       "js-q5",
-            promptEn: "Which method attaches an event handler to an element?",
-            promptPs:  "کوم میتود د یوه عنصر سره د پیښو هینډلر تړي؟",
+            id: "js-q5", promptEn: "Which method attaches an event handler to an element?", promptPs: "کوم میتود د یوه عنصر سره د پیښو هینډلر تړي؟",
             options: [
-              { en: "element.onClick()", ps: "element.onClick()", correct: false },
-              { en: "element.on()", ps: "element.on()", correct: false },
-              { en: "element.addEventListener()", ps: "element.addEventListener()", correct: true }
+              { en: "element.onClick()",          ps: "element.onClick()",          correct: false },
+              { en: "element.on()",               ps: "element.on()",               correct: false },
+              { en: "element.addEventListener()", ps: "element.addEventListener()", correct: true  }
             ]
           }
         ]
@@ -845,7 +2167,6 @@ btn.addEventListener("click", () => {
 
 // ─── Seed function ────────────────────────────────────────────────────────────
 async function main() {
-  // 1. Resolve author
   const author = await db.user.findUniqueOrThrow({
     where: { email: AUTHOR_EMAIL },
     select: { id: true, name: true }
@@ -857,125 +2178,94 @@ async function main() {
   });
 
   console.log(`Author: ${author.name} (${author.id})`);
-  console.log(`Creator profile: ${creatorProfile.id}`);
 
-  // 2. Upsert course
+  // Upsert course
   await db.course.upsert({
     where: { id: COURSE.id },
     create: {
-      id:              COURSE.id,
-      slug:            COURSE.id,
-      status:          CourseStatus.PUBLISHED,
-      level:           COURSE.level,
-      titleEn:         COURSE.titleEn,
-      titlePs:         COURSE.titlePs,
-      descriptionEn:   COURSE.descriptionEn,
-      descriptionPs:   COURSE.descriptionPs,
-      authorId:        author.id,
-      authorProfileId: creatorProfile.id,
-      publishedAt:     new Date()
+      id: COURSE.id, slug: COURSE.id, status: CourseStatus.PUBLISHED,
+      level: COURSE.level, titleEn: COURSE.titleEn, titlePs: COURSE.titlePs,
+      descriptionEn: COURSE.descriptionEn, descriptionPs: COURSE.descriptionPs,
+      authorId: author.id, authorProfileId: creatorProfile.id, publishedAt: new Date()
     },
     update: {
-      status:          CourseStatus.PUBLISHED,
-      level:           COURSE.level,
-      titleEn:         COURSE.titleEn,
-      titlePs:         COURSE.titlePs,
-      descriptionEn:   COURSE.descriptionEn,
-      descriptionPs:   COURSE.descriptionPs,
-      authorId:        author.id,
-      authorProfileId: creatorProfile.id,
-      publishedAt:     new Date()
+      status: CourseStatus.PUBLISHED, level: COURSE.level,
+      titleEn: COURSE.titleEn, titlePs: COURSE.titlePs,
+      descriptionEn: COURSE.descriptionEn, descriptionPs: COURSE.descriptionPs,
+      authorId: author.id, authorProfileId: creatorProfile.id, publishedAt: new Date()
     }
   });
 
-  console.log(`Upserted course: ${COURSE.titleEn}`);
-
-  let totalLessons = 0;
-  let totalQuestions = 0;
+  let totalVideo = 0, totalReading = 0, totalQuestions = 0;
 
   for (const mod of COURSE.modules) {
     const moduleId = `${COURSE.id}:${mod.id}`;
 
-    // 3. Upsert module
     await db.module.upsert({
       where: { id: moduleId },
       create: { id: moduleId, courseId: COURSE.id, order: mod.order, titleEn: mod.titleEn, titlePs: mod.titlePs },
       update: { courseId: COURSE.id, order: mod.order, titleEn: mod.titleEn, titlePs: mod.titlePs }
     });
 
-    // 4. Upsert video lessons
+    // Move the existing quiz to its new order FIRST so lesson orders don't collide
+    await db.lesson.updateMany({
+      where: { id: `${COURSE.id}:${mod.id}:quiz` },
+      data: { order: mod.lessons.length + 1 }
+    });
+
+    // Video + Reading lessons
     for (const lesson of mod.lessons) {
       const lessonId = `${COURSE.id}:${lesson.id}`;
+      const lessonType = lesson.type === "READING" ? LessonType.READING : LessonType.VIDEO;
+
       await db.lesson.upsert({
         where: { id: lessonId },
         create: {
-          id:            lessonId,
-          moduleId,
-          order:         lesson.order,
-          type:          LessonType.VIDEO,
-          titleEn:       lesson.titleEn,
-          titlePs:       lesson.titlePs,
-          descriptionEn: lesson.descriptionEn,
-          descriptionPs: lesson.descriptionPs,
-          youtubeUrl:    lesson.youtubeId,
-          readingEn:     lesson.readingEn,
-          readingPs:     lesson.readingPs,
-          isFinalTest:   false,
-          passingScore:  null
+          id: lessonId, moduleId, order: lesson.order, type: lessonType,
+          titleEn: lesson.titleEn, titlePs: lesson.titlePs,
+          descriptionEn: lesson.descriptionEn, descriptionPs: lesson.descriptionPs,
+          youtubeUrl: lesson.youtubeId ?? null,
+          readingEn: lesson.readingEn ?? null, readingPs: lesson.readingPs ?? null,
+          isFinalTest: false, passingScore: null
         },
         update: {
-          moduleId,
-          order:         lesson.order,
-          type:          LessonType.VIDEO,
-          titleEn:       lesson.titleEn,
-          titlePs:       lesson.titlePs,
-          descriptionEn: lesson.descriptionEn,
-          descriptionPs: lesson.descriptionPs,
-          youtubeUrl:    lesson.youtubeId,
-          readingEn:     lesson.readingEn,
-          readingPs:     lesson.readingPs,
-          isFinalTest:   false,
-          passingScore:  null
+          moduleId, order: lesson.order, type: lessonType,
+          titleEn: lesson.titleEn, titlePs: lesson.titlePs,
+          descriptionEn: lesson.descriptionEn, descriptionPs: lesson.descriptionPs,
+          youtubeUrl: lesson.youtubeId ?? null,
+          readingEn: lesson.readingEn ?? null, readingPs: lesson.readingPs ?? null,
+          isFinalTest: false, passingScore: null
         }
       });
-      totalLessons++;
+
+      if (lessonType === LessonType.READING) totalReading++;
+      else totalVideo++;
     }
 
-    // 5. Upsert quiz lesson
+    // Quiz lesson — order = lessons count + 1
     const q = mod.quiz;
     const quizLessonId = `${COURSE.id}:${mod.id}:quiz`;
+    const quizOrder = mod.lessons.length + 1;
+
     await db.lesson.upsert({
       where: { id: quizLessonId },
       create: {
-        id:            quizLessonId,
-        moduleId,
-        order:         mod.lessons.length + 1,
-        type:          LessonType.QUIZ,
-        titleEn:       q.titleEn,
-        titlePs:       q.titlePs,
-        descriptionEn: q.descriptionEn,
-        descriptionPs: q.descriptionPs,
-        isFinalTest:   true,
-        passingScore:  q.passScore
+        id: quizLessonId, moduleId, order: quizOrder, type: LessonType.QUIZ,
+        titleEn: q.titleEn, titlePs: q.titlePs,
+        descriptionEn: q.descriptionEn, descriptionPs: q.descriptionPs,
+        isFinalTest: true, passingScore: q.passScore
       },
       update: {
-        moduleId,
-        order:         mod.lessons.length + 1,
-        type:          LessonType.QUIZ,
-        titleEn:       q.titleEn,
-        titlePs:       q.titlePs,
-        descriptionEn: q.descriptionEn,
-        descriptionPs: q.descriptionPs,
-        isFinalTest:   true,
-        passingScore:  q.passScore
+        moduleId, order: quizOrder, type: LessonType.QUIZ,
+        titleEn: q.titleEn, titlePs: q.titlePs,
+        descriptionEn: q.descriptionEn, descriptionPs: q.descriptionPs,
+        isFinalTest: true, passingScore: q.passScore
       }
     });
 
-    // 6. Upsert Quiz record
-    const quizId = `${COURSE.id}:${q.id}`;
     await db.quiz.upsert({
       where: { lessonId: quizLessonId },
-      create: { id: quizId, lessonId: quizLessonId },
+      create: { id: `${COURSE.id}:${q.id}`, lessonId: quizLessonId },
       update: {}
     });
 
@@ -984,56 +2274,29 @@ async function main() {
       select: { id: true }
     });
 
-    // 7. Upsert questions + answer choices
     for (const [qi, question] of q.questions.entries()) {
       const questionId = `${COURSE.id}:${question.id}`;
       await db.question.upsert({
         where: { id: questionId },
-        create: {
-          id:       questionId,
-          quizId:   quizRecord.id,
-          order:    qi + 1,
-          type:     QuestionType.SINGLE_CHOICE,
-          promptEn: question.promptEn,
-          promptPs: question.promptPs
-        },
-        update: {
-          quizId:   quizRecord.id,
-          order:    qi + 1,
-          type:     QuestionType.SINGLE_CHOICE,
-          promptEn: question.promptEn,
-          promptPs: question.promptPs
-        }
+        create: { id: questionId, quizId: quizRecord.id, order: qi + 1, type: QuestionType.SINGLE_CHOICE, promptEn: question.promptEn, promptPs: question.promptPs },
+        update: { quizId: quizRecord.id, order: qi + 1, type: QuestionType.SINGLE_CHOICE, promptEn: question.promptEn, promptPs: question.promptPs }
       });
 
       for (const [ci, opt] of question.options.entries()) {
         const choiceId = `${questionId}:choice-${ci + 1}`;
         await db.answerChoice.upsert({
           where: { id: choiceId },
-          create: {
-            id:         choiceId,
-            questionId,
-            order:      ci + 1,
-            textEn:     opt.en,
-            textPs:     opt.ps,
-            isCorrect:  opt.correct
-          },
-          update: {
-            questionId,
-            order:      ci + 1,
-            textEn:     opt.en,
-            textPs:     opt.ps,
-            isCorrect:  opt.correct
-          }
+          create: { id: choiceId, questionId, order: ci + 1, textEn: opt.en, textPs: opt.ps, isCorrect: opt.correct },
+          update: { questionId, order: ci + 1, textEn: opt.en, textPs: opt.ps, isCorrect: opt.correct }
         });
       }
       totalQuestions++;
     }
 
-    console.log(`  Module "${mod.titleEn}": ${mod.lessons.length} lessons + 1 quiz (${q.questions.length} questions)`);
+    console.log(`  Module "${mod.titleEn}": ${mod.lessons.filter(l => l.type !== "READING").length} video + ${mod.lessons.filter(l => l.type === "READING").length} reading + 1 quiz (${q.questions.length} questions)`);
   }
 
-  console.log(`\nDone! Course seeded with ${COURSE.modules.length} modules, ${totalLessons} video lessons, ${totalQuestions} quiz questions.`);
+  console.log(`\nDone! ${totalVideo} video lessons, ${totalReading} reading lessons, ${totalQuestions} quiz questions.`);
   console.log(`URL: /courses/${COURSE.id}`);
 }
 

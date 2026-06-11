@@ -77,6 +77,11 @@ type CourseOverviewProps = {
     level?: string | null;
     enrollmentCount: number;
   }>;
+  announcements?: Array<{
+    id: string;
+    body: string;
+    createdAt: Date | string;
+  }>;
 };
 
 /* Khan Academy-style status dot for the course-overview lesson list */
@@ -117,7 +122,8 @@ export function CourseOverview({
   viewerRole = null,
   studentName = "",
   lessonStatuses = {},
-  relatedCourses = []
+  relatedCourses = [],
+  announcements = []
 }: CourseOverviewProps) {
   const { locale, t, direction } = useLanguage();
   const router = useRouter();
@@ -262,6 +268,27 @@ export function CourseOverview({
           <p className="mt-3 rounded-[var(--radius)] border border-[rgba(196,43,43,0.18)] bg-[var(--danger-50)] px-4 py-3 text-sm font-[800] text-[var(--danger)]" role="alert">{enrollError}</p>
         ) : null}
       </section>
+
+      {enrolled && announcements.length > 0 ? (
+        <section id="announcements" className="pr-card scroll-mt-24 p-6 lg:p-7">
+          <p className="pr-eyebrow">{t.announceNavLabel}</p>
+          <h2 className="pr-h2 mt-2">{t.notificationCenter}</h2>
+          <div className="mt-5 grid gap-3">
+            {announcements.map((announcement) => (
+              <article key={announcement.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4">
+                <p className="whitespace-pre-wrap text-sm font-[600] leading-7 text-[var(--ink-2)]">{announcement.body}</p>
+                <p className="mt-3 text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
+                  {new Date(announcement.createdAt).toLocaleDateString(locale === "en" ? "en-US" : `${locale}-AF`, {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric"
+                  })}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {/* ── Course completion dashboard ─────────────────────────── */}
       {enrolled && certificateStatus?.eligible ? (

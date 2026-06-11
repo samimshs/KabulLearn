@@ -30,6 +30,15 @@ function timeAgo(isoString: string, locale: string): string {
   return rtf.format(-Math.floor(hrs / 24), "day");
 }
 
+function notificationHref(notif: AppNotificationPreview) {
+  if (!notif.link) return null;
+  if (notif.link.includes("#")) return notif.link;
+  if (notif.title.toLowerCase().startsWith("new announcement in ") && notif.link.startsWith("/courses/")) {
+    return `${notif.link}#announcements`;
+  }
+  return notif.link;
+}
+
 function SenderInitials({ name, role }: { name: string | null; role: string }) {
   const label = name ?? role;
   const initials = label.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("") || "?";
@@ -324,11 +333,13 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                       </div>
                       {appNotifications.length > 0 ? (
                         <ul className="grid gap-1 max-h-[200px] overflow-y-auto">
-                          {appNotifications.map((notif) => (
+                          {appNotifications.map((notif) => {
+                            const href = notificationHref(notif);
+                            return (
                             <li key={notif.id}>
-                              {notif.link ? (
+                              {href ? (
                                 <Link
-                                  href={notif.link}
+                                  href={href}
                                   onClick={() => setNotifOpen(false)}
                                   className="block rounded-[10px] p-2 transition hover:bg-[var(--surface)]"
                                 >
@@ -344,7 +355,8 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                                 </div>
                               )}
                             </li>
-                          ))}
+                          );
+                          })}
                         </ul>
                       ) : (
                         <p className="py-2 text-[12px] text-[var(--muted)]">{t.noNotifications}</p>

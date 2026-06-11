@@ -18,7 +18,7 @@ export async function postCourseAnnouncement(input: { courseId: string; body: st
     // Ensure this educator owns the course
     const course = await db.course.findUnique({
       where: { id: values.courseId },
-      select: { authorId: true, titleEn: true, titlePs: true }
+      select: { authorId: true, slug: true, titleEn: true, titlePs: true }
     });
     if (!course || course.authorId !== session.id) {
       return { ok: false, error: "Course not found or access denied." };
@@ -43,12 +43,14 @@ export async function postCourseAnnouncement(input: { courseId: string; body: st
           kind: "GENERAL" as const,
           title: `New announcement in "${courseTitle}"`,
           body: values.body.slice(0, 120),
-          link: `/courses/${values.courseId}`
+          link: `/courses/${values.courseId}#announcements`
         }))
       });
     }
 
     revalidatePath("/educator");
+    revalidatePath(`/courses/${values.courseId}`);
+    if (course.slug) revalidatePath(`/courses/${course.slug}`);
     return { ok: true, data: undefined };
   } catch (e) {
     if (e instanceof z.ZodError) return { ok: false, error: e.issues[0]?.message ?? "Invalid input." };

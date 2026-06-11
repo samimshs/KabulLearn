@@ -15,6 +15,7 @@ declare global {
           events?: {
             onReady?: () => void;
             onStateChange?: (event: { data: number }) => void;
+            onError?: (event: { data: number }) => void;
           };
         }
       ) => {
@@ -64,6 +65,14 @@ function loadYouTubeApi() {
       document.head.appendChild(tag);
     }
   });
+}
+
+function youtubeErrorMessage(code: number, fallback: string) {
+  if (code === 2) return "This YouTube link is invalid. Please ask the educator to update the lesson video.";
+  if (code === 5) return "This video cannot be played in the embedded player.";
+  if (code === 100) return "This YouTube video is unavailable or private.";
+  if (code === 101 || code === 150) return "This YouTube video does not allow playback on external websites.";
+  return fallback;
 }
 
 export function VideoPlayer({
@@ -151,6 +160,9 @@ export function VideoPlayer({
             } else if (event.data === 2) {
               sampleNow();
             }
+          },
+          onError: (event) => {
+            setMessage(youtubeErrorMessage(event.data, t.couldNotCompleteLesson));
           }
         }
       });

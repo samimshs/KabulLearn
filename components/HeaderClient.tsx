@@ -19,14 +19,15 @@ type HeaderClientProps = {
   unreadAppNotifications?: number;
 };
 
-function timeAgo(isoString: string): string {
+function timeAgo(isoString: string, locale: string): string {
   const diff = Date.now() - new Date(isoString).getTime();
   const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return "now";
-  if (mins < 60) return `${mins}m`;
+  const rtf = new Intl.RelativeTimeFormat(locale === "en" ? "en" : `${locale}-AF`, { numeric: "auto", style: "narrow" });
+  if (mins < 1) return rtf.format(0, "minute");
+  if (mins < 60) return rtf.format(-mins, "minute");
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h`;
-  return `${Math.floor(hrs / 24)}d`;
+  if (hrs < 24) return rtf.format(-hrs, "hour");
+  return rtf.format(-Math.floor(hrs / 24), "day");
 }
 
 function SenderInitials({ name, role }: { name: string | null; role: string }) {
@@ -54,7 +55,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
   const avatarUrl = usePortalAvatarUrl(user?.image ?? null);
   const totalBellBadge = unreadCount + appNotifUnread;
 
-  // Global Cmd+K / Ctrl+K shortcut + OS detection
+  // Global Cmd+K / Ctrl+K shortcut, Escape-to-close, + OS detection
   useEffect(() => {
     setIsMac(/Mac|iPhone|iPad|iPod/.test(navigator.platform));
 
@@ -62,6 +63,10 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setSearchOpen((o) => !o);
+        setMenuOpen(false);
+        setNotifOpen(false);
+      }
+      if (e.key === "Escape") {
         setMenuOpen(false);
         setNotifOpen(false);
       }
@@ -85,8 +90,6 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
     { locale: "fa" as const, label: "دری", title: t.dari },
     { locale: "en" as const, label: "EN", title: t.english }
   ];
-
-  if (pathname === "/") return null;
 
   if (pathname === "/login" || pathname === "/register") {
     return (
@@ -128,8 +131,8 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
     "/dashboard";
 
   const portalLabel =
-    user?.role === "ADMIN" ? "Admin panel" :
-    user?.role === "EDUCATOR" ? "Educator portal" :
+    user?.role === "ADMIN" ? t.adminPanel :
+    user?.role === "EDUCATOR" ? t.educatorPortal :
     t.myPortal;
 
   const inboxHref =
@@ -162,6 +165,32 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
           />
         </Link>
 
+        {/* Primary nav */}
+        <nav className="flex min-w-0 flex-1 items-center gap-1" aria-label="Primary">
+          <Link
+            href="/courses"
+            className={`inline-flex h-9 items-center rounded-[var(--radius)] px-3 text-[13px] font-[800] transition ${
+              pathname.startsWith("/courses")
+                ? "text-[var(--brand)]"
+                : "text-[var(--muted)] hover:text-[var(--brand)]"
+            }`}
+          >
+            {t.courses}
+          </Link>
+          {user?.role === "STUDENT" && (
+            <Link
+              href="/dashboard"
+              className={`hidden h-9 items-center rounded-[var(--radius)] px-3 text-[13px] font-[800] transition sm:inline-flex ${
+                pathname.startsWith("/dashboard")
+                  ? "text-[var(--brand)]"
+                  : "text-[var(--muted)] hover:text-[var(--brand)]"
+              }`}
+            >
+              {t.myCourses}
+            </Link>
+          )}
+        </nav>
+
         {/* Right side */}
         <div className="kl-header-actions flex min-w-0 shrink items-center justify-end gap-1.5 sm:gap-2">
           {user ? (
@@ -170,14 +199,14 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
               <button
                 type="button"
                 onClick={() => { setSearchOpen(true); setMenuOpen(false); setNotifOpen(false); }}
-                aria-label="Search"
+                aria-label={t.searchLabel}
                 className="flex h-9 items-center gap-2 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 text-[12px] font-[700] text-[var(--muted)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)]"
               >
                 <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5 shrink-0" aria-hidden="true">
                   <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.5" />
                   <path d="m10 10 2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
-                <span className="hidden lg:block">Search</span>
+                <span className="hidden lg:block">{t.searchLabel}</span>
                 <kbd className="hidden rounded border border-[var(--border)] bg-white px-1 py-0.5 text-[10px] font-[800] text-[var(--muted-2)] lg:block">{isMac ? "⌘K" : "Ctrl K"}</kbd>
               </button>
 
@@ -246,7 +275,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                                       {msg.senderName ?? msg.senderRole.toLowerCase()}
                                     </span>
                                     <span className="shrink-0 text-[10px] font-[600] text-[var(--muted)]">
-                                      {timeAgo(msg.createdAt)}
+                                      {timeAgo(msg.createdAt, locale)}
                                     </span>
                                   </div>
                                   <p className="line-clamp-1 text-[11px] font-[500] text-[var(--muted)]">
@@ -303,13 +332,13 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                                 >
                                   <p className="text-[12px] font-[800] text-[var(--ink)]">{notif.title}</p>
                                   <p className="mt-0.5 line-clamp-2 text-[11px] text-[var(--muted)]">{notif.body}</p>
-                                  <p className="mt-1 text-[10px] font-[600] text-[var(--muted-2)]">{timeAgo(notif.createdAt)}</p>
+                                  <p className="mt-1 text-[10px] font-[600] text-[var(--muted-2)]">{timeAgo(notif.createdAt, locale)}</p>
                                 </Link>
                               ) : (
                                 <div className="rounded-[10px] p-2">
                                   <p className="text-[12px] font-[800] text-[var(--ink)]">{notif.title}</p>
                                   <p className="mt-0.5 line-clamp-2 text-[11px] text-[var(--muted)]">{notif.body}</p>
-                                  <p className="mt-1 text-[10px] font-[600] text-[var(--muted-2)]">{timeAgo(notif.createdAt)}</p>
+                                  <p className="mt-1 text-[10px] font-[600] text-[var(--muted-2)]">{timeAgo(notif.createdAt, locale)}</p>
                                 </div>
                               )}
                             </li>
@@ -329,7 +358,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                   type="button"
                   aria-haspopup="true"
                   aria-expanded={menuOpen}
-                  aria-label="Account menu"
+                  aria-label={t.accountMenuLabel}
                   onClick={() => { setMenuOpen((o) => !o); setNotifOpen(false); }}
                   className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--brand)] text-xs font-[900] text-white shadow-[0_10px_24px_rgba(0,87,255,0.22)] transition hover:ring-2 hover:ring-[var(--brand)] hover:ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-2"
                 >
@@ -396,7 +425,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
               <Link href="/login" className="pr-btn-ghost !min-h-9 px-4">
                 {t.signIn}
               </Link>
-              <Link href="/register" className="pr-btn-primary hidden !min-h-9 px-4 sm:inline-flex">
+              <Link href="/register" className="pr-btn-primary !min-h-9 px-4">
                 {t.registerFree}
               </Link>
             </>

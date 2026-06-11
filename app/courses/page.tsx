@@ -1,8 +1,20 @@
+import type { Metadata } from "next";
 import { CourseDashboard } from "@/components/CourseDashboard";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { CourseStatus } from "@prisma/client";
-import { getCourseProgress } from "@/lib/security";
+import { CourseStatus, ProgressStatus } from "@prisma/client";
+
+export const metadata: Metadata = {
+  title: "Browse Courses — KabulLearn",
+  description: "Free structured courses in data science, statistics, computer basics, and more — in English, Pashto, and Dari, with verified certificates.",
+  alternates: { canonical: "https://kabullearn.com/courses" },
+  openGraph: {
+    title: "Browse Courses — KabulLearn",
+    description: "Free structured courses in English, Pashto, and Dari, with verified certificates.",
+    url: "https://kabullearn.com/courses",
+    siteName: "KabulLearn"
+  }
+};
 
 type CourseRow = {
   id: string;
@@ -137,26 +149,48 @@ export default async function CoursesPage({
 
   if (userId && rawCourses.length > 0) {
     try {
-      const [enrollments, progressRows] = await Promise.all([
+      const courseIds = rawCourses.map((course) => course.id);
+
+      // Three batched queries instead of 2 per course (previously getCourseProgress
+      // was called in a loop — 50+ round-trips for a 25-course catalog).
+      const [enrollments, completedLessons, certificates] = await Promise.all([
         db.enrollment.findMany({
-          where: { userId, courseId: { in: rawCourses.map((course) => course.id) } },
+          where: { userId, courseId: { in: courseIds } },
           select: { courseId: true }
         }),
-        Promise.all(rawCourses.map(async (course) => ({
-          courseId: course.id,
-          progress: await getCourseProgress(userId, course.id)
-        })))
+        db.userProgress.findMany({
+          where: {
+            userId,
+            status: ProgressStatus.COMPLETED,
+            lesson: { module: { courseId: { in: courseIds } } }
+          },
+          select: { lesson: { select: { module: { select: { courseId: true } } } } }
+        }),
+        db.certificate.findMany({
+          where: { userId, courseId: { in: courseIds } },
+          select: { courseId: true }
+        })
       ]);
 
       for (const enrollment of enrollments) {
         enrolledCourseIds.add(enrollment.courseId);
       }
 
-      for (const row of progressRows) {
-        progressByCourse.set(row.courseId, {
-          completedModules: row.progress.completed,
-          totalModules: row.progress.required
-        });
+      const completedByCourse = new Map<string, number>();
+      for (const row of completedLessons) {
+        const courseId = row.lesson.module.courseId;
+        completedByCourse.set(courseId, (completedByCourse.get(courseId) ?? 0) + 1);
+      }
+
+      const certifiedCourseIds = new Set(certificates.map((cert) => cert.courseId));
+
+      for (const course of rawCourses) {
+        const total = course.modules.reduce((n, m) => n + m.lessons.length, 0);
+        // A certificate marks the course fully complete regardless of lesson rows
+        const completed = certifiedCourseIds.has(course.id)
+          ? total
+          : Math.min(completedByCourse.get(course.id) ?? 0, total);
+        progressByCourse.set(course.id, { completedModules: completed, totalModules: total });
       }
     } catch {
       // progress/enrollment unavailable

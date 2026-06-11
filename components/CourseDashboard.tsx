@@ -13,49 +13,6 @@ type CourseModule = {
 
 type CourseRow = CourseCardRow & { modules: CourseModule[]; tagSlugs?: string[] };
 
-const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  "data-science": ["data", "machine", "python", "pandas", "learning", "ml", "ai", "neural", "deep", "classification", "clustering"],
-  "statistics": ["statistic", "probability", "regression", "احصایه", "distribution", "sampling", "variance"],
-  "computer-basics": ["computer", "basics", "hardware", "software", "operating", "network", "fundamental", "intro to comp"],
-  "physics": ["physics", "kinematics", "فیزیک", "mechanics", "motion", "force", "energy", "velocity"],
-};
-
-const SECTION_ORDER = ["data-science", "statistics", "computer-basics", "physics", "other"] as const;
-type SectionKey = typeof SECTION_ORDER[number];
-
-function matchesCategory(course: CourseRow, key: string): boolean {
-  if (key === "all") return true;
-  const haystack = [
-    course.titleEn, course.titlePs, course.titleDa ?? "",
-    course.descriptionEn, course.descriptionPs, course.descriptionDa ?? "",
-  ].join(" ").toLowerCase();
-  return (CATEGORY_KEYWORDS[key] ?? []).some(kw => haystack.includes(kw));
-}
-
-function getPrimaryCategory(course: CourseRow): SectionKey {
-  const haystack = [
-    course.titleEn, course.titlePs, course.titleDa ?? "",
-    course.descriptionEn, course.descriptionPs, course.descriptionDa ?? "",
-  ].join(" ").toLowerCase();
-  for (const key of ["data-science", "statistics", "computer-basics", "physics"] as const) {
-    if (CATEGORY_KEYWORDS[key].some(kw => haystack.includes(kw))) return key;
-  }
-  return "other";
-}
-
-function SectionDivider({ label, count }: { label: string; count: number }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="shrink-0 text-[11px] font-[800] uppercase tracking-[2px] text-[var(--muted-2)] whitespace-nowrap">
-        {label}
-      </span>
-      <div className="h-px flex-1 bg-gradient-to-r from-[var(--border)] to-transparent" />
-      <span className="shrink-0 rounded-full bg-[var(--surface)] px-2 py-0.5 text-[10px] font-[800] text-[var(--muted-2)]">
-        {count}
-      </span>
-    </div>
-  );
-}
 
 export function EducatorCta() {
   const { t } = useLanguage();
@@ -98,29 +55,6 @@ export function CourseDashboard({ courses, dbError, isAuthenticated = false, ava
   const [query, setQuery] = useState("");
   const [levelFilter, setLevelFilter] = useState("");
   const [sortBy, setSortBy] = useState<"popular" | "az">("popular");
-  const [activeCategory, setActiveCategory] = useState("all");
-
-  const categories = [
-    { key: "all",             label: t.categoryAll },
-    { key: "data-science",    label: t.categoryDataScience },
-    { key: "statistics",      label: t.categoryStatistics },
-    { key: "computer-basics", label: t.categoryComputerBasics },
-    { key: "physics",         label: t.categoryPhysics },
-  ];
-
-  const sectionLabels: Record<SectionKey, string> = {
-    "data-science":    t.categoryDataScience,
-    "statistics":      t.categoryStatistics,
-    "computer-basics": t.categoryComputerBasics,
-    "physics":         t.categoryPhysics,
-    "other":           t.categoryOther,
-  };
-
-  // Stable thumbnail index per course regardless of filter state
-  const courseIndexMap = useMemo(
-    () => new Map(courses.map((c, i) => [c.id, i])),
-    [courses]
-  );
 
   const allLevels = useMemo(() => {
     const s = new Set<string>();
@@ -144,7 +78,6 @@ export function CourseDashboard({ courses, dbError, isAuthenticated = false, ava
       return (
         (!q || localizedTitle.toLowerCase().includes(q) || desc.toLowerCase().includes(q) || titleDa.toLowerCase().includes(q) || descDa.toLowerCase().includes(q) || authorName.toLowerCase().includes(q) || authorUsername.toLowerCase().includes(q))
         && (!levelFilter || level === levelFilter)
-        && matchesCategory(c, activeCategory)
       );
     });
     if (sortBy === "az") {
@@ -157,7 +90,7 @@ export function CourseDashboard({ courses, dbError, isAuthenticated = false, ava
       result.sort((a, b) => (b.enrollmentCount ?? 0) - (a.enrollmentCount ?? 0));
     }
     return result;
-  }, [courses, query, levelFilter, sortBy, activeCategory, locale]);
+  }, [courses, query, levelFilter, sortBy, locale]);
 
   return (
     <>
@@ -192,23 +125,8 @@ export function CourseDashboard({ courses, dbError, isAuthenticated = false, ava
           </div>
         </div>
 
-        {/* Category chips + level filter */}
+        {/* Sort + level filter */}
         <div className="flex flex-wrap items-center gap-2 px-6 pt-3 pb-5">
-          {categories.map(cat => (
-            <button
-              key={cat.key}
-              type="button"
-              onClick={() => setActiveCategory(cat.key)}
-              className={`rounded-full border px-4 py-1.5 text-[12px] font-[800] uppercase tracking-[0.8px] transition
-                ${activeCategory === cat.key
-                  ? "border-[var(--brand)] bg-[var(--brand)] text-white shadow-[0_4px_12px_rgba(0,87,255,0.22)]"
-                  : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[rgba(0,87,255,0.3)] hover:text-[var(--ink)]"
-                }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-
           {allLevels.length > 0 && (
             <div className="ms-auto flex items-center gap-2">
               <label htmlFor="sort-filter" className="sr-only">{t.sortByLabel}</label>
@@ -280,30 +198,11 @@ export function CourseDashboard({ courses, dbError, isAuthenticated = false, ava
             <div className="pr-muted-box py-16 text-center text-[15px] font-[700] text-[var(--muted)]">
               {courses.length > 0 ? t.noResults : t.noCourses}
             </div>
-          ) : activeCategory !== "all" ? (
-            /* Single-category view — flat grid, no dividers */
+          ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filtered.map((course) => (
-                <CourseCard key={course.id} course={course} index={courseIndexMap.get(course.id) ?? 0} isAuthenticated={isAuthenticated} />
+                <CourseCard key={course.id} course={course} isAuthenticated={isAuthenticated} />
               ))}
-            </div>
-          ) : (
-            /* "All" view — courses grouped by category with section dividers */
-            <div className="grid gap-10">
-              {SECTION_ORDER.map((sectionKey) => {
-                const sectionCourses = filtered.filter(c => getPrimaryCategory(c) === sectionKey);
-                if (sectionCourses.length === 0) return null;
-                return (
-                  <div key={sectionKey} className="grid gap-4">
-                    <SectionDivider label={sectionLabels[sectionKey]} count={sectionCourses.length} />
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                      {sectionCourses.map((course) => (
-                        <CourseCard key={course.id} course={course} index={courseIndexMap.get(course.id) ?? 0} isAuthenticated={isAuthenticated} />
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           )}
         </section>

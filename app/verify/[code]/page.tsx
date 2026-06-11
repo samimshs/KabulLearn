@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getServerLocale } from "@/lib/server-locale";
-import { dictionaries } from "@/lib/i18n";
+import { dictionaries, localize } from "@/lib/i18n";
 
 export default async function CertificateVerificationPage({
   params
@@ -12,22 +12,40 @@ export default async function CertificateVerificationPage({
   const [{ code }, locale] = await Promise.all([params, getServerLocale()]);
   const t = dictionaries[locale];
   const decodedCode = decodeURIComponent(code);
-  const certificate = await db.certificate.findFirst({
-    where: {
-      OR: [
-        { uuid: decodedCode },
-        { verificationCode: decodedCode }
-      ]
-    },
-    select: {
-      uuid: true,
-      verificationCode: true,
-      grade: true,
-      issuedAt: true,
-      user: { select: { name: true, email: true } },
-      course: { select: { titleEn: true, titlePs: true } }
-    }
-  });
+
+  // This page is employer-facing trust infrastructure — a DB hiccup must show
+  // a graceful "try again" panel, never a crash or a false "not found".
+  let certificate;
+  try {
+    certificate = await db.certificate.findFirst({
+      where: {
+        OR: [
+          { uuid: decodedCode },
+          { verificationCode: decodedCode }
+        ]
+      },
+      select: {
+        uuid: true,
+        verificationCode: true,
+        grade: true,
+        issuedAt: true,
+        user: { select: { name: true, email: true } },
+        course: { select: { titleEn: true, titlePs: true, titleDa: true } }
+      }
+    });
+  } catch {
+    return (
+      <main className="pr-page grid min-h-[60vh] place-items-center">
+        <section className="pr-panel w-full max-w-xl p-10 text-center">
+          <h1 className="pr-h1">{t.verifyUnavailableTitle}</h1>
+          <p className="pr-copy mt-4">{t.verifyUnavailableBody}</p>
+          <Link href={`/verify/${encodeURIComponent(decodedCode)}`} className="pr-btn-primary mt-8 inline-flex">
+            {t.tryAgain}
+          </Link>
+        </section>
+      </main>
+    );
+  }
 
   if (!certificate) {
     notFound();
@@ -45,7 +63,9 @@ export default async function CertificateVerificationPage({
           </div>
           <div>
             <p className="text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">{t.courseLabel}</p>
-            <p className="mt-1 text-xl font-[800] text-[var(--ink)]">{certificate.course.titleEn}</p>
+            <p className="mt-1 text-xl font-[800] text-[var(--ink)]">
+              {localize(locale, certificate.course.titleEn, certificate.course.titlePs, certificate.course.titleDa ?? undefined)}
+            </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <div>

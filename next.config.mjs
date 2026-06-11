@@ -16,7 +16,7 @@ const nextConfig = {
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' https://www.youtube.com https://www.youtube-nocookie.com",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://lh3.googleusercontent.com https://api.qrserver.com",
+      "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://lh3.googleusercontent.com",
       "font-src 'self' data:",
       "connect-src 'self' https://api.resend.com https://*.blob.vercel-storage.com https://*.public.blob.vercel-storage.com https://www.youtube.com https://www.youtube-nocookie.com https://*.googlevideo.com https://*.youtube.com",
       "media-src 'self' https://*.public.blob.vercel-storage.com",

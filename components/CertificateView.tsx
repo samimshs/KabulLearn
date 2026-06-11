@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import QRCode from "qrcode";
 import { useLanguage } from "@/components/LanguageProvider";
 
 type CertificateViewProps = {
@@ -39,12 +40,27 @@ export function CertificateView({
   autoPrint = false
 }: CertificateViewProps) {
   const { t } = useLanguage();
+  const [qrUrl, setQrUrl] = useState("");
+
+  const verificationId = certificateUuid ?? verificationCode;
+  const verificationUrl = verificationId
+    ? `https://kabullearn.com/verify/${encodeURIComponent(verificationId)}`
+    : "";
+
   useEffect(() => {
     if (autoPrint && eligible) {
       const t = setTimeout(() => window.print(), 600);
       return () => clearTimeout(t);
     }
   }, [autoPrint, eligible]);
+
+  // QR generated locally — no third-party service, works offline and in print
+  useEffect(() => {
+    if (!verificationUrl || !eligible) return;
+    QRCode.toDataURL(verificationUrl, { width: 264, margin: 1, errorCorrectionLevel: "M" })
+      .then(setQrUrl)
+      .catch(() => setQrUrl(""));
+  }, [verificationUrl, eligible]);
 
   if (!eligible) {
     return (
@@ -80,14 +96,6 @@ export function CertificateView({
   }
 
   const dateStr = issuedDateStr(issuedAt);
-  const verificationId = certificateUuid ?? verificationCode;
-  const verificationUrl = verificationId
-    ? `https://kabullearn.com/verify/${encodeURIComponent(verificationId)}`
-    : "";
-  const qrUrl = verificationUrl
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=132x132&data=${encodeURIComponent(verificationUrl)}`
-    : "";
-
   const issuedDate = issuedAt ? (typeof issuedAt === "string" ? new Date(issuedAt) : issuedAt) : new Date();
   const linkedInUrl = (() => {
     const params = new URLSearchParams({
@@ -155,7 +163,7 @@ export function CertificateView({
           <div className="px-10 py-12 text-center lg:px-16 lg:py-16">
             {/* Header */}
             <div className="flex justify-center">
-              <img src="/poharana-icon-v2.svg" alt="KabulLearn" className="h-14 w-14" />
+              <img src="/poharana-icon-v3.svg" alt="KabulLearn" className="h-14 w-14" />
             </div>
             <p className="mt-4 text-[11px] font-[800] uppercase tracking-[4px] text-[#0057FF]">
               KabulLearn · Learn Without Limits

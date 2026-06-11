@@ -177,14 +177,14 @@ export function CourseOverview({
         }
 
         if (!response.ok || !result.ok) {
-          setEnrollError(result.error ?? "Could not enroll right now. Please try again.");
+          setEnrollError(result.error ?? t.enrollErrorGeneric);
           return;
         }
 
         setEnrolled(true);
         router.refresh();
       } catch {
-        setEnrollError("Could not enroll right now. Please try again.");
+        setEnrollError(t.enrollErrorGeneric);
       }
     });
   }

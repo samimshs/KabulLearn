@@ -4,26 +4,8 @@ import Link from "next/link";
 import { useLanguage } from "@/components/LanguageProvider";
 import { localize, localizeLevel } from "@/lib/i18n";
 import type { RecommendedCourse } from "@/lib/recommendations";
+import { courseGradient } from "@/lib/course-art";
 
-const PALETTE = [
-  "linear-gradient(135deg,#0057FF 0%,#0E7490 100%)",
-  "linear-gradient(135deg,#18825C 0%,#0E7490 100%)",
-  "linear-gradient(135deg,#7C3AED 0%,#0057FF 100%)",
-  "linear-gradient(135deg,#B06C00 0%,#C42B2B 100%)",
-  "linear-gradient(135deg,#0E7490 0%,#475569 100%)",
-  "linear-gradient(135deg,#4338CA 0%,#7C3AED 100%)",
-];
-
-function cardGradient(title: string, id: string): string {
-  const t = title.toLowerCase();
-  if (/data|machine|python|ml|pandas/.test(t)) return PALETTE[0];
-  if (/statistic|probability|regression/.test(t)) return PALETTE[1];
-  if (/\bai\b|intelligence|neural|deep/.test(t)) return PALETTE[2];
-  if (/web|html|css|javascript|frontend/.test(t)) return PALETTE[3];
-  if (/computer|hardware|software|basics|digital/.test(t)) return PALETTE[4];
-  if (/physic|mechanic|quantum|optic/.test(t)) return PALETTE[5];
-  return PALETTE[id.charCodeAt(0) % PALETTE.length];
-}
 
 function StarRating({ value }: { value: number }) {
   return (
@@ -58,7 +40,7 @@ export function RecommendedCourses({ courses }: { courses: RecommendedCourse[] }
         {courses.map((course) => {
           const title = localize(locale, course.titleEn, course.titlePs, course.titleDa);
           const level = localizeLevel(course.level, locale);
-          const bg = cardGradient(course.titleEn, course.id);
+          const bg = courseGradient(course.id);
 
           return (
             <article

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { HomeHeroVisual } from "@/components/HomeHeroVisual";
 import { HeroLangPills } from "@/components/HeroLangPills";
+import { CourseCard, type CourseCardRow } from "@/components/CourseCard";
+import { EducatorCta } from "@/components/CourseDashboard";
 import { auth } from "@/auth";
 import { getServerLocale } from "@/lib/server-locale";
 import { dictionaries } from "@/lib/i18n";
@@ -13,8 +15,7 @@ function formatNumber(value: number, locale: Locale) {
   return new Intl.NumberFormat(numberLocale, { maximumFractionDigits: 0 }).format(value);
 }
 
-function fmtStat(n: number, fallback: number, locale: Locale): string {
-  const value = n === 0 ? fallback : n;
+function fmtStat(value: number, locale: Locale): string {
   if (value >= 1000) return `${formatNumber(Math.floor(value / 1000), locale)}K+`;
   return `${formatNumber(value, locale)}+`;
 }
@@ -25,6 +26,12 @@ const STAT_ICONS = {
   languages: <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none"><circle cx="10" cy="10" r="7.2" stroke="currentColor" strokeWidth="1.5" /><path d="M3 10h14M10 3c2.1 2.2 2.1 11.8 0 14M10 3c-2.1 2.2-2.1 11.8 0 14" stroke="currentColor" strokeWidth="1.3" /></svg>,
   learners:  <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none"><circle cx="7.5" cy="7" r="2.6" stroke="currentColor" strokeWidth="1.5" /><path d="M3 16c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /><path d="M13.5 6.2A2.4 2.4 0 0 1 15 11M14 12.2c1.8.3 3 1.7 3 3.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>,
 };
+
+const HOW_ICONS = [
+  <svg key="account" viewBox="0 0 24 24" className="h-6 w-6" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" strokeWidth="1.7" /><path d="M5 19.5c0-3.3 3-5.2 7-5.2s7 1.9 7 5.2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>,
+  <svg key="learn" viewBox="0 0 24 24" className="h-6 w-6" fill="none"><path d="M12 6C9.5 4.3 5.5 4 3 4.7v13C5.5 17 9.5 17.3 12 19M12 6c2.5-1.7 6.5-2 9-1.3v13c-2.5-.7-6.5-.4-9 1.3M12 6v13" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /></svg>,
+  <svg key="cert" viewBox="0 0 24 24" className="h-6 w-6" fill="none"><circle cx="12" cy="9" r="5" stroke="currentColor" strokeWidth="1.7" /><path d="m9 13-1.5 8L12 19l4.5 2L15 13" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /></svg>,
+];
 
 export default async function Home() {
   const session = await auth();
@@ -51,32 +58,85 @@ export default async function Home() {
     },
   ];
 
-  // Live platform stats — fall back to placeholder values if DB is unavailable
+  // Live platform stats and featured courses. Stats with no real value are
+  // hidden rather than replaced with invented placeholders.
   let courseCount = 0, lessonCount = 0, learnerCount = 0;
+  let featured: CourseCardRow[] = [];
   try {
-    [courseCount, lessonCount, learnerCount] = await Promise.all([
-      db.course.count({ where: { status: CourseStatus.PUBLISHED } }),
-      db.lesson.count({ where: { module: { course: { status: CourseStatus.PUBLISHED } } } }),
-      db.user.count({ where: { role: "STUDENT" } }),
+    const [counts, featuredRaw] = await Promise.all([
+      Promise.all([
+        db.course.count({ where: { status: CourseStatus.PUBLISHED } }),
+        db.lesson.count({ where: { module: { course: { status: CourseStatus.PUBLISHED } } } }),
+        db.user.count({ where: { role: "STUDENT" } }),
+      ]),
+      db.course.findMany({
+        where: { status: CourseStatus.PUBLISHED },
+        orderBy: { enrollments: { _count: "desc" } },
+        take: 4,
+        select: {
+          id: true,
+          slug: true,
+          titleEn: true, titlePs: true, titleDa: true,
+          descriptionEn: true, descriptionPs: true, descriptionDa: true,
+          level: true,
+          _count: { select: { enrollments: true } },
+          authorProfile: { select: { name: true, username: true, avatarUrl: true } },
+          instructors: { orderBy: { order: "asc" }, select: { profile: { select: { name: true, username: true, avatarUrl: true } } } },
+          modules: {
+            orderBy: [{ order: "asc" }],
+            select: {
+              id: true,
+              order: true,
+              lessons: { orderBy: [{ order: "asc" }], select: { id: true, order: true, isFinalTest: true } }
+            }
+          }
+        }
+      })
     ]);
-  } catch { /* DB unavailable — placeholders shown */ }
+    [courseCount, lessonCount, learnerCount] = counts;
+    featured = featuredRaw.map((course) => ({
+      id: course.id,
+      slug: course.slug,
+      titleEn: course.titleEn ?? course.titlePs ?? "",
+      titlePs: course.titlePs ?? course.titleEn ?? "",
+      titleDa: course.titleDa,
+      descriptionEn: course.descriptionEn ?? course.descriptionPs ?? "",
+      descriptionPs: course.descriptionPs ?? course.descriptionEn ?? "",
+      descriptionDa: course.descriptionDa,
+      level: course.level,
+      hasCertificate: course.modules.length > 0 &&
+        course.modules.every((module) => module.lessons.some((lesson) => lesson.isFinalTest)),
+      modules: course.modules.map((module) => ({
+        id: module.id,
+        order: module.order,
+        lessons: module.lessons.map((lesson) => ({ id: lesson.id, order: lesson.order }))
+      })),
+      enrollmentCount: course._count.enrollments,
+      instructors: course.instructors.length > 0
+        ? course.instructors.map((courseInstructor) => courseInstructor.profile)
+        : course.authorProfile
+          ? [course.authorProfile]
+          : []
+    }));
+  } catch { /* DB unavailable — sections degrade gracefully */ }
 
   const platformStats = [
-    { icon: STAT_ICONS.courses,   value: fmtStat(courseCount, 25, locale),     label: dict.courses },
-    { icon: STAT_ICONS.lessons,   value: fmtStat(lessonCount, 400, locale),    label: dict.lessons },
-    { icon: STAT_ICONS.languages, value: formatNumber(3, locale),              label: dict.statLanguages },
-    { icon: STAT_ICONS.learners,  value: fmtStat(learnerCount, 1000, locale),  label: dict.statLearners },
+    courseCount > 0 ? { icon: STAT_ICONS.courses, value: fmtStat(courseCount, locale), label: dict.courses } : null,
+    lessonCount > 0 ? { icon: STAT_ICONS.lessons, value: fmtStat(lessonCount, locale), label: dict.lessons } : null,
+    { icon: STAT_ICONS.languages, value: formatNumber(3, locale), label: dict.statLanguages },
+    learnerCount > 0 ? { icon: STAT_ICONS.learners, value: fmtStat(learnerCount, locale), label: dict.statLearners } : null,
+  ].filter((stat): stat is NonNullable<typeof stat> => stat !== null);
+
+  const howSteps = [
+    { title: dict.howStep1Title, body: dict.howStep1Body },
+    { title: dict.howStep2Title, body: dict.howStep2Body },
+    { title: dict.howStep3Title, body: dict.howStep3Body },
   ];
 
   return (
     <main className="pr-page kl-home-page">
       <section className="kl-home-hero grid items-center gap-8 lg:grid-cols-[0.78fr_1.22fr]">
         <div className="kl-home-copy flex flex-col gap-5">
-          <img
-            src="/poharana-logo-v3.svg"
-            alt="KabulLearn"
-            className="kl-home-logo h-auto w-[276px] max-w-[78vw] object-contain"
-          />
           <p className="pr-eyebrow kl-home-kicker">{dict.heroEyebrow}</p>
           <h1 className="pr-h1 kl-home-heading">{dict.heroHeading}</h1>
           <p className="pr-copy kl-home-subheadline">{dict.heroSubtext}</p>
@@ -90,15 +150,8 @@ export default async function Home() {
               <Link href="/admin" className="pr-btn-primary">{dict.goToAdminPortal}</Link>
             ) : (
               <>
-                <Link href="/courses" className="pr-btn-primary">{dict.heroCta}</Link>
-                <Link href="/educator" className="pr-btn-ghost">
-                  {dict.heroForEducators}
-                  <svg viewBox="0 0 22 22" className="h-5 w-5 shrink-0 text-[var(--brand)]" fill="none" aria-hidden="true">
-                    <path d="M11 3 2 8l9 5 9-5-9-5Z" fill="currentColor" />
-                    <path d="M5.5 10.8v4C5.5 16.6 8 18 11 18s5.5-1.4 5.5-3.2v-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M19 8v5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                  </svg>
-                </Link>
+                <Link href="/register" className="pr-btn-primary">{dict.startLearningFree}</Link>
+                <Link href="/courses" className="pr-btn-ghost">{dict.heroCta}</Link>
               </>
             )}
           </div>
@@ -123,6 +176,53 @@ export default async function Home() {
           <HomeHeroVisual stats={platformStats} />
         </div>
       </section>
+
+      {/* Featured courses */}
+      {featured.length > 0 && (
+        <section className="mt-14" aria-label={dict.featuredCoursesTitle}>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="pr-eyebrow">{dict.featuredCoursesEyebrow}</p>
+              <h2 className="pr-h2 mt-2">{dict.featuredCoursesTitle}</h2>
+            </div>
+            <Link href="/courses" className="text-[14px] font-[800] text-[var(--brand)] hover:underline underline-offset-2">
+              {dict.viewAllCourses} →
+            </Link>
+          </div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {featured.map((course) => (
+              <CourseCard key={course.id} course={course} isAuthenticated={Boolean(session?.user?.id)} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* How it works */}
+      <section className="mt-14" aria-label={dict.howItWorksTitle}>
+        <div className="pr-panel p-7 lg:p-10">
+          <p className="pr-eyebrow">{dict.howItWorksEyebrow}</p>
+          <h2 className="pr-h2 mt-2">{dict.howItWorksTitle}</h2>
+          <ol className="mt-7 grid gap-6 md:grid-cols-3">
+            {howSteps.map((step, i) => (
+              <li key={step.title} className="relative rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-6">
+                <div className="flex items-center gap-3">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--brand-50)] text-[var(--brand)]">
+                    {HOW_ICONS[i]}
+                  </span>
+                  <span className="text-[12px] font-[900] uppercase tracking-[2px] text-[var(--muted-2)]">
+                    {formatNumber(i + 1, locale)}
+                  </span>
+                </div>
+                <h3 className="mt-4 text-[16px] font-[800] text-[var(--ink)]">{step.title}</h3>
+                <p className="mt-2 text-[14px] font-[500] leading-relaxed text-[var(--muted)]">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Educator CTA — hidden for users who already have a workspace */}
+      {role !== "EDUCATOR" && role !== "ADMIN" && <EducatorCta />}
     </main>
   );
 }

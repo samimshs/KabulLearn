@@ -12,6 +12,7 @@ import { PortalSettingsView } from "@/components/PortalSettingsView";
 import { dropEnrollment } from "@/lib/actions/enrollment-actions";
 import { localize, localizeLevel } from "@/lib/i18n";
 import type { RecommendedCourse } from "@/lib/recommendations";
+import { courseGradient } from "@/lib/course-art";
 
 type DashCourse = {
   id: string;
@@ -65,26 +66,6 @@ type DashboardViewProps = {
   certificates: DashCertificate[];
 };
 
-/* Category-aware gradient thumbnails. */
-const PALETTE = [
-  "linear-gradient(135deg,#0057FF 0%,#0E7490 100%)",  // data science: blue/teal
-  "linear-gradient(135deg,#18825C 0%,#0E7490 100%)",  // statistics: green/teal
-  "linear-gradient(135deg,#7C3AED 0%,#0057FF 100%)",  // AI: purple/blue
-  "linear-gradient(135deg,#B06C00 0%,#C42B2B 100%)",  // web dev: orange/red
-  "linear-gradient(135deg,#0E7490 0%,#475569 100%)",  // computer basics: blue/gray
-  "linear-gradient(135deg,#4338CA 0%,#7C3AED 100%)",  // physics: indigo/purple
-];
-
-function courseGradient(title: string, index: number): string {
-  const t = title.toLowerCase();
-  if (/data|machine|python|ml|pandas/.test(t)) return PALETTE[0];
-  if (/statistic|probability|regression/.test(t)) return PALETTE[1];
-  if (/\bai\b|intelligence|neural|deep/.test(t)) return PALETTE[2];
-  if (/web|html|css|javascript|frontend/.test(t)) return PALETTE[3];
-  if (/computer|hardware|software|basics|digital/.test(t)) return PALETTE[4];
-  if (/physics|mechanics|motion|energy/.test(t)) return PALETTE[5];
-  return PALETTE[index % PALETTE.length];
-}
 
 function initials(name: string) {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("") || "?";
@@ -321,7 +302,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
         {/* Continue Learning */}
         {activeCourse ? (
           <article className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
-            <div className="relative h-28 overflow-hidden" style={{ background: courseGradient(localize(locale, activeCourse.titleEn, activeCourse.titlePs, activeCourse.titleDa), activeCourse.thumbIndex) }}>
+            <div className="relative h-28 overflow-hidden" style={{ background: courseGradient(activeCourse.id) }}>
               <ThumbPattern />
               <span className="absolute bottom-3 start-4 rounded-full bg-white/20 px-3 py-1 text-[10px] font-[900] uppercase tracking-[1px] text-white backdrop-blur-sm">
                 {t.continueLearning}
@@ -428,7 +409,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
                 const isDropping = isDropPending && droppingCourseId === course.id;
                 return (
                   <article key={course.id} className="group flex flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 hover:border-[rgba(0,87,255,0.28)] hover:shadow-[var(--shadow)]">
-                    <Link href={`/courses/${course.id}?from=my-courses`} className="relative block h-24 overflow-hidden" style={{ background: courseGradient(title, course.thumbIndex) }} aria-label={title}>
+                    <Link href={`/courses/${course.id}?from=my-courses`} className="relative block h-24 overflow-hidden" style={{ background: courseGradient(course.id) }} aria-label={title}>
                       <ThumbPattern />
                     </Link>
                     <div className="flex flex-1 flex-col p-4">

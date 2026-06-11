@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
+import localFont from "next/font/local";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { auth } from "@/auth";
@@ -19,11 +20,42 @@ const manrope = Manrope({
   display: "swap"
 });
 
+// Arabic-script UI fonts for Pashto and Dari — applied via CSS when dir="rtl".
+// preload: false keeps them off the critical path for English visitors.
+const vazirmatn = localFont({
+  src: "../font/Vazirmatn/Vazirmatn-VariableFont_wght.ttf",
+  weight: "100 900",
+  variable: "--font-arabic",
+  display: "swap",
+  preload: false
+});
+
+const notoNaskhArabic = localFont({
+  src: "../font/Noto_Naskh_Arabic/NotoNaskhArabic-VariableFont_wght.ttf",
+  weight: "400 700",
+  variable: "--font-arabic-serif",
+  display: "swap",
+  preload: false
+});
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://kabullearn.com"),
   title: "KabulLearn — Learn Without Limits",
   description: "A trilingual LMS for Afghan learners. Structured courses, guided quizzes, and verified certificates in English, Pashto and Dari.",
   icons: { icon: "/poharana-icon-v3.svg", apple: "/poharana-icon-v3.svg" },
   manifest: "/manifest.json",
+  openGraph: {
+    type: "website",
+    url: "https://kabullearn.com",
+    siteName: "KabulLearn",
+    title: "KabulLearn — Learn Without Limits",
+    description: "Free structured courses, guided quizzes, and verified certificates in English, Pashto and Dari."
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KabulLearn — Learn Without Limits",
+    description: "Free structured courses, guided quizzes, and verified certificates in English, Pashto and Dari."
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -46,14 +78,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   } catch { /* auth failure — treat as logged out */ }
 
   return (
-    <html lang={locale} dir={direction} className={manrope.variable}>
+    <html lang={locale} dir={direction} className={`${manrope.variable} ${vazirmatn.variable} ${notoNaskhArabic.variable}`}>
       <body>
         <LanguageProvider initialLocale={locale}>
+          <a href="#main-content" className="kl-skip-link">{t.skipToContent}</a>
           {/* Wipes user-scoped localStorage keys whenever the active user changes */}
           <SessionGuard userId={userId} />
           <Header />
           <BackButton />
-          {children}
+          <div id="main-content">{children}</div>
           <SiteFooter rightsReserved={t.rightsReserved} />
           {userId ? <CourseChatbox /> : null}
         </LanguageProvider>

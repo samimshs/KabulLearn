@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageProvider";
 import { localizeLevel } from "@/lib/i18n";
+import { courseArtIndex, COURSE_GRADIENTS } from "@/lib/course-art";
 
 export type CourseCardRow = {
   id: string;
@@ -128,7 +129,9 @@ function initials(name: string) {
     .join("") || "PR";
 }
 
-export function CourseCard({ course, index = 0, isAuthenticated = false }: { course: CourseCardRow; index?: number; isAuthenticated?: boolean }) {
+// `index` is accepted for backwards compatibility but no longer used — art is
+// derived from the course ID so it stays stable across views and filters.
+export function CourseCard({ course, isAuthenticated = false }: { course: CourseCardRow; index?: number; isAuthenticated?: boolean }) {
   const { locale, t } = useLanguage();
   const title =
     locale === "fa" ? (course.titleDa ?? course.titleEn) :
@@ -140,7 +143,8 @@ export function CourseCard({ course, index = 0, isAuthenticated = false }: { cou
     course.descriptionEn;
   const level = localizeLevel(course.level, locale);
   const lessonCount = course.modules.reduce((n, m) => n + m.lessons.length, 0);
-  const thumb = THUMB_CONFIGS[index % THUMB_CONFIGS.length];
+  const thumbIdx = courseArtIndex(course.id);
+  const thumb = { gradient: COURSE_GRADIENTS[thumbIdx], pattern: THUMB_CONFIGS[thumbIdx].pattern };
   const courseHref = `/courses/${encodeURIComponent(course.slug ?? course.id)}`;
   const manageHref = `/educator/courses/${course.id}`;
   const cardHref = course.isCreatorCourse ? manageHref : courseHref;
@@ -196,8 +200,11 @@ export function CourseCard({ course, index = 0, isAuthenticated = false }: { cou
         ) : null}
 
         {course.rating && course.rating.count > 0 ? (
-          <p className="mt-1.5 text-[12px] font-[900] text-[var(--ink)]">
-            <span className="text-[var(--brand)]">★</span> {course.rating.average.toFixed(1)}
+          <p
+            className="mt-1.5 text-[12px] font-[900] text-[var(--ink)]"
+            aria-label={`${course.rating.average.toFixed(1)} out of 5 (${course.rating.count})`}
+          >
+            <span className="text-[var(--brand)]" aria-hidden="true">★</span> {course.rating.average.toFixed(1)}
             <span className="font-[700] text-[var(--muted)]"> ({course.rating.count})</span>
           </p>
         ) : null}

@@ -4,6 +4,8 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { openai, EMBED_MODEL, CHAT_MODEL, cosineSimilarity } from "@/lib/openai";
 
+const EDUCATOR_INTENT_RE = /\b(educator|teacher|instructor|teach|creator|course creator|create course)\b|استاد|ښوونک|کورس جوړ|کورس جوړوون|مدرس|آموزگار|ساختن کورس|سازنده کورس/i;
+
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -66,14 +68,17 @@ export async function POST(req: NextRequest) {
     return new Response(fallback, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
   }
 
-  // 3. Score and pick the top 5 most relevant chunks
+  // 3. Score and pick the most relevant chunks. Common role/onboarding questions
+  // get a light lexical boost because cross-script embedding matches can be weak.
+  const educatorIntent = EDUCATOR_INTENT_RE.test(message);
   const scored = rows.map(row => ({
     text: row.chunkText,
     label: `[${row.source}:${row.sourceKey}] ${row.title}`,
-    score: cosineSimilarity(queryVec, JSON.parse(row.embedding) as number[])
+    score: cosineSimilarity(queryVec, JSON.parse(row.embedding) as number[]) +
+      (educatorIntent && row.sourceKey.includes("guide-become-educator") ? 0.35 : 0)
   }));
   scored.sort((a, b) => b.score - a.score);
-  const top = scored.slice(0, 5);
+  const top = scored.slice(0, 8);
 
   const context = top
     .map(c => `[${c.label}]\n${c.text}`)

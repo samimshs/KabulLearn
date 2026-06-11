@@ -214,7 +214,6 @@ export function CertificateView({
                   </Link>
                 </div>
               ) : null}
-              <p className="mt-1 text-[11px] text-[#9896B8]">kabullearn.com · Afghan learners, lifelong knowledge</p>
             </div>
           </div>
 

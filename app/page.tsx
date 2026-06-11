@@ -155,13 +155,16 @@ export default async function Home() {
             )}
           </div>
 
-          <ul className="kl-feature-list grid grid-cols-2 gap-x-3 gap-y-1.5 sm:grid-cols-4">
+          <ul className="kl-feature-list flex flex-wrap gap-2.5">
             {features.map((feature) => (
-              <li key={feature.label} className="grid justify-items-center gap-1 text-center">
-                <span className="grid h-8 w-8 place-items-center rounded-[9px] bg-[var(--brand-50)] text-[var(--brand)]">
+              <li
+                key={feature.label}
+                className="flex items-center gap-2.5 rounded-full border border-[var(--border)] bg-white/75 py-2 pe-4 ps-2 shadow-[var(--shadow-sm)] backdrop-blur-sm"
+              >
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--brand-50)] text-[var(--brand)]">
                   {feature.icon}
                 </span>
-                <span className="text-[12px] font-[700] leading-tight text-[var(--ink-2)]">{feature.label}</span>
+                <span className="text-[13px] font-[700] leading-none text-[var(--ink-2)]">{feature.label}</span>
               </li>
             ))}
           </ul>
@@ -171,9 +174,15 @@ export default async function Home() {
         <div className="kl-home-art">
           <HomeHeroVisual stats={platformStats} />
         </div>
+
+        <a href="#kl-home-more" aria-label={dict.featuredCoursesTitle} className="kl-scroll-cue">
+          <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" aria-hidden="true">
+            <path d="M3.5 6 8 10.5 12.5 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </a>
       </section>
 
-      <div className="kl-home-body">
+      <div id="kl-home-more" className="kl-home-body">
       {/* Featured courses */}
       {featured.length > 0 && (
         <section className="mt-14" aria-label={dict.featuredCoursesTitle}>

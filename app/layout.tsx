@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
-import localFont from "next/font/local";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { auth } from "@/auth";
@@ -18,24 +17,6 @@ const manrope = Manrope({
   weight: ["300", "400", "600", "700", "800"],
   variable: "--font-sans",
   display: "swap"
-});
-
-// Arabic-script UI fonts for Pashto and Dari — applied via CSS when dir="rtl".
-// preload: false keeps them off the critical path for English visitors.
-const vazirmatn = localFont({
-  src: "../font/Vazirmatn/Vazirmatn-VariableFont_wght.ttf",
-  weight: "100 900",
-  variable: "--font-arabic",
-  display: "swap",
-  preload: false
-});
-
-const notoNaskhArabic = localFont({
-  src: "../font/Noto_Naskh_Arabic/NotoNaskhArabic-VariableFont_wght.ttf",
-  weight: "400 700",
-  variable: "--font-arabic-serif",
-  display: "swap",
-  preload: false
 });
 
 export const metadata: Metadata = {
@@ -80,7 +61,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   } catch { /* auth failure — treat as logged out */ }
 
   return (
-    <html lang={locale} dir={direction} className={`${manrope.variable} ${vazirmatn.variable} ${notoNaskhArabic.variable}`}>
+    <html lang={locale} dir={direction} className={manrope.variable}>
       <body>
         <LanguageProvider initialLocale={locale}>
           <a href="#main-content" className="kl-skip-link">{t.skipToContent}</a>

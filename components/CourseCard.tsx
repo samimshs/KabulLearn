@@ -178,33 +178,31 @@ export function CourseCard({ course, isAuthenticated = false }: { course: Course
             <span className="pr-badge pr-badge-cert">{t.certificateIncluded}</span>
           )}
           {course.isCreatorCourse ? (
-            <span className="rounded-full border border-[rgba(0,87,255,0.2)] bg-[var(--brand-50)] px-2.5 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] text-[var(--brand)]">
+            <span className="rounded-full border border-[rgba(0,87,255,0.2)] bg-[var(--brand-50)] px-2.5 py-1 text-[11px] font-[800] text-[var(--brand)]">
               {t.myCourse}
             </span>
           ) : course.isEnrolled ? (
             <span className="pr-badge pr-badge-green">{t.enrolled}</span>
           ) : null}
-          <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-0.5 text-[10px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
-            {course.modules.length} {t.modules}
-          </span>
         </div>
 
-        <h2 className="text-[15px] font-[800] leading-[1.3] tracking-[-0.3px] text-[var(--ink)]">{title}</h2>
-        <p className="mt-1.5 line-clamp-2 text-[12px] font-[500] leading-[1.6] text-[var(--muted)]">{desc}</p>
+        <h2 className="text-[16px] font-[800] leading-[1.3] tracking-[-0.3px] text-[var(--ink)]">{title}</h2>
+        <p className="mt-1.5 line-clamp-2 text-[13px] font-[400] leading-[1.6] text-[var(--muted)]">{desc}</p>
 
         {/* Metadata */}
-        {course.enrollmentCount !== undefined ? (
-          <p className="mt-2 text-[11px] font-[800] uppercase tracking-[1px] text-[var(--muted-2)]">
-            {lessonCount} {t.lessons}&nbsp;·&nbsp;~{estimateTime(lessonCount)}&nbsp;·&nbsp;{course.enrollmentCount.toLocaleString()} {t.enrolledStudents}
-          </p>
-        ) : null}
+        <p className="mt-2 text-[12px] font-[600] text-[var(--muted-2)]">
+          {course.modules.length} {t.modules}&nbsp;·&nbsp;{lessonCount} {t.lessons}&nbsp;·&nbsp;~{estimateTime(lessonCount)}
+          {course.enrollmentCount !== undefined && course.enrollmentCount >= 50
+            ? <>&nbsp;·&nbsp;{course.enrollmentCount.toLocaleString()} {t.enrolledStudents}</>
+            : null}
+        </p>
 
         {course.rating && course.rating.count > 0 ? (
           <p
             className="mt-1.5 text-[12px] font-[900] text-[var(--ink)]"
             aria-label={`${course.rating.average.toFixed(1)} out of 5 (${course.rating.count})`}
           >
-            <span className="text-[var(--brand)]" aria-hidden="true">★</span> {course.rating.average.toFixed(1)}
+            <span className="text-[var(--gold)]" aria-hidden="true">★</span> {course.rating.average.toFixed(1)}
             <span className="font-[700] text-[var(--muted)]"> ({course.rating.count})</span>
           </p>
         ) : null}

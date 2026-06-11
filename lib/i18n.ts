@@ -731,7 +731,9 @@ export const dictionaries = {
     howStep2Body: "Watch focused lessons, read guided notes, and pass short quizzes to unlock each module.",
     howStep3Title: "Earn a verified certificate",
     howStep3Body: "Finish a course and receive a certificate with a QR code anyone can verify online.",
-    startLearningFree: "Start learning — free"
+    startLearningFree: "Start learning — free",
+    homeClosingTitle: "Your future starts with one course",
+    homeClosingBody: "Join learners across Afghanistan and beyond. Free today, free always."
   },
   ps: {
     appName: "KabulLearn",
@@ -1463,7 +1465,9 @@ export const dictionaries = {
     howStep2Body: "متمرکز درسونه وګورئ، لارښود یادښتونه ولولئ، او د هر ماډیول د خلاصولو لپاره لنډې ازموینې تېرې کړئ.",
     howStep3Title: "تایید شوی سند ترلاسه کړئ",
     howStep3Body: "یو کورس پای ته ورسوئ او داسې سند ترلاسه کړئ چې QR کوډ یې هرڅوک آنلاین تاییدولی شي.",
-    startLearningFree: "زده کړه پیل کړئ — وړیا"
+    startLearningFree: "زده کړه پیل کړئ — وړیا",
+    homeClosingTitle: "ستاسو راتلونکی له یوه کورس څخه پیلیږي",
+    homeClosingBody: "په افغانستان او بهر کې له زده‌کوونکو سره یوځای شئ. نن وړیا، تل وړیا."
   },
   fa: {
     appName: "KabulLearn",
@@ -2195,7 +2199,9 @@ export const dictionaries = {
     howStep2Body: "درس‌های متمرکز را تماشا کنید، یادداشت‌های راهنما را بخوانید و با آزمون‌های کوتاه هر ماژول را باز کنید.",
     howStep3Title: "گواهی تأییدشده بگیرید",
     howStep3Body: "یک کورس را تمام کنید و گواهی‌ای با کد QR دریافت کنید که هر کسی می‌تواند آنلاین تأیید کند.",
-    startLearningFree: "یادگیری را شروع کنید — رایگان"
+    startLearningFree: "یادگیری را شروع کنید — رایگان",
+    homeClosingTitle: "آینده شما با یک کورس آغاز می‌شود",
+    homeClosingBody: "به یادگیرندگان در افغانستان و فراتر از آن بپیوندید. امروز رایگان، همیشه رایگان."
   }
 } as const;
 

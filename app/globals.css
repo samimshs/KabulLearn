@@ -10,7 +10,7 @@
   --ink:          #0A0914;   /* near-black with purple tint */
   --ink-2:        #2D2B42;
   --muted:        #6B6987;
-  --muted-2:      #9896B8;
+  --muted-2:      #7C7A9C;
 
   --border:       #E4E3F2;
   --surface:      #F7F7FB;
@@ -22,6 +22,10 @@
   --warning-50:   #FFF3D6;
   --danger:       #C42B2B;
   --danger-50:    #FEEFEF;
+
+  --gold:         #C9A84C;
+  --gold-deep:    #8A6100;
+  --gold-50:      #FFFBF0;
 
   --radius-sm:    6px;
   --radius:       10px;
@@ -160,9 +164,9 @@ textarea {
 
 .pr-eyebrow {
   color: var(--brand);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 3px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
   line-height: 1.2;
   text-transform: uppercase;
 }
@@ -186,7 +190,7 @@ textarea {
 .pr-copy {
   color: var(--muted);
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.75;
 }
 
@@ -278,11 +282,10 @@ textarea {
 }
 
 /* ─── KabulLearn landing hero ────────────────────────────────── */
+/* The page grows with its content — the hero alone fills the first viewport. */
 .kl-home-page {
   min-height: 100svh;
-  height: 100svh;
   max-width: none;
-  overflow: hidden;
   padding: 0;
   background:
     radial-gradient(circle at 79% 16%, rgba(0, 87, 255, 0.12), transparent 28%),
@@ -294,10 +297,23 @@ textarea {
   position: relative;
   isolation: isolate;
   direction: ltr;
-  min-height: 100svh;
-  max-height: 100svh;
+  min-height: calc(100svh - 4rem); /* fill first screen minus sticky header */
   overflow: hidden;
   padding: clamp(16px, 2.1vw, 34px) clamp(42px, 5vw, 92px) clamp(18px, 2.4vw, 36px);
+}
+
+/* Sections below the hero get the standard content width the hero opts out of */
+.kl-home-body {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px 48px;
+}
+
+@media (min-width: 1024px) {
+  .kl-home-body {
+    padding: 0 32px 64px;
+  }
 }
 
 .kl-home-hero::before {
@@ -1587,9 +1603,9 @@ body:has(.kl-home-page) > footer {
   background: var(--brand);
   padding: 4px 10px;
   color: #fff;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
   line-height: 1;
   text-transform: uppercase;
 }
@@ -1607,9 +1623,9 @@ body:has(.kl-home-page) > footer {
 }
 
 .pr-badge-cert {
-  border-color: rgba(124, 58, 237, 0.2);
-  background: rgba(124, 58, 237, 0.07);
-  color: #7C3AED;
+  border-color: rgba(201, 168, 76, 0.45);
+  background: var(--gold-50);
+  color: var(--gold-deep);
 }
 
 .pr-muted-box {

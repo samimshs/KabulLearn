@@ -161,7 +161,7 @@ export default async function Home() {
                 <span className="grid h-8 w-8 place-items-center rounded-[9px] bg-[var(--brand-50)] text-[var(--brand)]">
                   {feature.icon}
                 </span>
-                <span className="text-[10px] font-[800] leading-tight text-[var(--ink-2)]">{feature.label}</span>
+                <span className="text-[12px] font-[700] leading-tight text-[var(--ink-2)]">{feature.label}</span>
               </li>
             ))}
           </ul>
@@ -173,6 +173,7 @@ export default async function Home() {
         </div>
       </section>
 
+      <div className="kl-home-body">
       {/* Featured courses */}
       {featured.length > 0 && (
         <section className="mt-14" aria-label={dict.featuredCoursesTitle}>
@@ -205,12 +206,12 @@ export default async function Home() {
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--brand-50)] text-[var(--brand)]">
                     {HOW_ICONS[i]}
                   </span>
-                  <span className="text-[12px] font-[900] uppercase tracking-[2px] text-[var(--muted-2)]">
+                  <span className="grid h-7 w-7 place-items-center rounded-full bg-[var(--gold-50)] text-[13px] font-[800] text-[var(--gold-deep)] ring-1 ring-[rgba(201,168,76,0.4)]">
                     {formatNumber(i + 1, locale)}
                   </span>
                 </div>
                 <h3 className="mt-4 text-[16px] font-[800] text-[var(--ink)]">{step.title}</h3>
-                <p className="mt-2 text-[14px] font-[500] leading-relaxed text-[var(--muted)]">{step.body}</p>
+                <p className="mt-2 text-[14px] font-[400] leading-relaxed text-[var(--muted)]">{step.body}</p>
               </li>
             ))}
           </ol>
@@ -219,6 +220,27 @@ export default async function Home() {
 
       {/* Educator CTA — hidden for users who already have a workspace */}
       {role !== "EDUCATOR" && role !== "ADMIN" && <EducatorCta />}
+
+      {/* Closing CTA — guests only */}
+      {!role && (
+        <section className="mt-14 mb-4 rounded-[var(--radius-xl)] bg-gradient-to-br from-[#021533] via-[#00255f] to-[var(--brand)] px-7 py-12 text-center lg:py-16">
+          <h2 className="text-[28px] font-[800] tracking-[-0.6px] text-white lg:text-[34px]">
+            {dict.homeClosingTitle}
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-[15px] font-[400] leading-relaxed text-white/80">
+            {dict.homeClosingBody}
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link href="/register" className="pr-btn-primary !border-white !bg-white !text-[var(--brand)] hover:!bg-white/90">
+              {dict.startLearningFree}
+            </Link>
+            <Link href="/courses" className="pr-btn-ghost !border-white/40 !bg-transparent !text-white hover:!border-white hover:!text-white">
+              {dict.heroCta}
+            </Link>
+          </div>
+        </section>
+      )}
+      </div>
     </main>
   );
 }

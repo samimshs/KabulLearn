@@ -5,9 +5,28 @@ const nextConfig = {
   serverExternalPackages: ["pdfkit"],
   images: {
     remotePatterns: [
-      // Allow any HTTPS image URL (user-uploaded avatars can come from any host)
-      { protocol: "https", hostname: "**" }
+      // Vercel Blob (user-uploaded avatars)
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+      // Google OAuth profile pictures
+      { protocol: "https", hostname: "lh3.googleusercontent.com" }
     ]
+  },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          // Prevent clickjacking — disallow embedding in iframes
+          { key: "X-Frame-Options", value: "DENY" },
+          // Prevent MIME-sniffing attacks
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          // Don't leak internal URLs (with tokens, route params) in Referer headers
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // Deny access to camera, mic, geolocation
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" }
+        ]
+      }
+    ];
   }
 };
 

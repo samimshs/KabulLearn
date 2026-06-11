@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { UserRole, UserStatus } from "@prisma/client";
 import { createVerificationToken, isDisposableEmail, sendVerificationEmail } from "@/lib/email-verification";
+import { assertRateLimit } from "@/lib/security";
 import type { Locale } from "@/lib/i18n";
 
 function normalizeLocale(value: FormDataEntryValue | null): Locale {
@@ -83,6 +84,12 @@ export async function registerUser(
 
   if (isDisposableEmail(email)) {
     return { error: m.permanentEmail };
+  }
+
+  try {
+    await assertRateLimit(`register:${email}`, 5);
+  } catch {
+    return { error: m.createUnavailable };
   }
 
   try {

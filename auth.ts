@@ -7,6 +7,7 @@ import { z } from "zod";
 import { UserRole, UserStatus } from "@prisma/client";
 import { authConfig } from "@/auth.config";
 import { db } from "@/lib/db";
+import { assertRateLimit } from "@/lib/security";
 
 const credentialsSchema = z.object({
   email: z.string().email().transform((value) => value.toLowerCase()),
@@ -33,6 +34,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const parsed = credentialsSchema.safeParse(rawCredentials);
 
         if (!parsed.success) {
+          return null;
+        }
+
+        try {
+          await assertRateLimit(`login:${parsed.data.email}`, 10);
+        } catch {
           return null;
         }
 

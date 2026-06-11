@@ -100,9 +100,13 @@ const DIVIDER = `<hr style="border:none;border-top:1px solid #e2e8f0;margin:24px
 const EN_LABEL = `<p style="font-size:11px;color:#526174;margin:0 0 12px">English ↓</p>`;
 
 function verificationHtml(verifyUrl: string, name: string | null, locale: string): string {
+  const safeNameEn = esc(name ?? "learner");
+  const safeNamePs = esc(name ?? "زده کوونکی");
+  const safeNameFa = esc(name ?? "یادگیرنده");
+
   const enBlock = `
     <h1 style="margin:0 0 12px">Verify your KabulLearn account</h1>
-    <p>Hello ${name ?? "learner"},</p>
+    <p>Hello ${safeNameEn},</p>
     <p>Click the link below to activate your account. This link expires in 15 minutes.</p>
     <p><a href="${verifyUrl}" style="${BTN}">Verify account</a></p>
     <p>If the button does not work, open this URL:</p>
@@ -112,7 +116,7 @@ function verificationHtml(verifyUrl: string, name: string | null, locale: string
     return `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#102033">
       <div dir="rtl" style="text-align:right">
         <h1 style="margin:0 0 12px">د KabulLearn حساب تایید کړئ</h1>
-        <p>سلام ${name ?? "زده کوونکی"},</p>
+        <p>سلام ${safeNamePs},</p>
         <p>د خپل حساب د فعالولو لپاره لاندې تڼۍ کلیک کړئ. دا لینک ۱۵ دقیقو کې پای ته رسیږي.</p>
         <p><a href="${verifyUrl}" style="${BTN}">حساب تایید کړئ</a></p>
         <p>که تڼۍ کار نه کوي، دا URL پرانیزئ:</p>
@@ -126,7 +130,7 @@ function verificationHtml(verifyUrl: string, name: string | null, locale: string
     return `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#102033">
       <div dir="rtl" style="text-align:right">
         <h1 style="margin:0 0 12px">تأیید حساب KabulLearn شما</h1>
-        <p>سلام ${name ?? "یادگیرنده"},</p>
+        <p>سلام ${safeNameFa},</p>
         <p>برای فعال‌سازی حساب خود روی دکمه زیر کلیک کنید. این لینک در ۱۵ دقیقه منقضی می‌شود.</p>
         <p><a href="${verifyUrl}" style="${BTN}">تأیید حساب</a></p>
         <p>اگر دکمه کار نمی‌کند، این URL را باز کنید:</p>
@@ -140,9 +144,13 @@ function verificationHtml(verifyUrl: string, name: string | null, locale: string
 }
 
 function passwordResetHtml(resetUrl: string, name: string | null, locale: string): string {
+  const safeNameEn = esc(name ?? "learner");
+  const safeNamePs = esc(name ?? "زده کوونکی");
+  const safeNameFa = esc(name ?? "یادگیرنده");
+
   const enBlock = `
     <h1 style="margin:0 0 12px">Reset your KabulLearn password</h1>
-    <p>Hello ${name ?? "learner"},</p>
+    <p>Hello ${safeNameEn},</p>
     <p>Click the link below to choose a new password. This link expires in 30 minutes.</p>
     <p><a href="${resetUrl}" style="${BTN}">Reset password</a></p>
     <p>If you did not request this change, you can ignore this email.</p>
@@ -153,7 +161,7 @@ function passwordResetHtml(resetUrl: string, name: string | null, locale: string
     return `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#102033">
       <div dir="rtl" style="text-align:right">
         <h1 style="margin:0 0 12px">د KabulLearn پاسورډ بدل کړئ</h1>
-        <p>سلام ${name ?? "زده کوونکی"},</p>
+        <p>سلام ${safeNamePs},</p>
         <p>د نوي پاسورډ د ټاکلو لپاره لاندې تڼۍ کلیک کړئ. دا لینک ۳۰ دقیقو کې پای ته رسیږي.</p>
         <p><a href="${resetUrl}" style="${BTN}">پاسورډ بدل کړئ</a></p>
         <p>که تاسو دا بدلون نه دی غوښتی، دا بریښنالیک له پامه وباسئ.</p>
@@ -168,7 +176,7 @@ function passwordResetHtml(resetUrl: string, name: string | null, locale: string
     return `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#102033">
       <div dir="rtl" style="text-align:right">
         <h1 style="margin:0 0 12px">بازنشانی رمز عبور KabulLearn شما</h1>
-        <p>سلام ${name ?? "یادگیرنده"},</p>
+        <p>سلام ${safeNameFa},</p>
         <p>برای انتخاب رمز عبور جدید روی دکمه زیر کلیک کنید. این لینک در ۳۰ دقیقه منقضی می‌شود.</p>
         <p><a href="${resetUrl}" style="${BTN}">بازنشانی رمز عبور</a></p>
         <p>اگر این تغییر را درخواست نکردید، این ایمیل را نادیده بگیرید.</p>
@@ -185,11 +193,12 @@ function passwordResetHtml(resetUrl: string, name: string | null, locale: string
 // Educator welcome is always trilingual — it's sent by an admin on the user's behalf,
 // so we can't reliably know which language the recipient prefers at that moment.
 function educatorWelcomeHtml(name: string): string {
+  const safeName = esc(name);
   return `<div style="font-family:Arial,sans-serif;line-height:1.7;color:#102033;max-width:600px">
 
     <!-- Pashto -->
     <div dir="rtl" style="text-align:right">
-      <h1 style="margin:0 0 8px;color:#0057FF">مبارک شه، ${name}!</h1>
+      <h1 style="margin:0 0 8px;color:#0057FF">مبارک شه، ${safeName}!</h1>
       <p style="margin:0 0 20px;font-size:16px">ستاسو غوښتنه تایید شوه — تاسو اوس KabulLearn کې استاد یئ.</p>
       <h2 style="font-size:14px;font-weight:800;color:#526174;margin:0 0 8px">د ننوتلو لارښوونه</h2>
       <p>ستاسو حساب هغه شان دی چې د زده کوونکي پر مهال مو کارولو — ورته ایمیل، ورته پټنوم. <a href="https://kabullearn.com/login" style="color:#0057FF">kabullearn.com</a> کې ننوځئ.</p>
@@ -208,7 +217,7 @@ function educatorWelcomeHtml(name: string): string {
 
     <!-- Dari -->
     <div dir="rtl" style="text-align:right">
-      <h1 style="margin:0 0 8px;color:#0057FF">تبریک، ${name}!</h1>
+      <h1 style="margin:0 0 8px;color:#0057FF">تبریک، ${safeName}!</h1>
       <p style="margin:0 0 20px;font-size:16px">درخواست شما تأیید شد — شما اکنون استاد KabulLearn هستید.</p>
       <h2 style="font-size:14px;font-weight:800;color:#526174;margin:0 0 8px">راهنمای ورود</h2>
       <p>حساب شما همان است که به عنوان شاگرد داشتید — همان ایمیل، همان رمز عبور. در <a href="https://kabullearn.com/login" style="color:#0057FF">kabullearn.com</a> وارد شوید.</p>
@@ -227,7 +236,7 @@ function educatorWelcomeHtml(name: string): string {
 
     <!-- English -->
     <div dir="ltr">
-      <h1 style="margin:0 0 8px;color:#0057FF">Congratulations, ${name}!</h1>
+      <h1 style="margin:0 0 8px;color:#0057FF">Congratulations, ${safeName}!</h1>
       <p style="margin:0 0 20px;font-size:16px">Your application has been approved — you are now an educator on KabulLearn.</p>
       <h2 style="font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#526174;margin:0 0 8px">How to log in as an educator</h2>
       <p>Your account is the <strong>same account</strong> you used as a student — same email, same password. Sign in at <a href="https://kabullearn.com/login" style="color:#0057FF">kabullearn.com</a> and you will be taken directly to your <strong>Educator Dashboard</strong>.</p>
@@ -246,13 +255,14 @@ function educatorWelcomeHtml(name: string): string {
 }
 
 function educatorRejectionHtml(name: string, reason: string): string {
+  const safeName = esc(name);
   const safeReason = reason.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   return `<div style="font-family:Arial,sans-serif;line-height:1.7;color:#102033;max-width:600px">
 
     <!-- Pashto -->
     <div dir="rtl" style="text-align:right">
       <h1 style="margin:0 0 8px;color:#102033">د KabulLearn د استاد غوښتنه</h1>
-      <p>سلام ${name},</p>
+      <p>سلام ${safeName},</p>
       <p>مننه چې د KabulLearn استاد کیدو لپاره مو غوښتنه وکړه. له بده مرغه، ستاسو غوښتنه اوس نه شي منل کیدی.</p>
       <div style="background:#f8f9fb;border-left:3px solid #0057ff;padding:12px 16px;margin:16px 0;border-radius:4px">
         <p style="margin:0;font-weight:700">د رد کیدو دلیل:</p>
@@ -267,7 +277,7 @@ function educatorRejectionHtml(name: string, reason: string): string {
     <!-- Dari -->
     <div dir="rtl" style="text-align:right">
       <h1 style="margin:0 0 8px;color:#102033">درخواست استادی KabulLearn</h1>
-      <p>سلام ${name},</p>
+      <p>سلام ${safeName},</p>
       <p>ممنون از اینکه برای تدریس در KabulLearn درخواست دادید. متأسفانه درخواست شما در این مرحله پذیرفته نشد.</p>
       <div style="background:#f8f9fb;border-left:3px solid #0057ff;padding:12px 16px;margin:16px 0;border-radius:4px">
         <p style="margin:0;font-weight:700">دلیل رد درخواست:</p>
@@ -282,7 +292,7 @@ function educatorRejectionHtml(name: string, reason: string): string {
     <!-- English -->
     <div dir="ltr">
       <h1 style="margin:0 0 8px;color:#102033">Your KabulLearn Educator Application</h1>
-      <p>Hello ${name},</p>
+      <p>Hello ${safeName},</p>
       <p>Thank you for applying to teach on KabulLearn. Unfortunately, your application could not be approved at this time.</p>
       <div style="background:#f8f9fb;border-left:3px solid #0057ff;padding:12px 16px;margin:16px 0;border-radius:4px">
         <p style="margin:0;font-weight:700">Reason:</p>

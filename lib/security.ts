@@ -10,24 +10,20 @@ export async function assertRateLimit(key: string, limit = 30) {
   const now = new Date();
   const resetAt = new Date(now.getTime() + rateLimitWindowMs());
 
+  // Reset expired window first so the subsequent increment starts from 1
+  await db.rateLimitBucket.updateMany({
+    where: { key, resetAt: { lt: now } },
+    data: { count: 0, resetAt }
+  });
+
   const bucket = await db.rateLimitBucket.upsert({
     where: { key },
     create: { key, count: 1, resetAt },
-    update: {
-      count: { increment: 1 }
-    }
+    update: { count: { increment: 1 } }
   });
 
-  if (bucket.resetAt < now) {
-    await db.rateLimitBucket.update({
-      where: { key },
-      data: { count: 1, resetAt }
-    });
-    return;
-  }
-
   if (bucket.count > limit) {
-    throw new Error("Too many submissions. Please wait a moment and try again.");
+    throw new Error("Too many requests. Please wait a moment and try again.");
   }
 }
 
@@ -39,7 +35,8 @@ export function signHeartbeat(input: {
   durationSec: number;
   consumedPct: number;
 }) {
-  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "poharana-dev-secret";
+  const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+  if (!secret) throw new Error("AUTH_SECRET is required for heartbeat signing.");
   return createHmac("sha256", secret)
     .update([
       input.userId,

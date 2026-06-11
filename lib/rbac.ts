@@ -52,7 +52,7 @@ export async function requireMinimumRole(role: UserRole) {
 }
 
 export async function requireEducator() {
-  return requireRole([UserRole.EDUCATOR]);
+  return requireRole([UserRole.EDUCATOR, UserRole.ADMIN]);
 }
 
 export async function requireAdmin() {

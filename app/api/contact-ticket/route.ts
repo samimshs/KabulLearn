@@ -1,10 +1,12 @@
+import { randomInt } from "crypto";
 import { NextResponse } from "next/server";
 import { sendTicketConfirmationEmail } from "@/lib/email-verification";
+import { assertRateLimit } from "@/lib/security";
 
 const MAX_FILE_BYTES = 3 * 1024 * 1024;
 
 function generateTicketNumber(): string {
-  return `KL-${String(Math.floor(100000 + Math.random() * 900000))}`;
+  return `KL-${String(randomInt(100000, 1000000))}`;
 }
 
 export async function POST(request: Request) {
@@ -22,15 +24,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, ticketNumber: "KL-000000" });
   }
 
-  // Timing — less than 5 seconds between page load and submit = bot
-  const loadedAt = Number(body.get("_t") ?? 0);
-  if (!loadedAt || Date.now() - loadedAt < 5000) {
-    return NextResponse.json(
-      { ok: false, error: "Please take a moment to review your message before submitting." },
-      { status: 429 }
-    );
-  }
-
   const name        = (body.get("name")        as string | null)?.trim() ?? "";
   const email       = (body.get("email")       as string | null)?.trim() ?? "";
   const issueType   = (body.get("issueType")   as string | null)?.trim() ?? "";
@@ -43,6 +36,15 @@ export async function POST(request: Request) {
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ ok: false, error: "Please enter a valid email address." }, { status: 400 });
+  }
+
+  try {
+    await assertRateLimit(`contact-ticket:${email}`, 3);
+  } catch {
+    return NextResponse.json(
+      { ok: false, error: "Too many submissions. Please wait a moment and try again." },
+      { status: 429 }
+    );
   }
 
   let screenshotBase64: string | null = null;

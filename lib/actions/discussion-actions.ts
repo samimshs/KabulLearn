@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { assertRateLimit } from "@/lib/security";
 
 export type ActionResult<T = void> =
   | { ok: true; data: T }
@@ -34,6 +35,8 @@ export async function createDiscussionThread(input: z.infer<typeof createThreadS
     if (!session?.user?.id) throw new Error("Authentication required.");
     const values = createThreadSchema.parse(input);
 
+    await assertRateLimit(`discussion-thread:${session.user.id}`, 5);
+
     const enrollment = await db.enrollment.findUnique({
       where: { userId_courseId: { userId: session.user.id, courseId: values.courseId } }
     });
@@ -60,6 +63,8 @@ export async function createDiscussionReply(input: z.infer<typeof createReplySch
     const session = await auth();
     if (!session?.user?.id) throw new Error("Authentication required.");
     const values = createReplySchema.parse(input);
+
+    await assertRateLimit(`discussion-reply:${session.user.id}`, 10);
 
     const thread = await db.discussionThread.findUnique({
       where: { id: values.threadId },

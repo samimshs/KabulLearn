@@ -5,6 +5,7 @@ import { z } from "zod";
 import { UserRole } from "@prisma/client";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { assertRateLimit } from "@/lib/security";
 
 export type ActionResult<T = void> =
   | { ok: true; data: T }
@@ -59,6 +60,8 @@ export async function sendDirectMessage(input: z.infer<typeof sendSchema>): Prom
 
     const { recipientId, body } = sendSchema.parse(input);
     if (recipientId === session.user.id) throw new Error("You cannot message yourself.");
+
+    await assertRateLimit(`direct-message:${session.user.id}`, 20);
 
     const [sender, recipient] = await Promise.all([
       db.user.findUnique({ where: { id: session.user.id }, select: { id: true, role: true } }),

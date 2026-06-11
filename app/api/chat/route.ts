@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { UserStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { openai, EMBED_MODEL, CHAT_MODEL, cosineSimilarity } from "@/lib/openai";
@@ -7,6 +8,14 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return new Response("Unauthorized", { status: 401 });
+  }
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { status: true }
+  });
+  if (!user || user.status === UserStatus.VERIFICATION_PENDING) {
+    return new Response("Please verify your email before using AI chat.", { status: 403 });
   }
 
   const { message } = (await req.json()) as {

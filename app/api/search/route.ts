@@ -1,13 +1,21 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { CourseStatus } from "@prisma/client";
+import { assertRateLimit } from "@/lib/security";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() ?? "";
+  const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const ip = forwardedFor || request.headers.get("x-real-ip") || "unknown";
 
-  if (!q || q.length < 2) {
+  if (!q || q.length < 3) {
     return NextResponse.json({ courses: [], lessons: [], creators: [] });
+  }
+  try {
+    await assertRateLimit(`search:${ip}`, 60);
+  } catch {
+    return NextResponse.json({ courses: [], lessons: [], creators: [] }, { status: 429 });
   }
 
   const [courses, lessons, creators] = await Promise.allSettled([

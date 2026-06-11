@@ -5,6 +5,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { getCourseCertificateStatus } from "@/lib/actions/certificate-actions";
+import { assertCourseEnrollment } from "@/lib/security";
 
 export type ActionResult<T = void> =
   | { ok: true; data: T }
@@ -27,6 +28,8 @@ export async function submitCourseRating(input: z.infer<typeof ratingSchema>): P
     if (!session?.user?.id) throw new Error("Authentication required.");
 
     const values = ratingSchema.parse(input);
+    await assertCourseEnrollment({ userId: session.user.id, courseId: values.courseId });
+
     const certificateStatus = await getCourseCertificateStatus(values.courseId, session.user.id);
     if (!certificateStatus) throw new Error("Course not found.");
 

@@ -81,6 +81,7 @@ model User {
   role          UserRole  @default(STUDENT)
   status        UserStatus @default(ACTIVE)
   locale        String    @default("en")
+  sessionVersion Int      @default(0)
 
   accounts        Account[]
   sessions        Session[]
@@ -104,9 +105,27 @@ model User {
   streak           UserStreak?
   notifications    AppNotification[]
   lessonNotes      LessonNote[]
+  adminAuditEvents AdminAuditLog[] @relation("AdminAuditActor")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AdminAuditLog {
+  id        String   @id @default(cuid())
+  actorId   String
+  action    String
+  targetId  String?
+  targetType String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  actor User @relation("AdminAuditActor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([actorId])
+  @@index([action])
+  @@index([targetType, targetId])
+  @@index([createdAt])
 }
 
 model DirectMessage {

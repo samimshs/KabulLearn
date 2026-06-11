@@ -5,8 +5,11 @@ import { db } from "@/lib/db";
 import { submitQuizAttempt } from "@/lib/actions/quiz-actions";
 
 vi.mock("@/auth", () => ({ auth: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/lib/actions/certificate-actions", () => ({ createCertificateIfEligible: vi.fn() }));
 vi.mock("@/lib/security", () => ({
+  assertCourseEnrollment: vi.fn(),
+  assertPrecedingLessonsCompleted: vi.fn(),
   assertPrerequisiteModulesCompleted: vi.fn(),
   assertRateLimit: vi.fn()
 }));
@@ -87,6 +90,7 @@ describe("submitQuizAttempt", () => {
       ]
     });
 
+    if (!result.ok) throw new Error(result.error);
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.data.score).toBe(100);

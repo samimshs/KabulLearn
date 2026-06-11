@@ -2,13 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { UserRole } from "@prisma/client";
-import { hash } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAdmin, requireEducator } from "@/lib/rbac";
 import { auth } from "@/auth";
 import { sendEducatorWelcomeEmail } from "@/lib/email-verification";
 import { createSystemInboxMessage } from "@/lib/actions/message-actions";
+import { writeAdminAudit } from "@/lib/admin-audit";
 
 export type ActionResult<T = void> =
   | {
@@ -33,16 +34,19 @@ function toActionError(error: unknown): ActionResult<never> {
 
 const updateUserRoleSchema = z.object({
   userId: z.string().min(1),
-  role: z.nativeEnum(UserRole)
+  role: z.nativeEnum(UserRole),
+  adminPassword: z.string().optional()
 });
 
 const resetUserPasswordSchema = z.object({
   userId: z.string().min(1),
-  password: z.string().min(8, "Temporary password must be at least 8 characters.").max(128)
+  password: z.string().min(8, "Temporary password must be at least 8 characters.").max(128),
+  adminPassword: z.string().optional()
 });
 
 const deleteUserSchema = z.object({
-  userId: z.string().min(1)
+  userId: z.string().min(1),
+  adminPassword: z.string().optional()
 });
 
 const educatorProfileSchema = z.object({
@@ -54,19 +58,42 @@ const educatorProfileSchema = z.object({
   )
 });
 
+async function requireAdminPasswordIfConfigured(adminId: string, adminPassword?: string) {
+  const admin = await db.user.findUnique({
+    where: { id: adminId },
+    select: { passwordHash: true }
+  });
+  if (!admin?.passwordHash) return;
+  if (!adminPassword) throw new Error("Enter your admin password to confirm this sensitive action.");
+  const valid = await compare(adminPassword, admin.passwordHash);
+  if (!valid) throw new Error("Admin password is incorrect.");
+}
+
 export async function updateUserRole(input: z.infer<typeof updateUserRoleSchema>): Promise<ActionResult> {
   try {
     const admin = await requireAdmin();
-    const { userId, role } = updateUserRoleSchema.parse(input);
+    const { userId, role, adminPassword } = updateUserRoleSchema.parse(input);
+    await requireAdminPasswordIfConfigured(admin.id, adminPassword);
 
     if (userId === admin.id && role !== UserRole.ADMIN) {
       throw new Error("You cannot remove your own admin access.");
     }
 
+    const existingUser = await db.user.findUnique({
+      where: { id: userId },
+      select: { role: true }
+    });
     const updatedUser = await db.user.update({
       where: { id: userId },
-      data: { role },
+      data: { role, sessionVersion: { increment: 1 } },
       select: { email: true, name: true }
+    });
+    await writeAdminAudit({
+      actorId: admin.id,
+      action: "user.role.update",
+      targetId: userId,
+      targetType: "User",
+      metadata: { from: existingUser?.role ?? null, to: role }
     });
 
     if (role === UserRole.EDUCATOR) {
@@ -100,13 +127,20 @@ export async function updateUserRole(input: z.infer<typeof updateUserRoleSchema>
 
 export async function resetUserPassword(input: z.infer<typeof resetUserPasswordSchema>): Promise<ActionResult> {
   try {
-    await requireAdmin();
-    const { userId, password } = resetUserPasswordSchema.parse(input);
+    const admin = await requireAdmin();
+    const { userId, password, adminPassword } = resetUserPasswordSchema.parse(input);
+    await requireAdminPasswordIfConfigured(admin.id, adminPassword);
     const passwordHash = await hash(password, 12);
 
     await db.user.update({
       where: { id: userId },
-      data: { passwordHash }
+      data: { passwordHash, sessionVersion: { increment: 1 } }
+    });
+    await writeAdminAudit({
+      actorId: admin.id,
+      action: "user.password.reset",
+      targetId: userId,
+      targetType: "User"
     });
 
     revalidatePath("/admin");
@@ -120,13 +154,22 @@ export async function resetUserPassword(input: z.infer<typeof resetUserPasswordS
 export async function deleteUser(input: z.infer<typeof deleteUserSchema>): Promise<ActionResult> {
   try {
     const admin = await requireAdmin();
-    const { userId } = deleteUserSchema.parse(input);
+    const { userId, adminPassword } = deleteUserSchema.parse(input);
+    await requireAdminPasswordIfConfigured(admin.id, adminPassword);
 
     if (userId === admin.id) {
       throw new Error("You cannot delete your own admin account.");
     }
 
     await db.$transaction([
+      db.adminAuditLog.create({
+        data: {
+          actorId: admin.id,
+          action: "user.delete",
+          targetId: userId,
+          targetType: "User"
+        }
+      }),
       // CourseReviewEvent uses onDelete: Restrict — clear audit rows first
       db.courseReviewEvent.deleteMany({ where: { actorId: userId } }),
       db.course.updateMany({

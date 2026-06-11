@@ -1,6 +1,6 @@
 # PohaRana
 
-PohaRana is a Next.js LMS for Afghan learners. Student-facing learning content supports English and Pashto, while creator/educator and admin workflows are English-only.
+PohaRana is a Next.js LMS for Afghan learners. Student-facing learning content supports English, Pashto, and Dari, while creator/educator and admin workflows are English-first.
 
 ## Run Locally
 
@@ -57,10 +57,26 @@ npm run db:seed
 - Student-facing course, lesson, and quiz content is now served from published course queries in the database.
 - `components`: current student-facing course, lesson, quiz, language, and video components.
 
+## Security Hardening To-Do
+
+Status legend: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` blocked or needs review.
+
+- [x] Document `OPENAI_API_KEY` in `.env.example`; keep real secrets only in ignored `.env.local`.
+- [x] Add AI chat rate limits, max prompt size, and scoped retrieval.
+- [x] Add enrollment checks to lesson progress, quiz attempts, certificate issuance, ratings, and notes.
+- [x] Add admin audit logging for role changes, password resets, user deletion, and course review decisions.
+- [x] Add session-version invalidation after admin password resets and role changes.
+- [x] Add stricter security headers including CSP and HSTS.
+- [x] Harden uploads by validating image magic bytes, disallowing animated/original risky formats where practical, and rate limiting avatar uploads.
+- [x] Harden contact ticket file handling and remove sensitive response-body logging.
+- [x] Add search endpoint rate limiting.
+- [x] Upgrade vulnerable dev dependencies reported by `npm audit`.
+- [ ] Add 2FA/passkeys for admins and educators. Skipped for now by request.
+
 ## Language Policy
 
-- Student-facing content supports English and Pashto.
-- Pashto student pages must preserve RTL behavior.
+- Student-facing content supports English, Pashto, and Dari.
+- Pashto and Dari student pages must preserve RTL behavior.
 - Creator/educator dashboards are English-only.
 - Admin dashboards are English-only.
 - Dynamic learning records use bilingual fields for course, module, lesson, reading, quiz, question, and answer-choice content.

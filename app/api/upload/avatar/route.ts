@@ -1,14 +1,14 @@
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { assertRateLimit } from "@/lib/security";
 
 const MAX_SIZE = 3 * 1024 * 1024; // 3 MB
-const ALLOWED = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"]);
+const ALLOWED = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp"]);
 
 function detectMimeFromBytes(bytes: Uint8Array): string | null {
   if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg";
   if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return "image/png";
-  if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38) return "image/gif";
   // WebP: RIFF????WEBP
   if (
     bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
@@ -29,6 +29,11 @@ export async function POST(request: Request) {
       { status: 503 }
     );
   }
+  try {
+    await assertRateLimit(`avatar-upload:${session.user.id}`, 10);
+  } catch {
+    return NextResponse.json({ error: "Too many uploads. Please wait a moment and try again." }, { status: 429 });
+  }
 
   const form = await request.formData().catch(() => null);
   const file = form?.get("file") as File | null;
@@ -38,7 +43,7 @@ export async function POST(request: Request) {
   }
 
   if (!ALLOWED.has(file.type)) {
-    return NextResponse.json({ error: "Only JPG, PNG, WebP and GIF images are accepted." }, { status: 400 });
+    return NextResponse.json({ error: "Only JPG, PNG, and WebP images are accepted." }, { status: 400 });
   }
 
   if (file.size > MAX_SIZE) {

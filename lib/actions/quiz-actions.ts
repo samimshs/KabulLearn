@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { LessonType, ProgressStatus, QuestionType } from "@prisma/client";
 import { createCertificateIfEligible } from "@/lib/actions/certificate-actions";
-import { assertPrecedingLessonsCompleted, assertRateLimit } from "@/lib/security";
+import { assertCourseEnrollment, assertPrecedingLessonsCompleted, assertRateLimit } from "@/lib/security";
 
 export type ActionResult<T = void> =
   | {
@@ -54,9 +54,9 @@ export async function startQuizAttempt(
     if (!session?.user?.id) throw new Error("Authentication required.");
     if (session.user.status === "VERIFICATION_PENDING") throw new Error("Verify your email before continuing.");
 
-    await assertRateLimit(`start-quiz:${session.user.id}:${input.lessonId}`, 20);
-
     const values = quizAttemptSchema.parse(input);
+    await assertRateLimit(`start-quiz:${session.user.id}:${values.lessonId}`, 20);
+    await assertCourseEnrollment({ userId: session.user.id, courseId: values.courseId });
     const lesson = await db.lesson.findUnique({
       where: { id: values.lessonId },
       select: {
@@ -118,6 +118,7 @@ export async function submitQuizAttempt(
     }
 
     await assertRateLimit(`submit-quiz:${session.user.id}:${lessonId}`, 12);
+    await assertCourseEnrollment({ userId: session.user.id, courseId });
 
     const lesson = await db.lesson.findUnique({
       where: {
@@ -243,6 +244,9 @@ export async function submitQuizAttempt(
     const passingScore = lesson.passingScore ?? 70;
     const passed = score >= passingScore;
     const durationMs = Date.now() - attempt.startedAt.getTime();
+    if (durationMs < 3_000) {
+      throw new Error("This quiz was submitted too quickly. Please start a fresh attempt and answer carefully.");
+    }
 
     const submissionAnswers: Array<{ questionId: string; answerChoiceId?: string; textAnswer?: string }> = [];
     for (const selected of selectedAnswers) {

@@ -1,6 +1,7 @@
 import { CourseStatus, LessonType, ProgressStatus } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
+import { assertCourseEnrollment } from "@/lib/security";
 
 export type CourseCertificateStatus = {
   courseId: string;
@@ -22,6 +23,10 @@ export async function getCourseCertificateStatus(
   courseId: string,
   userId: string
 ): Promise<CourseCertificateStatus | null> {
+  const enrolled = await assertCourseEnrollment({ userId, courseId })
+    .then(() => true)
+    .catch(() => false);
+  if (!enrolled) return null;
   const course = await db.course.findUnique({
     where: { id: courseId },
     select: {

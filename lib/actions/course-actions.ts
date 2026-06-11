@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { sendCourseBackToReview } from "@/lib/course-review";
 import { AuthorizationError, canManageCourse, requireAdmin, requireEducator } from "@/lib/rbac";
+import { writeAdminAudit } from "@/lib/admin-audit";
 import {
   courseIdSchema,
   createCourseDbSchema,
@@ -302,6 +303,13 @@ export async function publishCourse(input: { courseId: string }): Promise<Action
         note: "Course published."
       }
     });
+    await writeAdminAudit({
+      actorId: admin.id,
+      action: "course.publish",
+      targetId: courseId,
+      targetType: "Course",
+      metadata: { title: course.titleEn }
+    });
     await db.notificationLog.create({
       data: {
         email: course.author.email,
@@ -354,6 +362,13 @@ export async function rejectCourse(input: { courseId: string; reviewNote: string
         type: ReviewEventType.RETURNED,
         note: reviewNote
       }
+    });
+    await writeAdminAudit({
+      actorId: admin.id,
+      action: "course.reject",
+      targetId: courseId,
+      targetType: "Course",
+      metadata: { title: course.titleEn }
     });
     await db.notificationLog.create({
       data: {

@@ -27,6 +27,9 @@ export async function requireUser() {
   if (!session?.user?.id) {
     throw new AuthenticationError();
   }
+  if (session.user.sessionInvalid) {
+    throw new AuthenticationError("Your session has expired. Please sign in again.");
+  }
 
   return session.user;
 }

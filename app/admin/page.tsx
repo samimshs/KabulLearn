@@ -59,7 +59,8 @@ async function handleUpdateUserRole(formData: FormData) {
   "use server";
   await updateUserRole({
     userId: String(formData.get("userId") || ""),
-    role: String(formData.get("role") || "") as UserRole
+    role: String(formData.get("role") || "") as UserRole,
+    adminPassword: String(formData.get("adminPassword") || "")
   });
 }
 
@@ -67,7 +68,8 @@ async function handleResetUserPassword(formData: FormData) {
   "use server";
   await resetUserPassword({
     userId: String(formData.get("userId") || ""),
-    password: String(formData.get("password") || "")
+    password: String(formData.get("password") || ""),
+    adminPassword: String(formData.get("adminPassword") || "")
   });
 }
 
@@ -874,6 +876,13 @@ export default async function AdminDashboardPage({
                               <form key={roleOption} action={handleUpdateUserRole}>
                                 <input type="hidden" name="userId" value={user.id} />
                                 <input type="hidden" name="role" value={roleOption} />
+                                <input
+                                  type="password"
+                                  name="adminPassword"
+                                  autoComplete="current-password"
+                                  placeholder="Admin password"
+                                  className="pr-input mb-1 h-8 text-xs"
+                                />
                                 <button
                                   type="submit"
                                   disabled={roleOption === user.role}
@@ -905,6 +914,13 @@ export default async function AdminDashboardPage({
                                 type="text"
                                 minLength={8}
                                 placeholder="Temporary password"
+                                className="pr-input"
+                              />
+                              <input
+                                name="adminPassword"
+                                type="password"
+                                autoComplete="current-password"
+                                placeholder="Your admin password"
                                 className="pr-input"
                               />
                               <button type="submit" className="pr-btn-secondary !min-h-9 w-full">

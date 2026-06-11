@@ -92,6 +92,19 @@ export async function assertPrecedingLessonsCompleted(input: {
   }
 }
 
+export async function assertCourseEnrollment(input: {
+  userId: string;
+  courseId: string;
+}) {
+  const enrollment = await db.enrollment.findUnique({
+    where: { userId_courseId: { userId: input.userId, courseId: input.courseId } },
+    select: { id: true }
+  });
+  if (!enrollment) {
+    throw new Error("Enroll in this course before continuing.");
+  }
+}
+
 export async function assertPrerequisiteModulesCompleted(input: {
   userId: string;
   courseId: string;

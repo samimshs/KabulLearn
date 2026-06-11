@@ -10,6 +10,7 @@ export const authConfig = {
       if (user) {
         token.role = user.role ?? "STUDENT";
         token.status = user.status ?? "ACTIVE";
+        token.sessionVersion = user.sessionVersion ?? 0;
       }
 
       return token;
@@ -19,6 +20,8 @@ export const authConfig = {
         session.user.id = token.sub ?? "";
         session.user.role = (token.role as UserRole | undefined) ?? "STUDENT";
         session.user.status = (token.status as UserStatus | undefined) ?? "ACTIVE";
+        session.user.sessionVersion = typeof token.sessionVersion === "number" ? token.sessionVersion : undefined;
+        session.user.sessionInvalid = Boolean(token.sessionInvalid);
       }
 
       return session;

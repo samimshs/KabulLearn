@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { assertRateLimit, signHeartbeat } from "@/lib/security";
+import { assertCourseEnrollment, assertRateLimit, signHeartbeat } from "@/lib/security";
 import { createCertificateIfEligible } from "@/lib/actions/certificate-actions";
 import { updateUserStreak } from "@/lib/actions/streak-actions";
 
@@ -23,6 +23,7 @@ export async function markLessonInProgress(input: z.infer<typeof lessonRefSchema
   if (!session?.user?.id) return { ok: false as const };
 
   const values = lessonRefSchema.parse(input);
+  await assertCourseEnrollment({ userId: session.user.id, courseId: values.courseId });
   const lesson = await db.lesson.findUnique({
     where: { id: values.lessonId },
     select: { type: true, module: { select: { courseId: true } } }
@@ -50,6 +51,7 @@ export async function completeReadingLesson(input: z.infer<typeof completeReadin
   if (!session?.user?.id) throw new Error("Authentication required.");
 
   const values = completeReadingSchema.parse(input);
+  await assertCourseEnrollment({ userId: session.user.id, courseId: values.courseId });
   const lesson = await db.lesson.findUnique({
     where: { id: values.lessonId },
     select: { type: true, moduleId: true, module: { select: { courseId: true } } }
@@ -102,6 +104,7 @@ export async function recordVideoHeartbeat(input: z.infer<typeof heartbeatSchema
   await assertRateLimit(`video:${session.user.id}:${input.lessonId}`, 120);
 
   const values = heartbeatSchema.parse(input);
+  await assertCourseEnrollment({ userId: session.user.id, courseId: values.courseId });
   const lesson = await db.lesson.findUnique({
     where: { id: values.lessonId },
     select: {
@@ -154,6 +157,7 @@ export async function completeVideoLesson(input: z.infer<typeof completeVideoSch
   await assertRateLimit(`complete-video:${session.user.id}:${input.lessonId}`, 20);
 
   const values = completeVideoSchema.parse(input);
+  await assertCourseEnrollment({ userId: session.user.id, courseId: values.courseId });
   const heartbeat = await db.lessonHeartbeat.findUnique({
     where: { id: values.heartbeatId },
     select: {

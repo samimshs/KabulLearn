@@ -63,7 +63,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           image: user.image,
           role: user.role,
-          status: user.status
+          status: user.status,
+          sessionVersion: user.sessionVersion
         };
       }
     }),
@@ -100,14 +101,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       } else if (token.email) {
         const dbUser = await db.user.findUnique({
           where: { email: token.email.toLowerCase() },
-          select: { role: true, status: true, name: true, image: true }
+          select: { role: true, status: true, name: true, image: true, sessionVersion: true }
         }).catch(() => null);
 
         if (dbUser) {
+          if (typeof token.sessionVersion === "number" && token.sessionVersion !== dbUser.sessionVersion) {
+            token.sessionInvalid = true;
+            token.role = UserRole.STUDENT;
+            token.status = UserStatus.SUSPENDED;
+            return token;
+          }
           token.role = dbUser.role;
           token.status = dbUser.status;
+          token.sessionVersion = dbUser.sessionVersion;
+          token.sessionInvalid = false;
           if (dbUser.name) token.name = dbUser.name;
           token.picture = dbUser.image ?? null;
+        } else {
+          token.sessionInvalid = true;
+          token.role = UserRole.STUDENT;
+          token.status = UserStatus.SUSPENDED;
         }
       }
 
@@ -118,6 +131,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.sub ?? "";
         session.user.role = (token.role as UserRole | undefined) ?? UserRole.STUDENT;
         session.user.status = (token.status as UserStatus | undefined) ?? UserStatus.ACTIVE;
+        session.user.sessionVersion = typeof token.sessionVersion === "number" ? token.sessionVersion : undefined;
+        session.user.sessionInvalid = Boolean(token.sessionInvalid);
         session.user.image = typeof token.picture === "string" ? token.picture : null;
       }
 

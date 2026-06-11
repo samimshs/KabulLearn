@@ -8,6 +8,7 @@ export function DeleteUserButton({ userId, label }: { userId: string; label: str
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
   const [isPending, startTransition] = useTransition();
 
   return (
@@ -34,6 +35,17 @@ export function DeleteUserButton({ userId, label }: { userId: string; label: str
                 {message}
               </p>
             ) : null}
+            <label className="mt-5 grid gap-1.5 text-sm font-[800] text-[var(--ink)]">
+              Admin password
+              <input
+                type="password"
+                value={adminPassword}
+                onChange={(event) => setAdminPassword(event.target.value)}
+                autoComplete="current-password"
+                className="pr-input"
+                placeholder="Confirm with your password"
+              />
+            </label>
             <div className="mt-5 flex flex-wrap justify-end gap-2">
               <button type="button" onClick={() => setOpen(false)} className="pr-btn-ghost">
                 Cancel
@@ -43,7 +55,7 @@ export function DeleteUserButton({ userId, label }: { userId: string; label: str
                 disabled={isPending}
                 onClick={() => {
                   startTransition(async () => {
-                    const result = await deleteUser({ userId });
+                    const result = await deleteUser({ userId, adminPassword });
                     if (!result.ok) {
                       setMessage(result.error);
                       return;

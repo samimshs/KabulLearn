@@ -3,6 +3,8 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { openai, EMBED_MODEL } from "@/lib/openai";
 import { getPublicInfoContent } from "@/lib/info-translations";
+import { assertRateLimit } from "@/lib/security";
+import { writeAdminAudit } from "@/lib/admin-audit";
 
 // Hardcoded platform guide chunks covering common student + educator questions
 const PLATFORM_GUIDES = [
@@ -407,6 +409,11 @@ export async function POST() {
   if (session?.user?.role !== "ADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+  try {
+    await assertRateLimit(`admin-reindex:${session.user.id}`, 2);
+  } catch {
+    return NextResponse.json({ error: "Too many reindex requests. Please wait before running it again." }, { status: 429 });
+  }
 
   if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json({ error: "OPENAI_API_KEY is not set in environment variables" }, { status: 500 });
@@ -558,6 +565,13 @@ export async function POST() {
     await upsertEmbedding("guide", guide.key, guide.title, guide.text);
     counts.guides++;
   }
+
+  await writeAdminAudit({
+    actorId: session.user.id,
+    action: "ai.reindex",
+    targetType: "ContentEmbedding",
+    metadata: counts
+  });
 
   return NextResponse.json({ ok: true, counts });
 

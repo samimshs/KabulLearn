@@ -3,8 +3,10 @@ import { UserStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { openai, EMBED_MODEL, CHAT_MODEL, cosineSimilarity } from "@/lib/openai";
+import { assertRateLimit } from "@/lib/security";
 
 const EDUCATOR_INTENT_RE = /\b(educator|teacher|instructor|teach|creator|course creator|create course)\b|استاد|ښوونک|کورس جوړ|کورس جوړوون|مدرس|آموزگار|ساختن کورس|سازنده کورس/i;
+const MAX_MESSAGE_CHARS = 1200;
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -28,11 +30,20 @@ export async function POST(req: NextRequest) {
   if (!message?.trim()) {
     return new Response("Bad request", { status: 400 });
   }
+  const trimmedMessage = message.trim();
+  if (trimmedMessage.length > MAX_MESSAGE_CHARS) {
+    return new Response("Message is too long.", { status: 400 });
+  }
+  try {
+    await assertRateLimit(`ai-chat:${session.user.id}`, 20);
+  } catch {
+    return new Response("Too many AI chat requests. Please wait a moment and try again.", { status: 429 });
+  }
 
   // 1. Embed the user's question
   const embResponse = await openai.embeddings.create({
     model: EMBED_MODEL,
-    input: message.trim()
+    input: trimmedMessage
   });
   const queryVec = embResponse.data[0].embedding;
 
@@ -70,7 +81,7 @@ export async function POST(req: NextRequest) {
 
   // 3. Score and pick the most relevant chunks. Common role/onboarding questions
   // get a light lexical boost because cross-script embedding matches can be weak.
-  const educatorIntent = EDUCATOR_INTENT_RE.test(message);
+  const educatorIntent = EDUCATOR_INTENT_RE.test(trimmedMessage);
   const scored = rows.map(row => ({
     text: row.chunkText,
     label: `[${row.source}:${row.sourceKey}] ${row.title}`,
@@ -109,7 +120,7 @@ If the answer is not found in the provided content, say so briefly in the user's
 Platform content:
 ${context}`
       },
-      { role: "user", content: message.trim() }
+      { role: "user", content: trimmedMessage }
     ]
   });
 

@@ -81,12 +81,9 @@ export function CertificateView({
 
   const dateStr = issuedDateStr(issuedAt);
   const verificationId = certificateUuid ?? verificationCode;
-  const verificationUrl =
-    typeof window !== "undefined" && verificationId
-      ? `${window.location.origin}/verify/${encodeURIComponent(verificationId)}`
-      : verificationId
-        ? `/verify/${encodeURIComponent(verificationId)}`
-        : "";
+  const verificationUrl = verificationId
+    ? `https://kabullearn.com/verify/${encodeURIComponent(verificationId)}`
+    : "";
   const qrUrl = verificationUrl
     ? `https://api.qrserver.com/v1/create-qr-code/?size=132x132&data=${encodeURIComponent(verificationUrl)}`
     : "";

@@ -241,3 +241,52 @@ export async function completeVideoLesson(input: z.infer<typeof completeVideoSch
 
   return { ok: true };
 }
+
+export async function completeEmbeddedVideoLesson(input: z.infer<typeof completeReadingSchema>) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Authentication required.");
+  }
+  if (session.user.status === "VERIFICATION_PENDING") {
+    throw new Error("Verify your email before continuing.");
+  }
+
+  await assertRateLimit(`complete-embedded-video:${session.user.id}:${input.lessonId}`, 20);
+
+  const values = completeReadingSchema.parse(input);
+  await assertCourseEnrollment({ userId: session.user.id, courseId: values.courseId });
+  const lesson = await db.lesson.findUnique({
+    where: { id: values.lessonId },
+    select: { type: true, module: { select: { courseId: true } } }
+  });
+
+  if (!lesson || lesson.type !== LessonType.VIDEO || lesson.module.courseId !== values.courseId) {
+    throw new Error("Invalid video lesson.");
+  }
+
+  await db.userProgress.upsert({
+    where: { userId_lessonId: { userId: session.user.id, lessonId: values.lessonId } },
+    create: {
+      userId: session.user.id,
+      lessonId: values.lessonId,
+      status: ProgressStatus.COMPLETED,
+      completedAt: new Date(),
+      attempts: 1
+    },
+    update: {
+      status: ProgressStatus.COMPLETED,
+      completedAt: new Date(),
+      attempts: { increment: 1 }
+    }
+  });
+
+  await createCertificateIfEligible(values.courseId, session.user.id).catch(() => null);
+  void updateUserStreak(session.user.id);
+
+  revalidatePath(`/courses/${values.courseId}`);
+  revalidatePath(`/courses/${values.courseId}/certificate`);
+  revalidatePath(`/dashboard`);
+  revalidatePath(`/dashboard/my-courses`);
+
+  return { ok: true };
+}

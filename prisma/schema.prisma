@@ -304,7 +304,6 @@ model Lesson {
   heartbeats   LessonHeartbeat[]
   quizAttemptSessions QuizAttemptSession[]
   notes       LessonNote[]
-  embedding   LessonEmbedding?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -688,12 +687,16 @@ model UserStreak {
   updatedAt     DateTime @updatedAt
 }
 
-model LessonEmbedding {
+model ContentEmbedding {
   id        String   @id @default(cuid())
-  lessonId  String   @unique
+  source    String   // "lesson" | "course" | "terms" | "privacy" | "guide"
+  sourceKey String   // stable unique key within source (DB id or slug)
+  title     String
   chunkText String   @db.Text
   embedding String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([source, sourceKey])
+  @@index([source])
 }

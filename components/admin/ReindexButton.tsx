@@ -4,7 +4,7 @@ import { useState } from "react";
 
 export function ReindexButton() {
   const [status, setStatus] = useState<"idle" | "running" | "done" | "error">("idle");
-  const [result, setResult] = useState<{ indexed: number; total: number } | null>(null);
+  const [result, setResult] = useState<{ counts: { lessons: number; courses: number; policy: number; guides: number } } | null>(null);
 
   async function run() {
     setStatus("running");
@@ -12,8 +12,8 @@ export function ReindexButton() {
     try {
       const res = await fetch("/api/admin/reindex", { method: "POST" });
       if (!res.ok) throw new Error("Failed");
-      const data = await res.json() as { indexed: number; total: number };
-      setResult(data);
+      const data = await res.json() as { ok: boolean; counts: { lessons: number; courses: number; policy: number; guides: number } };
+      setResult({ counts: data.counts });
       setStatus("done");
     } catch {
       setStatus("error");
@@ -40,7 +40,7 @@ export function ReindexButton() {
 
       {status === "done" && result && (
         <p className="text-[13px] font-[700] text-[var(--success)]">
-          ✓ Indexed {result.indexed} of {result.total} lessons
+          ✓ {result.counts.lessons} lessons · {result.counts.courses} courses · {result.counts.policy} policy sections · {result.counts.guides} guides indexed
         </p>
       )}
       {status === "error" && (

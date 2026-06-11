@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const { message, courseId } = (await req.json()) as {
+  const { message } = (await req.json()) as {
     message: string;
     courseId?: string;
   };
@@ -25,20 +25,13 @@ export async function POST(req: NextRequest) {
   });
   const queryVec = embResponse.data[0].embedding;
 
-  // 2. Load stored embeddings (scoped to the course when possible)
-  const rows = await db.lessonEmbedding.findMany({
-    where: courseId
-      ? { lesson: { module: { courseId } } }
-      : undefined,
+  // 2. Load all stored embeddings (all content types — similarity search handles relevance)
+  const rows = await db.contentEmbedding.findMany({
     select: {
+      source: true,
+      title: true,
       chunkText: true,
-      embedding: true,
-      lesson: {
-        select: {
-          titleEn: true,
-          module: { select: { course: { select: { titleEn: true } } } }
-        }
-      }
+      embedding: true
     }
   });
 
@@ -46,7 +39,7 @@ export async function POST(req: NextRequest) {
     const fallback = new ReadableStream({
       start(c) {
         c.enqueue(new TextEncoder().encode(
-          "The course content hasn't been indexed yet. An admin needs to run the AI index first."
+          "The platform content hasn't been indexed yet. An admin needs to run the AI index first."
         ));
         c.close();
       }
@@ -57,7 +50,7 @@ export async function POST(req: NextRequest) {
   // 3. Score and pick the top 5 most relevant chunks
   const scored = rows.map(row => ({
     text: row.chunkText,
-    label: `${row.lesson.module.course.titleEn} — ${row.lesson.titleEn}`,
+    label: `[${row.source}] ${row.title}`,
     score: cosineSimilarity(queryVec, JSON.parse(row.embedding) as number[])
   }));
   scored.sort((a, b) => b.score - a.score);
@@ -76,12 +69,13 @@ export async function POST(req: NextRequest) {
       {
         role: "system",
         content: [
-          "You are a helpful AI learning assistant for KabulLearn, an online platform for Afghan students.",
-          "Answer questions using ONLY the course content provided below.",
-          "If the answer is not found in the content, say: \"I don't have that information in the course content — try asking your instructor.\"",
-          "Be concise, accurate, and educational. Do not make things up.",
+          "You are a helpful AI assistant for KabulLearn, an online learning platform for Afghan students.",
+          "Answer questions using ONLY the platform content provided below.",
+          "You can answer questions about courses, lessons, how to register, how to sign in, platform features, terms of service, privacy policy, and any other provided content.",
+          "If the answer is not found in the provided content, say: \"I don't have that information — please contact support or ask your instructor.\"",
+          "Be concise, accurate, and helpful. Do not make things up.",
           "",
-          "Course content:",
+          "Platform content:",
           context
         ].join("\n")
       },

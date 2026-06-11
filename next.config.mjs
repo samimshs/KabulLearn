@@ -39,23 +39,18 @@ const nextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           // Don't leak internal URLs (with tokens, route params) in Referer headers
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          // Deny sensitive device access, but explicitly allow YouTube lesson playback features.
+          // Deny sensitive device access. Leave media/embed features at browser defaults so
+          // cross-origin video providers can negotiate playback inside their iframe.
           {
             key: "Permissions-Policy",
             value: [
               "camera=()",
               "microphone=()",
-              "geolocation=()",
-              'autoplay=(self "https://www.youtube.com" "https://www.youtube-nocookie.com")',
-              'encrypted-media=(self "https://www.youtube.com" "https://www.youtube-nocookie.com")',
-              'fullscreen=(self "https://www.youtube.com" "https://www.youtube-nocookie.com")',
-              'picture-in-picture=(self "https://www.youtube.com" "https://www.youtube-nocookie.com")'
+              "geolocation=()"
             ].join(", ")
           },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-          { key: "Content-Security-Policy", value: csp },
-          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-          { key: "Cross-Origin-Resource-Policy", value: "same-origin" }
+          { key: "Content-Security-Policy", value: csp }
         ]
       }
     ];

@@ -49,12 +49,14 @@ export const metadata: Metadata = {
     url: "https://kabullearn.com",
     siteName: "KabulLearn",
     title: "KabulLearn — Learn Without Limits",
-    description: "Free structured courses, guided quizzes, and verified certificates in English, Pashto and Dari."
+    description: "Free structured courses, guided quizzes, and verified certificates in English, Pashto and Dari.",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "KabulLearn — Learn Without Limits" }]
   },
   twitter: {
     card: "summary_large_image",
     title: "KabulLearn — Learn Without Limits",
-    description: "Free structured courses, guided quizzes, and verified certificates in English, Pashto and Dari."
+    description: "Free structured courses, guided quizzes, and verified certificates in English, Pashto and Dari.",
+    images: ["/og.png"]
   },
   appleWebApp: {
     capable: true,

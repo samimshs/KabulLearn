@@ -61,6 +61,14 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
     if (open) inputRef.current?.focus();
   }, [open]);
 
+  // Auto-grow the input with its content, up to a max height
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+  }, [input, open]);
+
   async function send(overrideText?: string) {
     const text = (overrideText ?? input).trim();
     if (!text || streaming) return;
@@ -171,7 +179,7 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-3">
             {messages.length <= 1 && (
               <div className="grid gap-2">
                 {suggestions.map((suggestion) => (
@@ -188,9 +196,9 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
             )}
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className="grid max-w-[85%] gap-1">
+                <div className="grid min-w-0 max-w-[85%] gap-1">
                   <div
-                    className={`rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
+                    className={`whitespace-pre-wrap break-words [overflow-wrap:anywhere] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
                       msg.role === "user"
                         ? "bg-[var(--brand)] text-white rounded-br-sm"
                         : "bg-[var(--surface)] text-[var(--ink)] rounded-bl-sm border border-[var(--border)]"
@@ -244,8 +252,8 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
                 disabled={streaming}
                 rows={1}
                 dir={direction}
-                className="flex-1 resize-none bg-transparent text-[13px] text-[var(--ink)] placeholder:text-[var(--muted-2)] focus:outline-none disabled:opacity-50"
-                style={{ maxHeight: 96, overflowY: "auto" }}
+                className="min-w-0 flex-1 resize-none bg-transparent text-[13px] leading-[1.5] text-[var(--ink)] placeholder:text-[var(--muted-2)] focus:outline-none disabled:opacity-50"
+                style={{ maxHeight: 120, overflowY: "auto", overflowX: "hidden" }}
               />
               <button
                 type="button"

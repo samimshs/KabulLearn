@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
 import { CourseStatus, EducatorRequestStatus, LessonType, QuestionType, UserRole } from "@prisma/client";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
@@ -40,6 +41,45 @@ function roleClass(role: UserRole) {
     return "border-[rgba(24,130,92,0.2)] bg-[var(--success-50)] text-[var(--success)]";
   }
   return "border-[var(--border)] bg-[var(--surface)] text-[var(--ink-2)]";
+}
+
+function AdminFoldout({
+  title,
+  eyebrow,
+  description,
+  badge,
+  defaultOpen = false,
+  children
+}: {
+  title: string;
+  eyebrow: string;
+  description?: string;
+  badge?: ReactNode;
+  defaultOpen?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <details open={defaultOpen} className="group rounded-[var(--radius-xl)] border border-[var(--border)] bg-white shadow-[var(--shadow-sm)]">
+      <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-4 px-5 py-4 lg:px-6">
+        <div>
+          <p className="pr-eyebrow">{eyebrow}</p>
+          <h2 className="mt-1 text-[20px] font-[800] tracking-[-0.35px] text-[var(--ink)]">{title}</h2>
+          {description ? <p className="mt-1 text-sm font-[600] leading-6 text-[var(--muted)]">{description}</p> : null}
+        </div>
+        <div className="flex items-center gap-3">
+          {badge}
+          <span className="grid h-9 w-9 place-items-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] transition group-open:rotate-180">
+            <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" aria-hidden="true">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+        </div>
+      </summary>
+      <div className="border-t border-[var(--border)]">
+        {children}
+      </div>
+    </details>
+  );
 }
 
 async function handlePublish(formData: FormData) {
@@ -387,21 +427,24 @@ export default async function AdminDashboardPage({
         </div>
       ) : (
         <div className="grid gap-6">
-          <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6" aria-label="Admin metrics">
-            {metrics.map((metric) => (
-              <div key={metric.label} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-4 shadow-[var(--shadow-sm)]">
-                <p className={`text-[28px] font-[800] leading-none tracking-[-0.5px] ${metric.tone}`}>
-                  {metric.value.toLocaleString()}
-                </p>
-                <p className="mt-2 text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--muted)]">
-                  {metric.label}
-                </p>
-              </div>
-            ))}
-          </section>
+          <AdminFoldout title="Platform snapshot" eyebrow="Overview" defaultOpen>
+            <section className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-6" aria-label="Admin metrics">
+              {metrics.map((metric) => (
+                <div key={metric.label} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-4 shadow-[var(--shadow-sm)]">
+                  <p className={`text-[28px] font-[800] leading-none tracking-[-0.5px] ${metric.tone}`}>
+                    {metric.value.toLocaleString()}
+                  </p>
+                  <p className="mt-2 text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--muted)]">
+                    {metric.label}
+                  </p>
+                </div>
+              ))}
+            </section>
+          </AdminFoldout>
 
           {/* ── Platform Analytics ──────────────────────────────── */}
-          <section className="grid gap-6 lg:grid-cols-2">
+          <AdminFoldout title="Platform analytics" eyebrow="Analytics" defaultOpen>
+          <section className="grid gap-6 p-5 lg:grid-cols-2">
             {/* AI content index */}
             <div className="pr-card overflow-hidden">
               <div className="border-b border-[var(--border)] p-5">
@@ -492,19 +535,17 @@ export default async function AdminDashboardPage({
               )}
             </div>
           </section>
+          </AdminFoldout>
 
-          <section className="pr-card overflow-hidden">
-            <div className="border-b border-[var(--border)] bg-white p-5 lg:p-6">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <p className="pr-eyebrow">Course inventory</p>
-                  <h2 className="pr-h2 mt-2">All courses</h2>
-                </div>
-                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
-                  {courses.length} total
-                </span>
-              </div>
-            </div>
+          <AdminFoldout
+            title="All courses"
+            eyebrow="Course inventory"
+            badge={(
+              <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
+                {courses.length} total
+              </span>
+            )}
+          >
             {courses.length === 0 ? (
               <div className="p-6">
                 <div className="pr-muted-box text-center font-[800] text-[var(--muted)]">
@@ -552,20 +593,18 @@ export default async function AdminDashboardPage({
                 </table>
               </div>
             )}
-          </section>
+          </AdminFoldout>
 
-          <section className="pr-card overflow-hidden">
-            <div className="border-b border-[var(--border)] bg-white p-5 lg:p-6">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <p className="pr-eyebrow">Review queue</p>
-                  <h2 className="pr-h2 mt-2">Courses awaiting review</h2>
-                </div>
-                <span className="rounded-full border border-[rgba(150,96,0,0.2)] bg-[var(--warning-50)] px-3 py-1 text-xs font-[800] uppercase tracking-[1px] text-[var(--warning)]">
-                  {pendingCourses.length} pending
-                </span>
-              </div>
-            </div>
+          <AdminFoldout
+            title="Courses awaiting review"
+            eyebrow="Review queue"
+            defaultOpen={pendingCourses.length > 0}
+            badge={(
+              <span className="rounded-full border border-[rgba(150,96,0,0.2)] bg-[var(--warning-50)] px-3 py-1 text-xs font-[800] uppercase tracking-[1px] text-[var(--warning)]">
+                {pendingCourses.length} pending
+              </span>
+            )}
+          >
 
             {pendingCourses.length === 0 ? (
               <div className="p-6">
@@ -770,25 +809,19 @@ export default async function AdminDashboardPage({
                 ))}
               </div>
             )}
-          </section>
+          </AdminFoldout>
 
           {/* ── Educator Access Requests ───────────────────────────── */}
-          <section className="pr-card overflow-hidden">
-            <div className="border-b border-[var(--border)] bg-white p-5 lg:p-6">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <p className="pr-eyebrow">Educator access</p>
-                  <h2 className="pr-h2 mt-2">Access requests</h2>
-                </div>
-                <div className="flex items-center gap-3">
-                  {pendingRequests.length > 0 && (
-                    <span className="rounded-full border border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.06)] px-3 py-1 text-xs font-[800] uppercase tracking-[1px] text-[#7C3AED]">
-                      {pendingRequests.length} pending
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
+          <AdminFoldout
+            title="Access requests"
+            eyebrow="Educator access"
+            defaultOpen={pendingRequests.length > 0}
+            badge={pendingRequests.length > 0 ? (
+              <span className="rounded-full border border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.06)] px-3 py-1 text-xs font-[800] uppercase tracking-[1px] text-[#7C3AED]">
+                {pendingRequests.length} pending
+              </span>
+            ) : null}
+          >
 
             {educatorRequests.length === 0 ? (
               <div className="p-6">
@@ -856,21 +889,16 @@ export default async function AdminDashboardPage({
                 })}
               </div>
             )}
-          </section>
+          </AdminFoldout>
 
           {/* ── Users & Roles ──────────────────────────────────────── */}
-          <section className="pr-card overflow-hidden">
+          <AdminFoldout
+            title="Users and roles"
+            eyebrow="Access control"
+            description="Promote educators, protect admin access, issue temporary recovery passwords, and remove test users."
+          >
             <div className="border-b border-[var(--border)] bg-white p-5 lg:p-6">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <p className="pr-eyebrow">Access control</p>
-                  <h2 className="pr-h2 mt-2">Users and roles</h2>
-                </div>
-                <p className="max-w-lg text-sm font-[500] leading-6 text-[var(--muted)]">
-                  Promote educators, protect admin access, issue temporary recovery passwords, and remove test users.
-                </p>
-              </div>
-              <form className="mt-4 flex flex-wrap gap-2" action="/admin">
+              <form className="flex flex-wrap gap-2" action="/admin">
                 <select name="role" defaultValue={roleFilter} className="pr-input max-w-56">
                   <option value="">All roles</option>
                   {Object.values(UserRole).map((role) => (
@@ -978,42 +1006,34 @@ export default async function AdminDashboardPage({
                 </table>
               </div>
             )}
-          </section>
+          </AdminFoldout>
 
           {/* ── Messaging ─────────────────────────────────────────────── */}
-          <section className="pr-card overflow-hidden">
-            <div className="border-b border-[var(--border)] bg-white p-5 lg:p-6">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="pr-eyebrow">Admin messaging</p>
-                  <h2 className="pr-h2 mt-2">Message users</h2>
-                  <p className="mt-1 text-sm font-[600] text-[var(--muted)]">
-                    Send a direct message to any individual user, or broadcast to all educators or all students at once.
-                  </p>
-                </div>
+          <AdminFoldout
+            title="Message users"
+            eyebrow="Admin messaging"
+            description="Send a direct message to any individual user, or broadcast to all educators or all students at once."
+          >
+            <div className="p-5 lg:p-6">
+              <div className="mb-5 flex justify-end">
                 <Link href="/admin/messages" className="pr-btn-ghost shrink-0">
                   Open inbox →
                 </Link>
               </div>
-            </div>
-            <div className="p-5 lg:p-6">
               <AdminComposeForm users={users} history={adminMessageHistory} />
             </div>
-          </section>
+          </AdminFoldout>
 
           {/* ── Site videos ───────────────────────────────────────────── */}
-          <section className="pr-card overflow-hidden">
-            <div className="border-b border-[var(--border)] bg-white p-5 lg:p-6">
-              <p className="pr-eyebrow">Site content</p>
-              <h2 className="pr-h2 mt-2">Instruction &amp; demo videos</h2>
-              <p className="mt-1 text-sm font-[600] text-[var(--muted)]">
-                Paste a YouTube link for each page placeholder. Leave blank to keep the default placeholder visible.
-              </p>
-            </div>
+          <AdminFoldout
+            title="Instruction & demo videos"
+            eyebrow="Site content"
+            description="Paste a YouTube link for each page placeholder. Leave blank to keep the default placeholder visible."
+          >
             <div className="p-5 lg:p-6">
               <AdminSiteVideosForm currentValues={siteVideos} />
             </div>
-          </section>
+          </AdminFoldout>
 
         </div>
       )}

@@ -1,11 +1,44 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { completeEmbeddedVideoLesson } from "@/lib/actions/video-actions";
 import { useLanguage } from "@/components/LanguageProvider";
 
 const WATCH_UNLOCK_SECONDS = 60;
-const YOUTUBE_IFRAME_ALLOW = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen";
+// Save position every N seconds while playing
+const SAVE_INTERVAL_SECONDS = 5;
+
+type YTPlayer = {
+  getPlayerState(): number;
+  getCurrentTime(): number;
+  seekTo(seconds: number, allowSeekAhead: boolean): void;
+  destroy(): void;
+};
+
+type YTWindow = typeof window & {
+  YT?: {
+    Player: new (el: string | HTMLElement, opts: object) => YTPlayer;
+    PlayerState: { PLAYING: number; PAUSED: number; ENDED: number; UNSTARTED: number };
+  };
+  onYouTubeIframeAPIReady?: () => void;
+};
+
+// Module-level promise so all VideoPlayer instances share one load
+let ytReady: Promise<void> | null = null;
+function loadYouTubeApi(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  if (ytReady) return ytReady;
+  ytReady = new Promise<void>((resolve) => {
+    const win = window as YTWindow;
+    if (win.YT?.Player) { resolve(); return; }
+    const prev = win.onYouTubeIframeAPIReady;
+    win.onYouTubeIframeAPIReady = () => { resolve(); prev?.(); };
+    const s = document.createElement("script");
+    s.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(s);
+  });
+  return ytReady;
+}
 
 function getYouTubeId(value: string) {
   const raw = value.trim();
@@ -28,15 +61,6 @@ function getYouTubeId(value: string) {
   }
 }
 
-function embedUrl(videoId: string) {
-  const params = new URLSearchParams({
-    rel: "0",
-    modestbranding: "1",
-    playsinline: "1"
-  });
-  return `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?${params.toString()}`;
-}
-
 export function VideoPlayer({
   video,
   courseId,
@@ -52,20 +76,80 @@ export function VideoPlayer({
 }) {
   const { t } = useLanguage();
   const videoId = getYouTubeId(video);
-  const src = useMemo(() => embedUrl(videoId), [videoId]);
   const [watchSeconds, setWatchSeconds] = useState(initialCompleted ? WATCH_UNLOCK_SECONDS : 0);
   const [message, setMessage] = useState("");
   const [completed, setCompleted] = useState(initialCompleted);
-  const [iframeLoaded, setIframeLoaded] = useState(false);
   const [isPending, startTransition] = useTransition();
 
+  const playerRef = useRef<YTPlayer | null>(null);
+  // Stable DOM id — YT IFrame API needs a string id or element; using id avoids ref-staleness
+  // when YT replaces the placeholder div with its own iframe element.
+  const playerId = `yt-player-${lessonId ?? videoId.replace(/[^a-zA-Z0-9]/g, "")}`;
+  const saveKey = lessonId ? `poharana:video:${lessonId}` : null;
+  // Track seconds since last save to rate-limit localStorage writes
+  const secondsSinceLastSave = useRef(0);
+
+  // Create the YT player once per video/lesson
   useEffect(() => {
-    if (!iframeLoaded || completed) return;
+    let active = true;
+
+    loadYouTubeApi().then(() => {
+      if (!active) return;
+      const win = window as YTWindow;
+      if (!win.YT?.Player) return;
+
+      playerRef.current = new win.YT.Player(playerId, {
+        videoId,
+        playerVars: {
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1,
+          origin: window.location.origin
+        },
+        events: {
+          onReady: (event: { target: YTPlayer }) => {
+            if (saveKey) {
+              const saved = parseInt(localStorage.getItem(saveKey) ?? "0", 10);
+              // Only seek if we saved a meaningful position (> 5 s)
+              if (saved > 5) event.target.seekTo(saved, true);
+            }
+          }
+        }
+      });
+    });
+
+    return () => {
+      active = false;
+      playerRef.current?.destroy();
+      playerRef.current = null;
+    };
+    // Re-run only if the video or lesson changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videoId, playerId]);
+
+  // Tick every second: count watch time and save position
+  useEffect(() => {
+    if (completed) return;
     const interval = setInterval(() => {
-      setWatchSeconds((current) => Math.min(WATCH_UNLOCK_SECONDS, current + 1));
+      const player = playerRef.current;
+      const win = window as YTWindow;
+      if (!player || !win.YT?.PlayerState) return;
+
+      if (player.getPlayerState() === win.YT.PlayerState.PLAYING) {
+        setWatchSeconds((s) => Math.min(WATCH_UNLOCK_SECONDS, s + 1));
+
+        if (saveKey) {
+          secondsSinceLastSave.current += 1;
+          if (secondsSinceLastSave.current >= SAVE_INTERVAL_SECONDS) {
+            secondsSinceLastSave.current = 0;
+            const time = player.getCurrentTime();
+            if (time > 0) localStorage.setItem(saveKey, String(Math.floor(time)));
+          }
+        }
+      }
     }, 1000);
     return () => clearInterval(interval);
-  }, [completed, iframeLoaded]);
+  }, [completed, saveKey]);
 
   const watchedPct = Math.round((watchSeconds / WATCH_UNLOCK_SECONDS) * 100);
   const canComplete = completed || watchedPct >= 90;
@@ -74,16 +158,8 @@ export function VideoPlayer({
     <div className="grid gap-3">
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 shadow-sm">
         <div className="aspect-video w-full">
-          <iframe
-            key={src}
-            src={src}
-            title={t.video}
-            className="h-full w-full"
-            allow={YOUTUBE_IFRAME_ALLOW}
-            allowFullScreen
-            referrerPolicy="strict-origin-when-cross-origin"
-            onLoad={() => setIframeLoaded(true)}
-          />
+          {/* YT IFrame API replaces this div with the actual <iframe> */}
+          <div id={playerId} className="h-full w-full" />
         </div>
       </div>
       {courseId && lessonId ? (

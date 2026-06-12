@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { logout } from "@/lib/actions/auth-actions";
 import { markAllNotificationsRead } from "@/lib/actions/notification-actions";
-import { usePortalAvatarUrl, usePortalUnreadCount } from "@/lib/portal-client-store";
+import { usePortalAvatarUrl, usePortalUnreadCount, setPortalUnreadCount } from "@/lib/portal-client-store";
 import type { MessagePreview, AppNotificationPreview } from "@/components/Header";
 import { CommandPalette } from "@/components/CommandPalette";
 
@@ -232,7 +232,19 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                   type="button"
                   aria-label={t.notificationsLabel}
                   aria-expanded={notifOpen}
-                  onClick={() => { setNotifOpen((o) => !o); setMenuOpen(false); }}
+                  onClick={() => {
+                    const opening = !notifOpen;
+                    setNotifOpen(opening);
+                    setMenuOpen(false);
+                    if (opening) {
+                      // Clear both badge counts as soon as the panel is opened
+                      if (appNotifUnread > 0) {
+                        setAppNotifUnread(0);
+                        markAllNotificationsRead();
+                      }
+                      if (unreadCount > 0) setPortalUnreadCount(0);
+                    }
+                  }}
                   className="relative grid h-9 w-9 place-items-center rounded-full border border-[var(--border)] bg-white text-[var(--muted)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)]"
                 >
                   <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">

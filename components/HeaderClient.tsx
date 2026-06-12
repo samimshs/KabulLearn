@@ -107,7 +107,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
   if (pathname === "/login" || pathname === "/register") {
     return (
       <header dir="ltr" className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:px-5 lg:px-8">
+        <div className="kl-site-header-inner mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:px-5 lg:px-8">
           <Link href="/" className="pr-focus flex h-11 shrink-0 items-center overflow-hidden" aria-label="KabulLearn home">
             <img src="/poharana-logo-v3.svg" alt="KabulLearn" className="hidden h-11 w-[166px] max-w-[42vw] object-contain sm:block" />
             <img src="/poharana-icon-v3.svg" alt="KabulLearn" className="h-9 w-9 rounded-[10px] shadow-[0_8px_20px_rgba(0,87,255,0.18)] sm:hidden" />
@@ -164,12 +164,13 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
     user?.role === "ADMIN" ? "/admin" :
     "/dashboard/messages";
 
+  const isHomePage = pathname === "/";
   const isLessonPage = /\/courses\/[^/]+\/lessons\//.test(pathname);
 
   return (
     <>
-    <header dir="ltr" className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl">
-      <div className={`mx-auto flex h-16 w-full items-center justify-between gap-2 px-3 sm:gap-5 sm:px-5 lg:px-8 ${isLessonPage ? "max-w-[1700px]" : "max-w-7xl"}`}>
+    <header dir="ltr" className={`sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl ${isHomePage ? "kl-home-header" : ""}`}>
+      <div className={`kl-site-header-inner mx-auto flex h-16 w-full items-center justify-between gap-2 px-3 sm:gap-5 sm:px-5 lg:px-8 ${isHomePage ? "max-w-none" : isLessonPage ? "max-w-[1700px]" : "max-w-7xl"}`}>
 
         {/* Wordmark */}
         <Link

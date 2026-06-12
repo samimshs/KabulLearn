@@ -321,6 +321,11 @@ textarea {
   padding: clamp(16px, 2.1vw, 34px) clamp(42px, 5vw, 92px) clamp(18px, 2.4vw, 36px);
 }
 
+.kl-home-header .kl-site-header-inner {
+  max-width: none;
+  padding-inline: clamp(42px, 5vw, 92px) !important;
+}
+
 /* Sections below the hero get the standard content width the hero opts out of */
 .kl-home-body {
   width: 100%;
@@ -1599,6 +1604,10 @@ body:has(.kl-home-page) > footer {
     max-height: none;
     padding: 18px 20px 44px;
     overflow-x: hidden;
+  }
+
+  .kl-home-header .kl-site-header-inner {
+    padding-inline: 20px !important;
   }
 
   .kl-home-copy,

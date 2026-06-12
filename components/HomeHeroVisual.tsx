@@ -18,6 +18,17 @@ type HeroStat = {
 };
 
 const Icon = {
+  pencil: (
+    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M11.5 2 14 4.5 5.5 13H3v-2.5L11.5 2Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    </svg>
+  ),
+  settings: (
+    <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M9 1.5V3M9 15v1.5M1.5 9H3M15 9h1.5M3.7 3.7l1.1 1.1M13.2 13.2l1.1 1.1M3.7 14.3l1.1-1.1M13.2 4.8l1.1-1.1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  ),
   grid: (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <rect x="2" y="2" width="5" height="5" rx="1.2" stroke="currentColor" strokeWidth="1.4" />
@@ -67,11 +78,11 @@ const Icon = {
 };
 
 const SIDEBAR: Array<[string, keyof typeof Icon]> = [
-  ["Dashboard", "grid"],
+  ["My Dashboard", "grid"],
   ["My Courses", "book"],
-  ["Certificates", "award"],
-  ["Quizzes", "spark"],
-  ["Messages", "chat"],
+  ["My Certificates", "award"],
+  ["My Messages", "chat"],
+  ["My Settings", "settings"],
 ];
 
 /* Real continent coastlines as [lon, lat] polygons (approximate but
@@ -205,23 +216,6 @@ function ChartTile({ tone = "blue" }: { tone?: "blue" | "green" | "purple" | "or
   );
 }
 
-function CoursePreview({ tone, title, label }: { tone: "green" | "purple" | "orange"; title: string; label: string }) {
-  return (
-    <article className="kl-dash-course">
-      <div className="kl-dash-course-art">
-        <ChartTile tone={tone} />
-      </div>
-      <div className="kl-dash-course-body">
-        <div className="flex gap-1.5">
-          <span className="kl-mini-pill kl-mini-pill-stage">{label}</span>
-          <span className="kl-mini-pill kl-mini-pill-cert">CERT</span>
-        </div>
-        <p>{title}</p>
-        <span>6 Lessons · 2h</span>
-      </div>
-    </article>
-  );
-}
 
 export function HomeHeroVisual({ stats }: { stats: HeroStat[] }) {
   return (
@@ -261,10 +255,11 @@ export function HomeHeroVisual({ stats }: { stats: HeroStat[] }) {
 
         <section className="kl-dashboard-card">
           <aside className="kl-dash-sidebar">
-            <div className="kl-dash-brand">
-              <span>{Icon.book}</span>
-              <strong>Kabul<span>Learn</span></strong>
+            <div className="kl-dash-portal-header">
+              <span className="kl-dash-portal-icon">{Icon.pencil}</span>
+              <strong>MY PORTAL</strong>
             </div>
+            <div className="kl-dash-divider" />
             {SIDEBAR.map(([item, icon], index) => (
               <div key={item} className={index === 0 ? "active" : ""}>
                 <span>{Icon[icon]}</span>
@@ -274,49 +269,51 @@ export function HomeHeroVisual({ stats }: { stats: HeroStat[] }) {
           </aside>
 
           <div className="kl-dash-main">
-            <div className="kl-dash-topbar">
-              <div className="kl-dash-search">{Icon.search}<span>Search courses...</span></div>
-              <span className="kl-dash-icon">{Icon.bell}</span>
-              <span className="kl-dash-avatar">Z</span>
-            </div>
-
-            <div className="kl-dash-welcome">
-              <h3>Welcome back, Zainab 👋</h3>
-              <p>Continue your learning journey.</p>
+            <div className="kl-dash-banner">
+              <div className="kl-dash-banner-copy">
+                <p>MY LEARNING</p>
+                <h3>Welcome back, Ahmad 👋</h3>
+                <span>Continue your learning journey.</span>
+              </div>
+              <div className="kl-dash-banner-stats">
+                {([["2","IN PROGRESS"],["40","LESSONS DONE"],["5","CERTIFICATES"],["11","QUIZ ATTEMPTS"]] as const).map(([val, label]) => (
+                  <div key={label} className="kl-dash-stat-box">
+                    <strong>{val}</strong>
+                    <span>{label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="kl-dash-summary">
               <div className="kl-learning-card">
-                <p>Continue Learning</p>
-                <div>
-                  <span className="kl-learning-thumb"><ChartTile tone="blue" /></span>
-                  <div>
-                    <strong>Applied Data Science: A Team Approach</strong>
-                    <small>Module 2 · Lesson 3</small>
-                  </div>
+                <div className="kl-learning-banner">
+                  <span className="kl-learning-badge">CONTINUE LEARNING</span>
                 </div>
-                <div className="kl-progress-row">
-                  <span><i /></span>
-                  <small>65%</small>
+                <div className="kl-learning-body">
+                  <p>UP NEXT</p>
+                  <strong>Web Development Starter</strong>
+                  <small>Applied software</small>
+                  <div className="kl-progress-meta">
+                    <span>Progress</span>
+                    <span className="kl-progress-pct">33%</span>
+                  </div>
+                  <div className="kl-progress-bar"><i /></div>
                   <button type="button">Continue</button>
                 </div>
               </div>
 
               <div className="kl-progress-card">
-                <p>Your Progress</p>
-                <div className="kl-ring"><span>72%</span></div>
-                <small>Overall Progress</small>
+                <p>YOUR PROGRESS</p>
+                <div className="kl-ring"><span>76%</span></div>
+                <small>Overall progress</small>
+                <div className="kl-progress-stats">
+                  <div><span>Lessons completed</span><strong>40/46</strong></div>
+                  <div><span>Courses completed</span><strong>5/7</strong></div>
+                </div>
               </div>
             </div>
 
-            <div className="kl-dash-popular">
-              <p>Popular Courses</p>
-              <div>
-                <CoursePreview tone="green" label="BEGINNER" title="Statistics with Real Examples" />
-                <CoursePreview tone="purple" label="INTER" title="AI for Education Design" />
-                <CoursePreview tone="orange" label="BEGINNER" title="Web Development Starter" />
-              </div>
-            </div>
           </div>
         </section>
 
@@ -329,10 +326,10 @@ export function HomeHeroVisual({ stats }: { stats: HeroStat[] }) {
           <span className="kl-phone-key kl-phone-key-power" />
           <div className="kl-phone-screen">
             <div className="kl-phone-top">
-              <span className="kl-phone-ava">Z</span>
+              <span className="kl-phone-ava">A</span>
               <div>
                 <small>Welcome back</small>
-                <strong>Zainab 👋</strong>
+                <strong>Ahmad 👋</strong>
               </div>
             </div>
 

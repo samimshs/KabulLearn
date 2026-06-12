@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const isDev = process.env.NODE_ENV === "development";
+
 const nextConfig = {
   // pdfkit ships .afm font metric files that webpack can't bundle — load it as a
   // native CommonJS module in the Node runtime instead.
@@ -14,7 +16,7 @@ const nextConfig = {
   async headers() {
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://www.youtube.com https://www.youtube-nocookie.com https://s.ytimg.com",
+      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.youtube.com https://www.youtube-nocookie.com https://s.ytimg.com`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://lh3.googleusercontent.com https://i.ytimg.com https://*.ytimg.com https://yt3.ggpht.com",
       "font-src 'self' data:",

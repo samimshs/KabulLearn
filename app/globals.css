@@ -333,6 +333,10 @@ textarea {
   .kl-home-body {
     padding: 0 32px 64px;
   }
+
+  .kl-home-art {
+    padding-top: clamp(20px, 4vh, 56px);
+  }
 }
 
 .kl-home-hero::before {
@@ -1708,23 +1712,6 @@ body:has(.kl-home-page) > footer {
   direction: ltr;
 }
 
-/* Compact header on very small screens — squeeze gaps and lang pills so all items fit */
-@media (max-width: 479px) {
-  .kl-header-actions {
-    gap: 3px;
-  }
-  /* The language wrapper pill — tighten inner padding */
-  .kl-header-actions > div[role="group"] {
-    padding: 2px;
-    gap: 0;
-  }
-  .kl-header-lang-pill {
-    min-width: 22px !important;
-    padding-inline: 3px !important;
-    font-size: 10px !important;
-    height: 26px !important;
-  }
-}
 
 .student-portal-shell {
   display: grid;

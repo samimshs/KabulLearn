@@ -56,10 +56,12 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
   const [menuOpen, setMenuOpen]   = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [langOpen, setLangOpen]   = useState(false);
   const [isMac, setIsMac] = useState(true); // default to Mac (most common); corrected on mount
   const [appNotifUnread, setAppNotifUnread] = useState(unreadAppNotifications);
   const menuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
   const unreadCount = usePortalUnreadCount(initialUnread);
   const avatarUrl = usePortalAvatarUrl(user?.image ?? null);
   const totalBellBadge = unreadCount + appNotifUnread;
@@ -78,6 +80,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
       if (e.key === "Escape") {
         setMenuOpen(false);
         setNotifOpen(false);
+        setLangOpen(false);
       }
     }
     window.addEventListener("keydown", onKey);
@@ -85,14 +88,15 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
   }, []);
 
   useEffect(() => {
-    if (!menuOpen && !notifOpen) return;
+    if (!menuOpen && !notifOpen && !langOpen) return;
     function handleClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [menuOpen, notifOpen]);
+  }, [menuOpen, notifOpen, langOpen]);
 
   const languageOptions = [
     { locale: "ps" as const, label: "پښتو", title: t.pashto },
@@ -112,23 +116,28 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
           <Link href="/support" className="h-9 items-center rounded-[var(--radius)] px-3 text-[13px] font-[700] text-[var(--muted)] transition hover:text-[var(--brand)] inline-flex">
             {t.supportUs}
           </Link>
-          <div className="flex h-9 items-center rounded-full border border-[var(--border)] bg-[var(--surface)] p-1 shadow-sm" role="group" aria-label={t.language}>
-            {languageOptions.map((option) => (
-              <button
-                key={option.locale}
-                type="button"
-                title={option.title}
-                onClick={() => setLocale(option.locale)}
-                aria-pressed={locale === option.locale}
-                className={`flex h-7 min-w-[26px] items-center justify-center rounded-full px-1.5 text-[11px] font-[900] transition sm:min-w-9 sm:px-2.5 sm:text-[12px] ${
-                  locale === option.locale
-                    ? "bg-[var(--brand)] text-white shadow-sm"
-                    : "text-[var(--muted)] hover:bg-white hover:text-[var(--ink)]"
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
+          <div className="relative" ref={langRef}>
+            <button type="button" onClick={() => setLangOpen(o => !o)} aria-label={t.language} aria-expanded={langOpen} className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[11px] font-[900] text-[var(--ink)] shadow-sm transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)] sm:hidden">
+              {languageOptions.find(o => o.locale === locale)?.label}
+            </button>
+            {langOpen && (
+              <div className="absolute right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-[10px] border border-[var(--border)] bg-white shadow-[0_8px_24px_rgba(10,9,20,0.1)] sm:hidden">
+                {languageOptions.map(option => (
+                  <button key={option.locale} type="button" onClick={() => { setLocale(option.locale); setLangOpen(false); }} className={`flex w-full items-center gap-3 px-4 py-2.5 text-[13px] transition hover:bg-[var(--surface)] ${locale === option.locale ? "font-[800] text-[var(--brand)]" : "font-[700] text-[var(--ink)]"}`}>
+                    <span className="w-8 text-[12px]">{option.label}</span>
+                    <span className="text-[11px] text-[var(--muted)]">{option.title}</span>
+                    {locale === option.locale && <svg viewBox="0 0 12 12" className="ml-auto h-3 w-3 shrink-0 text-[var(--brand)]" fill="none"><path d="m2 6 3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="hidden sm:flex h-9 items-center rounded-full border border-[var(--border)] bg-[var(--surface)] p-1 shadow-sm" role="group" aria-label={t.language}>
+              {languageOptions.map((option) => (
+                <button key={option.locale} type="button" title={option.title} onClick={() => setLocale(option.locale)} aria-pressed={locale === option.locale} className={`flex h-7 min-w-9 items-center justify-center rounded-full px-2.5 text-[12px] font-[900] transition ${locale === option.locale ? "bg-[var(--brand)] text-white shadow-sm" : "text-[var(--muted)] hover:bg-white hover:text-[var(--ink)]"}`}>
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
           </div>
         </div>
@@ -464,24 +473,29 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
             </>
           )}
 
-          {/* Language toggle */}
-          <div className="flex h-9 items-center rounded-full border border-[var(--border)] bg-[var(--surface)] p-1 shadow-sm" role="group" aria-label={t.language}>
-            {languageOptions.map((option) => (
-              <button
-                key={option.locale}
-                type="button"
-                title={option.title}
-                onClick={() => setLocale(option.locale)}
-                aria-pressed={locale === option.locale}
-                className={`kl-header-lang-pill flex h-7 min-w-[26px] items-center justify-center rounded-full px-1.5 text-[11px] font-[900] transition sm:min-w-9 sm:px-2.5 sm:text-[12px] ${
-                  locale === option.locale
-                    ? "bg-[var(--brand)] text-white shadow-sm"
-                    : "text-[var(--muted)] hover:bg-white hover:text-[var(--ink)]"
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
+          {/* Language toggle — dropdown on xs, pills on sm+ */}
+          <div className="relative" ref={langRef}>
+            <button type="button" onClick={() => setLangOpen(o => !o)} aria-label={t.language} aria-expanded={langOpen} className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[11px] font-[900] text-[var(--ink)] shadow-sm transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)] sm:hidden">
+              {languageOptions.find(o => o.locale === locale)?.label}
+            </button>
+            {langOpen && (
+              <div className="absolute right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-[10px] border border-[var(--border)] bg-white shadow-[0_8px_24px_rgba(10,9,20,0.1)] sm:hidden">
+                {languageOptions.map(option => (
+                  <button key={option.locale} type="button" onClick={() => { setLocale(option.locale); setLangOpen(false); }} className={`flex w-full items-center gap-3 px-4 py-2.5 text-[13px] transition hover:bg-[var(--surface)] ${locale === option.locale ? "font-[800] text-[var(--brand)]" : "font-[700] text-[var(--ink)]"}`}>
+                    <span className="w-8 text-[12px]">{option.label}</span>
+                    <span className="text-[11px] text-[var(--muted)]">{option.title}</span>
+                    {locale === option.locale && <svg viewBox="0 0 12 12" className="ml-auto h-3 w-3 shrink-0 text-[var(--brand)]" fill="none"><path d="m2 6 3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="hidden sm:flex h-9 items-center rounded-full border border-[var(--border)] bg-[var(--surface)] p-1 shadow-sm" role="group" aria-label={t.language}>
+              {languageOptions.map((option) => (
+                <button key={option.locale} type="button" title={option.title} onClick={() => setLocale(option.locale)} aria-pressed={locale === option.locale} className={`flex h-7 min-w-9 items-center justify-center rounded-full px-2.5 text-[12px] font-[900] transition ${locale === option.locale ? "bg-[var(--brand)] text-white shadow-sm" : "text-[var(--muted)] hover:bg-white hover:text-[var(--ink)]"}`}>
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

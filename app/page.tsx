@@ -155,7 +155,7 @@ export default async function Home() {
             )}
           </div>
 
-          <ul className="kl-feature-list flex flex-wrap gap-2.5">
+          <ul className="kl-feature-list grid grid-cols-2 gap-2">
             {features.map((feature) => (
               <li
                 key={feature.label}
@@ -164,7 +164,7 @@ export default async function Home() {
                 <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--brand-50)] text-[var(--brand)]">
                   {feature.icon}
                 </span>
-                <span className="text-[13px] font-[700] leading-none text-[var(--ink-2)]">{feature.label}</span>
+                <span className="text-[13px] font-[700] leading-snug text-[var(--ink-2)]">{feature.label}</span>
               </li>
             ))}
           </ul>
@@ -172,7 +172,7 @@ export default async function Home() {
         </div>
 
         <div className="kl-home-art">
-          <HomeHeroVisual stats={platformStats} />
+          <HomeHeroVisual stats={[]} />
         </div>
 
         <a href="#kl-home-more" aria-label={dict.featuredCoursesTitle} className="kl-scroll-cue">

@@ -364,17 +364,19 @@ export function HomeHeroVisual({ stats }: { stats: HeroStat[] }) {
           </div>
         </section>
 
-        <dl className="kl-stat-strip">
-          {stats.map((stat, index) => (
-            <div key={stat.label} className={index > 0 ? "with-border" : ""}>
-              <span>{stat.icon}</span>
-              <div>
-                <dt>{stat.value}</dt>
-                <dd>{stat.label}</dd>
+        {stats.length > 0 && (
+          <dl className="kl-stat-strip">
+            {stats.map((stat, index) => (
+              <div key={stat.label} className={index > 0 ? "with-border" : ""}>
+                <span>{stat.icon}</span>
+                <div>
+                  <dt>{stat.value}</dt>
+                  <dd>{stat.label}</dd>
+                </div>
               </div>
-            </div>
-          ))}
-        </dl>
+            ))}
+          </dl>
+        )}
       </div>
     </div>
   );

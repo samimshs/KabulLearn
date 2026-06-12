@@ -1,8 +1,7 @@
 import { ImageResponse } from "next/og";
-import { db } from "@/lib/db";
 import { courseArtIndex, COURSE_GRADIENTS } from "@/lib/course-art";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 const SIZE = { width: 1200, height: 630 };
 
@@ -14,46 +13,17 @@ function parseGradientColors(gradient: string): [string, string] {
 }
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const decodedSlug = decodeURIComponent(slug);
+  const { searchParams } = new URL(req.url);
 
-  let title = "KabulLearn Course";
-  let level: string | null = null;
-  let instructorName: string | null = null;
-  let courseId = decodedSlug;
-
-  try {
-    const course = await db.course.findFirst({
-      where: { OR: [{ slug: decodedSlug }, { id: decodedSlug }] },
-      select: {
-        id: true,
-        titleEn: true,
-        titlePs: true,
-        level: true,
-        instructors: {
-          orderBy: { order: "asc" },
-          take: 1,
-          select: { profile: { select: { name: true } } },
-        },
-        authorProfile: { select: { name: true } },
-      },
-    });
-
-    if (course) {
-      courseId = course.id;
-      title = course.titleEn || course.titlePs || title;
-      level = course.level ?? null;
-      instructorName =
-        course.instructors[0]?.profile?.name ??
-        course.authorProfile?.name ??
-        null;
-    }
-  } catch {
-    // DB unavailable — render with defaults
-  }
+  const title = searchParams.get("title") || "KabulLearn Course";
+  const level = searchParams.get("level") || null;
+  const instructorName = searchParams.get("instructor") || null;
+  // `id` is the real course ID used for the deterministic gradient; fall back to slug
+  const courseId = searchParams.get("id") || decodeURIComponent(slug);
 
   const gradientIndex = courseArtIndex(courseId);
   const gradient = COURSE_GRADIENTS[gradientIndex];
@@ -181,11 +151,7 @@ export async function GET(
           {/* Middle: title + level badge */}
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             {levelLabel && (
-              <div
-                style={{
-                  display: "flex",
-                }}
-              >
+              <div style={{ display: "flex" }}>
                 <span
                   style={{
                     background: "rgba(255,255,255,0.2)",

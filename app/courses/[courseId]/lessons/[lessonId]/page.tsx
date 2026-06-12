@@ -22,9 +22,10 @@ export async function generateMetadata({
     const course = await db.course.findFirst({
       where: { OR: [{ id: courseId }, { slug: courseId }] },
       select: {
-        slug: true,
-        titleEn: true,
-        titlePs: true,
+        id: true, slug: true, level: true,
+        titleEn: true, titlePs: true,
+        instructors: { orderBy: { order: "asc" }, take: 1, select: { profile: { select: { name: true } } } },
+        authorProfile: { select: { name: true } },
         modules: {
           select: {
             lessons: {
@@ -42,8 +43,15 @@ export async function generateMetadata({
     const description = (
       lesson?.descriptionEn || lesson?.descriptionPs || `Part of ${courseTitle} on KabulLearn`
     ).slice(0, 160);
+    const instructorName = course.instructors[0]?.profile?.name ?? course.authorProfile?.name ?? "";
     const url = `${BASE_URL}/courses/${encodeURIComponent(course.slug)}/lessons/${encodeURIComponent(lessonId)}`;
-    const ogImage = `${BASE_URL}/api/og/course/${encodeURIComponent(course.slug)}`;
+    const ogParams = new URLSearchParams({
+      title: courseTitle,
+      ...(course.level ? { level: course.level } : {}),
+      ...(instructorName ? { instructor: instructorName } : {}),
+      id: course.id,
+    });
+    const ogImage = `${BASE_URL}/api/og/course/${encodeURIComponent(course.slug)}?${ogParams}`;
     return {
       title: `${lessonTitle} — ${courseTitle} | KabulLearn`,
       description,

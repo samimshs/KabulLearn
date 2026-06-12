@@ -17,13 +17,26 @@ export async function generateMetadata({ params }: { params: Promise<{ courseId:
   try {
     const c = await db.course.findFirst({
       where: { OR: [{ id: courseId }, { slug: courseId }] },
-      select: { slug: true, titleEn: true, titlePs: true, titleDa: true, descriptionEn: true, descriptionPs: true, descriptionDa: true }
+      select: {
+        id: true, slug: true, level: true,
+        titleEn: true, titlePs: true, titleDa: true,
+        descriptionEn: true, descriptionPs: true, descriptionDa: true,
+        instructors: { orderBy: { order: "asc" }, take: 1, select: { profile: { select: { name: true } } } },
+        authorProfile: { select: { name: true } },
+      }
     });
     if (!c) return {};
     const title = c.titleEn || c.titlePs || c.titleDa || "Course";
     const description = (c.descriptionEn || c.descriptionPs || c.descriptionDa || "").slice(0, 160);
+    const instructorName = c.instructors[0]?.profile?.name ?? c.authorProfile?.name ?? "";
     const url = `${BASE_URL}/courses/${encodeURIComponent(c.slug)}`;
-    const ogImage = `${BASE_URL}/api/og/course/${encodeURIComponent(c.slug)}`;
+    const ogParams = new URLSearchParams({
+      title,
+      ...(c.level ? { level: c.level } : {}),
+      ...(instructorName ? { instructor: instructorName } : {}),
+      id: c.id,
+    });
+    const ogImage = `${BASE_URL}/api/og/course/${encodeURIComponent(c.slug)}?${ogParams}`;
     return {
       title: `${title} — KabulLearn`,
       description,

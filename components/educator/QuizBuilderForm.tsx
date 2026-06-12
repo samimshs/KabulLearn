@@ -604,7 +604,7 @@ function AddQuestionForm({
             value={explanationPs}
             dir="rtl"
             onChange={(e) => setExplanationPs(e.target.value)}
-            placeholder="د ځواب وروسته ښودل کیږي"
+            placeholder="د ځواب وروسته ښودل کېږي"
             className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
@@ -614,7 +614,7 @@ function AddQuestionForm({
             value={explanationDa}
             dir="rtl"
             onChange={(e) => setExplanationDa(e.target.value)}
-            placeholder="بعد از پاسخ دانش‌آموز نشان داده می‌شود"
+            placeholder="بعد از پاسخ شاگرد نشان داده می‌شود"
             className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>

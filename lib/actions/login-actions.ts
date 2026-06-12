@@ -23,11 +23,11 @@ const messages = {
     signInUnavailable: "Unable to sign in right now. Please try again in a moment."
   },
   ps: {
-    validEmail: "مهرباني وکړئ سمه ایمیل پته ولیکئ.",
+    validEmail: "مهرباني وکړئ د برېښنالیک سمه پته ولیکئ.",
     passwordMin: "پټنوم باید لږ تر لږه ۸ توري وي.",
     invalidLogin: "د ننوتلو معلومات سم نه دي.",
-    userNotFound: "د دې ایمیل سره کوم حساب نه دی موندل شوی. مهرباني وکړئ لومړی حساب جوړ کړئ.",
-    invalidCredentials: "ایمیل یا پټنوم سم نه دی.",
+    userNotFound: "د دې برېښنالیک لپاره کوم حساب ونه موندل شو. مهرباني وکړئ لومړی حساب جوړ کړئ.",
+    invalidCredentials: "برېښنالیک یا پټنوم سم نه دی.",
     notAuthorized: "تاسو اجازه نه لرئ.",
     signInUnavailable: "اوس ننوتل ممکن نه دي. مهرباني وکړئ لږ وروسته بیا هڅه وکړئ."
   },

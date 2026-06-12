@@ -152,7 +152,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
             value={descriptionPs}
             dir="rtl"
             onChange={(event) => setDescriptionPs(event.target.value)}
-            placeholder="اختیاري پښتو توضیحات"
+            placeholder="اختیاري پښتو تشریح"
             className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>

@@ -101,8 +101,8 @@ const EN_LABEL = `<p style="font-size:11px;color:#526174;margin:0 0 12px">Englis
 
 function verificationHtml(verifyUrl: string, name: string | null, locale: string): string {
   const safeNameEn = esc(name ?? "learner");
-  const safeNamePs = esc(name ?? "زده کوونکی");
-  const safeNameFa = esc(name ?? "یادگیرنده");
+  const safeNamePs = esc(name ?? "زده‌کوونکی");
+  const safeNameFa = esc(name ?? "شاگرد");
 
   const enBlock = `
     <h1 style="margin:0 0 12px">Verify your KabulLearn account</h1>
@@ -115,9 +115,9 @@ function verificationHtml(verifyUrl: string, name: string | null, locale: string
   if (locale === "ps") {
     return `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#102033">
       <div dir="rtl" style="text-align:right">
-        <h1 style="margin:0 0 12px">د KabulLearn حساب تایید کړئ</h1>
+        <h1 style="margin:0 0 12px">د کابل‌لرن حساب تایید کړئ</h1>
         <p>سلام ${safeNamePs},</p>
-        <p>د خپل حساب د فعالولو لپاره لاندې تڼۍ کلیک کړئ. دا لینک ۱۵ دقیقو کې پای ته رسیږي.</p>
+        <p>د خپل حساب د فعالولو لپاره لاندې تڼۍ کېکاږئ. دا لینک په ۱۵ دقیقو کې پای ته رسېږي.</p>
         <p><a href="${verifyUrl}" style="${BTN}">حساب تایید کړئ</a></p>
         <p>که تڼۍ کار نه کوي، دا URL پرانیزئ:</p>
         <p style="word-break:break-all">${verifyUrl}</p>
@@ -129,7 +129,7 @@ function verificationHtml(verifyUrl: string, name: string | null, locale: string
   if (locale === "fa") {
     return `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#102033">
       <div dir="rtl" style="text-align:right">
-        <h1 style="margin:0 0 12px">تأیید حساب KabulLearn شما</h1>
+        <h1 style="margin:0 0 12px">تأیید حساب کابل‌لرن شما</h1>
         <p>سلام ${safeNameFa},</p>
         <p>برای فعال‌سازی حساب خود روی دکمه زیر کلیک کنید. این لینک در ۱۵ دقیقه منقضی می‌شود.</p>
         <p><a href="${verifyUrl}" style="${BTN}">تأیید حساب</a></p>
@@ -145,8 +145,8 @@ function verificationHtml(verifyUrl: string, name: string | null, locale: string
 
 function passwordResetHtml(resetUrl: string, name: string | null, locale: string): string {
   const safeNameEn = esc(name ?? "learner");
-  const safeNamePs = esc(name ?? "زده کوونکی");
-  const safeNameFa = esc(name ?? "یادگیرنده");
+  const safeNamePs = esc(name ?? "زده‌کوونکی");
+  const safeNameFa = esc(name ?? "شاگرد");
 
   const enBlock = `
     <h1 style="margin:0 0 12px">Reset your KabulLearn password</h1>
@@ -160,11 +160,11 @@ function passwordResetHtml(resetUrl: string, name: string | null, locale: string
   if (locale === "ps") {
     return `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#102033">
       <div dir="rtl" style="text-align:right">
-        <h1 style="margin:0 0 12px">د KabulLearn پاسورډ بدل کړئ</h1>
+        <h1 style="margin:0 0 12px">د کابل‌لرن پټنوم بدل کړئ</h1>
         <p>سلام ${safeNamePs},</p>
-        <p>د نوي پاسورډ د ټاکلو لپاره لاندې تڼۍ کلیک کړئ. دا لینک ۳۰ دقیقو کې پای ته رسیږي.</p>
-        <p><a href="${resetUrl}" style="${BTN}">پاسورډ بدل کړئ</a></p>
-        <p>که تاسو دا بدلون نه دی غوښتی، دا بریښنالیک له پامه وباسئ.</p>
+        <p>د نوي پټنوم د ټاکلو لپاره لاندې تڼۍ کېکاږئ. دا لینک په ۳۰ دقیقو کې پای ته رسېږي.</p>
+        <p><a href="${resetUrl}" style="${BTN}">پټنوم بدل کړئ</a></p>
+        <p>که تاسو دا بدلون نه وي غوښتی، دا برېښنالیک له پامه وباسئ.</p>
         <p>که تڼۍ کار نه کوي، دا URL پرانیزئ:</p>
         <p style="word-break:break-all">${resetUrl}</p>
       </div>
@@ -175,7 +175,7 @@ function passwordResetHtml(resetUrl: string, name: string | null, locale: string
   if (locale === "fa") {
     return `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#102033">
       <div dir="rtl" style="text-align:right">
-        <h1 style="margin:0 0 12px">بازنشانی رمز عبور KabulLearn شما</h1>
+        <h1 style="margin:0 0 12px">بازنشانی رمز عبور کابل‌لرن شما</h1>
         <p>سلام ${safeNameFa},</p>
         <p>برای انتخاب رمز عبور جدید روی دکمه زیر کلیک کنید. این لینک در ۳۰ دقیقه منقضی می‌شود.</p>
         <p><a href="${resetUrl}" style="${BTN}">بازنشانی رمز عبور</a></p>
@@ -199,18 +199,18 @@ function educatorWelcomeHtml(name: string): string {
     <!-- Pashto -->
     <div dir="rtl" style="text-align:right">
       <h1 style="margin:0 0 8px;color:#0057FF">مبارک شه، ${safeName}!</h1>
-      <p style="margin:0 0 20px;font-size:16px">ستاسو غوښتنه تایید شوه — تاسو اوس KabulLearn کې استاد یئ.</p>
+      <p style="margin:0 0 20px;font-size:16px">ستاسو غوښتنه تایید شوه — تاسو اوس په کابل‌لرن کې استاد یاست.</p>
       <h2 style="font-size:14px;font-weight:800;color:#526174;margin:0 0 8px">د ننوتلو لارښوونه</h2>
-      <p>ستاسو حساب هغه شان دی چې د زده کوونکي پر مهال مو کارولو — ورته ایمیل، ورته پټنوم. <a href="https://kabullearn.com/login" style="color:#0057FF">kabullearn.com</a> کې ننوځئ.</p>
+      <p>ستاسو حساب هماغه دی چې د زده‌کوونکي په توګه مو کاراوه — هماغه برېښنالیک، هماغه پټنوم. په <a href="https://kabullearn.com/login" style="color:#0057FF">kabullearn.com</a> کې ننوځئ.</p>
       <p style="margin-top:20px"><a href="https://kabullearn.com/login" style="${BTN}">د استاد ډشبورډ ته لاړ شئ</a></p>
       <h2 style="font-size:14px;font-weight:800;color:#526174;margin:28px 0 8px">د استاد سرچینې</h2>
       <ul style="padding-right:20px;padding-left:0;margin:0 0 16px">
-        <li><a href="https://kabullearn.com/educator-guidelines" style="color:#0057FF">د استاد لارښوونې</a> — د کورس جوړښت، ثبتولو لارښوونې، د ازموینې اړتیاوې</li>
-        <li><a href="https://kabullearn.com/educator-resources" style="color:#0057FF">تدریس سرچینې</a> — د لومړي کورس لپاره وسایل</li>
+        <li><a href="https://kabullearn.com/educator-guidelines" style="color:#0057FF">د استاد لارښوونې</a> — د کورس جوړښت، د ثبت لارښوونې، د ازموینې اړتیاوې</li>
+        <li><a href="https://kabullearn.com/educator-resources" style="color:#0057FF">د تدریس سرچینې</a> — د لومړي کورس لپاره وسایل</li>
       </ul>
-      <h2 style="font-size:14px;font-weight:800;color:#526174;margin:28px 0 8px">د زده کوونکي تاریخچه</h2>
+      <h2 style="font-size:14px;font-weight:800;color:#526174;margin:28px 0 8px">د زده‌کوونکي تاریخچه</h2>
       <p>ستاسو مخکینی کورس پرمختګ او سندونه ساتل شوي دي. د اړتیا پر مهال <a href="mailto:info@kabulhub.com" style="color:#0057FF">info@kabulhub.com</a> له لارې موږ سره اړیکه ونیسئ.</p>
-      <p style="margin-top:28px;color:#526174;font-size:13px">ستاسو د KabulLearn ټیم سره شاملیدلو خوشحالیږو!<br>— د KabulLearn ټیم</p>
+      <p style="margin-top:28px;color:#526174;font-size:13px">موږ خوښ یو چې تاسو د کابل‌لرن له ټیم سره یاست!<br>— د کابل‌لرن ټیم</p>
     </div>
 
     ${DIVIDER}
@@ -218,18 +218,18 @@ function educatorWelcomeHtml(name: string): string {
     <!-- Dari -->
     <div dir="rtl" style="text-align:right">
       <h1 style="margin:0 0 8px;color:#0057FF">تبریک، ${safeName}!</h1>
-      <p style="margin:0 0 20px;font-size:16px">درخواست شما تأیید شد — شما اکنون استاد KabulLearn هستید.</p>
+      <p style="margin:0 0 20px;font-size:16px">درخواست شما تأیید شد — شما اکنون استاد کابل‌لرن هستید.</p>
       <h2 style="font-size:14px;font-weight:800;color:#526174;margin:0 0 8px">راهنمای ورود</h2>
       <p>حساب شما همان است که به عنوان شاگرد داشتید — همان ایمیل، همان رمز عبور. در <a href="https://kabullearn.com/login" style="color:#0057FF">kabullearn.com</a> وارد شوید.</p>
-      <p style="margin-top:20px"><a href="https://kabullearn.com/login" style="${BTN}">برو به داشبورد استاد</a></p>
+      <p style="margin-top:20px"><a href="https://kabullearn.com/login" style="${BTN}">رفتن به داشبورد استاد</a></p>
       <h2 style="font-size:14px;font-weight:800;color:#526174;margin:28px 0 8px">منابع استادی</h2>
       <ul style="padding-right:20px;padding-left:0;margin:0 0 16px">
-        <li><a href="https://kabullearn.com/educator-guidelines" style="color:#0057FF">دستورالعمل‌های استاد</a> — ساختار کورس، نکات ضبط، الزامات آزمون</li>
+        <li><a href="https://kabullearn.com/educator-guidelines" style="color:#0057FF">رهنمودهای استاد</a> — ساختار کورس، نکات ضبط، نیازمندی‌های آزمون</li>
         <li><a href="https://kabullearn.com/educator-resources" style="color:#0057FF">منابع تدریس</a> — ابزارها و چک‌لیست‌ها برای اولین کورس</li>
       </ul>
       <h2 style="font-size:14px;font-weight:800;color:#526174;margin:28px 0 8px">درباره تاریخچه شاگردی</h2>
-      <p>پیشرفت کورس و گواهینامه‌های قبلی شما محفوظ است. در صورت نیاز با <a href="mailto:info@kabulhub.com" style="color:#0057FF">info@kabulhub.com</a> تماس بگیرید.</p>
-      <p style="margin-top:28px;color:#526174;font-size:13px">خوش آمدید به تیم — خوشحالیم که در KabulLearn تدریس می‌کنید!<br>— تیم KabulLearn</p>
+      <p>پیشرفت کورس و گواهی‌های قبلی شما محفوظ است. در صورت نیاز با <a href="mailto:info@kabulhub.com" style="color:#0057FF">info@kabulhub.com</a> تماس بگیرید.</p>
+      <p style="margin-top:28px;color:#526174;font-size:13px">به تیم خوش آمدید — خوشحالیم که در کابل‌لرن تدریس می‌کنید!<br>— تیم کابل‌لرن</p>
     </div>
 
     ${DIVIDER}
@@ -261,30 +261,30 @@ function educatorRejectionHtml(name: string, reason: string): string {
 
     <!-- Pashto -->
     <div dir="rtl" style="text-align:right">
-      <h1 style="margin:0 0 8px;color:#102033">د KabulLearn د استاد غوښتنه</h1>
+      <h1 style="margin:0 0 8px;color:#102033">د کابل‌لرن د استاد غوښتنه</h1>
       <p>سلام ${safeName},</p>
-      <p>مننه چې د KabulLearn استاد کیدو لپاره مو غوښتنه وکړه. له بده مرغه، ستاسو غوښتنه اوس نه شي منل کیدی.</p>
+      <p>مننه چې د کابل‌لرن استاد کېدو لپاره مو غوښتنه وکړه. له بده مرغه، ستاسو غوښتنه دا مهال نه شي منل کېدای.</p>
       <div style="background:#f8f9fb;border-left:3px solid #0057ff;padding:12px 16px;margin:16px 0;border-radius:4px">
-        <p style="margin:0;font-weight:700">د رد کیدو دلیل:</p>
+        <p style="margin:0;font-weight:700">د رد کېدو دلیل:</p>
         <p style="margin:8px 0 0;white-space:pre-wrap">${safeReason}</p>
       </div>
-      <p>که چیرې تاسو داسې فکر کوئ چې دا غلطي ده، یا غواړئ بیا غوښتنه وکړئ، مهرباني وکړئ <a href="mailto:info@kabulhub.com" style="color:#0057FF">info@kabulhub.com</a> سره اړیکه ونیسئ.</p>
-      <p style="color:#526174;font-size:13px">— د KabulLearn ټیم</p>
+      <p>که فکر کوئ چې دا تېروتنه ده، یا غواړئ بیا غوښتنه وکړئ، مهرباني وکړئ له <a href="mailto:info@kabulhub.com" style="color:#0057FF">info@kabulhub.com</a> سره اړیکه ونیسئ.</p>
+      <p style="color:#526174;font-size:13px">— د کابل‌لرن ټیم</p>
     </div>
 
     ${DIVIDER}
 
     <!-- Dari -->
     <div dir="rtl" style="text-align:right">
-      <h1 style="margin:0 0 8px;color:#102033">درخواست استادی KabulLearn</h1>
+      <h1 style="margin:0 0 8px;color:#102033">درخواست استادی کابل‌لرن</h1>
       <p>سلام ${safeName},</p>
-      <p>ممنون از اینکه برای تدریس در KabulLearn درخواست دادید. متأسفانه درخواست شما در این مرحله پذیرفته نشد.</p>
+      <p>از این‌که برای تدریس در کابل‌لرن درخواست دادید سپاسگزاریم. متأسفانه درخواست شما در این مرحله پذیرفته نشد.</p>
       <div style="background:#f8f9fb;border-left:3px solid #0057ff;padding:12px 16px;margin:16px 0;border-radius:4px">
         <p style="margin:0;font-weight:700">دلیل رد درخواست:</p>
         <p style="margin:8px 0 0;white-space:pre-wrap">${safeReason}</p>
       </div>
       <p>اگر فکر می‌کنید این اشتباه است یا می‌خواهید دوباره درخواست دهید، با <a href="mailto:info@kabulhub.com" style="color:#0057FF">info@kabulhub.com</a> تماس بگیرید.</p>
-      <p style="color:#526174;font-size:13px">— تیم KabulLearn</p>
+      <p style="color:#526174;font-size:13px">— تیم کابل‌لرن</p>
     </div>
 
     ${DIVIDER}
@@ -310,23 +310,23 @@ function educatorRejectionHtml(name: string, reason: string): string {
 const EMAIL_SUBJECTS: Record<string, Record<string, string>> = {
   verification: {
     en: "Verify your KabulLearn account",
-    ps: "د KabulLearn حساب تایید کړئ",
-    fa: "تأیید حساب KabulLearn شما"
+    ps: "د کابل‌لرن حساب تایید کړئ",
+    fa: "تأیید حساب کابل‌لرن شما"
   },
   passwordReset: {
     en: "Reset your KabulLearn password",
-    ps: "د KabulLearn پاسورډ بدل کړئ",
-    fa: "بازنشانی رمز عبور KabulLearn"
+    ps: "د کابل‌لرن پټنوم بدل کړئ",
+    fa: "بازنشانی رمز عبور کابل‌لرن"
   },
   educatorWelcome: {
     en: "Welcome to the KabulLearn Educator Program!",
-    ps: "د KabulLearn د استاد برنامه ته ښه راغلاست!",
-    fa: "به برنامه استادی KabulLearn خوش آمدید!"
+    ps: "د کابل‌لرن د استاد پروګرام ته ښه راغلاست!",
+    fa: "به برنامه استادی کابل‌لرن خوش آمدید!"
   },
   certificate: {
     en: "🎓 You earned your certificate on KabulLearn",
-    ps: "🎓 تاسو د KabulLearn سند ترلاسه کړ",
-    fa: "🎓 شما گواهینامه KabulLearn خود را دریافت کردید"
+    ps: "🎓 تاسو د کابل‌لرن سند ترلاسه کړ",
+    fa: "🎓 شما گواهی کابل‌لرن خود را دریافت کردید"
   }
 };
 
@@ -438,7 +438,7 @@ export async function sendEducatorRejectionEmail(input: {
     body: JSON.stringify({
       from: fromEmail,
       to: input.email,
-      subject: "د KabulLearn استاد غوښتنه / درخواست استادی KabulLearn / Your KabulLearn Educator Application",
+      subject: "د کابل‌لرن د استاد غوښتنه / درخواست استادی کابل‌لرن / Your KabulLearn Educator Application",
       html: educatorRejectionHtml(name, input.reason)
     })
   });
@@ -476,7 +476,7 @@ export async function sendEducatorWelcomeEmail(input: {
     body: JSON.stringify({
       from: fromEmail,
       to: input.email,
-      subject: "د KabulLearn د استاد برنامه ته ښه راغلاست! / به برنامه استادی KabulLearn خوش آمدید! / Welcome to the KabulLearn Educator Program!",
+      subject: "د کابل‌لرن د استاد پروګرام ته ښه راغلاست! / به برنامه استادی کابل‌لرن خوش آمدید! / Welcome to the KabulLearn Educator Program!",
       html: educatorWelcomeHtml(name)
     })
   });
@@ -597,15 +597,15 @@ function certificateHtml(input: {
       <h2 style="margin:0 0 8px;font-size:21px;font-weight:800;color:#0057FF;">مبارک شه، ${namePs}!</h2>
       <p style="margin:0 0 18px;font-size:15px;color:#334155;line-height:1.7;">
         تاسو د <strong style="color:#0A0914;">"${courseTitlePs}"</strong> کورس بشپړ کړ.
-        KabulLearn تاسو ته د دې لاسته راوړنه مبارک وایي.
+        کابل‌لرن تاسو ته د دې لاسته راوړنې مبارکي وایي.
       </p>
       ${grade > 0 ? gradeBadge("نمره", `${grade}%`) : ""}
       <div style="margin:0 0 14px;">
         <a href="${certUrl}" style="${BTN_GOLD}">د سند ډاونلوډ کړئ ↓</a>
       </div>
       <div style="margin:0 0 18px;display:flex;gap:10px;flex-wrap:wrap;">
-        <a href="${verifyUrl}" style="${BTN_OUTLINE}">آنلاین تصدیق کړئ</a>
-        <a href="${linkedinUrl}" style="${LINKEDIN_BTN}">LinkedIn کې شریک کړئ</a>
+        <a href="${verifyUrl}" style="${BTN_OUTLINE}">آنلاین یې تصدیق کړئ</a>
+        <a href="${linkedinUrl}" style="${LINKEDIN_BTN}">په LinkedIn کې یې شریک کړئ</a>
       </div>
       <p style="margin:0;font-size:12px;color:#94A3B8;">د تصدیق کوډ: <strong style="font-family:monospace;color:#526174;letter-spacing:1px;">${verifyUrl.split("code=")[1] ?? ""}</strong></p>
     </div>
@@ -616,12 +616,12 @@ function certificateHtml(input: {
     <div dir="rtl" style="text-align:right;">
       <h2 style="margin:0 0 8px;font-size:21px;font-weight:800;color:#0057FF;">تبریک، ${nameFa}!</h2>
       <p style="margin:0 0 18px;font-size:15px;color:#334155;line-height:1.7;">
-        شما دوره <strong style="color:#0A0914;">"${courseTitleFa}"</strong> را با موفقیت به پایان رساندید.
-        KabulLearn این دستاورد را به شما تبریک می‌گوید.
+        شما کورس <strong style="color:#0A0914;">"${courseTitleFa}"</strong> را با موفقیت به پایان رساندید.
+        کابل‌لرن این دستاورد را به شما تبریک می‌گوید.
       </p>
       ${grade > 0 ? gradeBadge("نمره", `${grade}%`) : ""}
       <div style="margin:0 0 14px;">
-        <a href="${certUrl}" style="${BTN_GOLD}">دانلود گواهینامه ↓</a>
+        <a href="${certUrl}" style="${BTN_GOLD}">دانلود گواهی ↓</a>
       </div>
       <div style="margin:0 0 18px;display:flex;gap:10px;flex-wrap:wrap;">
         <a href="${verifyUrl}" style="${BTN_OUTLINE}">تأیید آنلاین</a>
@@ -690,11 +690,11 @@ export async function sendCertificateEmail(input: {
   const firstName = (s: string) => esc(s.split(" ")[0] || s);
   const nameEn = firstName(user.name ?? "Learner");
   const namePs = firstName(user.name ?? "زده کوونکی");
-  const nameFa = firstName(user.name ?? "یادگیرنده");
+  const nameFa = firstName(user.name ?? "شاگرد");
 
   const courseTitleEn = esc(course.titleEn || course.titlePs || course.titleDa || "your course");
   const courseTitlePs = esc(course.titlePs || course.titleEn || course.titleDa || "کورس");
-  const courseTitleFa = esc(course.titleDa || course.titleEn || course.titlePs || "دوره");
+  const courseTitleFa = esc(course.titleDa || course.titleEn || course.titlePs || "کورس");
 
   const certUrl = `https://kabullearn.com/courses/${encodeURIComponent(course.slug)}/certificate`;
   const verifyUrl = `https://kabullearn.com/verify?code=${encodeURIComponent(input.verificationCode)}`;

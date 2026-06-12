@@ -70,7 +70,7 @@ export function ModuleCreateForm({ courseId }: { courseId: string }) {
             value={titlePs}
             dir="rtl"
             onChange={(event) => setTitlePs(event.target.value)}
-            placeholder="د ماډیول سرلیک"
+            placeholder="د برخې سرلیک"
             className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
@@ -80,7 +80,7 @@ export function ModuleCreateForm({ courseId }: { courseId: string }) {
             value={titleDa}
             dir="rtl"
             onChange={(event) => setTitleDa(event.target.value)}
-            placeholder="عنوان ماژول"
+            placeholder="عنوان بخش"
             className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
@@ -104,7 +104,7 @@ export function ModuleCreateForm({ courseId }: { courseId: string }) {
             dir="rtl"
             onChange={(event) => setDescriptionPs(event.target.value)}
             rows={3}
-            placeholder="لنډه توضیحات"
+            placeholder="لنډه تشریح"
             className="min-h-[90px] rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
@@ -115,7 +115,7 @@ export function ModuleCreateForm({ courseId }: { courseId: string }) {
             dir="rtl"
             onChange={(event) => setDescriptionDa(event.target.value)}
             rows={3}
-            placeholder="توضیح کوتاه ماژول"
+            placeholder="توضیح کوتاه بخش"
             className="min-h-[90px] rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>

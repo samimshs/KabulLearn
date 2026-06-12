@@ -23,12 +23,20 @@ export async function generateMetadata({ params }: { params: Promise<{ courseId:
     const title = c.titleEn || c.titlePs || c.titleDa || "Course";
     const description = (c.descriptionEn || c.descriptionPs || c.descriptionDa || "").slice(0, 160);
     const url = `${BASE_URL}/courses/${encodeURIComponent(c.slug)}`;
+    const ogImage = `${BASE_URL}/api/og/course/${encodeURIComponent(c.slug)}`;
     return {
       title: `${title} — KabulLearn`,
       description,
       alternates: { canonical: url },
-      openGraph: { title: `${title} — KabulLearn`, description, type: "website", url, siteName: "KabulLearn" },
-      twitter: { card: "summary", title: `${title} — KabulLearn`, description }
+      openGraph: {
+        title: `${title} — KabulLearn`,
+        description,
+        type: "website",
+        url,
+        siteName: "KabulLearn",
+        images: [{ url: ogImage, width: 1200, height: 630, alt: `${title} — KabulLearn` }],
+      },
+      twitter: { card: "summary_large_image", title: `${title} — KabulLearn`, description, images: [ogImage] }
     };
   } catch {
     return {};

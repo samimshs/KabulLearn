@@ -103,7 +103,12 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
   if (pathname === "/login" || pathname === "/register") {
     return (
       <header dir="ltr" className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-end gap-2 px-4 sm:px-5 lg:px-8">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:px-5 lg:px-8">
+          <Link href="/" className="pr-focus flex h-11 shrink-0 items-center overflow-hidden" aria-label="KabulLearn home">
+            <img src="/poharana-logo-v3.svg" alt="KabulLearn" className="hidden h-11 w-[166px] max-w-[42vw] object-contain sm:block" />
+            <img src="/poharana-icon-v3.svg" alt="KabulLearn" className="h-9 w-9 rounded-[10px] shadow-[0_8px_20px_rgba(0,87,255,0.18)] sm:hidden" />
+          </Link>
+          <div className="flex items-center gap-2">
           <Link href="/support" className="h-9 items-center rounded-[var(--radius)] px-3 text-[13px] font-[700] text-[var(--muted)] transition hover:text-[var(--brand)] inline-flex">
             {t.supportUs}
           </Link>
@@ -124,6 +129,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                 {option.label}
               </button>
             ))}
+          </div>
           </div>
         </div>
       </header>

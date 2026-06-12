@@ -240,7 +240,7 @@ export default async function Home() {
             {dict.homeClosingBody}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/register" className="pr-btn-primary !border-white !bg-white !text-[var(--brand)] hover:!bg-white/90">
+            <Link href="/register" className="pr-btn-primary !border-white hover:!opacity-90">
               {dict.startLearningFree}
             </Link>
             <Link href="/courses" className="pr-btn-ghost !border-white/40 !bg-transparent !text-white hover:!border-white hover:!text-white">

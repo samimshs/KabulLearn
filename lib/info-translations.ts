@@ -148,6 +148,21 @@ export type PublicInfoContent = {
     help: string;
     sections: TextSection[];
   };
+  about: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    missionTitle: string;
+    missionParagraphs: string[];
+    womenTitle: string;
+    womenParagraphs: string[];
+    offersTitle: string;
+    offers: Array<{ title: string; description: string }>;
+    orgTitle: string;
+    orgText: string;
+    startLearning: string;
+    teach: string;
+  };
 };
 
 const commonFooterLinks = {
@@ -162,6 +177,8 @@ const commonFooterLinks = {
     teach: "Teach on KabulLearn",
     portal: "Educator Portal",
     resources: "Resources",
+    company: "Company",
+    about: "About KabulLearn",
     legal: "Legal & Trust",
     terms: "Terms of Service",
     privacy: "Privacy Policy",
@@ -179,6 +196,8 @@ const commonFooterLinks = {
     teach: "په کابل لرن کې تدریس",
     portal: "د ښوونکي پورټل",
     resources: "سرچینې",
+    company: "شرکت",
+    about: "د کابل‌لرن اړه",
     legal: "قانوني او باور",
     terms: "د خدمت شرایط",
     privacy: "د محرمیت تګلاره",
@@ -196,6 +215,8 @@ const commonFooterLinks = {
     teach: "تدریس در کابل‌لرن",
     portal: "درگاه استاد",
     resources: "منابع",
+    company: "شرکت",
+    about: "درباره کابل‌لرن",
     legal: "قانونی و اعتماد",
     terms: "شرایط خدمات",
     privacy: "خط مشی رازداری",
@@ -241,8 +262,9 @@ function footer(locale: Locale): PublicInfoContent["footer"] {
         ]
       },
       {
-        title: f.legal,
+        title: f.company,
         links: [
+          { key: "about", label: f.about, href: "/about" },
           { key: "terms", label: f.terms, href: "/terms" },
           { key: "privacy", label: f.privacy, href: "/privacy" },
           { key: "contact", label: f.contact, href: "/contact" },
@@ -505,6 +527,31 @@ const en: Omit<PublicInfoContent, "footer"> = {
       { title: "10. Children and students", paragraphs: ["KabulLearn is not intended to collect personal information from children without required consent. Parents, guardians, schools, or institutions may contact support for review."] },
       { title: "11. Changes to this policy", paragraphs: ["We may update this Privacy Policy as KabulLearn grows, adds features, changes providers, or responds to legal requirements. Updated versions will be posted on this page."] }
     ]
+  },
+  about: {
+    eyebrow: "About KabulLearn",
+    title: "Free education for Afghans, wherever they are",
+    description: "KabulLearn is a free learning platform with structured courses in English, Pashto, and Dari.",
+    missionTitle: "What we are",
+    missionParagraphs: [
+      "We build online courses for Afghan learners who don't have reliable access to education. That includes people in rural areas with limited schools, Afghans who have moved abroad, and girls and women inside Afghanistan who have been banned from secondary school and university since 2021.",
+      "Everything on KabulLearn is free. You need a device and an internet connection. That is all."
+    ],
+    womenTitle: "Girls and women in Afghanistan",
+    womenParagraphs: [
+      "In 2021, Afghan girls were banned from secondary school. In 2022, women were banned from universities. Millions of young women who were studying lost access to formal education overnight.",
+      "KabulLearn is not a fix for that. But it is a place where Afghan girls and women can take structured courses, earn certificates, and keep learning — in Pashto, Dari, or English — without leaving home."
+    ],
+    offersTitle: "What KabulLearn offers",
+    offers: [
+      { title: "Free", description: "All courses are free. No payment, no subscription." },
+      { title: "Three languages", description: "Courses are available in English, Pashto, and Dari." },
+      { title: "Certificates", description: "Complete a course and earn a certificate you can verify online." }
+    ],
+    orgTitle: "Who runs KabulLearn",
+    orgText: "KabulLearn is operated by KabulHub LLC, based in Chicago, Illinois. Contact us at info@kabulhub.com.",
+    startLearning: "Start learning free",
+    teach: "Teach on KabulLearn"
   }
 };
 
@@ -715,6 +762,31 @@ const ps: Omit<PublicInfoContent, "footer"> = {
       title: section.title.replace(/Who operates KabulLearn/, "کابل‌لرن څوک چلوي").replace(/Information we collect/, "کوم معلومات راټولوو").replace(/How we use information/, "معلومات څنګه کاروو").replace(/How information is shared/, "معلومات څنګه شریکېږي").replace(/Cookies and similar technology/, "کوکیز او ورته ټکنالوژي").replace(/Data retention/, "د معلوماتو ساتل").replace(/Security/, "امنیت").replace(/Your choices and rights/, "ستاسو انتخابونه او حقونه").replace(/International users/, "نړیوال کاروونکي").replace(/Children and students/, "ماشومان او زده کوونکي").replace(/Changes to this policy/, "د تګلارې بدلونونه"),
       paragraphs: section.paragraphs?.map(() => "کابل‌لرن د حساب، زده کړې، ازموینو، سندونو، ښوونکو، ملاتړ، امنیت، او تخنیکي کارونو لپاره اړین معلومات کاروي. موږ شخصي معلومات نه پلورو. د لاسرسي، سمون، ړنګولو، یا صادرولو غوښتنې info@kabulhub.com ته ولېږئ.")
     }))
+  },
+  about: {
+    eyebrow: "د کابل‌لرن اړه",
+    title: "وړیا زده کړه د افغانانو لپاره، چیرته چې وي",
+    description: "کابل‌لرن د انګلیسي، پښتو او دري ژبو کې د منظمو کورسونو سره وړیا زده کړه پلیټفورم دی.",
+    missionTitle: "موږ چه یو",
+    missionParagraphs: [
+      "موږ هغو افغان زده کوونکو لپاره آنلاین کورسونه جوړوو چې د معیاري زده کړې باوري لاسرسی نه لري. دا هغه خلک شاملوي چې د محدودو ښوونځیو سره سیمو کې اوسیږي، هغه افغانان چې بهر ته ولاړ دي، او هغه نجونې او ښځې چې له ۲۰۲۱ کال وروسته د منځنۍ ښوونځي او پوهنتون له حضور منع شوي دي.",
+      "کابل‌لرن کې هر شی وړیا دی. تاسو یوازې وسیلې او انټرنیټ ته اړتیا لرئ. بس."
+    ],
+    womenTitle: "افغانستان کې نجونې او ښځې",
+    womenParagraphs: [
+      "د ۲۰۲۱ کال وروسته، افغانستان کې نجونو ته له منځنۍ ښوونځي منع وشوه. د ۲۰۲۲ کال وروسته، ښځو ته له پوهنتون منع وشوه. ملیونونه ځوانې ښځې چې زده کول یې، شپه ورځ د رسمي زده کړې لاسرسی وله.",
+      "کابل‌لرن دا بدلولای نه شي. خو دا یو ځای دی چیرته چې افغان نجونې او ښځې کولای شي منظم کورسونه واخلي، سندونه ترلاسه کړي، او زده کړه دوام ورکړي — پښتو، دري، یا انګلیسي کې — له کوره د وتلو پرته."
+    ],
+    offersTitle: "کابل‌لرن څه وړاندیز کوي",
+    offers: [
+      { title: "وړیا", description: "ټول کورسونه وړیا دي. نه پیسې، نه ممبرشپ." },
+      { title: "درې ژبې", description: "کورسونه د انګلیسي، پښتو او دري ژبو کې شتون لري." },
+      { title: "سندونه", description: "کورس بشپړ کړئ او د آنلاین تصدیق وړ سند ترلاسه کړئ." }
+    ],
+    orgTitle: "کابل‌لرن چا پرمخ وړي",
+    orgText: "کابل‌لرن د KabulHub LLC له خوا پرمخ وړل کیږي، چې شیکاګو، الینوی کې واقع دی. له موږ سره info@kabulhub.com له لارې اړیکه ونیسئ.",
+    startLearning: "وړیا زده کړه پیل کړئ",
+    teach: "کابل‌لرن کې تدریس کړئ"
   }
 };
 
@@ -932,6 +1004,31 @@ const fa: Omit<PublicInfoContent, "footer"> = {
       title: section.title.replace("کابل‌لرن څوک چلوي", "کابل‌لرن را چه کسی اداره می‌کند").replace("کوم معلومات راټولوو", "چه اطلاعاتی جمع می‌کنیم").replace("معلومات څنګه کاروو", "اطلاعات را چگونه استفاده می‌کنیم").replace("معلومات څنګه شریکېږي", "اطلاعات چگونه شریک می‌شود").replace("کوکیز او ورته ټکنالوژي", "کوکی‌ها و فناوری مشابه").replace("د معلوماتو ساتل", "نگهداری داده").replace("امنیت", "امنیت").replace("ستاسو انتخابونه او حقونه", "انتخاب‌ها و حقوق شما").replace("نړیوال کاروونکي", "کاربران بین‌المللی").replace("ماشومان او زده کوونکي", "کودکان و دانش‌آموزان").replace("د تګلارې بدلونونه", "تغییرات این خط مشی"),
       paragraphs: section.paragraphs?.map(() => "کابل‌لرن اطلاعات لازم برای حساب، یادگیری، آزمون‌ها، گواهی‌ها، استادان، پشتیبانی، امنیت، و کارهای فنی را استفاده می‌کند. ما اطلاعات شخصی را نمی‌فروشیم. درخواست دسترسی، اصلاح، حذف، یا صدور داده را به info@kabulhub.com بفرستید.")
     }))
+  },
+  about: {
+    eyebrow: "درباره کابل‌لرن",
+    title: "آموزش رایگان برای افغان‌ها، هر کجا که باشند",
+    description: "کابل‌لرن یک پلتفرم آموزشی رایگان با دوره‌های منظم به زبان‌های انگلیسی، پشتو و دری است.",
+    missionTitle: "ما چه هستیم",
+    missionParagraphs: [
+      "ما دوره‌های آنلاین برای فراگیران افغانی می‌سازیم که به آموزش معیاری دسترسی مطمئن ندارند. این شامل افرادی می‌شود که در مناطق با مکاتب محدود زندگی می‌کنند، افغان‌هایی که به خارج رفته‌اند، و دختران و زنانی که از سال ۲۰۲۱ از مکتب متوسطه و دانشگاه محروم شده‌اند.",
+      "همه چیز در کابل‌لرن رایگان است. تنها به یک دستگاه و اتصال به اینترنت نیاز دارید. همین."
+    ],
+    womenTitle: "دختران و زنان در افغانستان",
+    womenParagraphs: [
+      "از سال ۲۰۲۱، دختران افغان از مکتب متوسطه منع شدند. از سال ۲۰۲۲، زنان از دانشگاه منع شدند. میلیون‌ها دختر جوانی که در حال تحصیل بودند، یک‌شبه دسترسی به آموزش رسمی را از دست دادند.",
+      "کابل‌لرن این وضع را تغییر نمی‌دهد. اما جایی است که دختران و زنان افغان می‌توانند دوره‌های منظم بگیرند، گواهینامه کسب کنند، و به یادگیری ادامه دهند — به پشتو، دری یا انگلیسی — بدون نیاز به ترک خانه."
+    ],
+    offersTitle: "کابل‌لرن چه ارائه می‌دهد",
+    offers: [
+      { title: "رایگان", description: "همه دوره‌ها رایگان هستند. بدون پرداخت، بدون اشتراک." },
+      { title: "سه زبان", description: "دوره‌ها به زبان‌های انگلیسی، پشتو و دری موجود هستند." },
+      { title: "گواهینامه", description: "دوره را تکمیل کنید و گواهینامه‌ای دریافت کنید که آنلاین قابل تأیید است." }
+    ],
+    orgTitle: "چه کسی کابل‌لرن را اداره می‌کند",
+    orgText: "کابل‌لرن توسط KabulHub LLC، مستقر در شیکاگو، ایلینوی اداره می‌شود. با ما از طریق info@kabulhub.com تماس بگیرید.",
+    startLearning: "شروع یادگیری رایگان",
+    teach: "تدریس در کابل‌لرن"
   }
 };
 

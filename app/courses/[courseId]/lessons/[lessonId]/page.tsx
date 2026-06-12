@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { CourseStatus, LessonType, ProgressStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { LessonView } from "@/components/LessonView";
@@ -6,6 +7,61 @@ import { db } from "@/lib/db";
 import { getLessonNote } from "@/lib/actions/note-actions";
 import { getLessonBookmark } from "@/lib/actions/bookmark-actions";
 import { getServerLocale, localizedCourseSelect, localizedLessonSelect, localizedModuleSelect } from "@/lib/server-locale";
+
+const BASE_URL = "https://kabullearn.com";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ courseId: string; lessonId: string }>;
+}): Promise<Metadata> {
+  const { courseId: rawCourseId, lessonId: rawLessonId } = await params;
+  const courseId = decodeURIComponent(rawCourseId);
+  const lessonId = decodeURIComponent(rawLessonId);
+  try {
+    const course = await db.course.findFirst({
+      where: { OR: [{ id: courseId }, { slug: courseId }] },
+      select: {
+        slug: true,
+        titleEn: true,
+        titlePs: true,
+        modules: {
+          select: {
+            lessons: {
+              where: { id: lessonId },
+              select: { titleEn: true, titlePs: true, descriptionEn: true, descriptionPs: true },
+            },
+          },
+        },
+      },
+    });
+    if (!course) return {};
+    const lesson = course.modules.flatMap((m) => m.lessons).find(Boolean);
+    const courseTitle = course.titleEn || course.titlePs || "Course";
+    const lessonTitle = lesson?.titleEn || lesson?.titlePs || courseTitle;
+    const description = (
+      lesson?.descriptionEn || lesson?.descriptionPs || `Part of ${courseTitle} on KabulLearn`
+    ).slice(0, 160);
+    const url = `${BASE_URL}/courses/${encodeURIComponent(course.slug)}/lessons/${encodeURIComponent(lessonId)}`;
+    const ogImage = `${BASE_URL}/api/og/course/${encodeURIComponent(course.slug)}`;
+    return {
+      title: `${lessonTitle} — ${courseTitle} | KabulLearn`,
+      description,
+      alternates: { canonical: url },
+      openGraph: {
+        title: `${lessonTitle} — ${courseTitle} | KabulLearn`,
+        description,
+        type: "website",
+        url,
+        siteName: "KabulLearn",
+        images: [{ url: ogImage, width: 1200, height: 630, alt: `${courseTitle} — KabulLearn` }],
+      },
+      twitter: { card: "summary_large_image", title: `${lessonTitle} — ${courseTitle} | KabulLearn`, description, images: [ogImage] },
+    };
+  } catch {
+    return {};
+  }
+}
 
 type LessonInPage = {
   id: string; moduleId: string; order: number; type: LessonType;

@@ -322,6 +322,11 @@ const EMAIL_SUBJECTS: Record<string, Record<string, string>> = {
     en: "Welcome to the KabulLearn Educator Program!",
     ps: "د KabulLearn د استاد برنامه ته ښه راغلاست!",
     fa: "به برنامه استادی KabulLearn خوش آمدید!"
+  },
+  certificate: {
+    en: "🎓 You earned your certificate on KabulLearn",
+    ps: "🎓 تاسو د KabulLearn سند ترلاسه کړ",
+    fa: "🎓 شما گواهینامه KabulLearn خود را دریافت کردید"
   }
 };
 
@@ -539,6 +544,187 @@ function ticketConfirmationHtml(input: {
   </div>
 </body>
 </html>`;
+}
+
+// ─── Certificate completion ───────────────────────────────────────────────────
+
+function certificateHtml(input: {
+  nameEn: string;
+  namePs: string;
+  nameFa: string;
+  courseTitleEn: string;
+  courseTitlePs: string;
+  courseTitleFa: string;
+  grade: number;
+  certUrl: string;
+  verifyUrl: string;
+  linkedinUrl: string;
+}): string {
+  const { nameEn, namePs, nameFa, courseTitleEn, courseTitlePs, courseTitleFa, grade, certUrl, verifyUrl, linkedinUrl } = input;
+
+  const BTN_GOLD = `display:inline-block;background:#C99A2E;color:#fff;padding:13px 24px;border-radius:10px;text-decoration:none;font-weight:800;font-size:14px;letter-spacing:0.2px`;
+  const BTN_OUTLINE = `display:inline-block;border:1.5px solid #CBD5E1;color:#526174;padding:10px 18px;border-radius:10px;text-decoration:none;font-weight:700;font-size:13px`;
+  const LINKEDIN_BTN = `display:inline-block;background:#0077B5;color:#fff;padding:10px 18px;border-radius:10px;text-decoration:none;font-weight:700;font-size:13px`;
+
+  const gradeBadge = (label: string, gradeLabel: string) => `
+    <div style="display:inline-block;background:#FFF8E7;border:1.5px solid #E9C840;border-radius:10px;padding:10px 18px;margin:0 0 20px">
+      <span style="font-size:12px;font-weight:700;color:#9A7000;display:block;margin-bottom:2px">${label}</span>
+      <span style="font-size:26px;font-weight:900;color:#B58C00;font-variant-numeric:tabular-nums">${gradeLabel}</span>
+    </div>`;
+
+  const SECTION_DIVIDER = `<hr style="border:none;border-top:1px solid #E4E3F2;margin:28px 0" />`;
+
+  return `<!DOCTYPE html>
+<html lang="mul">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#F7F7FB;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+<div style="max-width:560px;margin:32px auto;padding:0 12px;">
+<div style="background:#fff;border-radius:20px;border:1px solid #E4E3F2;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.07);">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#0057FF 0%,#0E7490 100%);padding:36px 32px;text-align:center;">
+    <div style="width:72px;height:72px;background:rgba(255,255,255,0.15);border-radius:50%;display:inline-block;line-height:72px;margin-bottom:14px;border:3px solid rgba(255,255,255,0.25);">
+      <span style="font-size:34px;line-height:72px;">🎓</span>
+    </div>
+    <p style="margin:0;font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.65);">KabulLearn</p>
+    <h1 style="margin:8px 0 0;font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.3px;">Certificate of Completion</h1>
+  </div>
+
+  <div style="padding:0 32px 32px;">
+
+    <!-- ── Pashto ── -->
+    <div dir="rtl" style="text-align:right;padding-top:28px;">
+      <h2 style="margin:0 0 8px;font-size:21px;font-weight:800;color:#0057FF;">مبارک شه، ${namePs}!</h2>
+      <p style="margin:0 0 18px;font-size:15px;color:#334155;line-height:1.7;">
+        تاسو د <strong style="color:#0A0914;">"${courseTitlePs}"</strong> کورس بشپړ کړ.
+        KabulLearn تاسو ته د دې لاسته راوړنه مبارک وایي.
+      </p>
+      ${grade > 0 ? gradeBadge("نمره", `${grade}%`) : ""}
+      <div style="margin:0 0 14px;">
+        <a href="${certUrl}" style="${BTN_GOLD}">د سند ډاونلوډ کړئ ↓</a>
+      </div>
+      <div style="margin:0 0 18px;display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="${verifyUrl}" style="${BTN_OUTLINE}">آنلاین تصدیق کړئ</a>
+        <a href="${linkedinUrl}" style="${LINKEDIN_BTN}">LinkedIn کې شریک کړئ</a>
+      </div>
+      <p style="margin:0;font-size:12px;color:#94A3B8;">د تصدیق کوډ: <strong style="font-family:monospace;color:#526174;letter-spacing:1px;">${verifyUrl.split("code=")[1] ?? ""}</strong></p>
+    </div>
+
+    ${SECTION_DIVIDER}
+
+    <!-- ── Dari ── -->
+    <div dir="rtl" style="text-align:right;">
+      <h2 style="margin:0 0 8px;font-size:21px;font-weight:800;color:#0057FF;">تبریک، ${nameFa}!</h2>
+      <p style="margin:0 0 18px;font-size:15px;color:#334155;line-height:1.7;">
+        شما دوره <strong style="color:#0A0914;">"${courseTitleFa}"</strong> را با موفقیت به پایان رساندید.
+        KabulLearn این دستاورد را به شما تبریک می‌گوید.
+      </p>
+      ${grade > 0 ? gradeBadge("نمره", `${grade}%`) : ""}
+      <div style="margin:0 0 14px;">
+        <a href="${certUrl}" style="${BTN_GOLD}">دانلود گواهینامه ↓</a>
+      </div>
+      <div style="margin:0 0 18px;display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="${verifyUrl}" style="${BTN_OUTLINE}">تأیید آنلاین</a>
+        <a href="${linkedinUrl}" style="${LINKEDIN_BTN}">اشتراک در LinkedIn</a>
+      </div>
+      <p style="margin:0;font-size:12px;color:#94A3B8;">کد تأیید: <strong style="font-family:monospace;color:#526174;letter-spacing:1px;">${verifyUrl.split("code=")[1] ?? ""}</strong></p>
+    </div>
+
+    ${SECTION_DIVIDER}
+
+    <!-- ── English ── -->
+    <div dir="ltr">
+      <h2 style="margin:0 0 8px;font-size:21px;font-weight:800;color:#0057FF;">Congratulations, ${nameEn}!</h2>
+      <p style="margin:0 0 18px;font-size:15px;color:#334155;line-height:1.7;">
+        You have completed <strong style="color:#0A0914;">"${courseTitleEn}"</strong>.
+        This certificate confirms your achievement and can be shared or verified at any time.
+      </p>
+      ${grade > 0 ? gradeBadge("Your score", `${grade}%`) : ""}
+      <div style="margin:0 0 14px;">
+        <a href="${certUrl}" style="${BTN_GOLD}">Download Certificate ↓</a>
+      </div>
+      <div style="margin:0 0 18px;display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="${verifyUrl}" style="${BTN_OUTLINE}">Verify online</a>
+        <a href="${linkedinUrl}" style="${LINKEDIN_BTN}">Share on LinkedIn</a>
+      </div>
+      <p style="margin:0;font-size:12px;color:#94A3B8;">Verification code: <strong style="font-family:monospace;color:#526174;letter-spacing:1px;">${verifyUrl.split("code=")[1] ?? ""}</strong></p>
+    </div>
+
+    <!-- Footer -->
+    ${SECTION_DIVIDER}
+    <p style="margin:0;font-size:12px;color:#94A3B8;text-align:center;line-height:1.7;">
+      <a href="https://kabullearn.com" style="color:#94A3B8;text-decoration:none;font-weight:700;">kabullearn.com</a>
+      &nbsp;·&nbsp;
+      <a href="https://kabullearn.com/dashboard/settings" style="color:#94A3B8;">Unsubscribe</a>
+    </p>
+
+  </div>
+</div>
+</div>
+</body>
+</html>`;
+}
+
+export async function sendCertificateEmail(input: {
+  userId: string;
+  courseId: string;
+  verificationCode: string;
+  grade: number;
+}): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.FROM_EMAIL;
+  if (!apiKey || !fromEmail) return;
+
+  const [user, course] = await Promise.all([
+    db.user.findUnique({
+      where: { id: input.userId },
+      select: { name: true, email: true },
+    }),
+    db.course.findUnique({
+      where: { id: input.courseId },
+      select: { slug: true, titleEn: true, titlePs: true, titleDa: true },
+    }),
+  ]);
+  if (!user || !course) return;
+
+  const firstName = (s: string) => esc(s.split(" ")[0] || s);
+  const nameEn = firstName(user.name ?? "Learner");
+  const namePs = firstName(user.name ?? "زده کوونکی");
+  const nameFa = firstName(user.name ?? "یادگیرنده");
+
+  const courseTitleEn = esc(course.titleEn || course.titlePs || course.titleDa || "your course");
+  const courseTitlePs = esc(course.titlePs || course.titleEn || course.titleDa || "کورس");
+  const courseTitleFa = esc(course.titleDa || course.titleEn || course.titlePs || "دوره");
+
+  const certUrl = `https://kabullearn.com/courses/${encodeURIComponent(course.slug)}/certificate`;
+  const verifyUrl = `https://kabullearn.com/verify?code=${encodeURIComponent(input.verificationCode)}`;
+  const linkedinUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(certUrl)}&title=${encodeURIComponent(`I earned a certificate in ${course.titleEn || course.titlePs || "a course"} on KabulLearn`)}&summary=${encodeURIComponent("KabulLearn — Learn Without Limits")}`;
+
+  const html = certificateHtml({
+    nameEn, namePs, nameFa,
+    courseTitleEn, courseTitlePs, courseTitleFa,
+    grade: input.grade,
+    certUrl, verifyUrl, linkedinUrl,
+  });
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: user.email,
+      subject: `🎓 ${course.titleEn || course.titlePs || "Your certificate"} — Certificate of Completion`,
+      html,
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    console.error("Certificate email failed:", response.status, body);
+  }
 }
 
 export async function sendTicketConfirmationEmail(input: {

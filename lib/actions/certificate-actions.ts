@@ -2,6 +2,7 @@ import { CourseStatus, LessonType, ProgressStatus } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
 import { assertCourseEnrollment } from "@/lib/security";
+import { sendCertificateEmail } from "@/lib/email-verification";
 
 export type CourseCertificateStatus = {
   courseId: string;
@@ -117,11 +118,22 @@ export async function createCertificateIfEligible(courseId: string, userId: stri
   const status = await getCourseCertificateStatus(courseId, userId);
   if (!status || !status.eligible) return null;
 
+  const isNewCertificate = !status.hasCertificate;
+
   const certificate = await db.certificate.upsert({
     where: { userId_courseId: { userId, courseId } },
     update: { grade: status.grade },
     create: { userId, courseId, grade: status.grade, verificationCode: randomUUID() }
   });
+
+  if (isNewCertificate) {
+    void sendCertificateEmail({
+      userId,
+      courseId,
+      verificationCode: certificate.verificationCode,
+      grade: certificate.grade,
+    });
+  }
 
   return {
     ...status,

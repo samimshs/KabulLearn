@@ -88,10 +88,13 @@ main { flex: 1 1 auto; }
   flex-direction: column;
 }
 
-/* Arabic-script typography — Vazirmatn for UI, Noto Naskh as glyph fallback */
+/* Arabic-script typography — Vazirmatn for UI, Noto Naskh as glyph fallback.
+   Vazirmatn's x-height is taller than Manrope's, so we nudge font-size down
+   one point to keep visual weight consistent when the locale switches. */
 html[lang="ps"] body,
 html[lang="fa"] body {
   font-family: var(--font-arabic), var(--font-arabic-serif), var(--font-sans, 'Manrope'), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
 }
 
 /* Skip-to-content link — visually hidden until keyboard-focused */
@@ -1152,6 +1155,7 @@ html[dir="rtl"] .kl-home-lang {
   background:
     radial-gradient(circle at center, white 0 54%, transparent 55%),
     conic-gradient(var(--brand) 0 76%, #eef3ff 76% 100%);
+  transform: perspective(110px) rotateY(-20deg);
 }
 
 .kl-ring::after {

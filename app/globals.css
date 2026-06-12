@@ -463,9 +463,10 @@ html[dir="rtl"] .kl-home-page .pr-btn-primary:hover::after {
 .kl-home-copy {
   grid-column: 1;
   min-width: 0;
-  justify-content: center;
+  justify-content: flex-start;
   gap: clamp(22px, 3vh, 38px) !important;
   overflow: visible;
+  padding-top: clamp(20px, 4vh, 56px);
 }
 
 /* Staggered entrance — globally disabled for prefers-reduced-motion */
@@ -1705,6 +1706,24 @@ body:has(.kl-home-page) > footer {
 
 .kl-header-actions {
   direction: ltr;
+}
+
+/* Compact header on very small screens — squeeze gaps and lang pills so all items fit */
+@media (max-width: 479px) {
+  .kl-header-actions {
+    gap: 3px;
+  }
+  /* The language wrapper pill — tighten inner padding */
+  .kl-header-actions > div[role="group"] {
+    padding: 2px;
+    gap: 0;
+  }
+  .kl-header-lang-pill {
+    min-width: 22px !important;
+    padding-inline: 3px !important;
+    font-size: 10px !important;
+    height: 26px !important;
+  }
 }
 
 .student-portal-shell {

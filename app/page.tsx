@@ -134,7 +134,7 @@ export default async function Home() {
 
   return (
     <main className="pr-page kl-home-page">
-      <section className="kl-home-hero grid items-center gap-8 lg:grid-cols-[0.78fr_1.22fr]">
+      <section className="kl-home-hero grid items-start gap-8 lg:grid-cols-[0.78fr_1.22fr]">
         <div className="kl-home-copy flex flex-col gap-5">
           <p className="pr-eyebrow kl-home-kicker">{dict.heroEyebrow}</p>
           <h1 className="pr-h1 kl-home-heading">{dict.heroHeading}</h1>
@@ -240,7 +240,7 @@ export default async function Home() {
             {dict.homeClosingBody}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/register" className="pr-btn-primary !border-white !bg-white !text-white hover:!bg-white/90">
+            <Link href="/register" className="pr-btn-primary !border-white !bg-white !text-[var(--brand)] hover:!bg-white/90">
               {dict.startLearningFree}
             </Link>
             <Link href="/courses" className="pr-btn-ghost !border-white/40 !bg-transparent !text-white hover:!border-white hover:!text-white">

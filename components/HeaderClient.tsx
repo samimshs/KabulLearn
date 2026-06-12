@@ -115,7 +115,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                 title={option.title}
                 onClick={() => setLocale(option.locale)}
                 aria-pressed={locale === option.locale}
-                className={`flex h-7 min-w-9 items-center justify-center rounded-full px-2.5 text-[12px] font-[900] transition ${
+                className={`flex h-7 min-w-[26px] items-center justify-center rounded-full px-1.5 text-[11px] font-[900] transition sm:min-w-9 sm:px-2.5 sm:text-[12px] ${
                   locale === option.locale
                     ? "bg-[var(--brand)] text-white shadow-sm"
                     : "text-[var(--muted)] hover:bg-white hover:text-[var(--ink)]"
@@ -154,7 +154,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
   return (
     <>
     <header dir="ltr" className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl">
-      <div className={`mx-auto flex h-16 w-full items-center justify-between gap-3 px-4 sm:gap-5 sm:px-5 lg:px-8 ${isLessonPage ? "max-w-[1700px]" : "max-w-7xl"}`}>
+      <div className={`mx-auto flex h-16 w-full items-center justify-between gap-2 px-3 sm:gap-5 sm:px-5 lg:px-8 ${isLessonPage ? "max-w-[1700px]" : "max-w-7xl"}`}>
 
         {/* Wordmark */}
         <Link
@@ -442,17 +442,18 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
             </>
           ) : (
             <>
-              <Link href="/login?callbackUrl=%2Feducator" className="hidden h-9 items-center rounded-[var(--radius)] px-4 text-[13px] font-[700] text-[var(--muted)] transition hover:text-[var(--ink)] sm:inline-flex">
+              <Link href="/login?callbackUrl=%2Feducator" className="hidden h-9 items-center rounded-[var(--radius)] px-4 text-[13px] font-[700] text-[var(--muted)] transition hover:text-[var(--ink)] lg:inline-flex">
                 {t.educatorPortal}
               </Link>
-              <Link href="/support" className="hidden h-9 items-center rounded-[var(--radius)] px-3 text-[13px] font-[700] text-[var(--muted)] transition hover:text-[var(--brand)] sm:inline-flex">
+              <Link href="/support" className="hidden h-9 items-center rounded-[var(--radius)] px-3 text-[13px] font-[700] text-[var(--muted)] transition hover:text-[var(--brand)] md:inline-flex">
                 {t.supportUs}
               </Link>
-              <Link href="/login" className="pr-btn-ghost !min-h-9 px-4">
+              <Link href="/login" className="pr-btn-ghost !min-h-9 px-4 max-sm:!hidden">
                 {t.signIn}
               </Link>
-              <Link href="/register" className="pr-btn-primary !min-h-9 px-4">
-                {t.registerFree}
+              <Link href="/register" className="pr-btn-primary !min-h-9 px-3 sm:px-4">
+                <span className="sm:hidden">Join</span>
+                <span className="hidden sm:inline">{t.registerFree}</span>
               </Link>
             </>
           )}
@@ -466,7 +467,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                 title={option.title}
                 onClick={() => setLocale(option.locale)}
                 aria-pressed={locale === option.locale}
-                className={`flex h-7 min-w-9 items-center justify-center rounded-full px-2.5 text-[12px] font-[900] transition ${
+                className={`kl-header-lang-pill flex h-7 min-w-[26px] items-center justify-center rounded-full px-1.5 text-[11px] font-[900] transition sm:min-w-9 sm:px-2.5 sm:text-[12px] ${
                   locale === option.locale
                     ? "bg-[var(--brand)] text-white shadow-sm"
                     : "text-[var(--muted)] hover:bg-white hover:text-[var(--ink)]"

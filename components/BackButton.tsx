@@ -3,7 +3,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
 
-const HIDE_ON = new Set(["/", "/auth/redirect"]);
+const HIDE_ON = new Set(["/", "/auth/redirect", "/courses", "/login", "/register"]);
 
 export function BackButton() {
   const router = useRouter();

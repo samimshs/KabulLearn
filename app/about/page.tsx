@@ -8,7 +8,7 @@ import { dictionaries } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   title: "About — KabulLearn",
-  description: "KabulLearn is a free learning platform for Afghan learners, with structured courses in English, Pashto, and Dari.",
+  description: "KabulLearn is an online learning platform for Afghan learners, with structured courses in English, Pashto, and Dari.",
 };
 
 export default async function AboutPage() {

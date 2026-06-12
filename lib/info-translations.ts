@@ -528,22 +528,22 @@ const en: Omit<PublicInfoContent, "footer"> = {
   },
   about: {
     eyebrow: "About KabulLearn",
-    title: "Free education for Afghans, wherever they are",
-    description: "KabulLearn is a free learning platform with structured courses in English, Pashto, and Dari.",
+    title: "Education for Afghans, wherever they are",
+    description: "KabulLearn is an online learning platform with structured courses in English, Pashto, and Dari.",
     missionTitle: "What we are",
     missionParagraphs: [
       "We build online courses for Afghan learners who do not have reliable access to education, or who face poor education quality where learning opportunities exist. That includes people in rural areas with limited schools, Afghans who have moved abroad, and girls and women inside Afghanistan who have been banned from secondary school and university since 2021.",
-      "Everything on KabulLearn is free. You need a device and an internet connection. That is all."
+      "Creating an account is free. You need a device and an internet connection. That is all."
     ],
     offersTitle: "What KabulLearn offers",
     offers: [
-      { title: "Free", description: "All courses are free. No payment, no subscription." },
+      { title: "Free account", description: "Joining KabulLearn is free. Some courses are free, others are priced by their instructors." },
       { title: "Three languages", description: "Courses are available in English, Pashto, and Dari." },
       { title: "Certificates", description: "Complete a course and earn a certificate you can verify online." }
     ],
     orgTitle: "Who runs KabulLearn",
     orgText: "KabulLearn is operated by KabulHub LLC, based in Chicago, Illinois. Contact us at info@kabulhub.com.",
-    startLearning: "Start learning free",
+    startLearning: "Start learning",
     teach: "Teach on KabulLearn"
   }
 };
@@ -803,22 +803,22 @@ const ps: Omit<PublicInfoContent, "footer"> = {
   },
   about: {
     eyebrow: "د کابل‌لرن په اړه",
-    title: "د افغانانو لپاره وړیا زده کړه، هر ځای چې وي",
-    description: "کابل‌لرن یو وړیا زده‌کړیز پلېټفارم دی چې په انګلیسي، پښتو او دري کې منظم کورسونه وړاندې کوي.",
+    title: "د افغانانو لپاره زده کړه، هر ځای چې وي",
+    description: "کابل‌لرن یو آنلاین زده‌کړیز پلېټفارم دی چې په انګلیسي، پښتو او دري کې منظم کورسونه وړاندې کوي.",
     missionTitle: "موږ څوک یو",
     missionParagraphs: [
       "موږ د هغو افغان زده‌کوونکو لپاره آنلاین کورسونه جوړوو چې باوري زده کړې ته لاسرسی نه لري، یا هلته چې زده کړې شته خو کیفیت یې کمزوری دی. په دې کې هغه خلک شامل دي چې په محدودو ښوونیزو سیمو کې اوسي، هغه افغانان چې بهر مېشت دي، او هغه نجونې او ښځې چې له ۲۰۲۱ وروسته د منځني ښوونځي او پوهنتون له حضوري زده کړو منع شوي دي.",
-      "په کابل‌لرن کې هر څه وړیا دي. تاسو یوازې یوې وسیلې او انټرنېټ ته اړتیا لرئ. همدومره."
+      "د حساب جوړول وړیا دي. تاسو یوازې یوې وسیلې او انټرنېټ ته اړتیا لرئ. همدومره."
     ],
     offersTitle: "کابل‌لرن څه وړاندې کوي",
     offers: [
-      { title: "وړیا", description: "ټول کورسونه وړیا دي. نه فیس، نه غړیتوب." },
+      { title: "وړیا حساب", description: "کابل‌لرن ته یوځای کېدل وړیا دي. ځینې کورسونه وړیا دي، د نورو قیمت د استادانو له خوا ټاکل کېږي." },
       { title: "درې ژبې", description: "کورسونه په انګلیسي، پښتو او دري کې شتون لري." },
       { title: "سندونه", description: "کورس بشپړ کړئ او آنلاین د تصدیق وړ سند ترلاسه کړئ." }
     ],
     orgTitle: "کابل‌لرن څوک پرمخ وړي",
     orgText: "کابل‌لرن د KabulHub LLC له خوا پرمخ وړل کېږي، چې په شیکاګو، الینوی کې مېشته ده. له موږ سره په info@kabulhub.com اړیکه ونیسئ.",
-    startLearning: "وړیا زده کړه پیل کړئ",
+    startLearning: "زده کړه پیل کړئ",
     teach: "په کابل‌لرن کې تدریس وکړئ"
   }
 };
@@ -1061,22 +1061,22 @@ const fa: Omit<PublicInfoContent, "footer"> = {
   },
   about: {
     eyebrow: "درباره کابل‌لرن",
-    title: "آموزش رایگان برای افغان‌ها، هر کجا که باشند",
-    description: "کابل‌لرن یک پلتفرم آموزشی رایگان با کورس‌های منظم به زبان‌های انگلیسی، پشتو و دری است.",
+    title: "آموزش برای افغان‌ها، هر کجا که باشند",
+    description: "کابل‌لرن یک پلتفرم آموزش آنلاین با کورس‌های منظم به زبان‌های انگلیسی، پشتو و دری است.",
     missionTitle: "ما چه هستیم",
     missionParagraphs: [
       "ما کورس‌های آنلاین برای شاگردان افغان می‌سازیم که به آموزش قابل اعتماد دسترسی ندارند، یا در جاهایی درس می‌خوانند که کیفیت آموزش ضعیف است. این شامل افرادی می‌شود که در مناطق با مکاتب محدود زندگی می‌کنند، افغان‌هایی که به خارج رفته‌اند، و دختران و زنانی که از سال ۲۰۲۱ از مکتب متوسطه و دانشگاه محروم شده‌اند.",
-      "همه چیز در کابل‌لرن رایگان است. تنها به یک دستگاه و اتصال به اینترنت نیاز دارید. همین."
+      "ساختن حساب رایگان است. تنها به یک دستگاه و اتصال به اینترنت نیاز دارید. همین."
     ],
     offersTitle: "کابل‌لرن چه ارائه می‌دهد",
     offers: [
-      { title: "رایگان", description: "همه کورس‌ها رایگان هستند. بدون پرداخت، بدون اشتراک." },
+      { title: "حساب رایگان", description: "پیوستن به کابل‌لرن رایگان است. برخی کورس‌ها رایگان‌اند، قیمت دیگران توسط استادان تعیین می‌شود." },
       { title: "سه زبان", description: "کورس‌ها به زبان‌های انگلیسی، پشتو و دری موجود هستند." },
       { title: "گواهی", description: "کورس را تکمیل کنید و گواهی‌ای دریافت کنید که آنلاین قابل تصدیق است." }
     ],
     orgTitle: "چه کسی کابل‌لرن را اداره می‌کند",
     orgText: "کابل‌لرن توسط KabulHub LLC، مستقر در شیکاگو، ایلینوی اداره می‌شود. با ما از طریق info@kabulhub.com تماس بگیرید.",
-    startLearning: "شروع یادگیری رایگان",
+    startLearning: "شروع یادگیری",
     teach: "تدریس در کابل‌لرن"
   }
 };

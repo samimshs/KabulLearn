@@ -56,14 +56,6 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* Women in Afghanistan — most prominent section */}
-      <section className="rounded-[var(--radius-xl)] border border-[rgba(0,87,255,0.2)] bg-[linear-gradient(135deg,rgba(0,87,255,0.06),rgba(14,116,144,0.06))] p-6 sm:p-8">
-        <h2 className="text-2xl font-[800] tracking-[-0.4px] text-[var(--ink)]">{c.womenTitle}</h2>
-        <div className="mt-5 space-y-4 text-[15px] font-[500] leading-8 text-[var(--muted)]">
-          {c.womenParagraphs.map((p) => <p key={p}>{p}</p>)}
-        </div>
-      </section>
-
       {/* Stats */}
       {stats.length > 0 && (
         <section className="pr-card p-6 sm:p-8">

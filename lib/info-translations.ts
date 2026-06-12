@@ -154,8 +154,6 @@ export type PublicInfoContent = {
     description: string;
     missionTitle: string;
     missionParagraphs: string[];
-    womenTitle: string;
-    womenParagraphs: string[];
     offersTitle: string;
     offers: Array<{ title: string; description: string }>;
     orgTitle: string;
@@ -534,13 +532,8 @@ const en: Omit<PublicInfoContent, "footer"> = {
     description: "KabulLearn is a free learning platform with structured courses in English, Pashto, and Dari.",
     missionTitle: "What we are",
     missionParagraphs: [
-      "We build online courses for Afghan learners who don't have reliable access to education. That includes people in rural areas with limited schools, Afghans who have moved abroad, and girls and women inside Afghanistan who have been banned from secondary school and university since 2021.",
+      "We build online courses for Afghan learners who do not have reliable access to education, or who face poor education quality where learning opportunities exist. That includes people in rural areas with limited schools, Afghans who have moved abroad, and girls and women inside Afghanistan who have been banned from secondary school and university since 2021.",
       "Everything on KabulLearn is free. You need a device and an internet connection. That is all."
-    ],
-    womenTitle: "Girls and women in Afghanistan",
-    womenParagraphs: [
-      "In 2021, Afghan girls were banned from secondary school. In 2022, women were banned from universities. Millions of young women who were studying lost access to formal education overnight.",
-      "KabulLearn is not a fix for that. But it is a place where Afghan girls and women can take structured courses, earn certificates, and keep learning — in Pashto, Dari, or English — without leaving home."
     ],
     offersTitle: "What KabulLearn offers",
     offers: [
@@ -814,13 +807,8 @@ const ps: Omit<PublicInfoContent, "footer"> = {
     description: "کابل‌لرن یو وړیا زده‌کړیز پلېټفارم دی چې په انګلیسي، پښتو او دري کې منظم کورسونه وړاندې کوي.",
     missionTitle: "موږ څوک یو",
     missionParagraphs: [
-      "موږ د هغو افغان زده‌کوونکو لپاره آنلاین کورسونه جوړوو چې باوري او معیاري زده کړې ته لاسرسی نه لري. په دې کې هغه خلک شامل دي چې په محدودو ښوونیزو سیمو کې اوسي، هغه افغانان چې بهر مېشت دي، او هغه نجونې او ښځې چې له ۲۰۲۱ وروسته د منځني ښوونځي او پوهنتون له حضوري زده کړو منع شوي دي.",
+      "موږ د هغو افغان زده‌کوونکو لپاره آنلاین کورسونه جوړوو چې باوري زده کړې ته لاسرسی نه لري، یا هلته چې زده کړې شته خو کیفیت یې کمزوری دی. په دې کې هغه خلک شامل دي چې په محدودو ښوونیزو سیمو کې اوسي، هغه افغانان چې بهر مېشت دي، او هغه نجونې او ښځې چې له ۲۰۲۱ وروسته د منځني ښوونځي او پوهنتون له حضوري زده کړو منع شوي دي.",
       "په کابل‌لرن کې هر څه وړیا دي. تاسو یوازې یوې وسیلې او انټرنېټ ته اړتیا لرئ. همدومره."
-    ],
-    womenTitle: "په افغانستان کې نجونې او ښځې",
-    womenParagraphs: [
-      "له ۲۰۲۱ کال وروسته، په افغانستان کې نجونې له منځني ښوونځي منع شوې. له ۲۰۲۲ کال وروسته، ښځې له پوهنتونونو منع شوې. میلیونونه ځوانې ښځې چې زده کړه یې کوله، ناڅاپه یې رسمي زده کړو ته لاسرسی له لاسه ورکړ.",
-      "کابل‌لرن دا ستونزه په بشپړ ډول نه شي حل کولای. خو دا هغه ځای دی چې افغان نجونې او ښځې پکې منظم کورسونه اخیستلای شي، سندونه ترلاسه کولای شي، او خپلې زده کړې دوامولای شي — په پښتو، دري، یا انګلیسي — بې له دې چې له کوره ووځي."
     ],
     offersTitle: "کابل‌لرن څه وړاندې کوي",
     offers: [
@@ -1077,13 +1065,8 @@ const fa: Omit<PublicInfoContent, "footer"> = {
     description: "کابل‌لرن یک پلتفرم آموزشی رایگان با کورس‌های منظم به زبان‌های انگلیسی، پشتو و دری است.",
     missionTitle: "ما چه هستیم",
     missionParagraphs: [
-      "ما کورس‌های آنلاین برای شاگردان افغان می‌سازیم که به آموزش معیاری دسترسی مطمئن ندارند. این شامل افرادی می‌شود که در مناطق با مکاتب محدود زندگی می‌کنند، افغان‌هایی که به خارج رفته‌اند، و دختران و زنانی که از سال ۲۰۲۱ از مکتب متوسطه و دانشگاه محروم شده‌اند.",
+      "ما کورس‌های آنلاین برای شاگردان افغان می‌سازیم که به آموزش قابل اعتماد دسترسی ندارند، یا در جاهایی درس می‌خوانند که کیفیت آموزش ضعیف است. این شامل افرادی می‌شود که در مناطق با مکاتب محدود زندگی می‌کنند، افغان‌هایی که به خارج رفته‌اند، و دختران و زنانی که از سال ۲۰۲۱ از مکتب متوسطه و دانشگاه محروم شده‌اند.",
       "همه چیز در کابل‌لرن رایگان است. تنها به یک دستگاه و اتصال به اینترنت نیاز دارید. همین."
-    ],
-    womenTitle: "دختران و زنان در افغانستان",
-    womenParagraphs: [
-      "از سال ۲۰۲۱، دختران افغان از مکتب متوسطه منع شدند. از سال ۲۰۲۲، زنان از دانشگاه منع شدند. میلیون‌ها دختر جوانی که در حال تحصیل بودند، یک‌شبه دسترسی به آموزش رسمی را از دست دادند.",
-      "کابل‌لرن این وضعیت را به تنهایی حل نمی‌کند. اما جایی است که دختران و زنان افغان می‌توانند کورس‌های منظم بگیرند، گواهی کسب کنند و به یادگیری ادامه دهند — به پشتو، دری یا انگلیسی — بدون نیاز به ترک خانه."
     ],
     offersTitle: "کابل‌لرن چه ارائه می‌دهد",
     offers: [

@@ -189,7 +189,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
           />
         </Link>
 
-        {/* Primary nav — signed-in users only; guests get "Explore courses" in the homepage hero */}
+        {/* Primary nav */}
         <nav className="flex min-w-0 flex-1 items-center gap-1" aria-label="Primary">
           {user && (
             <Link
@@ -201,6 +201,18 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
               }`}
             >
               {t.courses}
+            </Link>
+          )}
+          {!user && (
+            <Link
+              href="/about"
+              className={`inline-flex h-9 items-center rounded-[var(--radius)] px-3 text-[13px] font-[800] transition ${
+                pathname === "/about"
+                  ? "text-[var(--brand)]"
+                  : "text-[var(--muted)] hover:text-[var(--brand)]"
+              }`}
+            >
+              {t.aboutUs}
             </Link>
           )}
           {user?.role === "STUDENT" && (

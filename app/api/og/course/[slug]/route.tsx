@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { courseArtIndex, COURSE_GRADIENTS } from "@/lib/course-art";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 const SIZE = { width: 1200, height: 630 };
 

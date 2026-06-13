@@ -8,6 +8,7 @@ import { SessionGuard } from "@/components/SessionGuard";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { BackButton } from "@/components/BackButton";
 import { CourseChatbox } from "@/components/CourseChatbox";
+import { SocialFloat } from "@/components/SocialFloat";
 import { SiteFooter } from "@/components/SiteFooter";
 import { dictionaries, getDirection } from "@/lib/i18n";
 import { normalizeLocale } from "@/lib/server-locale";
@@ -71,6 +72,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <BackButton />
           <div id="main-content">{children}</div>
           <SiteFooter rightsReserved={t.rightsReserved} />
+          <SocialFloat />
           {userId ? <CourseChatbox /> : null}
         </LanguageProvider>
       </body>

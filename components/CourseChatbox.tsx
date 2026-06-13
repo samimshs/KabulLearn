@@ -157,8 +157,8 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
       {open && (
         <div
           dir={direction}
-          className="fixed bottom-24 right-6 z-50 flex w-[360px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-[20px] border border-[var(--border)] bg-white shadow-[0_16px_48px_rgba(10,9,20,0.18),0_4px_16px_rgba(10,9,20,0.08)]"
-          style={{ height: 480 }}
+          className="fixed bottom-24 z-50 flex flex-col overflow-hidden rounded-[20px] border border-[var(--border)] bg-white shadow-[0_16px_48px_rgba(10,9,20,0.18),0_4px_16px_rgba(10,9,20,0.08)] inset-x-3 sm:inset-x-auto sm:right-6 sm:w-[360px]"
+          style={{ height: 'min(480px, calc(100dvh - 180px))' }}
         >
           {/* Header */}
           <div className="flex items-center gap-2.5 border-b border-[var(--border)] bg-[var(--brand)] px-4 py-3">
@@ -253,7 +253,7 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
                 rows={1}
                 dir={direction}
                 className="min-w-0 flex-1 resize-none bg-transparent text-[13px] leading-[1.5] text-[var(--ink)] placeholder:text-[var(--muted-2)] focus:outline-none disabled:opacity-50"
-                style={{ maxHeight: 120, overflowY: "auto", overflowX: "hidden" }}
+                style={{ fontSize: 16, maxHeight: 120, overflowY: "auto", overflowX: "hidden" }}
               />
               <button
                 type="button"

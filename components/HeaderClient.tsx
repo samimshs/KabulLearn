@@ -559,19 +559,6 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
             {t.courses}
           </Link>
 
-          {/* About — guests only */}
-          {!user && (
-            <Link href="/about" onClick={() => setNavSheetOpen(false)}
-              className={`flex items-center gap-3.5 rounded-[var(--radius-lg)] px-4 py-3.5 text-[15px] font-[700] transition ${pathname === "/about" ? "bg-[var(--brand-50)] text-[var(--brand)]" : "text-[var(--ink)] hover:bg-[var(--surface)]"}`}
-            >
-              <svg viewBox="0 0 20 20" className="h-5 w-5 shrink-0" fill="none" aria-hidden="true">
-                <circle cx="10" cy="10" r="7.5" stroke="currentColor" strokeWidth="1.5" />
-                <path d="M10 9v5M10 6h.01" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-              </svg>
-              {t.aboutUs}
-            </Link>
-          )}
-
           {/* My Dashboard — students */}
           {user?.role === "STUDENT" && (
             <Link href="/dashboard" onClick={() => setNavSheetOpen(false)}
@@ -622,6 +609,19 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
             </svg>
             {t.supportUs}
           </Link>
+
+          {/* About — guests only */}
+          {!user && (
+            <Link href="/about" onClick={() => setNavSheetOpen(false)}
+              className={`flex items-center gap-3.5 rounded-[var(--radius-lg)] px-4 py-3.5 text-[15px] font-[700] transition ${pathname === "/about" ? "bg-[var(--brand-50)] text-[var(--brand)]" : "text-[var(--ink)] hover:bg-[var(--surface)]"}`}
+            >
+              <svg viewBox="0 0 20 20" className="h-5 w-5 shrink-0" fill="none" aria-hidden="true">
+                <circle cx="10" cy="10" r="7.5" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M10 9v5M10 6h.01" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+              </svg>
+              {t.aboutUs}
+            </Link>
+          )}
 
           {/* Guest CTAs */}
           {!user && (

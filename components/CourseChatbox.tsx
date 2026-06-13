@@ -6,6 +6,29 @@ import { useLanguage } from "@/components/LanguageProvider";
 
 type Message = { role: "user" | "assistant"; content: string; chatLogId?: string; feedback?: 1 | -1 };
 
+function AIAvatar({ size = 32 }: { size?: number }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="shrink-0 rounded-full"
+      style={{
+        width: size,
+        height: size,
+        background: "linear-gradient(135deg, #0057FF 0%, #2563EB 55%, #4F46E5 100%)",
+        display: "grid",
+        placeItems: "center",
+      }}
+    >
+      <svg viewBox="0 0 20 20" style={{ width: size * 0.52, height: size * 0.52 }} fill="none">
+        {/* Sparkle — standard AI motif */}
+        <path d="M10 2.5L11.6 7.8L17 9.5L11.6 11.2L10 16.5L8.4 11.2L3 9.5L8.4 7.8L10 2.5Z" fill="white" />
+        <circle cx="15.5" cy="4" r="1.1" fill="rgba(255,255,255,0.75)" />
+        <circle cx="4.5" cy="15" r="0.8" fill="rgba(255,255,255,0.6)" />
+      </svg>
+    </div>
+  );
+}
+
 const URL_RE = /https?:\/\/[^\s)>\]"']+/g;
 
 function linkify(text: string) {
@@ -139,17 +162,20 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
         type="button"
         onClick={() => setOpen(o => !o)}
         aria-label={t.chatLabel}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--brand)] text-white shadow-[0_8px_24px_rgba(0,87,255,0.35)] transition hover:scale-105 hover:shadow-[0_12px_32px_rgba(0,87,255,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-2"
+        className="fixed bottom-6 right-6 z-50 rounded-full shadow-[0_8px_24px_rgba(0,87,255,0.35)] transition hover:scale-105 hover:shadow-[0_12px_32px_rgba(0,87,255,0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-2"
       >
         {open ? (
-          <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" aria-hidden="true">
-            <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
+          <div
+            className="flex h-14 w-14 items-center justify-center rounded-full text-white"
+            style={{ background: "linear-gradient(135deg, #0057FF 0%, #2563EB 55%, #4F46E5 100%)" }}
+            aria-hidden="true"
+          >
+            <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none">
+              <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </div>
         ) : (
-          <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" aria-hidden="true">
-            <path d="M3 5.5h14M3 10h10M3 14.5h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            <circle cx="16" cy="14.5" r="2.5" fill="currentColor" />
-          </svg>
+          <AIAvatar size={56} />
         )}
       </button>
 
@@ -162,12 +188,7 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
         >
           {/* Header */}
           <div className="flex items-center gap-2.5 border-b border-[var(--border)] bg-[var(--brand)] px-4 py-3">
-            <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/20">
-              <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 text-white" fill="none" aria-hidden="true">
-                <circle cx="8" cy="6" r="3" stroke="currentColor" strokeWidth="1.4" />
-                <path d="M2 14c0-2.21 2.686-4 6-4s6 1.79 6 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-              </svg>
-            </div>
+            <AIAvatar size={30} />
             <span className="flex-1 text-[13px] font-[800] text-white">{t.chatLabel}</span>
             <button
               type="button"
@@ -195,8 +216,9 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
               </div>
             )}
             {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className="grid min-w-0 max-w-[85%] gap-1">
+              <div key={i} className={`flex items-end gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                {msg.role === "assistant" && <AIAvatar size={26} />}
+                <div className="grid min-w-0 max-w-[78%] gap-1">
                   <div
                     className={`whitespace-pre-wrap break-words [overflow-wrap:anywhere] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
                       msg.role === "user"
@@ -274,7 +296,7 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
               </button>
             </div>
             <p className="mt-1.5 text-center text-[10px] text-[var(--muted-2)]">
-              AI · {t.chatLabel}
+              {t.chatLabel}
             </p>
           </div>
         </div>

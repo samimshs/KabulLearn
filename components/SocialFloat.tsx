@@ -105,7 +105,7 @@ export function SocialFloat() {
   return (
     <div
       ref={ref}
-      className="fixed left-6 z-[39] bottom-6 sm:bottom-auto sm:top-3/4 sm:-translate-y-1/2"
+      className="fixed bottom-6 left-6 z-[39]"
     >
       {/* Social icons — absolutely above the toggle button */}
       <div aria-hidden={!open} className="absolute bottom-full left-0 mb-3 flex flex-col gap-2.5">

@@ -108,7 +108,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
 
   if (pathname === "/login" || pathname === "/register") {
     return (
-      <header dir={direction} className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl">
+      <header dir="ltr" className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl">
         <div className="kl-site-header-inner mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:px-5 lg:px-8">
           <Link href="/" className="pr-focus flex h-11 shrink-0 items-center overflow-hidden" aria-label="KabulLearn home">
             <img src="/poharana-logo-v3.svg" alt="KabulLearn" className="hidden h-11 w-[166px] max-w-[42vw] object-contain sm:block" />
@@ -171,7 +171,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
 
   return (
     <>
-    <header dir={direction} className={`sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl ${isHomePage ? "kl-home-header" : ""}`}>
+    <header dir="ltr" className={`sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl ${isHomePage ? "kl-home-header" : ""}`}>
       <div className={`kl-site-header-inner mx-auto flex h-16 w-full items-center justify-between gap-2 px-3 sm:gap-5 sm:px-5 lg:px-8 ${isHomePage ? "max-w-none" : isLessonPage ? "max-w-[1700px]" : "max-w-7xl"}`}>
 
         {/* Wordmark */}

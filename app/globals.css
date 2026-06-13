@@ -94,7 +94,7 @@ main { flex: 1 1 auto; }
 html[lang="ps"] body,
 html[lang="fa"] body {
   font-family: var(--font-arabic), var(--font-arabic-serif), var(--font-sans, 'Manrope'), ui-sans-serif, system-ui, sans-serif;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 /* Skip-to-content link — visually hidden until keyboard-focused */
@@ -663,6 +663,9 @@ html[dir="rtl"] .kl-home-lang {
   position: relative;
   height: min(calc(83.333cqw), 800px);
   overflow: visible;
+  /* Hero visual contains English-only decorative text — always use the Latin
+     font regardless of the active locale so the mockup looks consistent. */
+  font-family: var(--font-sans, 'Manrope'), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Fixed 960 × 800 px design canvas — every child uses absolute px coords.

@@ -528,6 +528,15 @@ html[dir="rtl"] .kl-home-copy {
   text-align: right;
 }
 
+@media (max-width: 1023px) {
+  html[dir="rtl"] .kl-home-copy {
+    text-align: center;
+  }
+  html[dir="rtl"] .kl-home-cta {
+    justify-content: center;
+  }
+}
+
 html[dir="rtl"] .kl-home-logo {
   align-self: auto;
   margin-right: auto;
@@ -1641,6 +1650,8 @@ body:has(.kl-home-page) > footer {
 
   .kl-home-copy {
     padding-bottom: 0;
+    align-items: center;
+    text-align: center;
     justify-content: start;
     gap: 0 !important;
     max-height: none;
@@ -1663,10 +1674,14 @@ body:has(.kl-home-page) > footer {
   }
 
   .kl-home-cta {
+    justify-content: center;
     margin-top: 32px;
   }
 
   .kl-feature-list {
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
     margin-top: 32px;
   }
 
@@ -1682,8 +1697,8 @@ body:has(.kl-home-page) > footer {
 
   .kl-home-hero > * {
     min-width: 0;
-    width: min(100%, calc(100vw - 40px));
-    max-width: calc(100vw - 40px);
+    width: 100%;
+    max-width: 100%;
   }
 
   .kl-home-page .pr-h1 {
@@ -1709,21 +1724,21 @@ body:has(.kl-home-page) > footer {
 
 @media (max-width: 640px) {
   .kl-home-hero > div:first-child {
-    width: min(300px, calc(100vw - 44px)) !important;
-    max-width: min(300px, calc(100vw - 44px)) !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .kl-home-page .pr-h1 {
-    width: min(300px, calc(100vw - 44px)) !important;
-    max-width: min(300px, calc(100vw - 44px)) !important;
+    width: 100% !important;
+    max-width: 100% !important;
     font-size: clamp(30px, 8.5vw, 34px);
     letter-spacing: -1.2px;
   }
 
   .kl-home-page .pr-copy,
   .kl-home-page .pr-eyebrow {
-    width: min(300px, calc(100vw - 44px)) !important;
-    max-width: min(300px, calc(100vw - 44px)) !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .kl-home-page .pr-eyebrow {

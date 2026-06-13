@@ -23,7 +23,7 @@ export default async function SupportKabulLearnPage() {
   const t = dictionaries[locale];
   let supporterCount = 0;
   let totalRaisedCents = 0;
-  let recentSupporters: Array<{ id: string; donorName: string | null; createdAt: Date }> = [];
+  let recentSupporters: Array<{ id: string; donorName: string | null }> = [];
 
   try {
     const [aggregate, rows] = await Promise.all([
@@ -36,7 +36,7 @@ export default async function SupportKabulLearnPage() {
         where: { purpose: "DONATION", status: "PAID" },
         orderBy: { createdAt: "desc" },
         take: 12,
-        select: { id: true, donorName: true, createdAt: true }
+        select: { id: true, donorName: true }
       })
     ]);
     supporterCount = aggregate._count.id;
@@ -107,13 +107,6 @@ export default async function SupportKabulLearnPage() {
                 <article key={supporter.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
                   <p className="truncate text-sm font-[900] text-[var(--ink)]">
                     {supporter.donorName?.trim() || t.anonymousSupporter}
-                  </p>
-                  <p className="mt-1 text-[11px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
-                    {new Date(supporter.createdAt).toLocaleDateString(locale === "en" ? "en-US" : "fa-AF", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric"
-                    })}
                   </p>
                 </article>
               ))}

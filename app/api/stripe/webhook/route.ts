@@ -28,7 +28,7 @@ async function markCheckoutSessionPaid(session: Stripe.Checkout.Session) {
       stripeCheckoutSessionId: checkoutSessionId,
       stripePaymentIntentId: intentId,
       donorEmail: session.customer_details?.email ?? payment.donorEmail,
-      donorName: session.customer_details?.name ?? payment.donorName
+      donorName: payment.donorName
     }
   });
 

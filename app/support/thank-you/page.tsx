@@ -32,17 +32,22 @@ async function verifyDonationPayment(sessionId: string | undefined) {
     }
 
     const paymentId = session.metadata?.paymentId;
-    await db.payment.updateMany({
-      where: {
-        ...(paymentId ? { id: paymentId } : { stripeCheckoutSessionId: sessionId }),
-        purpose: "DONATION"
-      },
+    const payment = paymentId
+      ? await db.payment.findFirst({ where: { id: paymentId, purpose: "DONATION" } })
+      : await db.payment.findFirst({ where: { stripeCheckoutSessionId: sessionId, purpose: "DONATION" } });
+
+    if (!payment) {
+      return false;
+    }
+
+    await db.payment.update({
+      where: { id: payment.id },
       data: {
         status: "PAID",
         stripeCheckoutSessionId: session.id,
         stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null,
-        donorEmail: session.customer_details?.email ?? undefined,
-        donorName: session.customer_details?.name ?? undefined
+        donorEmail: payment.donorEmail ?? session.customer_details?.email ?? undefined,
+        donorName: payment.donorName
       }
     });
 

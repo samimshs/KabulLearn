@@ -22,7 +22,7 @@ export async function SiteFooter({ rightsReserved }: { rightsReserved: string })
   }));
 
   return (
-    <footer dir="ltr" className="mt-16 border-t border-[var(--border)] bg-[var(--card)]">
+    <footer dir={direction} className="mt-16 border-t border-[var(--border)] bg-[var(--card)]">
       <div className="mx-auto grid max-w-[1280px] gap-10 px-5 py-10 lg:grid-cols-[1.4fr_2.6fr] lg:px-8">
         <div dir="ltr" className="lg:col-start-1 lg:row-start-1">
           <Link href="/" className="inline-flex items-center gap-3" aria-label="KabulLearn home">

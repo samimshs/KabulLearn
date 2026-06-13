@@ -52,11 +52,12 @@ function SenderInitials({ name, role }: { name: string | null; role: string }) {
 
 export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], appNotifications = [], unreadAppNotifications = 0 }: HeaderClientProps) {
   const pathname = usePathname();
-  const { locale, setLocale, t } = useLanguage();
-  const [menuOpen, setMenuOpen]   = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
+  const { locale, direction, setLocale, t } = useLanguage();
+  const [menuOpen, setMenuOpen]     = useState(false);
+  const [notifOpen, setNotifOpen]   = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [langOpen, setLangOpen]   = useState(false);
+  const [langOpen, setLangOpen]     = useState(false);
+  const [navSheetOpen, setNavSheetOpen] = useState(false);
   const [isMac, setIsMac] = useState(true); // default to Mac (most common); corrected on mount
   const [appNotifUnread, setAppNotifUnread] = useState(unreadAppNotifications);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -81,6 +82,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
         setMenuOpen(false);
         setNotifOpen(false);
         setLangOpen(false);
+        setNavSheetOpen(false);
       }
     }
     window.addEventListener("keydown", onKey);
@@ -106,7 +108,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
 
   if (pathname === "/login" || pathname === "/register") {
     return (
-      <header dir="ltr" className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl">
+      <header dir={direction} className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl">
         <div className="kl-site-header-inner mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:px-5 lg:px-8">
           <Link href="/" className="pr-focus flex h-11 shrink-0 items-center overflow-hidden" aria-label="KabulLearn home">
             <img src="/poharana-logo-v3.svg" alt="KabulLearn" className="hidden h-11 w-[166px] max-w-[42vw] object-contain sm:block" />
@@ -121,7 +123,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
               {languageOptions.find(o => o.locale === locale)?.label}
             </button>
             {langOpen && (
-              <div className="absolute right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-[10px] border border-[var(--border)] bg-white shadow-[0_8px_24px_rgba(10,9,20,0.1)] sm:hidden">
+              <div className="absolute end-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-[10px] border border-[var(--border)] bg-white shadow-[0_8px_24px_rgba(10,9,20,0.1)] sm:hidden">
                 {languageOptions.map(option => (
                   <button key={option.locale} type="button" onClick={() => { setLocale(option.locale); setLangOpen(false); }} className={`flex w-full items-center gap-3 px-4 py-2.5 text-[13px] transition hover:bg-[var(--surface)] ${locale === option.locale ? "font-[800] text-[var(--brand)]" : "font-[700] text-[var(--ink)]"}`}>
                     <span className="w-8 text-[12px]">{option.label}</span>
@@ -169,7 +171,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
 
   return (
     <>
-    <header dir="ltr" className={`sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl ${isHomePage ? "kl-home-header" : ""}`}>
+    <header dir={direction} className={`sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl ${isHomePage ? "kl-home-header" : ""}`}>
       <div className={`kl-site-header-inner mx-auto flex h-16 w-full items-center justify-between gap-2 px-3 sm:gap-5 sm:px-5 lg:px-8 ${isHomePage ? "max-w-none" : isLessonPage ? "max-w-[1700px]" : "max-w-7xl"}`}>
 
         {/* Wordmark */}
@@ -228,6 +230,26 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
               {t.myCourses}
             </Link>
           )}
+
+          {/* Hamburger — mobile only */}
+          <button
+            type="button"
+            className="ms-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] text-[var(--ink)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)] sm:hidden"
+            onClick={() => { setNavSheetOpen(o => !o); setMenuOpen(false); setNotifOpen(false); setLangOpen(false); }}
+            aria-label="Navigation menu"
+            aria-expanded={navSheetOpen}
+            aria-controls="kl-mobile-nav"
+          >
+            {navSheetOpen ? (
+              <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" aria-hidden="true">
+                <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" aria-hidden="true">
+                <path d="M2 4.5h12M2 8h12M2 11.5h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            )}
+          </button>
         </nav>
 
         {/* Right side */}
@@ -290,7 +312,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                   <div
                     role="dialog"
                     aria-label={t.notificationsLabel}
-                    className="absolute right-0 top-[calc(100%+8px)] z-50 w-[320px] overflow-hidden rounded-[14px] border border-[var(--border)] bg-white shadow-[0_8px_32px_rgba(10,9,20,0.12),0_2px_8px_rgba(10,9,20,0.06)]"
+                    className="absolute end-0 top-[calc(100%+8px)] z-50 w-[320px] overflow-hidden rounded-[14px] border border-[var(--border)] bg-white shadow-[0_8px_32px_rgba(10,9,20,0.12),0_2px_8px_rgba(10,9,20,0.06)]"
                   >
                     {/* Panel header */}
                     <div className="border-b border-[var(--border)] px-4 py-3">
@@ -424,7 +446,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                 {menuOpen && (
                   <div
                     role="menu"
-                    className="absolute right-0 top-[calc(100%+8px)] z-50 min-w-[200px] overflow-hidden rounded-[14px] border border-[var(--border)] bg-white shadow-[0_8px_32px_rgba(10,9,20,0.12),0_2px_8px_rgba(10,9,20,0.06)]"
+                    className="absolute end-0 top-[calc(100%+8px)] z-50 min-w-[200px] overflow-hidden rounded-[14px] border border-[var(--border)] bg-white shadow-[0_8px_32px_rgba(10,9,20,0.12),0_2px_8px_rgba(10,9,20,0.06)]"
                   >
                     {/* User info */}
                     <div className="border-b border-[var(--border)] px-4 py-3">
@@ -476,7 +498,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
               <Link href="/support" className="hidden h-9 items-center rounded-[var(--radius)] px-3 text-[13px] font-[700] text-[var(--muted)] transition hover:text-[var(--brand)] md:inline-flex">
                 {t.supportUs}
               </Link>
-              <Link href="/login" className="pr-btn-ghost !min-h-9 px-4 max-sm:!hidden">
+              <Link href="/login" className="pr-btn-ghost !min-h-9 px-3 sm:px-4">
                 {t.signIn}
               </Link>
               <Link href="/register" className="pr-btn-primary !min-h-9 px-3 sm:px-4">
@@ -492,7 +514,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
               {languageOptions.find(o => o.locale === locale)?.label}
             </button>
             {langOpen && (
-              <div className="absolute right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-[10px] border border-[var(--border)] bg-white shadow-[0_8px_24px_rgba(10,9,20,0.1)] sm:hidden">
+              <div className="absolute end-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-[10px] border border-[var(--border)] bg-white shadow-[0_8px_24px_rgba(10,9,20,0.1)] sm:hidden">
                 {languageOptions.map(option => (
                   <button key={option.locale} type="button" onClick={() => { setLocale(option.locale); setLangOpen(false); }} className={`flex w-full items-center gap-3 px-4 py-2.5 text-[13px] transition hover:bg-[var(--surface)] ${locale === option.locale ? "font-[800] text-[var(--brand)]" : "font-[700] text-[var(--ink)]"}`}>
                     <span className="w-8 text-[12px]">{option.label}</span>
@@ -513,6 +535,131 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
         </div>
       </div>
     </header>
+
+    {/* ── Mobile nav sheet ──────────────────────────────────────── */}
+    {navSheetOpen && (
+      <div
+        id="kl-mobile-nav"
+        dir={direction}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation"
+        className="sm:hidden fixed inset-x-0 bottom-0 z-30 overflow-y-auto bg-white"
+        style={{ top: "64px" }}
+      >
+        <nav className="flex flex-col gap-0.5 p-4 pb-8">
+
+          {/* Courses — all users */}
+          <Link href="/courses" onClick={() => setNavSheetOpen(false)}
+            className={`flex items-center gap-3.5 rounded-[var(--radius-lg)] px-4 py-3.5 text-[15px] font-[700] transition ${pathname.startsWith("/courses") ? "bg-[var(--brand-50)] text-[var(--brand)]" : "text-[var(--ink)] hover:bg-[var(--surface)]"}`}
+          >
+            <svg viewBox="0 0 20 20" className="h-5 w-5 shrink-0" fill="none" aria-hidden="true">
+              <path d="M10 6C8 4.7 4.8 4.4 3 5v11c1.8-.6 5-.3 7 1M10 6c2-1.3 5.2-1.6 7-1v11c-1.8-.6-5-.3-7 1M10 6v11" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+            </svg>
+            {t.courses}
+          </Link>
+
+          {/* About — guests only */}
+          {!user && (
+            <Link href="/about" onClick={() => setNavSheetOpen(false)}
+              className={`flex items-center gap-3.5 rounded-[var(--radius-lg)] px-4 py-3.5 text-[15px] font-[700] transition ${pathname === "/about" ? "bg-[var(--brand-50)] text-[var(--brand)]" : "text-[var(--ink)] hover:bg-[var(--surface)]"}`}
+            >
+              <svg viewBox="0 0 20 20" className="h-5 w-5 shrink-0" fill="none" aria-hidden="true">
+                <circle cx="10" cy="10" r="7.5" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M10 9v5M10 6h.01" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+              </svg>
+              {t.aboutUs}
+            </Link>
+          )}
+
+          {/* My Dashboard — students */}
+          {user?.role === "STUDENT" && (
+            <Link href="/dashboard" onClick={() => setNavSheetOpen(false)}
+              className={`flex items-center gap-3.5 rounded-[var(--radius-lg)] px-4 py-3.5 text-[15px] font-[700] transition ${pathname.startsWith("/dashboard") ? "bg-[var(--brand-50)] text-[var(--brand)]" : "text-[var(--ink)] hover:bg-[var(--surface)]"}`}
+            >
+              <svg viewBox="0 0 20 20" className="h-5 w-5 shrink-0" fill="none" aria-hidden="true">
+                <rect x="3" y="3" width="5.5" height="5.5" rx="1.2" stroke="currentColor" strokeWidth="1.5" />
+                <rect x="11.5" y="3" width="5.5" height="5.5" rx="1.2" stroke="currentColor" strokeWidth="1.5" />
+                <rect x="3" y="11.5" width="5.5" height="5.5" rx="1.2" stroke="currentColor" strokeWidth="1.5" />
+                <rect x="11.5" y="11.5" width="5.5" height="5.5" rx="1.2" stroke="currentColor" strokeWidth="1.5" />
+              </svg>
+              {t.myCourses}
+            </Link>
+          )}
+
+          {/* Portal — educators and admins */}
+          {user && user.role !== "STUDENT" && (
+            <Link href={portalHref} onClick={() => setNavSheetOpen(false)}
+              className={`flex items-center gap-3.5 rounded-[var(--radius-lg)] px-4 py-3.5 text-[15px] font-[700] transition ${pathname.startsWith(portalHref) ? "bg-[var(--brand-50)] text-[var(--brand)]" : "text-[var(--ink)] hover:bg-[var(--surface)]"}`}
+            >
+              <svg viewBox="0 0 20 20" className="h-5 w-5 shrink-0" fill="none" aria-hidden="true">
+                <path d="M3 5.5 10 2l7 3.5v9A2 2 0 0 1 15 16.5H5A2 2 0 0 1 3 14.5v-9ZM7.5 16.5v-5h5v5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+              </svg>
+              {portalLabel}
+            </Link>
+          )}
+
+          <div className="my-2 h-px bg-[var(--border)]" />
+
+          {/* Educator Portal — guests */}
+          {!user && (
+            <Link href="/login?callbackUrl=%2Feducator" onClick={() => setNavSheetOpen(false)}
+              className="flex items-center gap-3.5 rounded-[var(--radius-lg)] px-4 py-3.5 text-[15px] font-[700] text-[var(--ink)] transition hover:bg-[var(--surface)]"
+            >
+              <svg viewBox="0 0 20 20" className="h-5 w-5 shrink-0" fill="none" aria-hidden="true">
+                <path d="M10 3 2 7l8 4 8-4-8-4ZM2 13l8 4 8-4M2 10l8 4 8-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {t.educatorPortal}
+            </Link>
+          )}
+
+          {/* Support — all users */}
+          <Link href="/support" onClick={() => setNavSheetOpen(false)}
+            className={`flex items-center gap-3.5 rounded-[var(--radius-lg)] px-4 py-3.5 text-[15px] font-[700] transition ${pathname === "/support" ? "bg-[var(--brand-50)] text-[var(--brand)]" : "text-[var(--ink)] hover:bg-[var(--surface)]"}`}
+          >
+            <svg viewBox="0 0 20 20" className="h-5 w-5 shrink-0" fill="none" aria-hidden="true">
+              <path d="M10 16.5S2.5 12 2.5 6.8a3.75 3.75 0 0 1 7.5-.8 3.75 3.75 0 0 1 7.5.8C17.5 12 10 16.5 10 16.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+            </svg>
+            {t.supportUs}
+          </Link>
+
+          {/* Guest CTAs */}
+          {!user && (
+            <>
+              <div className="my-2 h-px bg-[var(--border)]" />
+              <Link href="/login" onClick={() => setNavSheetOpen(false)}
+                className="pr-btn-ghost flex items-center justify-center text-[15px]"
+              >
+                {t.signIn}
+              </Link>
+              <Link href="/register" onClick={() => setNavSheetOpen(false)}
+                className="mt-2 pr-btn-primary flex items-center justify-center text-[15px]"
+              >
+                {t.registerFree}
+              </Link>
+            </>
+          )}
+
+          {/* Sign Out — logged-in users */}
+          {user && (
+            <>
+              <div className="my-2 h-px bg-[var(--border)]" />
+              <form action={logout}>
+                <button type="submit" onClick={() => setNavSheetOpen(false)}
+                  className="flex w-full items-center gap-3.5 rounded-[var(--radius-lg)] px-4 py-3.5 text-[15px] font-[700] text-[var(--danger)] transition hover:bg-[rgba(220,38,38,0.04)]"
+                >
+                  <svg viewBox="0 0 20 20" className="h-5 w-5 shrink-0" fill="none" aria-hidden="true">
+                    <path d="M13 13.5 16.5 10 13 6.5M16.5 10H7.5M7.5 3.5H5A1.5 1.5 0 0 0 3.5 5v10A1.5 1.5 0 0 0 5 16.5h2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {t.signOut}
+                </button>
+              </form>
+            </>
+          )}
+        </nav>
+      </div>
+    )}
+
     <CommandPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );

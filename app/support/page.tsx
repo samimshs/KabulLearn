@@ -1,13 +1,14 @@
 import Link from "next/link";
+import { DonationCheckoutForm } from "@/components/DonationCheckoutForm";
+import { db } from "@/lib/db";
 import { getPublicInfoContent } from "@/lib/info-translations";
+import { dictionaries } from "@/lib/i18n";
 import { getServerLocale } from "@/lib/server-locale";
 
 export const metadata = {
   title: "Support KabulLearn",
   description: "Support KabulLearn and help expand access to practical education in English, Pashto, and Dari for Afghan learners worldwide."
 };
-
-const donationLink = process.env.NEXT_PUBLIC_STRIPE_DONATION_LINK || null;
 
 const icons = [
   <svg key="courses" viewBox="0 0 24 24" fill="none" width="22" height="22" stroke="var(--brand)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>,
@@ -19,6 +20,37 @@ const icons = [
 export default async function SupportKabulLearnPage() {
   const locale = await getServerLocale();
   const d = getPublicInfoContent(locale).donate;
+  const t = dictionaries[locale];
+  let supporterCount = 0;
+  let totalRaisedCents = 0;
+  let recentSupporters: Array<{ id: string; donorName: string | null; createdAt: Date }> = [];
+
+  try {
+    const [aggregate, rows] = await Promise.all([
+      db.payment.aggregate({
+        where: { purpose: "DONATION", status: "PAID" },
+        _count: { id: true },
+        _sum: { amountCents: true }
+      }),
+      db.payment.findMany({
+        where: { purpose: "DONATION", status: "PAID" },
+        orderBy: { createdAt: "desc" },
+        take: 12,
+        select: { id: true, donorName: true, createdAt: true }
+      })
+    ]);
+    supporterCount = aggregate._count.id;
+    totalRaisedCents = aggregate._sum.amountCents ?? 0;
+    recentSupporters = rows;
+  } catch {
+    // Keep the donation page usable if public stats are temporarily unavailable.
+  }
+
+  const money = new Intl.NumberFormat(locale === "en" ? "en-US" : "fa-AF", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: totalRaisedCents % 100 === 0 ? 0 : 2
+  }).format(totalRaisedCents / 100);
 
   return (
     <main className="pr-page py-12 lg:py-20">
@@ -33,31 +65,7 @@ export default async function SupportKabulLearnPage() {
         </p>
 
         {/* CTA */}
-        <div className="mt-8 flex flex-col items-center gap-3">
-          {donationLink ? (
-            <a
-              href={donationLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="pr-btn-primary inline-flex items-center gap-2 px-8 !min-h-11 text-[15px]"
-            >
-              <svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
-              {d.ctaButton}
-            </a>
-          ) : (
-            <div className="rounded-[var(--radius-lg)] border border-[rgba(0,87,255,0.14)] bg-[var(--brand-50)] px-6 py-5 text-center">
-              <p className="text-[15px] font-[800] text-[var(--ink)]">{d.ctaComingSoon}</p>
-              <p className="mt-2 text-sm font-[600] text-[var(--muted)]">
-                {d.questions}{" "}
-                <a href="mailto:info@kabulhub.com" className="font-[800] text-[var(--brand)] hover:underline">
-                  info@kabulhub.com
-                </a>
-              </p>
-            </div>
-          )}
-        </div>
+        <DonationCheckoutForm />
       </section>
 
       {/* Purpose cards */}
@@ -71,6 +79,52 @@ export default async function SupportKabulLearnPage() {
             <p className="mt-2 text-sm font-[600] leading-6 text-[var(--muted)]">{p.description}</p>
           </div>
         ))}
+      </section>
+
+      <section className="mt-8 overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-white shadow-[var(--shadow)]">
+        <div className="border-b border-[var(--border)] bg-[linear-gradient(135deg,rgba(0,87,255,0.07),rgba(24,130,92,0.08))] px-6 py-6 sm:px-8">
+          <p className="pr-eyebrow">{t.donationDashboardEyebrow}</p>
+          <h2 className="pr-h2 mt-2">{t.donationDashboardTitle}</h2>
+          <p className="mt-2 max-w-2xl text-sm font-[600] leading-6 text-[var(--muted)]">
+            {t.donationDashboardDescription}
+          </p>
+        </div>
+        <div className="grid gap-4 p-6 sm:grid-cols-2 sm:p-8">
+          <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-5">
+            <p className="text-[12px] font-[900] uppercase tracking-[1.4px] text-[var(--muted)]">{t.totalSupporters}</p>
+            <p className="mt-2 text-[34px] font-[900] tracking-[-0.6px] text-[var(--ink)]">{supporterCount.toLocaleString(locale === "en" ? "en-US" : "fa-AF")}</p>
+          </div>
+          <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-5">
+            <p className="text-[12px] font-[900] uppercase tracking-[1.4px] text-[var(--muted)]">{t.totalRaised}</p>
+            <p className="mt-2 text-[34px] font-[900] tracking-[-0.6px] text-[var(--ink)]">{money}</p>
+          </div>
+        </div>
+        <div className="border-t border-[var(--border)] px-6 pb-6 sm:px-8 sm:pb-8">
+          <h3 className="pt-6 text-[16px] font-[900] text-[var(--ink)]">{t.recentSupporters}</h3>
+          {recentSupporters.length > 0 ? (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {recentSupporters.map((supporter) => (
+                <article key={supporter.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
+                  <p className="truncate text-sm font-[900] text-[var(--ink)]">
+                    {supporter.donorName?.trim() || t.anonymousSupporter}
+                  </p>
+                  <p className="mt-1 text-[11px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
+                    {new Date(supporter.createdAt).toLocaleDateString(locale === "en" ? "en-US" : "fa-AF", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric"
+                    })}
+                  </p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-6 text-center text-sm font-[700] text-[var(--muted)]">
+              {t.noSupportersYet}
+            </p>
+          )}
+          <p className="mt-4 text-xs font-[600] leading-6 text-[var(--muted-2)]">{t.donationDashboardPrivacy}</p>
+        </div>
       </section>
 
       {/* Legal disclosure */}

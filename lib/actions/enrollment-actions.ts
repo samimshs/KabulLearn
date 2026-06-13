@@ -29,11 +29,15 @@ export async function enrollInCourse(input: { courseId: string }): Promise<Actio
 
     const course = await db.course.findUnique({
       where: { id: courseId },
-      select: { status: true, publishedAt: true }
+      select: { status: true, publishedAt: true, isPaid: true }
     });
 
     if (!course || (course.status !== CourseStatus.PUBLISHED && !course.publishedAt)) {
       throw new Error("Course not found or not available.");
+    }
+
+    if (course.isPaid) {
+      throw new Error("This is a paid course. Complete checkout to enroll.");
     }
 
     const enrollment = await db.enrollment.upsert({

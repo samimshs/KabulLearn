@@ -17,6 +17,14 @@ const optionalText = (max: number) =>
     (value) => typeof value === "string" && value.trim() === "" ? undefined : value,
     z.string().trim().max(max).optional()
   );
+const priceCents = z.preprocess(
+  (value) => {
+    if (value === "" || value === null || value === undefined) return undefined;
+    if (typeof value === "string") return Math.round(Number(value) * 100);
+    return value;
+  },
+  z.number().int().min(100).max(1000000).optional()
+);
 
 export const instructorSchema = z.object({
   name: z.string().trim().min(1, "Instructor name is required.").max(120),
@@ -48,12 +56,29 @@ export const createCourseSchema = z.object({
   descriptionEn: localizedDescription,
   descriptionPs: localizedDescription,
   descriptionDa: optionalText(5000),
+  isPaid: z.boolean().optional().default(false),
+  priceCents,
   instructors: z.array(instructorSchema).min(1, "Add at least one instructor.")
+}).superRefine((data, ctx) => {
+  if (data.isPaid && !data.priceCents) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["priceCents"],
+      message: "Paid courses need a price."
+    });
+  }
 });
 
 export const createCourseDbSchema = createCourseSchema.transform((value) => {
   const { instructors, ...course } = value;
-  return { course, instructors };
+  return {
+    course: {
+      ...course,
+      priceCents: course.isPaid ? course.priceCents : null,
+      currency: "usd"
+    },
+    instructors
+  };
 });
 
 export const courseIdSchema = z.object({
@@ -74,12 +99,29 @@ export const updateCourseSchema = courseIdSchema.extend({
   descriptionEn: localizedDescription,
   descriptionPs: localizedDescription,
   descriptionDa: optionalText(5000),
+  isPaid: z.boolean().optional().default(false),
+  priceCents,
   instructors: z.array(instructorSchema).min(1, "Add at least one instructor.")
+}).superRefine((data, ctx) => {
+  if (data.isPaid && !data.priceCents) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["priceCents"],
+      message: "Paid courses need a price."
+    });
+  }
 });
 
 export const updateCourseDbSchema = updateCourseSchema.transform((value) => {
   const { instructors, ...course } = value;
-  return { course, instructors };
+  return {
+    course: {
+      ...course,
+      priceCents: course.isPaid ? course.priceCents : null,
+      currency: "usd"
+    },
+    instructors
+  };
 });
 
 export const createModuleSchema = z.object({

@@ -523,6 +523,9 @@ export async function updateCourse(input: UpdateCourseInputType): Promise<Action
         descriptionEn: values.course.descriptionEn,
         descriptionPs: values.course.descriptionPs,
         descriptionDa: values.course.descriptionDa,
+        isPaid: values.course.isPaid,
+        priceCents: values.course.priceCents,
+        currency: values.course.currency,
         authorProfileId: profileIds[0] ?? null
       }
     });

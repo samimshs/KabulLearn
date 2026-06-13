@@ -15,6 +15,9 @@ export type CourseCardRow = {
   descriptionPs: string;
   descriptionDa?: string | null;
   level?: string | null;
+  isPaid?: boolean;
+  priceCents?: number | null;
+  currency?: string | null;
   hasCertificate?: boolean;
   modules: Array<{ id: string; order: number; lessons: Array<{ id: string; order: number }> }>;
   enrollmentCount?: number;
@@ -143,6 +146,12 @@ export function CourseCard({ course, isAuthenticated = false }: { course: Course
     course.descriptionEn;
   const level = localizeLevel(course.level, locale);
   const lessonCount = course.modules.reduce((n, m) => n + m.lessons.length, 0);
+  const priceLabel = course.isPaid && course.priceCents
+    ? new Intl.NumberFormat(locale === "en" ? "en-US" : "fa-AF", {
+        style: "currency",
+        currency: (course.currency || "usd").toUpperCase()
+      }).format(course.priceCents / 100)
+    : null;
   const thumbIdx = courseArtIndex(course.id);
   const thumb = { gradient: COURSE_GRADIENTS[thumbIdx], pattern: THUMB_CONFIGS[thumbIdx].pattern };
   const courseHref = `/courses/${encodeURIComponent(course.slug ?? course.id)}`;
@@ -177,6 +186,9 @@ export function CourseCard({ course, isAuthenticated = false }: { course: Course
           {course.hasCertificate && (
             <span className="pr-badge pr-badge-cert">{t.certificateIncluded}</span>
           )}
+          <span className={course.isPaid ? "pr-badge" : "pr-badge pr-badge-green"}>
+            {priceLabel ?? t.freeCourseLabel}
+          </span>
           {course.isCreatorCourse ? (
             <span className="rounded-full border border-[rgba(0,87,255,0.2)] bg-[var(--brand-50)] px-2.5 py-1 text-[11px] font-[800] text-[var(--brand)]">
               {t.myCourse}

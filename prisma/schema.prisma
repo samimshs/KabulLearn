@@ -70,6 +70,19 @@ enum UserStatus {
   SUSPENDED
 }
 
+enum PaymentPurpose {
+  COURSE
+  DONATION
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+  REFUNDED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -108,6 +121,7 @@ model User {
   notifications    AppNotification[]
   lessonNotes      LessonNote[]
   adminAuditEvents AdminAuditLog[] @relation("AdminAuditActor")
+  payments         Payment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -258,12 +272,17 @@ model Course {
   enrollments Enrollment[]
   certificates Certificate[]
   ratings      CourseRating[]
+  payments     Payment[]
   reviewEvents CourseReviewEvent[]
   reviewChecklistItems CourseReviewChecklistItem[]
   discussionThreads DiscussionThread[]
   tags          CourseTagRelation[]
   announcements CourseAnnouncement[]
   learningPaths LearningPathCourse[]
+
+  isPaid     Boolean @default(false)
+  priceCents Int?
+  currency   String  @default("usd")
 
   submittedAt DateTime?
   publishedAt DateTime?
@@ -274,6 +293,36 @@ model Course {
   @@index([status])
   @@index([authorId])
   @@index([authorProfileId])
+  @@index([isPaid])
+}
+
+model Payment {
+  id        String         @id @default(cuid())
+  purpose   PaymentPurpose
+  status    PaymentStatus  @default(PENDING)
+  amountCents Int
+  currency  String         @default("usd")
+
+  userId   String?
+  courseId String?
+
+  stripeCheckoutSessionId String? @unique
+  stripePaymentIntentId   String? @unique
+  donorEmail String?
+  donorName  String?
+  metadata   Json?
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([purpose])
+  @@index([status])
+  @@index([userId])
+  @@index([courseId])
+  @@index([createdAt])
 }
 
 model Module {

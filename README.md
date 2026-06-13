@@ -40,6 +40,24 @@ npm run db:migrate
 npm run db:seed
 ```
 
+## Stripe Payments
+
+Paid courses and donations use Stripe Checkout. Set these environment variables locally and in Vercel:
+
+```bash
+NEXT_PUBLIC_APP_URL="https://kabullearn.com"
+STRIPE_SECRET_KEY="sk_live_or_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+```
+
+In Stripe, create a webhook endpoint for:
+
+```text
+https://kabullearn.com/api/stripe/webhook
+```
+
+Listen for `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, and `checkout.session.expired`. Course access is granted only by the webhook after Stripe confirms payment.
+
 ## Current Structure
 
 - `prisma/schema.prisma`: PostgreSQL LMS schema.

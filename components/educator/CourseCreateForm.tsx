@@ -7,7 +7,7 @@ import { COURSE_LEVEL_OPTIONS, COURSE_LEVELS } from "@/lib/i18n";
 import type { InstructorInput } from "@/lib/validators/course";
 import { AvatarUpload } from "@/components/educator/AvatarUpload";
 
-type CourseField = "slug" | "level" | "titleEn" | "titlePs" | "titleDa" | "descriptionEn" | "descriptionPs" | "descriptionDa";
+type CourseField = "slug" | "level" | "titleEn" | "titlePs" | "titleDa" | "descriptionEn" | "descriptionPs" | "descriptionDa" | "priceCents";
 
 type FieldErrors = Partial<Record<CourseField, string>> & { instructors?: string; [key: string]: string | undefined };
 
@@ -139,7 +139,7 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
     setCoInstructors((prev) => prev.filter((inst) => inst.username !== username));
   }
 
-  function validate(slug: string, titleEn: string, titlePs: string, titleDa: string, descriptionEn: string, descriptionPs: string, descriptionDa: string) {
+  function validate(slug: string, titleEn: string, titlePs: string, titleDa: string, descriptionEn: string, descriptionPs: string, descriptionDa: string, isPaid: boolean, priceUsd: string) {
     const next: FieldErrors = {};
 
     if (!slug) {
@@ -156,6 +156,10 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
     if (!descriptionEn.trim()) next.descriptionEn = "Enter an English course description.";
     if (!descriptionPs.trim()) next.descriptionPs = "Enter a Pashto course description.";
     if (!descriptionDa.trim()) next.descriptionDa = "Enter a Dari course description.";
+    if (isPaid) {
+      const price = Number(priceUsd);
+      if (!Number.isFinite(price) || price < 1) next.priceCents = "Enter a price of at least $1.";
+    }
 
     if (!primaryInstructor?.name.trim()) {
       next.instructors = "Your educator profile must be loaded before creating a course.";
@@ -185,8 +189,10 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
     const descriptionEn = (formData.get("descriptionEn") as string || "").trim();
     const descriptionPs = (formData.get("descriptionPs") as string || "").trim();
     const descriptionDa = (formData.get("descriptionDa") as string || "").trim();
+    const isPaid = formData.get("isPaid") === "on";
+    const priceUsd = (formData.get("priceUsd") as string || "").trim();
 
-    const localErrors = validate(slug, titleEn, titlePs, titleDa, descriptionEn, descriptionPs, descriptionDa);
+    const localErrors = validate(slug, titleEn, titlePs, titleDa, descriptionEn, descriptionPs, descriptionDa, isPaid, priceUsd);
     setFieldErrors(localErrors);
     setMessage("");
 
@@ -203,6 +209,8 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
           body: JSON.stringify({
             slug, level, titleEn, titlePs, titleDa,
             descriptionEn, descriptionPs, descriptionDa,
+            isPaid,
+            priceCents: isPaid ? Math.round(Number(priceUsd) * 100) : undefined,
             instructors: instructors.map((inst) => ({
               name: inst.name.trim(),
               username: inst.username.trim(),
@@ -298,6 +306,21 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
         <textarea name="descriptionDa" required rows={3} dir="rtl" className={`${fieldClass(Boolean(fieldErrors.descriptionDa))} leading-6`} />
         <FieldError message={fieldErrors.descriptionDa} />
       </label>
+
+      <div className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-[1fr_180px]">
+        <label className="flex items-start gap-3 text-sm font-[800] text-slate-800">
+          <input name="isPaid" type="checkbox" className="mt-1 h-4 w-4 rounded border-slate-300 text-[var(--brand)]" />
+          <span>
+            {t.paidCourseLabel}
+            <span className="mt-1 block text-xs font-[600] leading-5 text-slate-500">{t.paidCourseHint}</span>
+          </span>
+        </label>
+        <label className="pr-label">
+          {t.priceUsdLabel}
+          <input name="priceUsd" type="number" inputMode="decimal" min="1" step="0.01" placeholder="29.00" className={fieldClass(Boolean(fieldErrors.priceCents))} />
+          <FieldError message={fieldErrors.priceCents} />
+        </label>
+      </div>
 
       <div className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
         <div>

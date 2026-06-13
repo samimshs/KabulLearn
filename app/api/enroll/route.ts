@@ -41,13 +41,20 @@ export async function POST(request: Request) {
   try {
     const course = await db.course.findUnique({
       where: { id: courseId },
-      select: { status: true, publishedAt: true }
+      select: { status: true, publishedAt: true, isPaid: true }
     });
 
     if (!course || (course.status !== CourseStatus.PUBLISHED && !course.publishedAt)) {
       return NextResponse.json(
         { ok: false, error: "Course not found or not available." },
         { status: 404 }
+      );
+    }
+
+    if (course.isPaid) {
+      return NextResponse.json(
+        { ok: false, error: "This is a paid course. Complete checkout to enroll." },
+        { status: 402 }
       );
     }
 

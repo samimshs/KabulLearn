@@ -78,6 +78,9 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
     titleEn?: string; titlePs?: string; titleDa?: string | null;
     descriptionEn?: string; descriptionPs?: string; descriptionDa?: string | null;
     level?: string | null;
+    isPaid: boolean;
+    priceCents: number | null;
+    currency: string;
     status: CourseStatus;
     publishedAt: Date | null;
     author: { id: string; name: string | null; email: string };
@@ -98,6 +101,9 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
         id: true,
         slug: true,
         ...localizedCourseSelect(locale),
+        isPaid: true,
+        priceCents: true,
+        currency: true,
         status: true,
         publishedAt: true,
         author: { select: { id: true, name: true, email: true } },
@@ -333,10 +339,15 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
     provider: { "@type": "Organization", name: "KabulLearn", url: BASE_URL },
     instructor: instructorList.map((p) => ({ "@type": "Person", name: p.name, url: `${BASE_URL}/creators/${encodeURIComponent(p.username)}` })),
     inLanguage: ["en", "ps", "fa"],
-    isAccessibleForFree: true,
+    isAccessibleForFree: !course.isPaid,
     educationalLevel: course.level ?? "Beginner",
     hasCourseInstance: { "@type": "CourseInstance", courseMode: "online", inLanguage: ["en", "ps", "fa"] },
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD", category: "Free" }
+    offers: {
+      "@type": "Offer",
+      price: course.isPaid ? String((course.priceCents ?? 0) / 100) : "0",
+      priceCurrency: (course.currency || "usd").toUpperCase(),
+      category: course.isPaid ? "Paid" : "Free"
+    }
   };
 
   const breadcrumbJsonLd = {
@@ -363,6 +374,9 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
         descriptionPs: course.descriptionPs ?? course.descriptionEn ?? "",
         descriptionDa: course.descriptionDa,
         level: course.level ?? null,
+        isPaid: course.isPaid,
+        priceCents: course.priceCents,
+        currency: course.currency,
         modules: course.modules.map((module) => ({
           id: module.id,
           titleEn: module.titleEn ?? module.titlePs ?? "",

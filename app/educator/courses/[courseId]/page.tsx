@@ -265,6 +265,8 @@ export default async function EducatorCoursePage(props: EducatorCoursePageProps)
             descriptionEn={course.descriptionEn}
             descriptionPs={course.descriptionPs}
             descriptionDa={course.descriptionDa}
+            isPaid={course.isPaid}
+            priceCents={course.priceCents}
             status={course.status}
             instructors={course.instructors
               .sort((a, b) => a.order - b.order)

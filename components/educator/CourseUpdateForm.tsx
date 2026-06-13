@@ -18,6 +18,8 @@ interface CourseUpdateFormProps {
   descriptionEn?: string | null;
   descriptionPs?: string | null;
   descriptionDa?: string | null;
+  isPaid?: boolean;
+  priceCents?: number | null;
   status: CourseStatus;
   instructors: InstructorInput[];
 }
@@ -31,7 +33,7 @@ const emptyInstructor = (): InstructorInput => ({
 
 export function CourseUpdateForm({
   courseId, slug, level, titleEn, titlePs, titleDa,
-  descriptionEn, descriptionPs, descriptionDa, status,
+  descriptionEn, descriptionPs, descriptionDa, isPaid, priceCents, status,
   instructors: initialInstructors,
 }: CourseUpdateFormProps) {
   const { t } = useLanguage();
@@ -44,6 +46,8 @@ export function CourseUpdateForm({
     descriptionEn: descriptionEn ?? "",
     descriptionPs: descriptionPs ?? "",
     descriptionDa: descriptionDa ?? "",
+    isPaid: Boolean(isPaid),
+    priceUsd: priceCents ? (priceCents / 100).toFixed(2) : "",
   });
   const [instructors, setInstructors] = useState<InstructorInput[]>(
     initialInstructors.length > 0 ? initialInstructors : [emptyInstructor()]
@@ -70,6 +74,8 @@ export function CourseUpdateForm({
             descriptionEn: formState.descriptionEn,
             descriptionPs: formState.descriptionPs,
             descriptionDa: formState.descriptionDa,
+            isPaid: formState.isPaid,
+            priceCents: formState.isPaid ? Math.round(Number(formState.priceUsd) * 100) : undefined,
             instructors,
           });
           setMessage(result.ok ? t.courseUpdated : result.error);
@@ -106,6 +112,32 @@ export function CourseUpdateForm({
         <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
           {t.currentStatusLabel}
           <input value={status} readOnly className="rounded-xl border border-stone-200 bg-stone-100 px-3 py-3 text-sm text-[#525f6e]" />
+        </label>
+        <label className="flex items-start gap-3 rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm font-medium text-[#3d4a5a]">
+          <input
+            type="checkbox"
+            checked={formState.isPaid}
+            onChange={(e) => setFormState({ ...formState, isPaid: e.target.checked })}
+            className="mt-1 h-4 w-4 rounded border-stone-300 text-[#0f766e]"
+          />
+          <span>
+            {t.paidCourseLabel}
+            <span className="mt-1 block text-xs font-[600] leading-5 text-[#64748b]">{t.paidCourseHint}</span>
+          </span>
+        </label>
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.priceUsdLabel}
+          <input
+            value={formState.priceUsd}
+            onChange={(e) => setFormState({ ...formState, priceUsd: e.target.value })}
+            type="number"
+            inputMode="decimal"
+            min="1"
+            step="0.01"
+            placeholder="29.00"
+            disabled={!formState.isPaid}
+            className={inputCls}
+          />
         </label>
       </div>
 

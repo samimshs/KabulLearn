@@ -26,6 +26,9 @@ type CourseRow = {
   descriptionPs: string;
   descriptionDa?: string | null;
   level?: string | null;
+  isPaid: boolean;
+  priceCents: number | null;
+  currency: string;
   enrollmentCount: number;
   isEnrolled: boolean;
   isCreatorCourse: boolean;
@@ -54,6 +57,9 @@ export default async function CoursesPage({
     titleEn?: string; titlePs?: string; titleDa?: string | null;
     descriptionEn?: string; descriptionPs?: string; descriptionDa?: string | null;
     level?: string | null;
+    isPaid: boolean;
+    priceCents: number | null;
+    currency: string;
     _count: { enrollments: number };
     modules: Array<{ id: string; titleEn?: string; titlePs?: string; titleDa?: string | null; order: number; lessons: Array<{ id: string; order: number; isFinalTest: boolean }> }>;
     author: { name: string | null; email: string };
@@ -102,6 +108,9 @@ export default async function CoursesPage({
           titleEn: true, titlePs: true, titleDa: true,
           descriptionEn: true, descriptionPs: true, descriptionDa: true,
           level: true,
+          isPaid: true,
+          priceCents: true,
+          currency: true,
           _count: { select: { enrollments: true } },
           author: { select: { name: true, email: true } },
           authorProfile: { select: { name: true, username: true, avatarUrl: true } },
@@ -211,6 +220,9 @@ export default async function CoursesPage({
       descriptionPs: course.descriptionPs ?? course.descriptionEn ?? "",
       descriptionDa: course.descriptionDa,
       level: course.level,
+      isPaid: course.isPaid,
+      priceCents: course.priceCents,
+      currency: course.currency,
       hasCertificate,
       tagSlugs: course.tags?.map((t) => t.tag.slug) ?? [],
       modules: course.modules.map((module) => ({

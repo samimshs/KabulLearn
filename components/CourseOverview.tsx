@@ -34,6 +34,9 @@ type CourseOverviewProps = {
   > & {
     titleDa?: string | null;
     descriptionDa?: string | null;
+    isPaid?: boolean;
+    priceCents?: number | null;
+    currency?: string | null;
     modules: CourseModule[];
     author?: {
       name: string;
@@ -219,6 +222,7 @@ export function CourseOverview({
   const [passedQuizzes, setPassedQuizzes] = useState<Set<string>>(new Set(serverPassedModuleIds));
   const [enrolled, setEnrolled] = useState(isEnrolled);
   const [enrollError, setEnrollError] = useState<string | null>(null);
+  const [checkoutPending, setCheckoutPending] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [resumeLessonId, setResumeLessonId] = useState<string | null>(null);
   const [hasVisitedAny, setHasVisitedAny] = useState(false);
@@ -242,6 +246,12 @@ export function CourseOverview({
 
   const courseComplete = Boolean(certificateStatus?.eligible || certificateStatus?.hasCertificate);
   const completedModules = courseComplete ? totalModules : passedQuizzes.size;
+  const priceLabel = course.isPaid && course.priceCents
+    ? new Intl.NumberFormat(locale === "en" ? "en-US" : "fa-AF", {
+        style: "currency",
+        currency: (course.currency || "usd").toUpperCase()
+      }).format(course.priceCents / 100)
+    : null;
   const primaryActionLabel =
     progressPercent >= 100
       ? t.viewCourse
@@ -279,6 +289,47 @@ export function CourseOverview({
     });
   }
 
+  async function handlePaidCheckout() {
+    setCheckoutPending(true);
+    setEnrollError(null);
+
+    try {
+      const response = await fetch("/api/stripe/checkout/course", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courseId: course.id })
+      });
+      const result = (await response.json()) as { ok: boolean; error?: string; data?: { url?: string; enrolled?: boolean } };
+
+      if (response.status === 401) {
+        router.push(`/login?callbackUrl=${encodeURIComponent(`/courses/${course.id}`)}`);
+        return;
+      }
+
+      if (!response.ok || !result.ok) {
+        setEnrollError(result.error ?? t.enrollErrorGeneric);
+        return;
+      }
+
+      if (result.data?.enrolled) {
+        setEnrolled(true);
+        router.refresh();
+        return;
+      }
+
+      if (result.data?.url) {
+        window.location.href = result.data.url;
+        return;
+      }
+
+      setEnrollError(t.enrollErrorGeneric);
+    } catch {
+      setEnrollError(t.enrollErrorGeneric);
+    } finally {
+      setCheckoutPending(false);
+    }
+  }
+
   return (
     <main className="pr-page grid gap-6">
       <Link
@@ -311,6 +362,15 @@ export function CourseOverview({
               {t.enrolled}
             </span>
           ) : null}
+          {course.isPaid && priceLabel ? (
+            <span className="rounded-full border border-[rgba(0,87,255,0.18)] bg-[var(--brand-50)] px-3 py-1 text-xs font-[900] uppercase tracking-[1px] text-[var(--brand)]">
+              {priceLabel}
+            </span>
+          ) : (
+            <span className="rounded-full border border-[rgba(24,130,92,0.18)] bg-[var(--success-50)] px-3 py-1 text-xs font-[900] uppercase tracking-[1px] text-[var(--success)]">
+              {t.freeCourseLabel}
+            </span>
+          )}
           {ratingSummary && ratingSummary.count > 0 ? (
             <span className="rounded-full border border-[var(--border)] bg-white px-3 py-1 text-xs font-[900] uppercase tracking-[1px] text-[var(--ink)]">
               ★ {ratingSummary.average.toFixed(1)} ({ratingSummary.count})
@@ -328,6 +388,16 @@ export function CourseOverview({
                 {primaryActionLabel}
               </Link>
             ) : null
+          ) : viewerId && course.isPaid ? (
+            <button
+              type="button"
+              onClick={handlePaidCheckout}
+              disabled={checkoutPending}
+              className="pr-btn-primary"
+              aria-label={t.buyCourse}
+            >
+              {checkoutPending ? "..." : `${t.buyCourse}${priceLabel ? ` · ${priceLabel}` : ""}`}
+            </button>
           ) : viewerId ? (
             <button
               type="button"
@@ -343,7 +413,7 @@ export function CourseOverview({
               href={`/login?callbackUrl=${encodeURIComponent(`/courses/${course.id}`)}`}
               className="pr-btn-primary"
             >
-              {t.enrollNow}
+              {course.isPaid ? t.buyCourse : t.enrollNow}
             </Link>
           )}
           <ShareButton
@@ -499,7 +569,7 @@ export function CourseOverview({
                         </p>
                         {isPreview && !enrolled && (
                           <span className="shrink-0 rounded-full border border-[rgba(0,87,255,0.2)] bg-[rgba(0,87,255,0.06)] px-2 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] text-[var(--brand)]">
-                            Free Preview
+                            {t.freePreview}
                           </span>
                         )}
                       </div>
@@ -520,7 +590,7 @@ export function CourseOverview({
                           href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(lesson.id)}`}
                           className="shrink-0 text-sm font-[800] text-[var(--brand)] hover:underline"
                         >
-                          Preview →
+                          {t.preview} →
                         </Link>
                       ) : !enrolled ? (
                         <span className="text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">{t.enrollNow}</span>

@@ -155,16 +155,16 @@ export default async function Home() {
             )}
           </div>
 
-          <ul className="kl-feature-list grid grid-cols-2 gap-2">
+          <ul className="kl-feature-list grid grid-cols-2 gap-2 w-fit">
             {features.map((feature) => (
               <li
                 key={feature.label}
-                className="flex items-center gap-2.5 rounded-full border border-[var(--border)] bg-white/75 py-2 pe-4 ps-2 shadow-[var(--shadow-sm)] backdrop-blur-sm"
+                className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/75 py-2 pe-3 ps-2 shadow-[var(--shadow-sm)] backdrop-blur-sm"
               >
                 <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--brand-50)] text-[var(--brand)]">
                   {feature.icon}
                 </span>
-                <span className="text-[13px] font-[700] leading-snug text-[var(--ink-2)]">{feature.label}</span>
+                <span className="text-[11px] font-[700] leading-snug text-[var(--ink-2)]">{feature.label}</span>
               </li>
             ))}
           </ul>

@@ -221,37 +221,46 @@ export function HomeHeroVisual({ stats }: { stats: HeroStat[] }) {
   return (
     <div className="kl-hero-visual" aria-hidden="true">
       <div className="hero-visual-group">
-        <div className="kl-globe">
-          <GlobeEarth />
+        <div className="kl-deco-group">
+          <div className="kl-globe">
+            <GlobeEarth />
+          </div>
+
+          {/* Location pins on the globe */}
+          <span className="kl-geo-pin kl-geo-pin-1" />
+          <span className="kl-geo-pin kl-geo-pin-2" />
+          <span className="kl-geo-pin kl-geo-pin-3" />
+          <span className="kl-geo-pin kl-geo-pin-4" />
+          <span className="kl-geo-pin kl-geo-pin-5" />
+
+          {/* Connection network — arcing lines linking all 4 pins */}
+          <svg className="kl-pin-network" viewBox="0 0 960 800" aria-hidden="true">
+            <g stroke="#7cb9ff" strokeOpacity="0.82" strokeWidth="1.8" strokeLinecap="round" fill="none">
+              {/* existing connections */}
+              <path d="M631 24 Q673 -14 716 65" />
+              <path d="M631 24 Q732 -24 833 71" />
+              <path d="M716 65 Q775  22 833 71" />
+              <path d="M833 71 Q877 32 921 117" />
+              {/* pin-5 (861,-1) → all others */}
+              <path d="M861 -1 Q746 -18 631 24" />
+              <path d="M861 -1 Q788 -8 716 65" />
+              <path d="M861 -1 Q847 -12 833 71" />
+              <path d="M861 -1 Q891 58 921 117" />
+            </g>
+            <g fill="#7cb9ff" fillOpacity="0.9">
+              <circle cx="631" cy="24" r="3" />
+              <circle cx="716" cy="65" r="3" />
+              <circle cx="833" cy="71" r="3" />
+              <circle cx="921" cy="117" r="3" />
+              <circle cx="861" cy="-1" r="3" />
+            </g>
+          </svg>
+
+          {/* Language markers, anchored to the globe */}
+          <span className="kl-bubble kl-bubble-ps" dir="rtl">پښتو</span>
+          <span className="kl-bubble kl-bubble-en">English</span>
+          <span className="kl-bubble kl-bubble-da" dir="rtl">دری</span>
         </div>
-
-        {/* Location pins on the globe */}
-        <span className="kl-geo-pin kl-geo-pin-1" />
-        <span className="kl-geo-pin kl-geo-pin-2" />
-        <span className="kl-geo-pin kl-geo-pin-3" />
-        <span className="kl-geo-pin kl-geo-pin-4" />
-
-        {/* Connection network — arcing lines linking all 4 pins */}
-        <svg className="kl-pin-network" viewBox="0 0 960 800" aria-hidden="true">
-          <g stroke="#7cb9ff" strokeOpacity="0.82" strokeWidth="1.8" strokeLinecap="round" fill="none">
-            {/* Each Q control point sits well above both endpoints → arc up then back down */}
-            <path d="M631 24 Q673 -14 716 65" />
-            <path d="M631 24 Q732 -24 833 71" />
-            <path d="M716 65 Q775  22 833 71" />
-            <path d="M833 71 Q891  32 949 117" />
-          </g>
-          <g fill="#7cb9ff" fillOpacity="0.9">
-            <circle cx="631" cy="24" r="3" />
-            <circle cx="716" cy="65" r="3" />
-            <circle cx="833" cy="71" r="3" />
-            <circle cx="949" cy="117" r="3" />
-          </g>
-        </svg>
-
-        {/* Language markers, anchored to the globe */}
-        <span className="kl-bubble kl-bubble-ps" dir="rtl">پښتو</span>
-        <span className="kl-bubble kl-bubble-en">English</span>
-        <span className="kl-bubble kl-bubble-da" dir="rtl">دری</span>
 
         <section className="kl-dashboard-card">
           <aside className="kl-dash-sidebar">

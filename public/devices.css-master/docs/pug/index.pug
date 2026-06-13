@@ -1,0 +1,150 @@
+extends _layout/_layout.pug
+
+block variables
+  - var slug = 'index'
+  - var parent = 'index'
+  - var title = 'Devices.css - Modern devices crafted in pure CSS'
+  - var description = 'Modern devices crafted in pure CSS. Pure CSS iPhone 14 Pro, iPhone 14, MacBook Pro, iPad Pro, iMac, Apple Watch Ultra, HomePod, iPhone 1st gen, and Surface family devices.'
+
+block content
+  .container.grid-md
+    .columns
+      .hero-container.column.col-12
+        .rework-hero
+          .hero-content
+            h1.hero-title DEVICES.CSS
+            h2.hero-subtitle Modern devices crafted in pure CSS
+
+    .columns
+      .column.col-6.col-md-12
+        a.hero-section(href="phones.html#iphone-14-pro" target="_blank")
+          .demo-title iPhone
+            small.label.label-gray.ml-2 iPhone 14 Pro
+            small.label.label-gray.ml-2 iPhone 14
+          .demo.demo-iphone-14
+            .device.device-iphone-14
+              .device-frame
+                img.device-screen(src="assets/img/bg-iphone-14.jpg")
+              .device-stripe
+              .device-header
+              .device-sensors
+              .device-btns
+              .device-power
+              .device-home
+          .demo.demo-iphone-14-pro
+            .device.device-iphone-14-pro
+              .device-frame
+                img.device-screen(src="assets/img/bg-iphone-14-pro.jpg")
+              .device-stripe
+              .device-header
+              .device-sensors
+              .device-btns
+              .device-power
+              .device-home
+          
+      .column.col-6.col-md-12
+        a.hero-section(href="computers.html#macbook-pro" target="_blank")
+          .demo-title MacBook Pro
+          .demo.demo-macbook-pro
+            .device.device-macbook-pro
+              .device-frame
+                img.device-screen(src="assets/img/bg-10.jpg")
+              .device-stripe
+              .device-header
+              .device-sensors
+              .device-btns
+              .device-power
+              .device-home
+      .column.col-6.col-md-12
+        a.hero-section(href="watches.html#apple-watch-ultra" target="_blank")
+          .demo-title Apple Watch
+            small.label.label-gray.ml-2 Ultra
+            small.label.label-gray.ml-2 Series 8
+          .demo.demo-apple-watch
+            .device.device-apple-watch-s8
+              .device-frame
+                img.device-screen(src="assets/img/bg-watch.jpg")
+              .device-stripe
+              .device-header
+              .device-sensors
+              .device-btns
+              .device-power
+              .device-home
+          .demo.demo-apple-watch
+            .device.device-apple-watch-ultra
+              .device-frame
+                img.device-screen(src="assets/img/bg-watch.jpg")
+              .device-stripe
+              .device-header
+              .device-sensors
+              .device-btns
+              .device-power
+              .device-home
+      .column.col-6.col-md-12
+        a.hero-section(href="computers.html#imac" target="_blank")
+          .demo-title iMac
+          .demo.demo-imac
+            .device.device-imac.device-blue
+              .device-frame
+                img.device-screen(src="assets/img/bg-08.jpg")
+              .device-stripe
+              .device-header
+              .device-sensors
+              .device-btns
+              .device-power
+              .device-home
+      .column.col-12
+        include _layout/_ad-g.pug
+      .column.col-6.col-md-12
+        a.hero-section(href="tablets.html#ipad-pro" target="_blank")
+          .demo-title iPad Pro
+          .demo.demo-ipad-pro
+            .device.device-ipad-pro
+              .device-frame
+                img.device-screen(src="assets/img/bg-01.jpg" loading="lazy")
+              .device-stripe
+              .device-header
+              .device-sensors
+              .device-btns
+              .device-power
+              .device-home
+      .column.col-6.col-md-12
+        a.hero-section(href="accessories.html#homepod" target="_blank")
+          .demo-title HomePod
+          .demo.demo-homepod
+            .device.device-homepod
+              .device-frame
+              .device-stripe
+              .device-header
+              .device-sensors
+              .device-btns
+              .device-power
+              .device-home
+      .column.col-6.col-md-12
+        a.hero-section(href="phones.html#google-pixel-6-pro" target="_blank")
+          .demo-title Google Pixel 6 Pro
+            small.label.label-gray.ml-2 
+          .demo.demo-google-pixel-6-pro
+            .device.device-google-pixel-6-pro
+              .device-frame
+                img.device-screen(src="assets/img/bg-pixel-6.jpg" loading="lazy")
+              .device-stripe
+              .device-header
+              .device-sensors
+              .device-btns
+              .device-power
+              .device-home
+      .column.col-6.col-md-12
+        a.hero-section(href="phones.html#the-iphone" target="_blank")
+          .demo-title iPhone
+            small.label.label-gray.ml-2 ORIGINAL
+          .demo.demo-the-iphone
+            .device.device-the-iphone
+              .device-frame
+                img.device-screen(src="assets/img/bg-iphone.jpg")
+              .device-stripe
+              .device-header
+              .device-sensors
+              .device-btns
+              .device-power
+              .device-home

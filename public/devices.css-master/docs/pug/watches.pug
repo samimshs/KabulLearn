@@ -1,0 +1,72 @@
+extends _layout/_layout.pug
+
+block variables
+  - var slug = 'watches'
+  - var parent = 'watches'
+  - var title = 'Watches - Devices.css - Modern devices crafted in pure CSS'
+  - var description = 'Pure CSS Apple Watch Ultra, Apple Watch Series 8 devices. Pure CSS watch devices mockups. Modern watch devices crafted in pure CSS.'
+
+block content
+  .container.grid-md
+    .columns
+      .hero-container.column.col-md-12
+        .rework-hero
+          .hero-content
+            h1.hero-title Watches
+            h2.hero-subtitle Modern watch devices crafted in pure CSS
+            h2.text-assistive Pure CSS Apple Watch Ultra, Apple Watch Series 8 devices. Pure CSS watch devices mockups. Modern watch devices crafted in pure CSS.
+
+    .columns
+      .content-container.column.col-md-12
+        h2.rework-title#apple-watch-ultra
+          | Apple Watch Ultra
+          a.ml-2(href="#apple-watch-ultra") #
+        h3.text-assistive Pure CSS Apple Watch Ultra, Apple Watch Ultra in pure CSS
+        .rework-content
+          p Apple Watch Ultra. Rugged and capable, with precision dual-frequency GPS, up to 36-hour battery life, and three bands for athletes of all kinds.
+        .rework-device.watches
+          .device.device-apple-watch-ultra
+            .device-frame
+              img.device-screen(src="assets/img/bg-watch.jpg" loading="lazy")
+            .device-stripe
+            .device-header
+            .device-sensors
+            .device-btns
+            .device-power
+            .device-home
+    
+    include _layout/_ad-g.pug
+
+    .columns
+      .content-container.column.col-md-12
+        h2.rework-title#apple-watch-series-8
+          | Apple Watch Series 8
+          a.ml-2(href="#apple-watch-series-8") #
+        h3.text-assistive Pure CSS Apple Watch Series 8, Apple Watch Series 8 in pure CSS
+        .rework-content
+          p Apple Watch Series 8 features temperature sensing for insights into women’s health, Car Crash Detection, and sleep stages to understand your sleep. 
+        .rework-device.watches
+          .dots
+            .dot.tooltip.active(style="background:#272C31;" data-tooltip="device-midnight (default)")
+          .device.device-apple-watch-s8
+            .device-frame
+              img.device-screen(src="assets/img/bg-watch.jpg" loading="lazy")
+            .device-stripe
+            .device-header
+            .device-sensors
+            .device-btns
+            .device-power
+            .device-home
+    
+    include _layout/_ad-sidebar.pug
+
+    .columns  
+      ul.pagination.column
+        .page-item.page-prev
+          a(href="tablets.html")
+            .page-item-subtitle Previous
+            .page-item-title.h5 Tablets
+        .page-item.page-next
+          a(href="accessories.html")
+            .page-item-subtitle Next
+            .page-item-title.h5 Accessories

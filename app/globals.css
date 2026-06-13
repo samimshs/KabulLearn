@@ -767,7 +767,7 @@ html[dir="rtl"] .kl-home-lang {
   transform:
     perspective(1400px)
     translateY(-22px)
-    rotateY(-13deg)
+    rotateY(-31deg)
     rotateX(2.5deg)
     scale(1.02);
   transform-origin: 50% 50%;
@@ -1155,7 +1155,7 @@ html[dir="rtl"] .kl-home-lang {
   background:
     radial-gradient(circle at center, white 0 54%, transparent 55%),
     conic-gradient(var(--brand) 0 76%, #eef3ff 76% 100%);
-  transform: perspective(110px) rotateY(-20deg);
+  transform: perspective(110px) rotateY(-8deg);
 }
 
 .kl-ring::after {

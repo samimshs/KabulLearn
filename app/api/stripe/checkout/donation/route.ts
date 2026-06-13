@@ -16,60 +16,76 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Choose a valid donation amount." }, { status: 400 });
   }
 
-  const session = await auth();
-  const stripe = getStripe();
-  const origin = getRequestOrigin(request);
-  const donorEmail = parsed.data.donorEmail || session?.user?.email || undefined;
-  const donorName = parsed.data.donorName || session?.user?.name || undefined;
+  try {
+    const session = await auth();
+    const stripe = getStripe();
+    const origin = getRequestOrigin(request);
+    const donorEmail = parsed.data.donorEmail || session?.user?.email || undefined;
+    const donorName = parsed.data.donorName || session?.user?.name || undefined;
 
-  const payment = await db.payment.create({
-    data: {
-      purpose: "DONATION",
-      status: "PENDING",
-      amountCents: parsed.data.amountCents,
-      currency: "usd",
-      userId: session?.user?.id ?? null,
-      donorEmail: donorEmail ?? null,
-      donorName: donorName ?? null
-    },
-    select: { id: true }
-  });
+    const payment = await db.payment.create({
+      data: {
+        purpose: "DONATION",
+        status: "PENDING",
+        amountCents: parsed.data.amountCents,
+        currency: "usd",
+        userId: session?.user?.id ?? null,
+        donorEmail: donorEmail ?? null,
+        donorName: donorName ?? null
+      },
+      select: { id: true }
+    });
 
-  const checkout = await stripe.checkout.sessions.create({
-    mode: "payment",
-    client_reference_id: payment.id,
-    customer_email: donorEmail,
-    line_items: [
-      {
-        quantity: 1,
-        price_data: {
-          currency: "usd",
-          unit_amount: parsed.data.amountCents,
-          product_data: {
-            name: "KabulLearn donation",
-            description: "Support practical education in English, Pashto, and Dari"
+    const checkout = await stripe.checkout.sessions.create({
+      mode: "payment",
+      client_reference_id: payment.id,
+      customer_email: donorEmail,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "usd",
+            unit_amount: parsed.data.amountCents,
+            product_data: {
+              name: "KabulLearn donation",
+              description: "Support practical education in English, Pashto, and Dari"
+            }
           }
         }
-      }
-    ],
-    metadata: {
-      paymentId: payment.id,
-      purpose: "DONATION"
-    },
-    payment_intent_data: {
+      ],
       metadata: {
         paymentId: payment.id,
         purpose: "DONATION"
-      }
-    },
-    success_url: `${origin}/support/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/support?donation=cancelled`
-  });
+      },
+      payment_intent_data: {
+        metadata: {
+          paymentId: payment.id,
+          purpose: "DONATION"
+        }
+      },
+      success_url: `${origin}/support/thank-you?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/support?donation=cancelled`
+    });
 
-  await db.payment.update({
-    where: { id: payment.id },
-    data: { stripeCheckoutSessionId: checkout.id }
-  });
+    await db.payment.update({
+      where: { id: payment.id },
+      data: { stripeCheckoutSessionId: checkout.id }
+    });
 
-  return NextResponse.json({ ok: true, data: { url: checkout.url } });
+    return NextResponse.json({ ok: true, data: { url: checkout.url } });
+  } catch (error) {
+    const code = typeof error === "object" && error && "code" in error ? String(error.code) : undefined;
+    const message = error instanceof Error ? error.message : "Unknown donation checkout error.";
+    console.error("Donation checkout failed:", { code, message });
+
+    if (message.includes("STRIPE_SECRET_KEY")) {
+      return NextResponse.json({ ok: false, error: "Stripe is not configured in this environment." }, { status: 500 });
+    }
+
+    if (code === "P2021") {
+      return NextResponse.json({ ok: false, error: "Payment database migration has not been applied." }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: false, error: "Could not start donation checkout. Please try again." }, { status: 500 });
+  }
 }

@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import Stripe from "stripe";
 import { db } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
+import { confirmPaidCourseCheckout } from "@/lib/stripe-course-payments";
 
 export const runtime = "nodejs";
 
@@ -33,10 +34,10 @@ async function markCheckoutSessionPaid(session: Stripe.Checkout.Session) {
   });
 
   if (updated.purpose === "COURSE" && updated.userId && updated.courseId) {
-    await db.enrollment.upsert({
-      where: { userId_courseId: { userId: updated.userId, courseId: updated.courseId } },
-      update: {},
-      create: { userId: updated.userId, courseId: updated.courseId }
+    await confirmPaidCourseCheckout({
+      sessionId: checkoutSessionId,
+      userId: updated.userId,
+      courseId: updated.courseId
     });
 
     revalidatePath(`/courses/${updated.courseId}`);

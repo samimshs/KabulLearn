@@ -44,6 +44,39 @@ function toActionError(error: unknown): ActionResult<never> {
   return { ok: false, error: "Something went wrong." };
 }
 
+function normalizedOptionalText(value: string | null | undefined) {
+  const trimmed = value?.trim() ?? "";
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function courseContentChanged(
+  previous: {
+    titleEn: string;
+    titlePs: string;
+    titleDa: string | null;
+    descriptionEn: string;
+    descriptionPs: string;
+    descriptionDa: string | null;
+  },
+  next: {
+    titleEn: string;
+    titlePs: string;
+    titleDa?: string;
+    descriptionEn: string;
+    descriptionPs: string;
+    descriptionDa?: string;
+  }
+) {
+  return (
+    previous.titleEn !== next.titleEn ||
+    previous.titlePs !== next.titlePs ||
+    normalizedOptionalText(previous.titleDa) !== normalizedOptionalText(next.titleDa) ||
+    previous.descriptionEn !== next.descriptionEn ||
+    previous.descriptionPs !== next.descriptionPs ||
+    normalizedOptionalText(previous.descriptionDa) !== normalizedOptionalText(next.descriptionDa)
+  );
+}
+
 const reorderModulesSchema = z.object({
   courseId: z.string().min(1),
   moduleIds: z.array(z.string().min(1)).min(1, "Add at least one module before ordering.")
@@ -290,6 +323,8 @@ export async function publishCourse(input: { courseId: string }): Promise<Action
         reviewNote: null
       },
       select: {
+        id: true,
+        slug: true,
         titleEn: true,
         author: { select: { email: true } }
       }
@@ -319,6 +354,9 @@ export async function publishCourse(input: { courseId: string }): Promise<Action
     });
 
     revalidatePath("/");
+    revalidatePath("/courses");
+    revalidatePath(`/courses/${course.id}`);
+    if (course.slug) revalidatePath(`/courses/${course.slug}`);
     revalidatePath("/admin");
     revalidatePath("/educator");
 
@@ -347,9 +385,12 @@ export async function rejectCourse(input: { courseId: string; reviewNote: string
       data: {
         status: CourseStatus.DRAFT,
         submittedAt: null,
+        publishedAt: null,
         reviewNote
       },
       select: {
+        id: true,
+        slug: true,
         titleEn: true,
         author: { select: { email: true } }
       }
@@ -378,6 +419,10 @@ export async function rejectCourse(input: { courseId: string; reviewNote: string
       }
     });
 
+    revalidatePath("/");
+    revalidatePath("/courses");
+    revalidatePath(`/courses/${course.id}`);
+    if (course.slug) revalidatePath(`/courses/${course.slug}`);
     revalidatePath("/admin");
     revalidatePath("/educator");
 
@@ -470,7 +515,15 @@ export async function updateCourse(input: UpdateCourseInputType): Promise<Action
 
     const course = await db.course.findUnique({
       where: { id: values.course.courseId },
-      select: { authorId: true }
+      select: {
+        authorId: true,
+        titleEn: true,
+        titlePs: true,
+        titleDa: true,
+        descriptionEn: true,
+        descriptionPs: true,
+        descriptionDa: true
+      }
     });
 
     if (!course) throw new Error("Course not found.");
@@ -530,7 +583,9 @@ export async function updateCourse(input: UpdateCourseInputType): Promise<Action
       }
     });
 
-    await sendCourseBackToReview(values.course.courseId);
+    if (courseContentChanged(course, values.course)) {
+      await sendCourseBackToReview(values.course.courseId);
+    }
 
     revalidatePath("/educator");
     revalidatePath(`/educator/courses/${values.course.courseId}`);

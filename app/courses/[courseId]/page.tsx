@@ -8,6 +8,7 @@ import { getCourseCertificateStatus } from "@/lib/actions/certificate-actions";
 import { getEnrollmentStatus } from "@/lib/actions/enrollment-actions";
 import { getCourseProgress } from "@/lib/security";
 import { getServerLocale, localizedCourseSelect, localizedLessonSelect, localizedModuleSelect } from "@/lib/server-locale";
+import { confirmPaidCourseCheckout, ensureEnrollmentForPaidCoursePayment } from "@/lib/stripe-course-payments";
 
 const BASE_URL = "https://kabullearn.com";
 
@@ -56,8 +57,15 @@ export async function generateMetadata({ params }: { params: Promise<{ courseId:
   }
 }
 
-export default async function CoursePage({ params }: { params: Promise<{ courseId: string }> }) {
+export default async function CoursePage({
+  params,
+  searchParams
+}: {
+  params: Promise<{ courseId: string }>;
+  searchParams?: Promise<{ checkout?: string; session_id?: string }>;
+}) {
   const { courseId: rawCourseId } = await params;
+  const resolvedSearchParams = await searchParams;
   const courseId = decodeURIComponent(rawCourseId);
   const locale = await getServerLocale();
 
@@ -164,6 +172,19 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
 
   const session = await auth();
   const userId = session?.user?.id;
+
+  if (userId && resolvedSearchParams?.checkout === "success" && resolvedSearchParams.session_id) {
+    await confirmPaidCourseCheckout({
+      sessionId: resolvedSearchParams.session_id,
+      userId,
+      courseId: resolvedCourseId
+    }).catch(() => false);
+  } else if (userId) {
+    await ensureEnrollmentForPaidCoursePayment({
+      userId,
+      courseId: resolvedCourseId
+    }).catch(() => false);
+  }
 
   let serverPassedModuleIds: string[] = [];
   let lessonStatuses: Record<string, "IN_PROGRESS" | "COMPLETED"> = {};

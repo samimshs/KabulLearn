@@ -4,6 +4,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { getRequestOrigin, getStripe } from "@/lib/stripe";
+import { confirmLatestPaidCourseCheckout, ensureEnrollmentForPaidCoursePayment } from "@/lib/stripe-course-payments";
 
 const checkoutSchema = z.object({
   courseId: z.string().min(1)
@@ -50,6 +51,22 @@ export async function POST(request: Request) {
   }
 
   if (course.enrollments.length > 0) {
+    return NextResponse.json({ ok: true, data: { enrolled: true, url: `/courses/${encodeURIComponent(course.slug || course.id)}` } });
+  }
+
+  const paidPaymentExists = await ensureEnrollmentForPaidCoursePayment({
+    userId: session.user.id,
+    courseId: course.id
+  }).catch(() => false);
+  if (paidPaymentExists) {
+    return NextResponse.json({ ok: true, data: { enrolled: true, url: `/courses/${encodeURIComponent(course.slug || course.id)}` } });
+  }
+
+  const alreadyPaid = await confirmLatestPaidCourseCheckout({
+    userId: session.user.id,
+    courseId: course.id
+  }).catch(() => false);
+  if (alreadyPaid) {
     return NextResponse.json({ ok: true, data: { enrolled: true, url: `/courses/${encodeURIComponent(course.slug || course.id)}` } });
   }
 

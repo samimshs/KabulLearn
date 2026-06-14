@@ -554,6 +554,71 @@ export async function sendCoursePurchaseThankYouEmail(input: {
   return { sent: true };
 }
 
+export async function sendCourseCreatorSaleEmail(input: {
+  email: string;
+  creatorName?: string | null;
+  studentName?: string | null;
+  courseTitleEn: string;
+  courseTitlePs?: string | null;
+  courseTitleDa?: string | null;
+  amountLabel: string;
+  courseUrl: string;
+  paymentId: string;
+}): Promise<{ sent: boolean }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.FROM_EMAIL;
+
+  if (!apiKey || !fromEmail) {
+    console.warn("Course creator sale email not sent: RESEND_API_KEY or FROM_EMAIL is missing.");
+    return { sent: false };
+  }
+
+  const marker = `course-sale-congrats:${input.paymentId}`;
+  const existing = await db.notificationLog.findFirst({
+    where: {
+      email: input.email,
+      body: { contains: marker }
+    },
+    select: { id: true }
+  });
+  if (existing) return { sent: true };
+
+  const subject = `Congratulations — ${input.courseTitleEn} was purchased`;
+  const html = courseCreatorSaleHtml(input);
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: input.email,
+      subject,
+      html
+    })
+  });
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    console.error("Course creator sale email failed:", response.status, body);
+    return { sent: false };
+  }
+
+  await db.notificationLog.create({
+    data: {
+      email: input.email,
+      subject,
+      body: `${marker}\n${input.courseTitleEn}`,
+      status: "SENT",
+      sentAt: new Date()
+    }
+  });
+
+  return { sent: true };
+}
+
 // ─── Support ticket confirmation ───────────────────────────────────────────────
 
 function esc(s: string): string {
@@ -607,6 +672,64 @@ function coursePurchaseThankYouHtml(input: {
         <p>سلام ${nameFa}،</p>
         <p>ثبت‌نام شما در <strong>${titleFa}</strong> اکنون فعال است و کورس هر زمانی که آماده باشید در دسترس شماست. خوشحالیم که کابل‌لرن را برای مسیر آموزشی خود انتخاب کردید. برایتان در آغاز این مسیر تمرکز، اعتمادبه‌نفس و پیشرفت پیوسته آرزو داریم.</p>
         <p><a href="${courseUrl}" style="${BTN}">شروع یادگیری</a></p>
+      </section>
+      <p style="margin-top:26px;color:#526174;font-size:13px">KabulLearn</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function courseCreatorSaleHtml(input: {
+  creatorName?: string | null;
+  studentName?: string | null;
+  courseTitleEn: string;
+  courseTitlePs?: string | null;
+  courseTitleDa?: string | null;
+  amountLabel: string;
+  courseUrl: string;
+}): string {
+  const creatorEn = esc(input.creatorName || "educator");
+  const creatorPs = esc(input.creatorName || "استاد");
+  const creatorFa = esc(input.creatorName || "استاد");
+  const studentEn = esc(input.studentName || "A student");
+  const studentPs = esc(input.studentName || "یوه زده‌کوونکي");
+  const studentFa = esc(input.studentName || "یک شاگرد");
+  const titleEn = esc(input.courseTitleEn);
+  const titlePs = esc(input.courseTitlePs || input.courseTitleEn);
+  const titleFa = esc(input.courseTitleDa || input.courseTitleEn);
+  const amount = esc(input.amountLabel);
+  const courseUrl = esc(input.courseUrl);
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F7F7FB;color:#102033;">
+  <div style="max-width:640px;margin:32px auto;background:#ffffff;border-radius:18px;border:1px solid #E4E3F2;overflow:hidden;">
+    <div style="background:linear-gradient(135deg,#18825c,#0057ff);padding:30px 32px;color:#ffffff;">
+      <p style="margin:0 0 10px;font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase">KabulLearn</p>
+      <h1 style="margin:0;font-size:28px;line-height:1.2">Congratulations on your course sale</h1>
+    </div>
+    <div style="padding:28px 32px;line-height:1.65">
+      <section>
+        <p style="font-size:11px;color:#526174;margin:0 0 12px">English</p>
+        <h2 style="margin:0 0 10px;font-size:20px">Congratulations, ${creatorEn}.</h2>
+        <p>${studentEn} purchased <strong>${titleEn}</strong> for <strong>${amount}</strong>. Your work is reaching learners, and we are excited to see your course creating value.</p>
+        <p><a href="${courseUrl}" style="${BTN}">View course</a></p>
+      </section>
+      ${DIVIDER}
+      <section dir="rtl" style="text-align:right">
+        <p style="font-size:11px;color:#526174;margin:0 0 12px">پښتو</p>
+        <h2 style="margin:0 0 10px;font-size:20px">مبارک شه، ${creatorPs}.</h2>
+        <p>${studentPs} ستاسو <strong>${titlePs}</strong> کورس په <strong>${amount}</strong> وپېره. ستاسو هڅې زده‌کوونکو ته رسېږي، او موږ خوښ یو چې ستاسو کورس ارزښت جوړوي.</p>
+        <p><a href="${courseUrl}" style="${BTN}">کورس وګورئ</a></p>
+      </section>
+      ${DIVIDER}
+      <section dir="rtl" style="text-align:right">
+        <p style="font-size:11px;color:#526174;margin:0 0 12px">دری</p>
+        <h2 style="margin:0 0 10px;font-size:20px">تبریک، ${creatorFa}.</h2>
+        <p>${studentFa} کورس <strong>${titleFa}</strong> شما را به مبلغ <strong>${amount}</strong> خرید. تلاش شما به شاگردان می‌رسد و ما خوشحالیم که کورس شما ارزش می‌آفریند.</p>
+        <p><a href="${courseUrl}" style="${BTN}">مشاهده کورس</a></p>
       </section>
       <p style="margin-top:26px;color:#526174;font-size:13px">KabulLearn</p>
     </div>

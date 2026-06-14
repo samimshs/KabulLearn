@@ -1626,6 +1626,16 @@ body:has(.kl-home-page) > footer {
 
 }
 
+@media (display-mode: standalone) and (min-width: 1024px) {
+  .kl-home-hero {
+    min-height: min(calc(100svh - 4rem), 820px);
+  }
+
+  .kl-scroll-cue {
+    bottom: clamp(8px, 1.4vh, 18px);
+  }
+}
+
 @media (max-width: 1023px) {
   .kl-home-page {
     height: auto;

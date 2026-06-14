@@ -247,12 +247,14 @@ export default async function LessonPage({
   };
   const normalizedLesson = normalizedCourse.modules.flatMap((module) => module.lessons).find((item) => item.id === lesson.id) ?? lesson;
 
-  const [initialNote, initialBookmarked] = isEnrolled && userId
+  const canUseNotes = Boolean(userId && (isEnrolled || isThePreviewLesson));
+
+  const [initialNote, initialBookmarked] = canUseNotes
     ? await Promise.all([
         getLessonNote(lessonId).catch(() => ""),
-        getLessonBookmark(lessonId).catch(() => false)
+        isEnrolled ? getLessonBookmark(lessonId).catch(() => false) : Promise.resolve(false)
       ])
     : ["", false] as const;
 
-  return <LessonView course={normalizedCourse} lesson={normalizedLesson} serverPassedModuleIds={serverPassedModuleIds} lessonStatuses={lessonStatuses} isComplete={isComplete} isPreviewLesson={isPreviewLesson} initialNote={initialNote} initialBookmarked={initialBookmarked} />;
+  return <LessonView course={normalizedCourse} lesson={normalizedLesson} serverPassedModuleIds={serverPassedModuleIds} lessonStatuses={lessonStatuses} isComplete={isComplete} isPreviewLesson={isPreviewLesson} canUseNotes={canUseNotes} initialNote={initialNote} initialBookmarked={initialBookmarked} />;
 }

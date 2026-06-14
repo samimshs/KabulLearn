@@ -166,7 +166,7 @@ export default async function EducatorCoursePage(props: EducatorCoursePageProps)
   const readinessItems = [
     { ok: course.modules.length > 0, label: t.atLeastOneModule },
     { ok: lessonCount > 0, label: t.atLeastOneLesson },
-    { ok: incompleteLessons.length === 0, label: incompleteLessons.length === 0 ? t.allContentComplete : `${incompleteLessons.length} incomplete lesson${incompleteLessons.length !== 1 ? "s" : ""}` },
+    { ok: lessonCount > 0 && incompleteLessons.length === 0, label: incompleteLessons.length === 0 ? t.allContentComplete : `${incompleteLessons.length} incomplete lesson${incompleteLessons.length !== 1 ? "s" : ""}` },
   ];
 
   return (

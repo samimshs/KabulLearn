@@ -41,6 +41,7 @@ type LessonViewProps = {
   lessonStatuses?: Record<string, "IN_PROGRESS" | "COMPLETED">;
   isComplete?: boolean;
   isPreviewLesson?: boolean;
+  canUseNotes?: boolean;
   initialNote?: string;
   initialBookmarked?: boolean;
 };
@@ -255,7 +256,7 @@ function LessonNotes({
 }
 
 /* ── Component ─────────────────────────────────────────────── */
-export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonStatuses = {}, isComplete = false, isPreviewLesson = false, initialNote = "", initialBookmarked = false }: LessonViewProps) {
+export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonStatuses = {}, isComplete = false, isPreviewLesson = false, canUseNotes = true, initialNote = "", initialBookmarked = false }: LessonViewProps) {
   const { locale, t, direction } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -559,7 +560,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                 )}
               </div>
             </div>
-            <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel stretch disabled={isPreviewLesson} />
+            <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel stretch disabled={!canUseNotes} />
           </div>
         ) : null}
 
@@ -614,7 +615,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                 )}
               </div>
             </div>
-            <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel disabled={isPreviewLesson} />
+            <LessonNotes lessonId={lesson.id} initialNote={initialNote} sidePanel disabled={!canUseNotes} />
           </div>
         ) : null}
       </section>

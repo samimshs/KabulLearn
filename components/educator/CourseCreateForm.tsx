@@ -456,14 +456,14 @@ export function CourseCreateForm({ className = "pr-card grid gap-4 p-5 lg:p-6" }
                   className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold leading-6 text-slate-950 outline-none transition focus:border-[var(--brand)] focus:bg-white focus:ring-4 focus:ring-blue-100"
                 />
               </label>
-              <button
-                type="button"
-                onClick={addManualInstructor}
-                disabled={!manualInstructor.name.trim()}
-                className="h-11 rounded-xl bg-[var(--brand)] px-4 text-sm font-black text-white shadow-sm transition hover:bg-[var(--brand-600)] disabled:cursor-not-allowed disabled:opacity-50 md:col-span-2"
-              >
-                {t.addInstructor}
-              </button>
+                <button
+                  type="button"
+                  onClick={addManualInstructor}
+                  disabled={!manualInstructor.name.trim()}
+                  className="h-11 rounded-xl bg-[var(--brand)] px-4 text-sm font-black text-white shadow-sm transition hover:bg-[var(--brand-hover)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-[var(--brand)] md:col-span-2"
+                >
+                  {t.addInstructor}
+                </button>
             </div>
           ) : null}
         </div>

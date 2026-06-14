@@ -33,6 +33,16 @@ function statusClass(status: CourseStatus) {
   return "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]";
 }
 
+function coursePriceLabel(course: { isPaid: boolean; priceCents: number | null }) {
+  if (!course.isPaid) return "Free";
+  if (!course.priceCents) return "Paid, price missing";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2
+  }).format(course.priceCents / 100);
+}
+
 function roleClass(role: UserRole) {
   if (role === UserRole.ADMIN) {
     return "border-[#26364f] bg-[#07111f] text-white";
@@ -159,6 +169,7 @@ export default async function AdminDashboardPage({
 
   type AdminCourse = {
     id: string; slug: string; status: CourseStatus; titleEn: string; descriptionEn: string; reviewNote: string | null;
+    isPaid: boolean; priceCents: number | null;
     author: { name: string | null; email: string };
     _count: { modules: number; enrollments: number };
     modules: Array<{
@@ -235,6 +246,7 @@ export default async function AdminDashboardPage({
         orderBy: [{ submittedAt: "desc" }, { updatedAt: "desc" }],
         select: {
           id: true, slug: true, status: true, titleEn: true, descriptionEn: true, reviewNote: true,
+          isPaid: true, priceCents: true,
           author: { select: { name: true, email: true } },
           _count: { select: { modules: true, enrollments: true } },
           modules: {
@@ -622,6 +634,9 @@ export default async function AdminDashboardPage({
                           <span className={`rounded-full border px-3 py-1 text-xs font-[800] uppercase tracking-[1px] ${statusClass(course.status)}`}>
                             {statusLabel(course.status)}
                           </span>
+                          <span className={`rounded-full border px-3 py-1 text-xs font-[800] uppercase tracking-[1px] ${course.isPaid ? "border-[rgba(0,87,255,0.18)] bg-[var(--brand-50)] text-[var(--brand)]" : "border-[rgba(24,130,92,0.2)] bg-[var(--success-50)] text-[var(--success)]"}`}>
+                            {coursePriceLabel(course)}
+                          </span>
                           <span className="truncate text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
                             {course.slug}
                           </span>
@@ -634,7 +649,7 @@ export default async function AdminDashboardPage({
                         </p>
                         <p className="mt-3 text-sm font-[700] text-[var(--ink-2)]">
                           {course.author.name || course.author.email}
-                          <span className="text-[var(--muted)]"> · {course._count.modules} modules · {course._count.enrollments} enrollments</span>
+                          <span className="text-[var(--muted)]"> · {coursePriceLabel(course)} · {course._count.modules} modules · {course._count.enrollments} enrollments</span>
                         </p>
                       </div>
                       <div className="flex flex-wrap gap-2 lg:justify-end">

@@ -10,17 +10,55 @@ const schema = z.object({
   body: z.string().max(5000)
 });
 
+async function canAccessLessonNotes(userId: string, lessonId: string) {
+  const lesson = await db.lesson.findUnique({
+    where: { id: lessonId },
+    select: {
+      id: true,
+      order: true,
+      type: true,
+      module: {
+        select: {
+          courseId: true,
+          order: true,
+          course: {
+            select: {
+              modules: {
+                orderBy: { order: "asc" },
+                select: {
+                  id: true,
+                  order: true,
+                  lessons: {
+                    orderBy: { order: "asc" },
+                    select: { id: true, order: true, type: true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+  if (!lesson) return false;
+
+  const enrolled = await assertCourseEnrollment({ userId, courseId: lesson.module.courseId })
+    .then(() => true)
+    .catch(() => false);
+  if (enrolled) return true;
+
+  const firstModule = lesson.module.course.modules[0];
+  const previewLesson = firstModule?.lessons.find((item) => item.type !== "QUIZ");
+  return previewLesson?.id === lesson.id;
+}
+
 export async function upsertLessonNote(input: { lessonId: string; body: string }) {
   const session = await auth();
   if (!session?.user?.id) return { ok: false as const };
 
   const { lessonId, body } = schema.parse(input);
-  const lesson = await db.lesson.findUnique({
-    where: { id: lessonId },
-    select: { module: { select: { courseId: true } } }
-  });
-  if (!lesson) return { ok: false as const };
-  await assertCourseEnrollment({ userId: session.user.id, courseId: lesson.module.courseId });
+  const canAccess = await canAccessLessonNotes(session.user.id, lessonId);
+  if (!canAccess) return { ok: false as const };
 
   if (!body.trim()) {
     await db.lessonNote.deleteMany({ where: { userId: session.user.id, lessonId } });
@@ -39,15 +77,8 @@ export async function upsertLessonNote(input: { lessonId: string; body: string }
 export async function getLessonNote(lessonId: string): Promise<string> {
   const session = await auth();
   if (!session?.user?.id) return "";
-  const lesson = await db.lesson.findUnique({
-    where: { id: lessonId },
-    select: { module: { select: { courseId: true } } }
-  }).catch(() => null);
-  if (!lesson) return "";
-  const enrolled = await assertCourseEnrollment({ userId: session.user.id, courseId: lesson.module.courseId })
-    .then(() => true)
-    .catch(() => false);
-  if (!enrolled) return "";
+  const canAccess = await canAccessLessonNotes(session.user.id, lessonId).catch(() => false);
+  if (!canAccess) return "";
 
   const note = await db.lessonNote.findUnique({
     where: { userId_lessonId: { userId: session.user.id, lessonId } },

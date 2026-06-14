@@ -1562,6 +1562,12 @@ body:has(.kl-home-page) > footer {
   display: none;
 }
 
+body:has(.kl-coming-soon-page) > header,
+body:has(.kl-coming-soon-page) > footer,
+body:has(.kl-coming-soon-page) > div.fixed.bottom-6.left-6 {
+  display: none;
+}
+
 @media (min-width: 1024px) and (max-height: 940px) {
   .kl-home-hero {
     padding-top: clamp(14px, 2vh, 26px);

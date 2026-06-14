@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { HomeHeroVisual } from "@/components/HomeHeroVisual";
 import { CourseCard, type CourseCardRow } from "@/components/CourseCard";
 import { EducatorCta } from "@/components/CourseDashboard";
@@ -19,6 +21,37 @@ function fmtStat(value: number, locale: Locale): string {
   return `${formatNumber(value, locale)}+`;
 }
 
+function isComingSoonHost(host: string | null) {
+  const normalized = (host ?? "").toLowerCase().split(":")[0];
+  return normalized === "kabullearn.com" || normalized === "www.kabullearn.com";
+}
+
+const comingSoonCopy: Record<Locale, {
+  eyebrow: string;
+  title: string;
+  body: string;
+  note: string;
+}> = {
+  en: {
+    eyebrow: "Coming soon",
+    title: "KabulLearn is getting ready.",
+    body: "We are preparing a focused learning platform with structured courses, guided practice, and certificates in English, Pashto, and Dari.",
+    note: "Thank you for your patience while we make the experience stronger for Afghan learners everywhere."
+  },
+  ps: {
+    eyebrow: "ژر راځي",
+    title: "کابل‌لرن د پیل لپاره چمتو کېږي.",
+    body: "موږ په انګلیسي، پښتو او دري کې د منظم کورسونو، لارښود تمرینونو او سندونو لپاره یو متمرکز د زده‌کړې پلېټفارم چمتو کوو.",
+    note: "ستاسو له زغم څخه مننه، موږ هڅه کوو چې د هر ځای افغان زده‌کوونکو لپاره تجربه لا پیاوړې کړو."
+  },
+  fa: {
+    eyebrow: "به‌زودی",
+    title: "کابل‌لرن برای آغاز آماده می‌شود.",
+    body: "ما یک پلتفرم متمرکز آموزشی با کورس‌های منظم، تمرین‌های راهنما و گواهی‌ها به زبان‌های انگلیسی، پشتو و دری آماده می‌کنیم.",
+    note: "از صبر شما سپاسگزاریم؛ ما تلاش می‌کنیم تجربه‌ای نیرومندتر برای شاگردان افغان در هر کجا فراهم کنیم."
+  }
+};
+
 const STAT_ICONS = {
   courses:   <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none"><path d="M10 5C8 3.7 4.8 3.4 3 4v11c1.8-.6 5-.3 7 1M10 5c2-1.3 5.2-1.6 7-1v11c-1.8-.6-5-.3-7 1M10 5v11" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" /></svg>,
   lessons:   <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none"><circle cx="10" cy="10" r="7.2" stroke="currentColor" strokeWidth="1.5" /><path d="M8.4 7.4 13 10l-4.6 2.6V7.4Z" fill="currentColor" /></svg>,
@@ -32,10 +65,47 @@ const HOW_ICONS = [
   <svg key="cert" viewBox="0 0 24 24" className="h-6 w-6" fill="none"><circle cx="12" cy="9" r="5" stroke="currentColor" strokeWidth="1.7" /><path d="m9 13-1.5 8L12 19l4.5 2L15 13" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /></svg>,
 ];
 
+function ComingSoonPage({ locale }: { locale: Locale }) {
+  const text = comingSoonCopy[locale];
+  const isRtl = locale !== "en";
+
+  return (
+    <main className="kl-coming-soon-page min-h-svh overflow-hidden bg-[radial-gradient(circle_at_78%_18%,rgba(0,87,255,0.14),transparent_30%),linear-gradient(135deg,#ffffff_0%,#f7faff_48%,#eef5ff_100%)]">
+      <section className="mx-auto grid min-h-svh max-w-6xl items-center gap-10 px-6 py-14 lg:grid-cols-[0.94fr_1.06fr] lg:px-10" dir={isRtl ? "rtl" : "ltr"}>
+        <div className="relative z-10 max-w-2xl">
+          <Image src="/poharana-logo-v3.svg" alt="KabulLearn" width={210} height={66} priority className="h-auto w-[190px]" />
+          <p className="mt-12 text-[13px] font-[900] uppercase tracking-[4px] text-[var(--brand)]">{text.eyebrow}</p>
+          <h1 className="mt-5 text-[clamp(42px,6vw,78px)] font-[950] leading-[0.98] tracking-[-2.4px] text-[var(--ink)]">{text.title}</h1>
+          <p className="mt-7 max-w-xl text-[18px] font-[650] leading-8 text-[var(--ink-2)]">{text.body}</p>
+          <p className="mt-4 max-w-xl text-[15px] font-[600] leading-7 text-[var(--muted)]">{text.note}</p>
+        </div>
+
+        <div className="relative min-h-[360px] lg:min-h-[560px]" aria-hidden="true">
+          <div className="absolute inset-x-0 top-8 mx-auto h-[420px] w-[420px] rounded-full bg-[rgba(0,87,255,0.10)] blur-3xl lg:h-[560px] lg:w-[560px]" />
+          <div className="absolute left-1/2 top-1/2 grid h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[44px] border border-white/70 bg-white/72 shadow-[0_32px_90px_rgba(0,87,255,0.18)] backdrop-blur-xl lg:h-[430px] lg:w-[430px]">
+            <div className="grid h-24 w-24 place-items-center rounded-[28px] bg-[var(--brand)] shadow-[0_18px_45px_rgba(0,87,255,0.30)] lg:h-32 lg:w-32">
+              <Image src="/poharana-icon-v3.svg" alt="" width={92} height={92} className="h-16 w-16 lg:h-20 lg:w-20" />
+            </div>
+          </div>
+          <div className="absolute right-8 top-16 rounded-full bg-[#18825c] px-4 py-2 text-sm font-[900] text-white shadow-[0_16px_35px_rgba(24,130,92,0.25)]">English</div>
+          <div className="absolute left-5 top-32 rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-[900] text-white shadow-[0_16px_35px_rgba(0,87,255,0.22)]">پښتو</div>
+          <div className="absolute bottom-20 right-16 rounded-full bg-[#6d39d8] px-4 py-2 text-sm font-[900] text-white shadow-[0_16px_35px_rgba(109,57,216,0.22)]">دری</div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
 export default async function Home() {
+  const locale = await getServerLocale();
+  const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host");
+  if (isComingSoonHost(host)) {
+    return <ComingSoonPage locale={locale} />;
+  }
+
   const session = await auth();
   const role = session?.user?.role;
-  const locale = await getServerLocale();
   const dict = dictionaries[locale];
 
   const features = [
@@ -57,8 +127,6 @@ export default async function Home() {
     },
   ];
 
-  // Live platform stats and featured courses. Stats with no real value are
-  // hidden rather than replaced with invented placeholders.
   let courseCount = 0, lessonCount = 0, learnerCount = 0;
   let featured: CourseCardRow[] = [];
   try {
@@ -157,18 +225,12 @@ export default async function Home() {
 
           <ul className="kl-feature-list grid grid-cols-2 gap-2 w-fit">
             {features.map((feature) => (
-              <li
-                key={feature.label}
-                className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/75 py-2 pe-3 ps-2 shadow-[var(--shadow-sm)] backdrop-blur-sm"
-              >
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--brand-50)] text-[var(--brand)]">
-                  {feature.icon}
-                </span>
+              <li key={feature.label} className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/75 py-2 pe-3 ps-2 shadow-[var(--shadow-sm)] backdrop-blur-sm">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--brand-50)] text-[var(--brand)]">{feature.icon}</span>
                 <span className="text-[11px] font-[700] leading-snug text-[var(--ink-2)]">{feature.label}</span>
               </li>
             ))}
           </ul>
-
         </div>
 
         <div className="kl-home-art">
@@ -183,72 +245,58 @@ export default async function Home() {
       </section>
 
       <div id="kl-home-more" className="kl-home-body">
-      {/* Featured courses */}
-      {featured.length > 0 && (
-        <section className="mt-14" aria-label={dict.featuredCoursesTitle}>
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="pr-eyebrow">{dict.featuredCoursesEyebrow}</p>
-              <h2 className="pr-h2 mt-2">{dict.featuredCoursesTitle}</h2>
+        {featured.length > 0 && (
+          <section className="mt-14" aria-label={dict.featuredCoursesTitle}>
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="pr-eyebrow">{dict.featuredCoursesEyebrow}</p>
+                <h2 className="pr-h2 mt-2">{dict.featuredCoursesTitle}</h2>
+              </div>
+              <Link href="/courses" className="text-[14px] font-[800] text-[var(--brand)] hover:underline underline-offset-2">
+                {dict.viewAllCourses} →
+              </Link>
             </div>
-            <Link href="/courses" className="text-[14px] font-[800] text-[var(--brand)] hover:underline underline-offset-2">
-              {dict.viewAllCourses} →
-            </Link>
-          </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {featured.map((course) => (
-              <CourseCard key={course.id} course={course} isAuthenticated={Boolean(session?.user?.id)} />
-            ))}
-          </div>
-        </section>
-      )}
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {featured.map((course) => (
+                <CourseCard key={course.id} course={course} isAuthenticated={Boolean(session?.user?.id)} />
+              ))}
+            </div>
+          </section>
+        )}
 
-      {/* How it works */}
-      <section className="mt-14" aria-label={dict.howItWorksTitle}>
-        <div className="pr-panel p-7 lg:p-10">
-          <p className="pr-eyebrow">{dict.howItWorksEyebrow}</p>
-          <h2 className="pr-h2 mt-2">{dict.howItWorksTitle}</h2>
-          <ol className="mt-7 grid gap-6 md:grid-cols-3">
-            {howSteps.map((step, i) => (
-              <li key={step.title} className="relative rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-6">
-                <div className="flex items-center gap-3">
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--brand-50)] text-[var(--brand)]">
-                    {HOW_ICONS[i]}
-                  </span>
-                  <span className="grid h-7 w-7 place-items-center rounded-full bg-[var(--gold-50)] text-[13px] font-[800] text-[var(--gold-deep)] ring-1 ring-[rgba(201,168,76,0.4)]">
-                    {formatNumber(i + 1, locale)}
-                  </span>
-                </div>
-                <h3 className="mt-4 text-[16px] font-[800] text-[var(--ink)]">{step.title}</h3>
-                <p className="mt-2 text-[14px] font-[400] leading-relaxed text-[var(--muted)]">{step.body}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* Educator CTA — hidden for users who already have a workspace */}
-      {role !== "EDUCATOR" && role !== "ADMIN" && <EducatorCta />}
-
-      {/* Closing CTA — guests only */}
-      {!role && (
-        <section className="mt-14 mb-4 rounded-[var(--radius-xl)] bg-gradient-to-br from-[#021533] via-[#00255f] to-[var(--brand)] px-7 py-12 text-center lg:py-16">
-          <h2 className="text-[28px] font-[800] tracking-[-0.6px] text-white lg:text-[34px]">
-            {dict.homeClosingTitle}
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-[15px] font-[400] leading-relaxed text-white/80">
-            {dict.homeClosingBody}
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/register" className="pr-btn-primary !border-white hover:!opacity-90">
-              {dict.startLearningFree}
-            </Link>
-            <Link href="/courses" className="pr-btn-ghost !border-white/40 !bg-transparent !text-white hover:!border-white hover:!text-white">
-              {dict.heroCta}
-            </Link>
+        <section className="mt-14" aria-label={dict.howItWorksTitle}>
+          <div className="pr-panel p-7 lg:p-10">
+            <p className="pr-eyebrow">{dict.howItWorksEyebrow}</p>
+            <h2 className="pr-h2 mt-2">{dict.howItWorksTitle}</h2>
+            <ol className="mt-7 grid gap-6 md:grid-cols-3">
+              {howSteps.map((step, i) => (
+                <li key={step.title} className="relative rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-6">
+                  <div className="flex items-center gap-3">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--brand-50)] text-[var(--brand)]">{HOW_ICONS[i]}</span>
+                    <span className="grid h-7 w-7 place-items-center rounded-full bg-[var(--gold-50)] text-[13px] font-[800] text-[var(--gold-deep)] ring-1 ring-[rgba(201,168,76,0.4)]">
+                      {formatNumber(i + 1, locale)}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 text-[16px] font-[800] text-[var(--ink)]">{step.title}</h3>
+                  <p className="mt-2 text-[14px] font-[400] leading-relaxed text-[var(--muted)]">{step.body}</p>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
-      )}
+
+        {role !== "EDUCATOR" && role !== "ADMIN" && <EducatorCta />}
+
+        {!role && (
+          <section className="mt-14 mb-4 rounded-[var(--radius-xl)] bg-gradient-to-br from-[#021533] via-[#00255f] to-[var(--brand)] px-7 py-12 text-center lg:py-16">
+            <h2 className="text-[28px] font-[800] tracking-[-0.6px] text-white lg:text-[34px]">{dict.homeClosingTitle}</h2>
+            <p className="mx-auto mt-3 max-w-xl text-[15px] font-[400] leading-relaxed text-white/80">{dict.homeClosingBody}</p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link href="/register" className="pr-btn-primary !border-white hover:!opacity-90">{dict.startLearningFree}</Link>
+              <Link href="/courses" className="pr-btn-ghost !border-white/40 !bg-transparent !text-white hover:!border-white hover:!text-white">{dict.heroCta}</Link>
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );

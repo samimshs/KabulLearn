@@ -1,9 +1,41 @@
 import type Stripe from "stripe";
 import { db } from "@/lib/db";
+import { appBaseUrl, sendCoursePurchaseThankYouEmail } from "@/lib/email-verification";
 import { getStripe } from "@/lib/stripe";
 
 function paymentIntentId(session: Stripe.Checkout.Session) {
   return typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
+}
+
+async function sendPurchaseThankYouEmail(input: {
+  paymentId: string;
+  userId: string;
+  courseId: string;
+}) {
+  const [user, course] = await Promise.all([
+    db.user.findUnique({
+      where: { id: input.userId },
+      select: { email: true, name: true }
+    }),
+    db.course.findUnique({
+      where: { id: input.courseId },
+      select: { slug: true, titleEn: true, titlePs: true, titleDa: true }
+    })
+  ]);
+
+  if (!user?.email || !course) return;
+
+  await sendCoursePurchaseThankYouEmail({
+    email: user.email,
+    name: user.name,
+    courseTitleEn: course.titleEn,
+    courseTitlePs: course.titlePs,
+    courseTitleDa: course.titleDa,
+    courseUrl: `${appBaseUrl()}/courses/${encodeURIComponent(course.slug || input.courseId)}`,
+    paymentId: input.paymentId
+  }).catch((error) => {
+    console.error("Course purchase thank-you email failed:", error);
+  });
 }
 
 async function finalizePaidCourseSession(session: Stripe.Checkout.Session) {
@@ -38,6 +70,8 @@ async function finalizePaidCourseSession(session: Stripe.Checkout.Session) {
     update: {},
     create: { userId, courseId }
   });
+
+  await sendPurchaseThankYouEmail({ paymentId: payment.id, userId, courseId });
 
   return true;
 }
@@ -105,6 +139,12 @@ export async function ensureEnrollmentForPaidCoursePayment(input: {
     where: { userId_courseId: { userId: input.userId, courseId: input.courseId } },
     update: {},
     create: { userId: input.userId, courseId: input.courseId }
+  });
+
+  await sendPurchaseThankYouEmail({
+    paymentId: payment.id,
+    userId: input.userId,
+    courseId: input.courseId
   });
 
   return true;

@@ -19,6 +19,7 @@ const DISPOSABLE_EMAIL_DOMAINS = new Set([
 
 export function appBaseUrl() {
   return (
+    process.env.NEXT_PUBLIC_APP_URL ||
     process.env.NEXTAUTH_URL ||
     process.env.AUTH_URL ||
     "http://localhost:3002"
@@ -490,10 +491,128 @@ export async function sendEducatorWelcomeEmail(input: {
   return { sent: true };
 }
 
+export async function sendCoursePurchaseThankYouEmail(input: {
+  email: string;
+  name?: string | null;
+  courseTitleEn: string;
+  courseTitlePs?: string | null;
+  courseTitleDa?: string | null;
+  courseUrl: string;
+  paymentId: string;
+}): Promise<{ sent: boolean }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.FROM_EMAIL;
+
+  if (!apiKey || !fromEmail) {
+    console.warn("Course purchase email not sent: RESEND_API_KEY or FROM_EMAIL is missing.");
+    return { sent: false };
+  }
+
+  const marker = `course-purchase-thank-you:${input.paymentId}`;
+  const existing = await db.notificationLog.findFirst({
+    where: {
+      email: input.email,
+      body: { contains: marker }
+    },
+    select: { id: true }
+  });
+  if (existing) return { sent: true };
+
+  const subject = `Your KabulLearn course is ready — ${input.courseTitleEn}`;
+  const html = coursePurchaseThankYouHtml(input);
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: input.email,
+      subject,
+      html
+    })
+  });
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    console.error("Course purchase email failed:", response.status, body);
+    return { sent: false };
+  }
+
+  await db.notificationLog.create({
+    data: {
+      email: input.email,
+      subject,
+      body: `${marker}\n${input.courseTitleEn}`,
+      status: "SENT",
+      sentAt: new Date()
+    }
+  });
+
+  return { sent: true };
+}
+
 // ─── Support ticket confirmation ───────────────────────────────────────────────
 
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function coursePurchaseThankYouHtml(input: {
+  name?: string | null;
+  courseTitleEn: string;
+  courseTitlePs?: string | null;
+  courseTitleDa?: string | null;
+  courseUrl: string;
+}): string {
+  const nameEn = esc(input.name || "learner");
+  const namePs = esc(input.name || "زده‌کوونکی");
+  const nameFa = esc(input.name || "شاگرد");
+  const titleEn = esc(input.courseTitleEn);
+  const titlePs = esc(input.courseTitlePs || input.courseTitleEn);
+  const titleFa = esc(input.courseTitleDa || input.courseTitleEn);
+  const courseUrl = esc(input.courseUrl);
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F7F7FB;color:#102033;">
+  <div style="max-width:640px;margin:32px auto;background:#ffffff;border-radius:18px;border:1px solid #E4E3F2;overflow:hidden;">
+    <div style="background:linear-gradient(135deg,#0057ff,#18825c);padding:30px 32px;color:#ffffff;">
+      <p style="margin:0 0 10px;font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase">KabulLearn</p>
+      <h1 style="margin:0;font-size:28px;line-height:1.2">Your course is ready</h1>
+    </div>
+    <div style="padding:28px 32px;line-height:1.65">
+      <section>
+        <p style="font-size:11px;color:#526174;margin:0 0 12px">English</p>
+        <h2 style="margin:0 0 10px;font-size:20px">Thank you for your purchase.</h2>
+        <p>Hello ${nameEn},</p>
+        <p>Your enrollment in <strong>${titleEn}</strong> is now active, and your course is ready whenever you are. We are grateful that you chose KabulLearn for your learning journey. Wishing you focus, confidence, and steady progress as you begin.</p>
+        <p><a href="${courseUrl}" style="${BTN}">Start learning</a></p>
+      </section>
+      ${DIVIDER}
+      <section dir="rtl" style="text-align:right">
+        <p style="font-size:11px;color:#526174;margin:0 0 12px">پښتو</p>
+        <h2 style="margin:0 0 10px;font-size:20px">ستاسو له پېرودنې مننه.</h2>
+        <p>سلام ${namePs}،</p>
+        <p>په <strong>${titlePs}</strong> کې ستاسو نوم‌لیکنه اوس فعاله ده، او کورس مو هر وخت چمتو دی. موږ منندوی یو چې د خپلې زده‌کړې د سفر لپاره مو کابل‌لرن غوره کړ. هیله ده د پیل پر مهال تمرکز، باور، او دوامداره پرمختګ ولرئ.</p>
+        <p><a href="${courseUrl}" style="${BTN}">زده کړه پیل کړئ</a></p>
+      </section>
+      ${DIVIDER}
+      <section dir="rtl" style="text-align:right">
+        <p style="font-size:11px;color:#526174;margin:0 0 12px">دری</p>
+        <h2 style="margin:0 0 10px;font-size:20px">از خرید شما سپاسگزاریم.</h2>
+        <p>سلام ${nameFa}،</p>
+        <p>ثبت‌نام شما در <strong>${titleFa}</strong> اکنون فعال است و کورس هر زمانی که آماده باشید در دسترس شماست. خوشحالیم که کابل‌لرن را برای مسیر آموزشی خود انتخاب کردید. برایتان در آغاز این مسیر تمرکز، اعتمادبه‌نفس و پیشرفت پیوسته آرزو داریم.</p>
+        <p><a href="${courseUrl}" style="${BTN}">شروع یادگیری</a></p>
+      </section>
+      <p style="margin-top:26px;color:#526174;font-size:13px">KabulLearn</p>
+    </div>
+  </div>
+</body>
+</html>`;
 }
 
 function ticketConfirmationHtml(input: {

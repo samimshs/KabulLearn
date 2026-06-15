@@ -41,10 +41,10 @@ export async function POST(request: Request) {
   try {
     const course = await db.course.findUnique({
       where: { id: courseId },
-      select: { status: true, publishedAt: true, isPaid: true }
+      select: { status: true, isPaid: true }
     });
 
-    if (!course || (course.status !== CourseStatus.PUBLISHED && !course.publishedAt)) {
+    if (!course || course.status !== CourseStatus.PUBLISHED) {
       return NextResponse.json(
         { ok: false, error: "Course not found or not available." },
         { status: 404 }

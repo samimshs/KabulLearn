@@ -48,12 +48,7 @@ export default async function CreatorProfilePage({
       user: { select: { image: true } },
       courseInstructors: {
         where: {
-          course: {
-            OR: [
-              { status: CourseStatus.PUBLISHED },
-              { publishedAt: { not: null } }
-            ]
-          }
+          course: { status: CourseStatus.PUBLISHED }
         },
         orderBy: { order: "asc" },
         select: {

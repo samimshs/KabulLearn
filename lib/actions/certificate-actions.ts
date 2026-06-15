@@ -35,7 +35,6 @@ export async function getCourseCertificateStatus(
       titleEn: true,
       titlePs: true,
       status: true,
-      publishedAt: true,
       modules: {
         orderBy: [{ order: "asc" }],
         select: {
@@ -47,7 +46,7 @@ export async function getCourseCertificateStatus(
     }
   });
 
-  if (!course || (course.status !== CourseStatus.PUBLISHED && !course.publishedAt)) {
+  if (!course || course.status !== CourseStatus.PUBLISHED) {
     return null;
   }
 

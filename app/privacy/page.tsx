@@ -19,8 +19,12 @@ export default async function PrivacyPage() {
         <Link href="/contact" className="pr-btn-ghost">{content.help}</Link>
       </InfoHero>
 
-      {content.sections.map((section) => (
-        <InfoSection key={section.title} title={section.title}>
+      {content.sections.map((section, index) => (
+        <InfoSection
+          key={section.title}
+          id={index === content.sections.length - 1 ? "data-deletion" : undefined}
+          title={section.title}
+        >
           {section.paragraphs?.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
           {section.bullets ? (
             <ul className="list-disc space-y-2 ps-5">

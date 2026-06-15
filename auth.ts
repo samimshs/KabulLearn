@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Facebook from "next-auth/providers/facebook";
 import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { compare } from "bcryptjs";
@@ -17,6 +18,9 @@ const credentialsSchema = z.object({
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 const googleProviderConfigured = Boolean(googleClientId && googleClientSecret);
+const facebookClientId = process.env.FACEBOOK_CLIENT_ID;
+const facebookClientSecret = process.env.FACEBOOK_CLIENT_SECRET;
+const facebookProviderConfigured = Boolean(facebookClientId && facebookClientSecret);
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -76,11 +80,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             clientSecret: googleClientSecret!
           })
         ]
+      : []),
+    ...(facebookProviderConfigured
+      ? [
+          Facebook({
+            clientId: facebookClientId!,
+            clientSecret: facebookClientSecret!,
+            allowDangerousEmailAccountLinking: true,
+            authorization: {
+              params: {
+                scope: "email,public_profile"
+              }
+            }
+          })
+        ]
       : [])
   ],
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider === "google" && user.email) {
+      if ((account?.provider === "google" || account?.provider === "facebook") && user.email) {
         await db.user.update({
           where: { email: user.email.toLowerCase() },
           data: {

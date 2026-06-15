@@ -39,7 +39,7 @@ export async function getRecommendedCourses(
   const rows = await db.course.findMany({
     where: {
       AND: [
-        { OR: [{ status: CourseStatus.PUBLISHED }, { publishedAt: { not: null } }] },
+        { status: CourseStatus.PUBLISHED },
         enrolledIds.length > 0 ? { id: { notIn: enrolledIds } } : {}
       ]
     },

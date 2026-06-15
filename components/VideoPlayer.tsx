@@ -9,10 +9,10 @@ const WATCH_UNLOCK_SECONDS = 60;
 const SAVE_INTERVAL_SECONDS = 5;
 
 type YTPlayer = {
-  getPlayerState(): number;
-  getCurrentTime(): number;
-  seekTo(seconds: number, allowSeekAhead: boolean): void;
-  destroy(): void;
+  getPlayerState?: () => number;
+  getCurrentTime?: () => number;
+  seekTo?: (seconds: number, allowSeekAhead: boolean) => void;
+  destroy?: () => void;
 };
 
 type YTWindow = typeof window & {
@@ -61,6 +61,10 @@ function getYouTubeId(value: string) {
   }
 }
 
+function isReadyPlayer(player: YTPlayer | null): player is Required<Pick<YTPlayer, "getPlayerState" | "getCurrentTime">> & YTPlayer {
+  return Boolean(player && typeof player.getPlayerState === "function" && typeof player.getCurrentTime === "function");
+}
+
 export function VideoPlayer({
   video,
   courseId,
@@ -92,13 +96,14 @@ export function VideoPlayer({
   // Create the YT player once per video/lesson
   useEffect(() => {
     let active = true;
+    let createdPlayer: YTPlayer | null = null;
 
     loadYouTubeApi().then(() => {
       if (!active) return;
       const win = window as YTWindow;
       if (!win.YT?.Player) return;
 
-      playerRef.current = new win.YT.Player(playerId, {
+      createdPlayer = new win.YT.Player(playerId, {
         videoId,
         playerVars: {
           rel: 0,
@@ -108,10 +113,12 @@ export function VideoPlayer({
         },
         events: {
           onReady: (event: { target: YTPlayer }) => {
+            if (!active) return;
+            playerRef.current = event.target;
             if (saveKey) {
               const saved = parseInt(localStorage.getItem(saveKey) ?? "0", 10);
               // Only seek if we saved a meaningful position (> 5 s)
-              if (saved > 5) event.target.seekTo(saved, true);
+              if (saved > 5 && typeof event.target.seekTo === "function") event.target.seekTo(saved, true);
             }
           }
         }
@@ -120,7 +127,8 @@ export function VideoPlayer({
 
     return () => {
       active = false;
-      playerRef.current?.destroy();
+      const player = playerRef.current ?? createdPlayer;
+      if (typeof player?.destroy === "function") player.destroy();
       playerRef.current = null;
     };
     // Re-run only if the video or lesson changes
@@ -133,7 +141,7 @@ export function VideoPlayer({
     const interval = setInterval(() => {
       const player = playerRef.current;
       const win = window as YTWindow;
-      if (!player || !win.YT?.PlayerState) return;
+      if (!isReadyPlayer(player) || !win.YT?.PlayerState) return;
 
       if (player.getPlayerState() === win.YT.PlayerState.PLAYING) {
         setWatchSeconds((s) => Math.min(WATCH_UNLOCK_SECONDS, s + 1));

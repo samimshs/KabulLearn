@@ -7,6 +7,8 @@ import { updateLesson } from "@/lib/actions/course-actions";
 import { SimpleMarkdown } from "@/components/SimpleMarkdown";
 import { useLanguage } from "@/components/LanguageProvider";
 
+const inputCls = "rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10";
+
 export function LessonUpdateForm({
   lesson
 }: {
@@ -48,73 +50,121 @@ export function LessonUpdateForm({
   const [isPending, startTransition] = useTransition();
 
   return (
-    <details className="rounded-[var(--radius)] border border-[var(--border)] bg-white">
-      <summary className="cursor-pointer list-none px-3 py-2 text-xs font-[800] uppercase tracking-[1px] text-[var(--brand)]">
-        {t.editLesson}
-      </summary>
-      <form
-        className="grid gap-3 border-t border-[var(--border)] p-3"
-        onSubmit={(event) => {
-          event.preventDefault();
-          startTransition(async () => {
-            const result = await updateLesson({
-              lessonId: lesson.id,
-              moduleId: lesson.moduleId,
-              type: lesson.type,
-              ...form
-            });
-            setMessage(result.ok ? t.lessonUpdated : result.error);
-            if (result.ok) router.refresh();
+    <form
+      className="grid gap-3"
+      onSubmit={(event) => {
+        event.preventDefault();
+        startTransition(async () => {
+          const result = await updateLesson({
+            lessonId: lesson.id,
+            moduleId: lesson.moduleId,
+            type: lesson.type,
+            ...form
           });
-        }}
-      >
-        <div className="grid gap-2 sm:grid-cols-3">
-          <input className="pr-input" value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} placeholder={t.englishTitle} />
-          <input className="pr-input" dir="rtl" value={form.titlePs} onChange={(e) => setForm({ ...form, titlePs: e.target.value })} placeholder={t.pashtoTitle} />
-          <input className="pr-input" dir="rtl" value={form.titleDa} onChange={(e) => setForm({ ...form, titleDa: e.target.value })} placeholder={t.dariTitle} />
-        </div>
-        <div className="grid gap-2 sm:grid-cols-3">
-          <input className="pr-input" value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} placeholder={t.englishDescLabel} />
-          <input className="pr-input" dir="rtl" value={form.descriptionPs} onChange={(e) => setForm({ ...form, descriptionPs: e.target.value })} placeholder={t.pashtoDescLabel} />
-          <input className="pr-input" dir="rtl" value={form.descriptionDa} onChange={(e) => setForm({ ...form, descriptionDa: e.target.value })} placeholder={t.dariDescLabel} />
-        </div>
-        {lesson.type === LessonType.VIDEO ? (
-          <input className="pr-input" value={form.youtubeUrl} onChange={(e) => setForm({ ...form, youtubeUrl: e.target.value })} placeholder={t.youtubeUrlLabel} />
-        ) : null}
-        {lesson.type === LessonType.READING ? (
-          <div className="grid gap-3">
-            <p className="text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
-              Markdown supported: # heading, ## section, - bullets, 1. steps, **bold**
-            </p>
-            <div className="grid gap-2 sm:grid-cols-3">
-              <textarea className="pr-input min-h-40" value={form.readingEn} onChange={(e) => setForm({ ...form, readingEn: e.target.value })} placeholder={t.englishContentLabel} />
-              <textarea className="pr-input min-h-40" dir="rtl" value={form.readingPs} onChange={(e) => setForm({ ...form, readingPs: e.target.value })} placeholder={t.pashtoContentLabel} />
-              <textarea className="pr-input min-h-40" dir="rtl" value={form.readingDa} onChange={(e) => setForm({ ...form, readingDa: e.target.value })} placeholder={t.dariContentLabel} />
-            </div>
-            {form.readingEn ? (
-              <details className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-3">
-                <summary className="cursor-pointer text-xs font-[800] uppercase tracking-[1px] text-[var(--brand)]">Preview English reading</summary>
-                <div className="mt-3 rounded-[var(--radius)] bg-white p-4">
-                  <SimpleMarkdown content={form.readingEn} />
-                </div>
-              </details>
-            ) : null}
-          </div>
-        ) : null}
-        {lesson.type === LessonType.QUIZ ? (
-          <div className="grid gap-2 sm:grid-cols-2">
-            <label className="flex items-center gap-2 text-sm font-[800] text-[var(--ink-2)]">
-              <input type="checkbox" checked={form.isFinalTest} onChange={(e) => setForm({ ...form, isFinalTest: e.target.checked })} />
-              {t.finalTestLabel}
+          setMessage(result.ok ? t.lessonUpdated : result.error);
+          if (result.ok) router.refresh();
+        });
+      }}
+    >
+      <div className="grid gap-2 sm:grid-cols-3">
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.englishTitle}
+          <input className={inputCls} value={form.titleEn} onChange={(e) => setForm({ ...form, titleEn: e.target.value })} placeholder="Lesson title" />
+        </label>
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.pashtoTitle}
+          <input className={inputCls} dir="rtl" value={form.titlePs} onChange={(e) => setForm({ ...form, titlePs: e.target.value })} placeholder="د درس سرلیک" />
+        </label>
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.dariTitle}
+          <input className={inputCls} dir="rtl" value={form.titleDa} onChange={(e) => setForm({ ...form, titleDa: e.target.value })} placeholder="عنوان درس" />
+        </label>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-3">
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.englishDescLabel}
+          <input className={inputCls} value={form.descriptionEn} onChange={(e) => setForm({ ...form, descriptionEn: e.target.value })} placeholder="Short description" />
+        </label>
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.pashtoDescLabel}
+          <input className={inputCls} dir="rtl" value={form.descriptionPs} onChange={(e) => setForm({ ...form, descriptionPs: e.target.value })} placeholder="لنډه تشریح" />
+        </label>
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.dariDescLabel}
+          <input className={inputCls} dir="rtl" value={form.descriptionDa} onChange={(e) => setForm({ ...form, descriptionDa: e.target.value })} placeholder="توضیح کوتاه" />
+        </label>
+      </div>
+
+      {lesson.type === LessonType.VIDEO ? (
+        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          {t.youtubeUrlLabel}
+          <input className={inputCls} value={form.youtubeUrl} onChange={(e) => setForm({ ...form, youtubeUrl: e.target.value })} placeholder="https://www.youtube.com/watch?v=..." />
+        </label>
+      ) : null}
+
+      {lesson.type === LessonType.READING ? (
+        <div className="grid gap-3">
+          <p className="text-xs font-[800] uppercase tracking-[1px] text-[#64748b]">
+            Markdown supported: # heading, ## section, - bullets, 1. steps, **bold**
+          </p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+              {t.englishContentLabel}
+              <textarea className={`min-h-40 ${inputCls}`} value={form.readingEn} onChange={(e) => setForm({ ...form, readingEn: e.target.value })} placeholder="Reading content" />
             </label>
-            <input className="pr-input" type="number" min={0} max={100} value={form.passingScore} onChange={(e) => setForm({ ...form, passingScore: Number(e.target.value) })} />
+            <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+              {t.pashtoContentLabel}
+              <textarea className={`min-h-40 ${inputCls}`} dir="rtl" value={form.readingPs} onChange={(e) => setForm({ ...form, readingPs: e.target.value })} placeholder="لیکنه" />
+            </label>
+            <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+              {t.dariContentLabel}
+              <textarea className={`min-h-40 ${inputCls}`} dir="rtl" value={form.readingDa} onChange={(e) => setForm({ ...form, readingDa: e.target.value })} placeholder="محتوای خواندنی" />
+            </label>
           </div>
-        ) : null}
-        <button type="submit" disabled={isPending} className="pr-btn-secondary !min-h-10">
-          {isPending ? t.saving : t.saveChanges}
-        </button>
-        {message ? <p className="text-sm font-[800] text-[var(--muted)]">{message}</p> : null}
-      </form>
-    </details>
+          {form.readingEn ? (
+            <details className="rounded-xl border border-stone-200 bg-stone-50 p-3">
+              <summary className="cursor-pointer text-xs font-[800] uppercase tracking-[1px] text-[#0f766e]">Preview English reading</summary>
+              <div className="mt-3 rounded-xl bg-white p-4">
+                <SimpleMarkdown content={form.readingEn} />
+              </div>
+            </details>
+          ) : null}
+        </div>
+      ) : null}
+
+      {lesson.type === LessonType.QUIZ ? (
+        <div className="grid gap-2 sm:grid-cols-2">
+          <label className="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm font-medium text-[#3d4a5a]">
+            <input
+              type="checkbox"
+              checked={form.isFinalTest}
+              onChange={(e) => setForm({ ...form, isFinalTest: e.target.checked })}
+              className="h-4 w-4 rounded border-stone-300 text-[#0f766e]"
+            />
+            {t.finalTestLabel}
+          </label>
+          <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+            {t.passingScore}
+            <input
+              className={inputCls}
+              type="number"
+              min={0}
+              max={100}
+              value={form.passingScore}
+              onChange={(e) => setForm({ ...form, passingScore: Number(e.target.value) })}
+            />
+          </label>
+        </div>
+      ) : null}
+
+      <button
+        type="submit"
+        disabled={isPending}
+        className="inline-flex h-11 items-center justify-center rounded-xl bg-[#0f766e] px-4 text-sm font-black text-white transition hover:bg-[#115e59] disabled:cursor-wait disabled:opacity-70"
+      >
+        {isPending ? t.saving : t.saveChanges}
+      </button>
+      {message ? <p className="text-sm font-[700] text-[#0f766e]">{message}</p> : null}
+    </form>
   );
 }

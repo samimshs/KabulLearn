@@ -353,8 +353,8 @@ const en: Omit<PublicInfoContent, "footer"> = {
       "Educator access, course review, or publishing questions",
       "Privacy, data deletion, copyright, abuse, or security reports"
     ],
-    ticketTitle: "Ticketing placeholder",
-    ticketText: "TODO: Add a support ticket form or help desk integration here when a ticketing system is configured. Until then, support requests should be sent by email.",
+    ticketTitle: "Support ticket",
+    ticketText: "Use the support form below to send account, course, payment, certificate, or technical issues directly to the KabulLearn team.",
     ticketFormTitle: "Submit a support ticket",
     ticketFormDescription: "Fill in the form below and we'll get back to you within 1–2 business days. You'll receive a confirmation email with your ticket number right away."
   },
@@ -364,7 +364,7 @@ const en: Omit<PublicInfoContent, "footer"> = {
     description: "Help us expand access to practical education in English, Pashto, and Dari.",
     longDescription: "KabulLearn creates structured courses, guided quizzes, educator support, and verifiable certificates for Afghan learners worldwide. Your contribution helps us create new courses, improve the platform, and keep learning accessible.",
     ctaButton: "Support with Stripe",
-    ctaComingSoon: "Donation link coming soon.",
+    ctaComingSoon: "Secure donation checkout is available through Stripe.",
     purposes: [
       { title: "Create new courses", description: "Fund new course development across mathematics, data science, AI, and more practical subjects." },
       { title: "Maintain the platform", description: "Keep infrastructure, hosting, and technical systems running reliably for learners around the world." },
@@ -523,7 +523,8 @@ const en: Omit<PublicInfoContent, "footer"> = {
       { title: "8. Your choices and rights", paragraphs: ["You may request access, correction, deletion, or export of personal information by contacting support. We may need to verify your identity before acting.", "Some requests may be limited by certificate integrity, fraud prevention, legal obligations, security, educator records, or operational needs."] },
       { title: "9. International users", paragraphs: ["KabulLearn is designed for Afghan learners worldwide and may process data in the United States and other locations where service providers operate."] },
       { title: "10. Children and students", paragraphs: ["KabulLearn is not intended to collect personal information from children without required consent. Parents, guardians, schools, or institutions may contact support for review."] },
-      { title: "11. Changes to this policy", paragraphs: ["We may update this Privacy Policy as KabulLearn grows, adds features, changes providers, or responds to legal requirements. Updated versions will be posted on this page."] }
+      { title: "11. Changes to this policy", paragraphs: ["We may update this Privacy Policy as KabulLearn grows, adds features, changes providers, or responds to legal requirements. Updated versions will be posted on this page."] },
+      { title: "12. Account and data deletion", paragraphs: ["You may request deletion of your KabulLearn account and personal information by emailing info@kabulhub.com from the email address connected to your account. Please include your full name and write \"Data deletion request\" in the subject line so we can identify and process the request.", "After verifying the request, we will delete or de-identify personal information that is no longer needed to provide the service, maintain security, prevent fraud or abuse, comply with legal obligations, preserve payment records, or protect certificate and course-completion integrity. Some limited records may be retained where required for these purposes.", "If you used Facebook Login, you may also send the same request to info@kabulhub.com and mention that the account was created with Facebook. We will use that information only to locate and process the deletion request."] }
     ]
   },
   about: {
@@ -628,8 +629,8 @@ const ps: Omit<PublicInfoContent, "footer"> = {
       "د استاد لاسرسی، بیاکتنه، یا خپرول",
       "محرمیت، د معلوماتو ړنګول، کاپي‌رایټ، ناوړه کارونه، یا امنیت"
     ],
-    ticketTitle: "د ټکټ سیستم ځای",
-    ticketText: "یادونه: کله چې د ملاتړ غوښتنو سیستم چمتو شي، دلته فورم یا د ملاتړ مرکز زیاتېږي. تر هغه وخته ملاتړ د برېښنالیک له لارې کېږي.",
+    ticketTitle: "د ملاتړ ټکټ",
+    ticketText: "د حساب، کورس، تادیې، سند یا تخنیکي ستونزو لپاره لاندې فورم وکاروئ، څو ستاسو غوښتنه نېغ د کابل‌لرن ټیم ته ورسېږي.",
     ticketFormTitle: "د ملاتړ ټکټ وسپارئ",
     ticketFormDescription: "لاندې فورم ډک کړئ؛ موږ به په ۱-۲ کاري ورځو کې درسره اړیکه ونیسو. د ټکټ له شمېرې سره تاییدي برېښنالیک به سمدستي واستول شي."
   },
@@ -639,7 +640,7 @@ const ps: Omit<PublicInfoContent, "footer"> = {
     description: "له موږ سره مرسته وکړئ چې په انګلیسي، پښتو او دري کې عملي زده کړو ته لاسرسی پراخ کړو.",
     longDescription: "کابل‌لرن د نړۍ د افغان زده‌کوونکو لپاره منظم کورسونه، لارښود ازموینې، د استادانو ملاتړ، او د تصدیق وړ سندونه جوړوي. ستاسو مرسته له موږ سره د نوو کورسونو په جوړولو، د پلېټفارم په ښه کولو، او د زده کړې د لاسرسي په ساتلو کې مرسته کوي.",
     ctaButton: "د Stripe له لارې ملاتړ وکړئ",
-    ctaComingSoon: "د مرستې لینک ژر راځي.",
+    ctaComingSoon: "د Stripe له لارې خوندي د مرستې تادیه فعاله ده.",
     purposes: [
       { title: "نوي کورسونه جوړول", description: "په ریاضیاتو، معلوماتو ساینس، مصنوعي ځیرکتیا، او نورو عملي موضوعاتو کې د نوو کورسونو پراختیا ملاتړ کړئ." },
       { title: "پلېټفارم ساتل", description: "زیربنا، کوربه‌توب، او تخنیکي سیستمونه د نړۍ د زده‌کوونکو لپاره د باور وړ وساتئ." },
@@ -798,7 +799,8 @@ const ps: Omit<PublicInfoContent, "footer"> = {
       { title: "۸. ستاسو انتخابونه او حقونه", paragraphs: ["تاسو کولای شئ له ملاتړ سره په اړیکه کې د خپلو شخصي معلوماتو د لاسرسي، سمون، ړنګولو، یا صادرولو غوښتنه وکړئ. ښايي د اقدام مخکې ستاسو هویت تایید کړو.", "ځینې غوښتنې کېدای شي د سند د اعتبار، د درغلۍ مخنیوي، قانوني مکلفیتونو، امنیت، د استاد ریکارډونو، یا عملیاتي اړتیاوو له امله محدودې شي."] },
       { title: "۹. نړیوال کاروونکي", paragraphs: ["کابل‌لرن د نړۍ د افغان زده‌کوونکو لپاره جوړ شوی او کېدای شي معلومات په امریکا او نورو هغو ځایونو کې پروسس کړي چې خدمت‌چمتو کوونکي پکې فعالیت کوي."] },
       { title: "۱۰. ماشومان او زده‌کوونکي", paragraphs: ["کابل‌لرن د دې لپاره نه دی جوړ شوی چې له اړینې اجازې پرته د ماشومانو شخصي معلومات راټول کړي. مور او پلار، سرپرستان، ښوونځي، یا ادارې کولای شي د بیاکتنې لپاره له ملاتړ سره اړیکه ونیسي."] },
-      { title: "۱۱. د دې تګلارې بدلونونه", paragraphs: ["موږ کېدای شي دا د محرمیت تګلاره تازه کړو، کله چې کابل‌لرن وده کوي، ځانګړنې زیاتوي، خدمت‌چمتو کوونکي بدلوي، یا قانوني اړتیاوو ته ځواب ورکوي. نوې بڼه به په همدې پاڼه کې خپرېږي."] }
+      { title: "۱۱. د دې تګلارې بدلونونه", paragraphs: ["موږ کېدای شي دا د محرمیت تګلاره تازه کړو، کله چې کابل‌لرن وده کوي، ځانګړنې زیاتوي، خدمت‌چمتو کوونکي بدلوي، یا قانوني اړتیاوو ته ځواب ورکوي. نوې بڼه به په همدې پاڼه کې خپرېږي."] },
+      { title: "۱۲. د حساب او معلوماتو ړنګول", paragraphs: ["تاسو کولای شئ د خپل کابل‌لرن حساب او شخصي معلوماتو د ړنګولو غوښتنه د خپل حساب له اړوند برېښنالیک څخه info@kabulhub.com ته واستوئ. مهرباني وکړئ خپل بشپړ نوم ولیکئ او د برېښنالیک په سرلیک کې \"Data deletion request\" ولیکئ، څو موږ غوښتنه وپېژنو او پروسس یې کړو.", "د غوښتنې له تایید وروسته، هغه شخصي معلومات به ړنګ یا بې‌هویته کړو چې نور د خدمت وړاندې کولو، امنیت ساتلو، د درغلۍ یا ناوړه کارونې مخنیوي، قانوني مکلفیتونو، د تادیې ریکارډونو ساتلو، یا د سند او کورس بشپړولو د اعتبار ساتلو لپاره اړین نه وي. ځینې محدود ریکارډونه کېدای شي د همدې موخو لپاره وساتل شي.", "که تاسو د فېسبوک له لارې ننوتلي یاست، همدا غوښتنه info@kabulhub.com ته واستوئ او یادونه وکړئ چې حساب مو د فېسبوک له لارې جوړ شوی. موږ دا معلومات یوازې د غوښتنې د موندلو او پروسس کولو لپاره کاروو."] }
     ]
   },
   about: {
@@ -894,8 +896,8 @@ const fa: Omit<PublicInfoContent, "footer"> = {
     emailParagraphs: ["ایمیل: info@kabulhub.com", "نام، ایمیل حساب، نام کورس، تصاویر صفحه، دستگاه/مرورگر و جزئیات گواهی یا آزمون را شامل کنید.", "ما معمولاً در ۱-۲ روز کاری پاسخ می‌دهیم. گزارش‌های فوری امنیتی یا رازداری باید در عنوان «فوری» داشته باشند."],
     areasTitle: "در چه مواردی کمک می‌کنیم",
     areas: ["ورود، ثبت‌نام یا دسترسی ایمیل", "ثبت‌نام کورس، دسترسی درس یا پخش ویدیو", "نمره آزمون، بخش‌های قفل‌شده یا پیشرفت", "دانلود گواهی، QR یا تصدیق", "دسترسی استاد، بررسی کورس یا نشر", "رازداری، حذف معلومات، حق مؤلف، سوءاستفاده یا امنیت"],
-    ticketTitle: "جای سیستم تکت",
-    ticketText: "یادداشت: وقتی سیستم تکت آماده شد، اینجا فورم یا مرکز پشتیبانی اضافه شود. تا آن زمان درخواست‌ها از طریق ایمیل فرستاده شوند.",
+    ticketTitle: "تکت پشتیبانی",
+    ticketText: "برای مشکلات حساب، کورس، پرداخت، گواهی یا مسایل تخنیکی، فورم زیر را استفاده کنید تا درخواست شما مستقیم به تیم کابل‌لرن برسد.",
     ticketFormTitle: "ارسال تکت پشتیبانی",
     ticketFormDescription: "فورم زیر را پر کنید، ما در ۱-۲ روز کاری با شما تماس می‌گیریم. ایمیل تأیید با شماره تکت بلافاصله فرستاده می‌شود."
   },
@@ -905,7 +907,7 @@ const fa: Omit<PublicInfoContent, "footer"> = {
     description: "به ما کمک کنید دسترسی به آموزش عملی به زبان‌های انگلیسی، پشتو، و دری را گسترش دهیم.",
     longDescription: "کابل‌لرن کورس‌های ساختاریافته، آزمون‌های راهنما، پشتیبانی از استادان و گواهی‌های قابل تصدیق را برای شاگردان افغان در سراسر جهان فراهم می‌کند. کمک شما به ساخت کورس‌های جدید، بهبود پلتفرم و دسترس‌پذیر ماندن آموزش کمک می‌کند.",
     ctaButton: "حمایت با Stripe",
-    ctaComingSoon: "لینک اهدا به زودی.",
+    ctaComingSoon: "پرداخت امن کمک مالی از طریق Stripe فعال است.",
     purposes: [
       { title: "ایجاد کورس‌های جدید", description: "توسعه کورس‌های جدید در ریاضیات، علم داده، هوش مصنوعی و سایر موضوعات عملی را پشتیبانی کنید." },
       { title: "نگهداری پلتفرم", description: "زیرساخت، میزبانی و سیستم‌های تخنیکی را برای شاگردان سراسر جهان قابل اعتماد نگه دارید." },
@@ -1056,7 +1058,8 @@ const fa: Omit<PublicInfoContent, "footer"> = {
       { title: "۸. انتخاب‌ها و حقوق شما", paragraphs: ["شما می‌توانید با تماس با پشتیبانی درخواست دسترسی، اصلاح، حذف یا صدور معلومات شخصی خود را بفرستید. پیش از اقدام، ممکن است نیاز باشد هویت شما را تأیید کنیم.", "برخی درخواست‌ها ممکن است به دلیل اعتبار گواهی، جلوگیری از تقلب، مکلفیت‌های قانونی، امنیت، سوابق استاد یا نیازهای عملیاتی محدود شوند."] },
       { title: "۹. کاربران بین‌المللی", paragraphs: ["کابل‌لرن برای شاگردان افغان در سراسر جهان طراحی شده است و ممکن است معلومات را در ایالات متحده و جاهای دیگری که خدمت‌دهندگان فعالیت می‌کنند پردازش کند."] },
       { title: "۱۰. کودکان و شاگردان", paragraphs: ["کابل‌لرن قصد ندارد بدون رضایت لازم، معلومات شخصی کودکان را جمع‌آوری کند. والدین، سرپرستان، مکاتب یا نهادها می‌توانند برای بررسی با پشتیبانی تماس بگیرند."] },
-      { title: "۱۱. تغییرات این خط‌مشی", paragraphs: ["ممکن است این خط‌مشی رازداری را با رشد کابل‌لرن، اضافه شدن قابلیت‌ها، تغییر خدمت‌دهندگان یا نیازهای قانونی به‌روزرسانی کنیم. نسخه‌های تازه در همین صفحه نشر می‌شود."] }
+      { title: "۱۱. تغییرات این خط‌مشی", paragraphs: ["ممکن است این خط‌مشی رازداری را با رشد کابل‌لرن، اضافه شدن قابلیت‌ها، تغییر خدمت‌دهندگان یا نیازهای قانونی به‌روزرسانی کنیم. نسخه‌های تازه در همین صفحه نشر می‌شود."] },
+      { title: "۱۲. حذف حساب و معلومات", paragraphs: ["شما می‌توانید درخواست حذف حساب کابل‌لرن و معلومات شخصی خود را از ایمیلی که به حساب شما وصل است به info@kabulhub.com بفرستید. لطفاً نام کامل خود را بنویسید و در عنوان ایمیل \"Data deletion request\" را ذکر کنید تا بتوانیم درخواست را شناسایی و پردازش کنیم.", "پس از تأیید درخواست، معلومات شخصی‌ای را که دیگر برای ارائه خدمت، حفظ امنیت، جلوگیری از تقلب یا سوءاستفاده، رعایت مکلفیت‌های قانونی، نگهداری سوابق پرداخت، یا حفظ اعتبار گواهی و تکمیل کورس لازم نیست، حذف یا بی‌هویت می‌کنیم. برخی سوابق محدود ممکن است برای همین هدف‌ها نگه‌داری شوند.", "اگر با Facebook Login حساب ساخته‌اید، همین درخواست را به info@kabulhub.com بفرستید و ذکر کنید که حساب با فیسبوک ساخته شده است. ما از این معلومات فقط برای پیدا کردن و پردازش درخواست حذف استفاده می‌کنیم."] }
     ]
   },
   about: {

@@ -34,7 +34,6 @@ export async function POST(request: Request) {
       titlePs: true,
       titleDa: true,
       status: true,
-      publishedAt: true,
       isPaid: true,
       priceCents: true,
       currency: true,
@@ -46,7 +45,7 @@ export async function POST(request: Request) {
     }
   });
 
-  if (!course || (course.status !== CourseStatus.PUBLISHED && !course.publishedAt)) {
+  if (!course || course.status !== CourseStatus.PUBLISHED) {
     return NextResponse.json({ ok: false, error: "Course not found or not available." }, { status: 404 });
   }
 

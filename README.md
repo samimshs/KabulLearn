@@ -25,8 +25,10 @@ Create `.env.local` from `.env.example`, then set:
 
 ```bash
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+DATABASE_URL_UNPOOLED="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
 AUTH_SECRET="replace-with-a-long-random-secret"
 AUTH_TRUST_HOST="true"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
 SEED_ADMIN_EMAIL="admin@example.com"
 SEED_ADMIN_PASSWORD="replace-with-at-least-12-characters"
 SEED_ADMIN_NAME="PohaRana Admin"
@@ -47,6 +49,7 @@ Paid courses and donations use Stripe Checkout. Set these environment variables 
 ```bash
 NEXT_PUBLIC_APP_URL="https://kabullearn.com"
 STRIPE_SECRET_KEY="sk_live_or_test_..."
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_live_or_test_..."
 STRIPE_WEBHOOK_SECRET="whsec_..."
 ```
 
@@ -376,9 +379,15 @@ Status legend: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` block
 
 ## 6. Production Readiness Pass
 - [x] Confirm `DATABASE_URL` is configured.
+- [ ] Confirm `DATABASE_URL_UNPOOLED` is configured for Prisma migrations/builds.
 - [x] Confirm `AUTH_SECRET` and `AUTH_TRUST_HOST` are configured.
 - [x] Confirm `RESEND_API_KEY` and `FROM_EMAIL` are configured.
 - [x] Confirm `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are configured.
+- [ ] Confirm `FACEBOOK_CLIENT_ID` and `FACEBOOK_CLIENT_SECRET` are configured if Facebook login is enabled.
+- [ ] Confirm `OPENAI_API_KEY` is configured for AI chat and educator translation helpers.
+- [ ] Confirm `BLOB_READ_WRITE_TOKEN` is configured for avatar uploads.
+- [ ] Confirm `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, and `STRIPE_WEBHOOK_SECRET` are configured for payments.
+- [ ] Confirm `CRON_SECRET` is configured for scheduled re-engagement emails.
 - [ ] Set `NEXTAUTH_URL` or `AUTH_URL` to the production domain before deployment.
 - [ ] Add Google OAuth production callback URL in Google Cloud Console: `https://YOUR_DOMAIN/api/auth/callback/google`.
 - [ ] Verify the Resend sender domain is production-approved.

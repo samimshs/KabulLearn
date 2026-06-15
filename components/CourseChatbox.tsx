@@ -200,7 +200,7 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-3">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.length <= 1 && (
               <div className="grid gap-2">
                 {suggestions.map((suggestion) => (
@@ -218,13 +218,14 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
             {messages.map((msg, i) => (
               <div key={i} className={`flex items-end gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 {msg.role === "assistant" && <AIAvatar size={26} />}
-                <div className="grid min-w-0 max-w-[78%] gap-1">
+                <div className="min-w-0 max-w-[82%] grid gap-1">
                   <div
-                    className={`whitespace-pre-wrap break-words [overflow-wrap:anywhere] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
+                    className={`min-w-0 break-words rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
                       msg.role === "user"
                         ? "bg-[var(--brand)] text-white rounded-br-sm"
                         : "bg-[var(--surface)] text-[var(--ink)] rounded-bl-sm border border-[var(--border)]"
                     }`}
+                    style={{ overflowWrap: "anywhere", wordBreak: "break-word", whiteSpace: "pre-wrap" }}
                   >
                     {msg.content
                       ? (msg.role === "assistant" ? linkify(msg.content) : msg.content)

@@ -24,3 +24,16 @@ export async function signInWithGoogle(formData: FormData) {
     redirectTo: `/auth/redirect?callbackUrl=${encodeURIComponent(callbackUrl)}&portal=${encodeURIComponent(portal)}`
   });
 }
+
+export async function signInWithFacebook(formData: FormData) {
+  if (!process.env.FACEBOOK_CLIENT_ID || !process.env.FACEBOOK_CLIENT_SECRET) {
+    redirect("/login?oauth=not-configured");
+  }
+
+  const callbackUrl = safeLocalPath(formData.get("callbackUrl"));
+  const portal = portalFromValue(formData.get("portal"));
+
+  await signIn("facebook", {
+    redirectTo: `/auth/redirect?callbackUrl=${encodeURIComponent(callbackUrl)}&portal=${encodeURIComponent(portal)}`
+  });
+}

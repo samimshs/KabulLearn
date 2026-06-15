@@ -29,7 +29,7 @@ export function Modal({ isOpen, onClose, title, size = "lg", children }: ModalPr
 
   if (!mounted || !isOpen) return null;
 
-  const maxW = size === "sm" ? "max-w-lg" : size === "xl" ? "max-w-4xl" : "max-w-2xl";
+  const maxW = size === "sm" ? "max-w-lg" : size === "xl" ? "max-w-6xl" : "max-w-2xl";
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-12">

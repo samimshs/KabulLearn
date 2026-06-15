@@ -181,8 +181,23 @@ export async function exportLearnerData(): Promise<ActionResult<{ filename: stri
 
 export async function requestAccountDeletion(): Promise<ActionResult> {
   try {
-    await requireUser();
-    // TODO: Persist deletion requests to a dedicated support/compliance table or ticketing system.
+    const user = await requireUser();
+    const admin = await db.user.findFirst({
+      where: { role: UserRole.ADMIN },
+      orderBy: { createdAt: "asc" },
+      select: { id: true }
+    });
+    if (!admin) throw new Error("Account deletion requests are temporarily unavailable.");
+
+    await db.directMessage.create({
+      data: {
+        senderId: user.id,
+        recipientId: admin.id,
+        body: `Account deletion request from ${user.name ?? user.email} (${user.email}). Please review and process according to the KabulLearn privacy policy.`
+      }
+    });
+
+    revalidatePath("/admin/messages");
     return { ok: true, data: undefined };
   } catch (error) {
     return toActionError(error);

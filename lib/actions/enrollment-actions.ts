@@ -29,10 +29,10 @@ export async function enrollInCourse(input: { courseId: string }): Promise<Actio
 
     const course = await db.course.findUnique({
       where: { id: courseId },
-      select: { status: true, publishedAt: true, isPaid: true }
+      select: { status: true, isPaid: true }
     });
 
-    if (!course || (course.status !== CourseStatus.PUBLISHED && !course.publishedAt)) {
+    if (!course || course.status !== CourseStatus.PUBLISHED) {
       throw new Error("Course not found or not available.");
     }
 

@@ -85,6 +85,8 @@ type CourseOverviewProps = {
     body: string;
     createdAt: Date | string;
   }>;
+  previewMode?: boolean;
+  previewBackHref?: string;
 };
 
 const BASE_URL = "https://kabullearn.com";
@@ -210,7 +212,9 @@ export function CourseOverview({
   studentName = "",
   lessonStatuses = {},
   relatedCourses = [],
-  announcements = []
+  announcements = [],
+  previewMode = false,
+  previewBackHref
 }: CourseOverviewProps) {
   const { locale, t, direction } = useLanguage();
   const router = useRouter();
@@ -333,11 +337,11 @@ export function CourseOverview({
   return (
     <main className="pr-page grid gap-6">
       <Link
-        href="/courses"
+        href={previewBackHref ?? "/courses"}
         className="inline-flex items-center gap-1.5 text-[13px] font-[800] uppercase tracking-[1px] text-[var(--brand)] transition hover:text-[var(--brand-hover)]"
       >
         <span style={{ transform: direction === "rtl" ? "scaleX(-1)" : "none" }} aria-hidden="true">←</span>
-        {t.backToCourses}
+        {previewMode ? "Back to editor" : t.backToCourses}
       </Link>
 
       <section className="pr-panel p-5 lg:p-7">
@@ -379,7 +383,11 @@ export function CourseOverview({
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          {enrolled ? (
+          {previewMode ? (
+            <span className="pr-btn-primary cursor-default opacity-80" aria-disabled="true">
+              Student preview
+            </span>
+          ) : enrolled ? (
             resumeLessonId ? (
               <Link
                 href={progressPercent >= 100 ? `/courses/${encodeURIComponent(course.id)}` : `/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(resumeLessonId)}${fromParam}`}
@@ -416,11 +424,13 @@ export function CourseOverview({
               {course.isPaid ? t.buyCourse : t.enrollNow}
             </Link>
           )}
-          <ShareButton
-            courseId={course.id}
-            title={localize(locale, course.titleEn, course.titlePs, course.titleDa) ?? course.titleEn}
-            t={t as Record<string, string>}
-          />
+          {!previewMode ? (
+            <ShareButton
+              courseId={course.id}
+              title={localize(locale, course.titleEn, course.titlePs, course.titleDa) ?? course.titleEn}
+              t={t as Record<string, string>}
+            />
+          ) : null}
         </div>
 
         {enrollError ? (
@@ -573,7 +583,11 @@ export function CourseOverview({
                           </span>
                         )}
                       </div>
-                      {enrolled && unlocked ? (
+                      {previewMode ? (
+                        <span className="shrink-0 text-xs font-[900] uppercase tracking-[1px] text-[var(--brand)]">
+                          {isPreview ? t.preview : t.locked}
+                        </span>
+                      ) : enrolled && unlocked ? (
                         <Link
                           href={
                             lesson.type === "QUIZ"

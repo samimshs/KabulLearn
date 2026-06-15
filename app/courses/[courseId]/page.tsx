@@ -163,8 +163,9 @@ export default async function CoursePage({
     throw new Error("Database temporarily unavailable. Please try again.");
   }
 
-  // Accessible if currently published OR was previously published (editing/re-review in progress)
-  if (!course || (course.status !== CourseStatus.PUBLISHED && !course.publishedAt)) {
+  if (!course) return notFound();
+  if (course.status !== CourseStatus.PUBLISHED &&
+      !(course.status === CourseStatus.PENDING_REVIEW && course.publishedAt !== null)) {
     return notFound();
   }
   const resolvedCourseId = course.id;

@@ -76,12 +76,7 @@ export default async function CoursesPage({
       db.course.findMany({
         where: {
           AND: [
-            {
-              OR: [
-                { status: CourseStatus.PUBLISHED },
-                { publishedAt: { not: null } }
-              ]
-            },
+            { status: CourseStatus.PUBLISHED },
             searchTerm
               ? {
                   OR: [

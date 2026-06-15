@@ -47,7 +47,9 @@ export default async function CoursePurchaseThankYouPage({
     }
   });
 
-  if (!course || (course.status !== CourseStatus.PUBLISHED && !course.publishedAt)) {
+  if (!course) notFound();
+  if (course.status !== CourseStatus.PUBLISHED &&
+      !(course.status === CourseStatus.PENDING_REVIEW && course.publishedAt !== null)) {
     notFound();
   }
 

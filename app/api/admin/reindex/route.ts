@@ -17,7 +17,7 @@ To create a free account on KabulLearn:
 1. Go to kabullearn.com and click "Register Free" in the top navigation.
 2. Enter your full name, email address, and a password.
 3. Click "Create account". You will be registered as a Student by default.
-4. After registering, you can browse courses, enroll for free, and track your progress.
+4. After registering, you can browse courses, enroll in free courses, buy paid courses when offered, and track your progress.
 
 You can also sign in with Google if you prefer not to use a password.
 If you forget your password, use the "Forgot password" link on the login page.`
@@ -45,13 +45,13 @@ If you cannot sign in, check your email address and password. Use "Forgot passwo
     title: "How to enroll in a course",
     text: `Enrolling in Courses on KabulLearn
 
-All courses on KabulLearn are free to enroll in.
+KabulLearn includes free courses and may also offer paid courses.
 
 To enroll:
 1. Browse the course catalog at kabullearn.com/courses.
 2. Click on a course to view its details.
-3. Click "Enroll for free".
-4. Once enrolled, you can access all lessons, quizzes, and earn a certificate.
+3. If the course is free, click "Enroll". If it is paid, click "Buy course" and complete Stripe checkout.
+4. Once enrolled or after payment is confirmed, you can access all lessons, quizzes, and earn a certificate.
 
 The first lesson of every course is a free preview — you can watch it without enrolling.
 After enrolling, your progress is saved automatically as you complete lessons and pass quizzes.`
@@ -167,7 +167,7 @@ CONTACT & SUPPORT:
 ۱. kabullearn.com ته لاړ شئ او په پورتني مینو کې «وړیا نوم‌لیکنه» کېکاږئ.
 ۲. خپل بشپړ نوم، د برېښنالیک پته او پټنوم ولیکئ.
 ۳. «حساب جوړ کړئ» کېکاږئ. تاسو به د زده‌کوونکي په توګه ثبت شئ.
-۴. له نوم‌لیکنې وروسته کورسونه کتلی شئ، وړیا پکې نوم‌لیکنه کولی شئ، او خپل پرمختګ تعقیبولی شئ.
+۴. له نوم‌لیکنې وروسته کورسونه کتلی شئ، په وړیا کورسونو کې نوم‌لیکنه کولی شئ، د اړتیا په صورت کې تادیه کېدونکي کورسونه اخیستلی شئ، او خپل پرمختګ تعقیبولی شئ.
 
 د ګوګل له لارې هم نوم‌لیکنه کولی شئ.
 که پټنوم مو هېر شو، د ننوتلو په پاڼه کې د پټنوم د بیا جوړولو لینک وکاروئ.`
@@ -192,13 +192,13 @@ CONTACT & SUPPORT:
     title: "په کورس کې نوم‌لیکنه — کابل‌لرن",
     text: `د کابل‌لرن په کورسونو کې نوم‌لیکنه
 
-د کابل‌لرن ټول کورسونه وړیا دي.
+په کابل‌لرن کې وړیا کورسونه شته او ځینې کورسونه کېدای شي تادیه کېدونکي وي.
 
 په کورس کې د نوم‌لیکنې لپاره:
 ۱. د kabullearn.com/courses کورس فهرست وګورئ.
 ۲. د کورس د جزیاتو لپاره پرې کېکاږئ.
-۳. «وړیا نوم‌لیکنه» کېکاږئ.
-۴. له نوم‌لیکنې وروسته، ټولو درسونو او ازموینو ته لاسرسی لرئ او سند ترلاسه کولی شئ.
+۳. که کورس وړیا وي، «نوم‌لیکنه» کېکاږئ. که کورس تادیه کېدونکی وي، «کورس واخلئ» کېکاږئ او د Stripe له لارې تادیه بشپړه کړئ.
+۴. له نوم‌لیکنې یا د تادیې له تایید وروسته، ټولو درسونو او ازموینو ته لاسرسی لرئ او سند ترلاسه کولی شئ.
 
 د هر کورس لومړی درس د وړیا مخکتنې لپاره شته — له نوم‌لیکنې پرته یې لیدلی شئ.`
   },
@@ -278,7 +278,7 @@ CONTACT & SUPPORT:
 ۱. به kabullearn.com بروید و روی «ثبت‌نام رایگان» در منوی بالا کلیک کنید.
 ۲. نام کامل، آدرس ایمیل و رمز عبور خود را وارد کنید.
 ۳. روی «ایجاد حساب» کلیک کنید. حساب شما به عنوان شاگرد ثبت می‌شود.
-۴. پس از ثبت‌نام، می‌توانید کورس‌ها را مرور کنید، رایگان ثبت‌نام شوید و پیشرفت خود را دنبال کنید.
+۴. پس از ثبت‌نام، می‌توانید کورس‌ها را مرور کنید، در کورس‌های رایگان ثبت‌نام شوید، در صورت نیاز کورس‌های پولی را خریداری کنید و پیشرفت خود را دنبال کنید.
 
 همچنین می‌توانید با گوگل ثبت‌نام کنید.
 اگر رمز عبور خود را فراموش کردید، از لینک «رمز عبور را فراموش کرده‌اید؟» در صفحه ورود استفاده کنید.`
@@ -303,13 +303,13 @@ CONTACT & SUPPORT:
     title: "ثبت‌نام در کورس‌های کابل‌لرن",
     text: `ثبت‌نام در کورس‌های کابل‌لرن
 
-همه کورس‌های کابل‌لرن رایگان هستند.
+در کابل‌لرن کورس‌های رایگان وجود دارد و برخی کورس‌ها ممکن است پولی باشند.
 
 برای ثبت‌نام:
 ۱. فهرست کورس‌ها را در kabullearn.com/courses مرور کنید.
 ۲. روی یک کورس کلیک کنید تا جزئیات آن را ببینید.
-۳. روی «ثبت‌نام رایگان» کلیک کنید.
-۴. پس از ثبت‌نام، به همه درس‌ها و آزمون‌ها دسترسی دارید و می‌توانید گواهی دریافت کنید.
+۳. اگر کورس رایگان است، روی «ثبت‌نام» کلیک کنید. اگر کورس پولی است، روی «خرید کورس» کلیک کنید و پرداخت را از طریق Stripe تکمیل کنید.
+۴. پس از ثبت‌نام یا تأیید پرداخت، به همه درس‌ها و آزمون‌ها دسترسی دارید و می‌توانید گواهی دریافت کنید.
 
 اولین درس هر کورس پیش‌نمایش رایگان است — می‌توانید بدون ثبت‌نام آن را تماشا کنید.`
   },

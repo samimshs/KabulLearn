@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { UserStatus } from "@prisma/client";
+import { CourseStatus, UserStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { openai, EMBED_MODEL, CHAT_MODEL, cosineSimilarity } from "@/lib/openai";
@@ -35,11 +35,6 @@ function sourceHref(source: string, sourceKey: string) {
   return "/";
 }
 
-function formatSources(locale: string, sources: SourceRef[]) {
-  if (sources.length === 0) return "";
-  const heading = locale === "ps" ? "سرچینې" : locale === "fa" ? "منابع" : "Sources";
-  return `\n\n${heading}:\n${sources.slice(0, 4).map((s, i) => `${i + 1}. ${s.title} (${s.href})`).join("\n")}`;
-}
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -74,12 +69,19 @@ export async function POST(req: NextRequest) {
     return new Response("Too many AI chat requests. Please wait a moment and try again.", { status: 429 });
   }
 
-  const resolvedCourse = courseId
-    ? await db.course.findFirst({
-        where: { OR: [{ id: courseId }, { slug: courseId }] },
-        select: { id: true }
-      }).catch(() => null)
-    : null;
+  const [resolvedCourse, publishedCourses] = await Promise.all([
+    courseId
+      ? db.course.findFirst({
+          where: { OR: [{ id: courseId }, { slug: courseId }] },
+          select: { id: true }
+        }).catch(() => null)
+      : Promise.resolve(null),
+    db.course.findMany({
+      where: { status: CourseStatus.PUBLISHED },
+      select: { titleEn: true, slug: true, id: true },
+      orderBy: { createdAt: "asc" }
+    }).catch(() => [])
+  ]);
   const scopedCourseId = resolvedCourse?.id ?? courseId;
 
   // 1. Embed the user's question
@@ -155,6 +157,10 @@ export async function POST(req: NextRequest) {
     .map(c => `[${c.label}]\n${c.text}`)
     .join("\n\n---\n\n");
 
+  const catalogSummary = publishedCourses.length > 0
+    ? `\n\nPLATFORM CATALOG (live data — use this to answer questions about available courses):\nTotal published courses: ${publishedCourses.length}\nCourse list:\n${publishedCourses.map((c, i) => `${i + 1}. ${c.titleEn} — https://kabullearn.com/courses/${encodeURIComponent(c.slug ?? c.id)}`).join("\n")}`
+    : "";
+
   // 4. Stream the answer
   const stream = await openai.chat.completions.create({
     model: CHAT_MODEL,
@@ -176,6 +182,7 @@ Answer questions using ONLY the platform content provided below. You can answer 
 The platform content may contain English, Pashto, or Dari text. Translate and adapt the relevant parts into the user's language when answering.
 When a user asks for a link or URL, always provide the full URL (e.g. https://kabullearn.com/privacy), never a relative path.
 If the answer is not found in the provided content, say so briefly in the user's language. Do not make things up.
+${catalogSummary}
 
 Platform content:
 ${context}`
@@ -194,11 +201,6 @@ ${context}`
           fullAnswer += delta;
           controller.enqueue(enc.encode(delta));
         }
-      }
-      const sourceText = formatSources(locale, sourceRefs);
-      if (sourceText) {
-        fullAnswer += sourceText;
-        controller.enqueue(enc.encode(sourceText));
       }
       if (chatLog) {
         await db.aiChatLog.update({

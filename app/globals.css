@@ -370,8 +370,9 @@ textarea {
 }
 
 .kl-home-page .pr-eyebrow {
-  font-size: clamp(12px, 0.92vw, 15px);
+  font-size: clamp(14px, 1.08vw, 18px);
   letter-spacing: 4px;
+  line-height: 1.5;
 }
 
 .kl-home-page .pr-h1 {
@@ -385,17 +386,17 @@ textarea {
 .kl-home-page .pr-copy {
   max-width: 580px;
   color: #555f7d;
-  font-size: clamp(15px, 1.05vw, 20px);
-  line-height: 1.58;
+  font-size: clamp(17px, 1.2vw, 22px);
+  line-height: 1.68;
 }
 
 .kl-home-page .pr-btn-primary,
 .kl-home-page .pr-btn-ghost {
-  min-height: 52px;
-  min-width: 189px;
+  min-height: 56px;
+  min-width: 202px;
   border-radius: 14px;
-  padding-inline: 29px;
-  font-size: 16px;
+  padding-inline: 32px;
+  font-size: 17px;
   font-weight: 900;
   letter-spacing: -0.2px;
 }
@@ -578,6 +579,24 @@ html[dir="rtl"] .kl-home-lang > div {
 
 .kl-feature-list {
   margin-top: clamp(18px, 2.8vh, 34px);
+}
+
+@media (min-width: 1024px) {
+  .kl-feature-list li {
+    padding-block: 10px !important;
+    padding-inline-end: 16px !important;
+    padding-inline-start: 10px !important;
+  }
+
+  .kl-feature-list li > span:first-child {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .kl-feature-list li > span:last-child {
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+  }
 }
 
 .kl-home-lang {
@@ -1576,6 +1595,7 @@ body:has(.kl-coming-soon-page) > div.fixed.bottom-6.left-6 {
 
   .kl-home-copy {
     gap: clamp(12px, 1.7vh, 18px) !important;
+    padding-top: 0;
   }
 
   .kl-home-logo {
@@ -1607,7 +1627,7 @@ body:has(.kl-coming-soon-page) > div.fixed.bottom-6.left-6 {
   }
 
   .kl-home-page .pr-eyebrow {
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.4;
   }
 
@@ -1619,15 +1639,15 @@ body:has(.kl-coming-soon-page) > div.fixed.bottom-6.left-6 {
 
   .kl-home-page .pr-copy {
     max-width: 530px;
-    font-size: 15px;
-    line-height: 1.46;
+    font-size: 16.5px;
+    line-height: 1.52;
   }
 
   .kl-home-page .pr-btn-primary,
   .kl-home-page .pr-btn-ghost {
-    min-height: 47px;
-    min-width: 171px;
-    font-size: 14px;
+    min-height: 50px;
+    min-width: 178px;
+    font-size: 15px;
   }
 
 }
@@ -1666,6 +1686,7 @@ body:has(.kl-coming-soon-page) > div.fixed.bottom-6.left-6 {
 
   .kl-home-copy {
     padding-bottom: 0;
+    padding-top: 0;
     align-items: center;
     text-align: center;
     justify-content: start;

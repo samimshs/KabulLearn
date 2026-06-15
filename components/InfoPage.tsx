@@ -10,6 +10,7 @@ type InfoHeroProps = {
 
 type InfoSectionProps = {
   title: string;
+  id?: string;
   children: ReactNode;
 };
 
@@ -31,9 +32,9 @@ export function InfoHero({ eyebrow, title, description, children }: InfoHeroProp
   );
 }
 
-export function InfoSection({ title, children }: InfoSectionProps) {
+export function InfoSection({ title, id, children }: InfoSectionProps) {
   return (
-    <section className="pr-card p-6 sm:p-8">
+    <section id={id} className="scroll-mt-24 pr-card p-6 sm:p-8">
       <h2 className="text-2xl font-[800] tracking-[-0.4px] text-[var(--ink)]">{title}</h2>
       <div className="mt-5 space-y-4 text-sm font-[600] leading-7 text-[var(--muted)]">{children}</div>
     </section>
@@ -121,4 +122,3 @@ export function LinkGrid({ items }: { items: LinkItem[] }) {
     </div>
   );
 }
-

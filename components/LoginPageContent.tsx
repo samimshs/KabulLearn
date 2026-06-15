@@ -108,7 +108,7 @@ export function LoginPageContent({
         </p>
       </section>
 
-      <div className="grid grid-cols-2 gap-1.5 rounded-[16px] border border-[var(--border)] bg-[linear-gradient(180deg,#f8faff,#fff)] p-1.5 shadow-[0_10px_28px_rgba(15,23,42,0.045)]">
+      <div className="grid grid-cols-2 gap-1.5 rounded-[16px] border border-[var(--border)] bg-[var(--surface)] p-1.5 shadow-[0_10px_28px_rgba(15,23,42,0.045)]">
         <Link
           href="/login"
           className={`flex min-h-[50px] items-center gap-2.5 rounded-[13px] px-2.5 text-start transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.16)] ${

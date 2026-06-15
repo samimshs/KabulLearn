@@ -143,7 +143,7 @@ export default async function EducatorCoursePage(props: EducatorCoursePageProps)
     }];
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#f8faff,#fff)]">
+    <main className="min-h-screen bg-[var(--surface)]">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[1.6px] text-[var(--brand)]">{t.courseEditor}</p>

@@ -1092,7 +1092,7 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
   const active = steps[activeIndex];
 
   return (
-    <section className={`min-h-[calc(100vh-120px)] bg-[linear-gradient(180deg,#f8faff,#fff)] px-4 py-5 ${className}`}>
+    <section className={`min-h-[calc(100vh-120px)] bg-[var(--surface)] px-4 py-5 ${className}`}>
       <div className={`mx-auto flex min-h-[calc(100vh-160px)] w-full flex-col transition-all ${active.key === "structure" ? "max-w-[1400px]" : "max-w-3xl"}`}>
         <header className="shrink-0">
           <div className="flex items-center justify-between gap-3">
@@ -1279,7 +1279,7 @@ function StepBody(props: {
                 key={lvl}
                 type="button"
                 onClick={() => patch({ level: state.level === lvl ? "" : lvl })}
-                className={`rounded-xl border px-4 py-2 text-xs font-black transition ${state.level === lvl ? "border-[var(--brand)] bg-blue-50 text-[var(--brand)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:border-[var(--border)]"}`}
+                className={`rounded-xl border px-4 py-2 text-xs font-black transition ${state.level === lvl ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:border-[var(--border)]"}`}
               >
                 {localizeLevel(lvl, props.locale)}
               </button>
@@ -1292,7 +1292,7 @@ function StepBody(props: {
             type="button"
             onClick={props.translateDescriptionNow}
             disabled={props.isTranslating || (!state.descriptionEn.trim() && !state.titleEn.trim())}
-            className="flex items-center gap-1.5 rounded-lg border border-[var(--brand)] bg-blue-50 px-3 py-1.5 text-xs font-black text-[var(--brand)] transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-lg border border-[var(--brand)] bg-[var(--brand-50)] px-3 py-1.5 text-xs font-black text-[var(--brand)] transition hover:bg-[var(--brand-50)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {props.isTranslating ? (
               <>
@@ -1334,7 +1334,7 @@ function StepBody(props: {
               key={choice.value}
               type="button"
               onClick={() => patch({ language: choice.value })}
-              className={`flex items-start gap-3 rounded-2xl border px-4 py-3.5 text-left transition ${active ? "border-[var(--brand)] bg-blue-50" : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--border)]"}`}
+              className={`flex items-start gap-3 rounded-2xl border px-4 py-3.5 text-left transition ${active ? "border-[var(--brand)] bg-[var(--brand-50)]" : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--border)]"}`}
             >
               <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${active ? "border-[var(--brand)]" : "border-[var(--border)]"}`}>
                 {active && <span className="h-2 w-2 rounded-full bg-[var(--brand)]" />}
@@ -1380,7 +1380,7 @@ function StepBody(props: {
           {props.availableEducators.length > 0 && (
             <div className="grid max-h-36 gap-1.5 overflow-y-auto">
               {props.availableEducators.slice(0, 5).map((educator) => (
-                <button key={educator.id} type="button" onClick={() => props.addPlatformInstructor(educator)} className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3 text-left transition hover:border-blue-200 hover:bg-blue-50">
+                <button key={educator.id} type="button" onClick={() => props.addPlatformInstructor(educator)} className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3 text-left transition hover:border-[var(--brand)] hover:bg-[var(--brand-50)]">
                   <InstructorCard instructor={educator} label={t.platformEducatorBadge} />
                 </button>
               ))}
@@ -1457,7 +1457,7 @@ function StepBody(props: {
     return (
       <div className="grid gap-3">
         {choices.map((choice) => (
-          <button key={choice.value} type="button" onClick={() => patch({ pricing: choice.value })} className={`rounded-2xl border px-4 py-3 text-left text-sm font-black transition ${state.pricing === choice.value ? "border-[var(--brand)] bg-blue-50 text-[var(--brand)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--ink-2)] hover:border-[var(--border)]"}`}>
+          <button key={choice.value} type="button" onClick={() => patch({ pricing: choice.value })} className={`rounded-2xl border px-4 py-3 text-left text-sm font-black transition ${state.pricing === choice.value ? "border-[var(--brand)] bg-[var(--brand-50)] text-[var(--brand)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--ink-2)] hover:border-[var(--border)]"}`}>
             {choice.label}
           </button>
         ))}

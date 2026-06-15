@@ -87,6 +87,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             clientId: facebookClientId!,
             clientSecret: facebookClientSecret!,
             allowDangerousEmailAccountLinking: true,
+            // auth.js v5 defaults to ["pkce"] for OAuth providers but Facebook's
+            // PKCE code verifier cookie is lost across the OAuth redirect boundary,
+            // producing a silent InvalidCheck → error=Configuration. State-only
+            // verification is the correct approach for Facebook OAuth.
+            checks: ["state"],
             authorization: {
               params: {
                 scope: "email,public_profile"

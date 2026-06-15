@@ -98,6 +98,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async signIn({ user, account }) {
+      // Facebook can return users without an email (phone-only accounts or
+      // accounts with a private email). Without an email the PrismaAdapter
+      // cannot create a user row and will throw a constraint error, which
+      // NextAuth surfaces as a bare "Configuration" error page.
+      if (account?.provider === "facebook" && !user.email) {
+        return "/login?error=OAuthEmailMissing";
+      }
+
       if ((account?.provider === "google" || account?.provider === "facebook") && user.email) {
         await db.user.update({
           where: { email: user.email.toLowerCase() },
@@ -117,6 +125,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.name = user.name ?? token.name;
         token.email = user.email ?? token.email;
         token.picture = user.image ?? null;
+        // sessionVersion is a custom field not returned by the OAuth adapter;
+        // seed it to 0 so the version-check on subsequent requests is a no-op.
+        token.sessionVersion = (user as { sessionVersion?: number }).sessionVersion ?? 0;
       } else if (token.email) {
         const dbUser = await db.user.findUnique({
           where: { email: token.email.toLowerCase() },

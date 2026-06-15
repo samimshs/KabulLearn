@@ -3,7 +3,8 @@ import type { UserRole, UserStatus } from "@prisma/client";
 
 export const authConfig = {
   pages: {
-    signIn: "/login"
+    signIn: "/login",
+    error: "/login",
   },
   callbacks: {
     jwt({ token, user }) {

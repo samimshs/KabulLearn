@@ -61,9 +61,11 @@ export function LoginPageContent({
         ? t.oauthAccountNotLinked
         : oauthError === "AccessDenied"
           ? t.oauthAccessDenied
-          : oauthError
-            ? t.oauthSignInFailed
-            : "";
+          : oauthError === "OAuthEmailMissing"
+            ? t.oauthEmailMissing
+            : oauthError
+              ? t.oauthSignInFailed
+              : "";
 
   const portalCopy = {
     admin: {

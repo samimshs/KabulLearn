@@ -75,6 +75,11 @@ enum PaymentPurpose {
   DONATION
 }
 
+enum DiscountType {
+  PERCENT
+  FIXED_CENTS
+}
+
 enum PaymentStatus {
   PENDING
   PAID
@@ -283,6 +288,7 @@ model Course {
   isPaid     Boolean @default(false)
   priceCents Int?
   currency   String  @default("usd")
+  promoCodes PromoCode[]
 
   submittedAt DateTime?
   publishedAt DateTime?
@@ -301,10 +307,12 @@ model Payment {
   purpose   PaymentPurpose
   status    PaymentStatus  @default(PENDING)
   amountCents Int
+  originalAmountCents Int?
   currency  String         @default("usd")
 
   userId   String?
   courseId String?
+  promoCodeId String?
 
   stripeCheckoutSessionId String? @unique
   stripePaymentIntentId   String? @unique
@@ -312,8 +320,9 @@ model Payment {
   donorName  String?
   metadata   Json?
 
-  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  course    Course?    @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  promoCode PromoCode? @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -322,7 +331,28 @@ model Payment {
   @@index([status])
   @@index([userId])
   @@index([courseId])
+  @@index([promoCodeId])
   @@index([createdAt])
+}
+
+model PromoCode {
+  id            String       @id @default(cuid())
+  code          String       @unique
+  discountType  DiscountType
+  discountValue Int
+  maxUses       Int?
+  usedCount     Int          @default(0)
+  expiresAt     DateTime?
+  isActive      Boolean      @default(true)
+  courseId      String?
+  course        Course?      @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  payments      Payment[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([code])
+  @@index([courseId])
+  @@index([isActive])
 }
 
 model Module {

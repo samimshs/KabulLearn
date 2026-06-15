@@ -48,11 +48,19 @@ type CreatorCourse = {
   qualityIssues: string[];
 };
 
+type StudentInfo = {
+  id: string;
+  name: string;
+  email: string;
+  image: string | null;
+  enrolledCourses: string[];
+};
+
 type CreatorDashboardViewProps = {
   firstName: string;
   intro: string;
   courses: CreatorCourse[];
-  students: string[];
+  students: StudentInfo[];
   metrics: {
     enrollments: number;
     activeCourses: number;
@@ -225,7 +233,7 @@ function CourseRow({ course, t }: { course: CreatorCourse; t: Dictionary }) {
           <Link href={`/educator/courses/${course.id}`} className="pr-btn-primary !min-h-9 px-4 text-[13px]">
             {t.editCourse}
           </Link>
-          {course.status === CourseStatus.DRAFT ? <CourseSubmitButton courseId={course.id} /> : null}
+          {course.status === CourseStatus.DRAFT ? <CourseSubmitButton courseId={course.id} courseStatus={course.status} /> : null}
           <DeleteCourseButton courseId={course.id} />
         </div>
       </div>
@@ -472,17 +480,34 @@ export function CreatorDashboardView({
                   <div className="p-5 lg:p-6">
                     {latestCourse ? (
                       <>
-                        <p className="text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--brand)]">{t.upNext}</p>
+                        <p className="text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--brand)]">Latest course</p>
                         <h2 className="mt-1 text-[22px] font-[800] tracking-[-0.4px] text-[var(--ink)]">{latestCourse.title}</h2>
-                        <p className="mt-1 text-[13px] font-[500] text-[var(--muted)]">{readinessHint(latestCourse.status, t)}</p>
-                        <div className="mt-5">
-                          <div className="mb-1.5 flex items-center justify-between text-[12px] font-[800]">
-                            <span className="text-[var(--muted)]">{statusLabel(latestCourse.status, latestCourse.latestReview, t)}</span>
-                            <span className="text-[var(--ink)]">{readiness(latestCourse.status)}%</span>
-                          </div>
-                          <div className="h-2 overflow-hidden rounded-full bg-[var(--surface)]">
-                            <div className="h-2 rounded-full bg-[var(--brand)] transition-all" style={{ width: `${readiness(latestCourse.status)}%` }} />
-                          </div>
+                        <div className="mt-4 flex items-center gap-0">
+                          {[
+                            { key: "DRAFT", label: "Draft" },
+                            { key: "PENDING_REVIEW", label: "In Review" },
+                            { key: "PUBLISHED", label: "Published" },
+                          ].map((step, i, arr) => {
+                            const order = ["DRAFT", "PENDING_REVIEW", "PUBLISHED"];
+                            const currentIdx = order.indexOf(latestCourse.status);
+                            const stepIdx = order.indexOf(step.key);
+                            const isLastStep = i === arr.length - 1;
+                            const done = stepIdx <= currentIdx;
+                            const active = stepIdx === currentIdx && !isLastStep;
+                            return (
+                              <div key={step.key} className="flex items-center">
+                                <div className="flex flex-col items-center gap-1">
+                                  <div className={`grid h-6 w-6 place-items-center rounded-full text-[10px] font-[900] ${active ? "bg-[var(--brand)] text-white" : done ? "bg-emerald-100 text-emerald-700" : "bg-[var(--surface)] text-[var(--muted)]"}`}>
+                                    {done ? "✓" : i + 1}
+                                  </div>
+                                  <span className={`text-[10px] font-[800] whitespace-nowrap ${active ? "text-[var(--brand)]" : done ? "text-emerald-700" : "text-[var(--muted)]"}`}>{step.label}</span>
+                                </div>
+                                {i < arr.length - 1 && (
+                                  <div className={`mb-4 h-px w-8 shrink-0 ${stepIdx < currentIdx ? "bg-emerald-300" : "bg-[var(--border)]"}`} />
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                         <div className="mt-5 flex items-center justify-between gap-3">
                           <p className="text-[12px] font-[700] text-[var(--muted-2)]">
@@ -586,9 +611,14 @@ export function CreatorDashboardView({
 
           {activeView === "students" ? (
             <section className="grid gap-4">
-              <div>
-                <p className="pr-eyebrow">{t.navMyStudents}</p>
-                <h1 className="pr-h2 mt-1">{t.enrolledStudentsHeading}</h1>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="pr-eyebrow">{t.navMyStudents}</p>
+                  <h1 className="pr-h2 mt-1">{t.enrolledStudentsHeading}</h1>
+                </div>
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-[800] text-[var(--muted)]">
+                  {students.length} {students.length === 1 ? "student" : "students"}
+                </span>
               </div>
               {students.length === 0 ? (
                 <div className="pr-muted-box py-16 text-center">
@@ -596,11 +626,33 @@ export function CreatorDashboardView({
                 </div>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {students.map((name) => (
-                    <article key={name} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
-                      <p className="text-[15px] font-[900] text-[var(--ink)]">{name}</p>
-                    </article>
-                  ))}
+                  {students.map((student) => {
+                    const initials = student.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+                    return (
+                      <article key={student.id} className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
+                        <div className="flex items-center gap-3">
+                          {student.image ? (
+                            <img src={student.image} alt={student.name} className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-[var(--border)]" />
+                          ) : (
+                            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--brand-50)] ring-2 ring-[var(--border)]">
+                              <span className="text-[13px] font-[900] text-[var(--brand)]">{initials}</span>
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="truncate text-[14px] font-[900] text-[var(--ink)]">{student.name}</p>
+                            <p className="truncate text-[12px] font-[600] text-[var(--muted)]">{student.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {student.enrolledCourses.map((title) => (
+                            <span key={title} className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-[11px] font-[700] leading-none text-[var(--ink-2)]">
+                              {title}
+                            </span>
+                          ))}
+                        </div>
+                      </article>
+                    );
+                  })}
                 </div>
               )}
             </section>

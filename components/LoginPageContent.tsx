@@ -85,9 +85,20 @@ export function LoginPageContent({
 
   if (isAdminLogin) {
     return (
-      <main className="grid min-h-[calc(100vh-4rem)] w-full place-items-center bg-[#05070b] px-4 py-4 sm:py-6">
+      <main className="grid min-h-[calc(100vh-4rem)] w-full place-items-center bg-[var(--admin-login-bg)] px-4 py-4 sm:py-6">
         <section className="w-full max-w-[390px]">
-          <Suspense fallback={<LoadingCard dark />}>
+          <div className="mb-7 flex flex-col items-center gap-3 text-center">
+            <div className="grid h-11 w-11 place-items-center rounded-[14px] bg-[#07111f] shadow-[0_8px_28px_rgba(4,11,25,0.45)]">
+              <svg viewBox="0 0 16 16" fill="none" className="h-5 w-5" aria-hidden="true">
+                <path d="M8 1.5 1.5 5v4.5C1.5 12.7 4.4 14.8 8 15.5c3.6-.7 6.5-2.8 6.5-6V5L8 1.5Z" stroke="#7ea7ff" strokeWidth="1.35" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-[10px] font-[900] uppercase tracking-[2.5px] text-[var(--muted)]">Admin Access</p>
+              <h1 className="mt-1 text-[22px] font-[850] tracking-[-0.5px] text-[var(--ink)]">Platform Console</h1>
+            </div>
+          </div>
+          <Suspense fallback={<LoadingCard />}>
             <LoginForm googleOAuthEnabled={googleOAuthEnabled} facebookOAuthEnabled={facebookOAuthEnabled} />
           </Suspense>
         </section>

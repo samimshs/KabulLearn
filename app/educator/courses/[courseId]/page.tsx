@@ -150,15 +150,15 @@ export default async function EducatorCoursePage(props: EducatorCoursePageProps)
           <h1 className="mt-1 text-xl font-black tracking-[-0.5px] text-[var(--ink)]">{course.titleEn}</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Link href="/educator" className="pr-btn-ghost !min-h-10 px-4 text-sm">{t.back}</Link>
           <Link href={`/educator/courses/${course.id}/preview`} className="pr-btn-secondary !min-h-10 px-4 text-sm">{t.preview}</Link>
-          {course.status === CourseStatus.DRAFT ? <CourseSubmitButton courseId={course.id} /> : null}
+          <CourseSubmitButton courseId={course.id} courseStatus={course.status} />
         </div>
       </div>
 
       <CourseCreateForm
         initialCourse={{
           courseId: course.id,
+          status: course.status,
           slug: course.slug,
           level: (course.level ?? "") as "" | "beginner" | "intermediate" | "advanced",
           titleEn: course.titleEn,

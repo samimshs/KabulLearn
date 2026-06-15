@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { HomeHeroVisual } from "@/components/HomeHeroVisual";
+import { HeroSubtextRotator } from "@/components/HeroSubtextRotator";
 import { CourseCard, type CourseCardRow } from "@/components/CourseCard";
 import { EducatorCta } from "@/components/CourseDashboard";
 import { auth } from "@/auth";
@@ -206,7 +207,17 @@ export default async function Home() {
         <div className="kl-home-copy flex flex-col gap-5">
           <p className="pr-eyebrow kl-home-kicker">{dict.heroEyebrow}</p>
           <h1 className="pr-h1 kl-home-heading">{dict.heroHeading}</h1>
-          <p className="pr-copy kl-home-subheadline">{dict.heroSubtext}</p>
+          <HeroSubtextRotator
+            key={locale}
+            statements={[
+              dict.heroSubtext,
+              dict.heroSubtext2,
+              dict.heroSubtext3,
+              dict.heroSubtext4,
+              dict.heroSubtext5,
+              dict.heroSubtext6,
+            ]}
+          />
 
           <div className="kl-home-cta flex flex-wrap gap-2">
             {role === "STUDENT" ? (

@@ -14,6 +14,7 @@ import { DeleteCourseButton } from "@/components/educator/DeleteCourseButton";
 import { AdminComposeForm, type AdminMessageHistoryItem } from "@/components/admin/AdminComposeForm";
 import { AdminSiteVideosForm } from "@/components/admin/AdminSiteVideosForm";
 import { ReindexButton } from "@/components/admin/ReindexButton";
+import { AdminPromoCodesSection } from "@/components/admin/AdminPromoCodesSection";
 
 function statusLabel(status: CourseStatus) {
   return status.split("_").map((w) => w[0] + w.slice(1).toLowerCase()).join(" ");
@@ -69,7 +70,7 @@ function AdminFoldout({
   children: ReactNode;
 }) {
   return (
-    <details open={defaultOpen} className="group rounded-[var(--radius-xl)] border border-[var(--border)] bg-white shadow-[var(--shadow-sm)]">
+    <details open={defaultOpen} className="group rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
       <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-4 px-5 py-4 lg:px-6">
         <div>
           <p className="pr-eyebrow">{eyebrow}</p>
@@ -234,6 +235,8 @@ export default async function AdminDashboardPage({
   let topCourses: Array<{ id: string; titleEn: string; _count: { enrollments: number } }> = [];
   let recentSignups: Array<{ id: string; name: string | null; email: string; createdAt: Date; role: UserRole }> = [];
   let adminMessageHistory: AdminMessageHistoryItem[] = [];
+  let promoCodes: Array<{ id: string; code: string; discountType: string; discountValue: number; maxUses: number | null; usedCount: number; expiresAt: Date | null; isActive: boolean; courseId: string | null; courseTitle?: string | null }> = [];
+  let paidCourses: Array<{ id: string; title: string }> = [];
   let dbError = false;
 
   const today = new Date();
@@ -386,6 +389,24 @@ export default async function AdminDashboardPage({
     dbError = true;
   }
 
+  try {
+    const [promoRows, paidCourseRows] = await Promise.all([
+      db.promoCode.findMany({
+        orderBy: { createdAt: "desc" },
+        select: { id: true, code: true, discountType: true, discountValue: true, maxUses: true, usedCount: true, expiresAt: true, isActive: true, courseId: true, course: { select: { titleEn: true } } }
+      }),
+      db.course.findMany({
+        where: { isPaid: true, status: CourseStatus.PUBLISHED },
+        orderBy: { titleEn: "asc" },
+        select: { id: true, titleEn: true }
+      })
+    ]);
+    promoCodes = promoRows.map((p) => ({ ...p, courseTitle: p.course?.titleEn ?? null }));
+    paidCourses = paidCourseRows.map((c) => ({ id: c.id, title: c.titleEn }));
+  } catch {
+    // promo codes unavailable — section will be empty
+  }
+
   const draftCount = courses.filter((c) => c.status === CourseStatus.DRAFT).length;
   const reviewCount = courses.filter((c) => c.status === CourseStatus.PENDING_REVIEW).length;
   const publishedCount = courses.filter((c) => c.status === CourseStatus.PUBLISHED).length;
@@ -419,10 +440,10 @@ export default async function AdminDashboardPage({
             <p>access.scope = privileged</p>
             <p>review.queue = {reviewCount}</p>
             <div className="mt-3 flex flex-wrap gap-2 font-sans">
-              <Link href="/admin/audit" className="rounded-full border border-[#26364f] px-3 py-1 text-[11px] font-[800] text-white hover:bg-white/10">
+              <Link href="/admin/audit" className="rounded-full border border-[#26364f] px-3 py-1 text-[11px] font-[800] text-white hover:bg-[var(--card)]/10">
                 Audit logs
               </Link>
-              <Link href="/admin/ai" className="rounded-full border border-[#26364f] px-3 py-1 text-[11px] font-[800] text-white hover:bg-white/10">
+              <Link href="/admin/ai" className="rounded-full border border-[#26364f] px-3 py-1 text-[11px] font-[800] text-white hover:bg-[var(--card)]/10">
                 AI review
               </Link>
             </div>
@@ -442,7 +463,7 @@ export default async function AdminDashboardPage({
           <AdminFoldout title="Platform snapshot" eyebrow="Overview" defaultOpen>
             <section className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-6" aria-label="Admin metrics">
               {metrics.map((metric) => (
-                <div key={metric.label} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-4 shadow-[var(--shadow-sm)]">
+                <div key={metric.label} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)]">
                   <p className={`text-[28px] font-[800] leading-none tracking-[-0.5px] ${metric.tone}`}>
                     {metric.value.toLocaleString()}
                   </p>
@@ -576,7 +597,7 @@ export default async function AdminDashboardPage({
                       <th className="px-5 py-3 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[var(--border)] bg-white">
+                  <tbody className="divide-y divide-[var(--border)] bg-[var(--card)]">
                     {courses.map((course) => (
                       <tr key={course.id} className="align-top">
                         <td className="px-5 py-4">
@@ -627,7 +648,7 @@ export default async function AdminDashboardPage({
             ) : (
               <div className="divide-y divide-[var(--border)]">
                 {pendingCourses.map((course) => (
-                  <article key={course.id} className="grid gap-5 bg-white p-5 lg:p-6">
+                  <article key={course.id} className="grid gap-5 bg-[var(--card)] p-5 lg:p-6">
                     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -691,7 +712,7 @@ export default async function AdminDashboardPage({
                           </div>
                         ) : (
                           course.modules.map((module) => (
-                            <section key={module.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">
+                            <section key={module.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4">
                               <div className="flex flex-wrap items-start justify-between gap-3">
                                 <div>
                                   <p className="text-[11px] font-[800] uppercase tracking-[1.5px] text-[var(--muted)]">
@@ -748,7 +769,7 @@ export default async function AdminDashboardPage({
                                             {lesson.quiz?.questions.length ?? 0} questions
                                           </p>
                                           {lesson.quiz?.questions.slice(0, 3).map((question) => (
-                                            <div key={question.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-white px-3 py-2">
+                                            <div key={question.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-3 py-2">
                                               <p className="text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
                                                 {question.type === QuestionType.TEXT_INPUT
                                                   ? "Text / math answer"
@@ -780,7 +801,7 @@ export default async function AdminDashboardPage({
                       </div>
                     </details>
                     {course.reviewEvents.length > 0 ? (
-                      <details className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white">
+                      <details className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)]">
                         <summary className="cursor-pointer list-none px-4 py-3 text-sm font-[800] text-[var(--brand)]">
                           Review history
                         </summary>
@@ -796,7 +817,7 @@ export default async function AdminDashboardPage({
                         </div>
                       </details>
                     ) : null}
-                    <details className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white">
+                    <details className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)]">
                       <summary className="cursor-pointer list-none px-4 py-3 text-sm font-[800] text-[var(--brand)]">
                         Review checklist
                       </summary>
@@ -912,7 +933,7 @@ export default async function AdminDashboardPage({
             eyebrow="Access control"
             description="Promote educators, protect admin access, issue temporary recovery passwords, and remove test users."
           >
-            <div className="border-b border-[var(--border)] bg-white p-5 lg:p-6">
+            <div className="border-b border-[var(--border)] bg-[var(--card)] p-5 lg:p-6">
               <form className="flex flex-wrap gap-2" action="/admin">
                 <select name="role" defaultValue={roleFilter} className="pr-input max-w-56">
                   <option value="">All roles</option>
@@ -941,7 +962,7 @@ export default async function AdminDashboardPage({
                       <th className="px-5 py-3 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[var(--border)] bg-white">
+                  <tbody className="divide-y divide-[var(--border)] bg-[var(--card)]">
                     {users.map((user) => (
                       <tr key={user.id} className="align-top">
                         <td className="px-5 py-4">
@@ -972,7 +993,7 @@ export default async function AdminDashboardPage({
                                   className={`inline-flex h-9 min-w-24 items-center justify-center rounded-[var(--radius)] px-3 text-xs font-[800] transition ${
                                     roleOption === user.role
                                       ? "cursor-not-allowed border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]"
-                                      : "border border-[var(--border)] bg-white text-[var(--ink)] hover:border-[rgba(0,87,255,0.3)] hover:text-[var(--brand)]"
+                                      : "border border-[var(--border)] bg-[var(--card)] text-[var(--ink)] hover:border-[rgba(0,87,255,0.3)] hover:text-[var(--brand)]"
                                   }`}
                                 >
                                   {roleLabel(roleOption)}
@@ -1021,6 +1042,15 @@ export default async function AdminDashboardPage({
                 </table>
               </div>
             )}
+          </AdminFoldout>
+
+          {/* ── Promo codes ───────────────────────────────────────────── */}
+          <AdminFoldout
+            title="Promo codes"
+            eyebrow="Discounts"
+            description="Create discount codes for paid courses. Supports percentage and fixed-amount discounts, usage limits, expiry dates, and per-course restrictions."
+          >
+            <AdminPromoCodesSection promoCodes={promoCodes} paidCourses={paidCourses} />
           </AdminFoldout>
 
           {/* ── Messaging ─────────────────────────────────────────────── */}

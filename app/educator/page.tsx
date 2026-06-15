@@ -116,7 +116,7 @@ export default async function EducatorDashboardPage({
         },
         enrollments: {
           select: {
-            user: { select: { name: true, email: true } }
+            user: { select: { id: true, name: true, email: true, image: true } }
           }
         }
       }
@@ -246,13 +246,19 @@ export default async function EducatorDashboardPage({
   const activeCourses = courses.filter((course) => course.status === CourseStatus.PUBLISHED).length;
   const completionRate = totalEnrollments > 0 ? Math.min(100, Math.round((completedCertificates / totalEnrollments) * 100)) : 0;
 
-  const studentNames = Array.from(
-    new Set(
-      courses.flatMap((course) =>
-        course.enrollments.map((enrollment) => enrollment.user.name ?? "Unnamed learner")
-      )
-    )
-  ).sort((a, b) => a.localeCompare(b));
+  const studentMap = new Map<string, { id: string; name: string; email: string; image: string | null; enrolledCourses: string[] }>();
+  for (const course of courses) {
+    for (const { user } of course.enrollments) {
+      const existing = studentMap.get(user.id);
+      const courseTitle = course.titleEn ?? course.titlePs ?? course.titleDa ?? "Untitled";
+      if (existing) {
+        if (!existing.enrolledCourses.includes(courseTitle)) existing.enrolledCourses.push(courseTitle);
+      } else {
+        studentMap.set(user.id, { id: user.id, name: user.name ?? "Unnamed learner", email: user.email, image: user.image ?? null, enrolledCourses: [courseTitle] });
+      }
+    }
+  }
+  const studentData = Array.from(studentMap.values()).sort((a, b) => a.name.localeCompare(b.name));
 
   const enrolledCourseIds = rawEnrollments.map((e) => e.course.id);
   const enrolledLevels: string[] = [];
@@ -281,7 +287,7 @@ export default async function EducatorDashboardPage({
           };
         })()
       }))}
-      students={studentNames}
+      students={studentData}
       metrics={{
         enrollments: totalEnrollments,
         activeCourses,

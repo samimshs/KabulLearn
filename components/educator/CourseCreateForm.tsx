@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition, type Dispatch, typ
 import { LessonType } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { AvatarUpload } from "@/components/educator/AvatarUpload";
+import { CourseSubmitButton } from "@/components/educator/CourseSubmitButton";
 import { useLanguage } from "@/components/LanguageProvider";
 import {
   createLesson,
@@ -105,6 +106,7 @@ type FieldErrors = Partial<Record<"slug" | "titleEn" | "descriptionEn" | "instru
 
 type CourseWizardInitial = {
   courseId: string;
+  status: string;
   slug: string;
   level: "" | "beginner" | "intermediate" | "advanced";
   titleEn: string;
@@ -384,8 +386,8 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
     { key: "instructors", label: t.instructors, question: t.cwInstructorsQuestion, help: t.cwInstructorsHelp },
     { key: "structure", label: t.courseStructure, question: t.cwStructureQuestion, help: t.cwStructureHelp },
     { key: "pricing", label: t.cwPricingQuestion, question: t.cwPricingQuestion, help: t.cwPricingHelp },
-    { key: "publish", label: t.cwReviewTitle, question: t.cwPublishQuestion, help: t.cwPublishHelp }
-  ], [t]);
+    { key: "publish", label: t.cwReviewTitle, question: isEditMode ? t.cwEditPublishQuestion : t.cwPublishQuestion, help: isEditMode ? t.cwEditPublishHelp : t.cwPublishHelp }
+  ], [t, isEditMode]);
 
   const activeIndex = Math.max(0, steps.findIndex((step) => step.key === activeStep));
   const saveComplete = isEditMode && messageTone === "success" && Boolean(message);
@@ -1105,15 +1107,50 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
             </span>
           </div>
           <p className="mt-2 text-sm font-semibold leading-6 text-[var(--muted)]">{active.help}</p>
-          <div className="mt-4">
-            <div className="flex items-center justify-between text-xs font-black text-[var(--muted)]">
-              <span>{t.cwStepProgress} {activeIndex + 1} {t.cwOf} {steps.length}</span>
-              <span>{Math.round(((activeIndex + 1) / steps.length) * 100)}%</span>
-            </div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--border)]">
-              <div className="h-full rounded-full bg-[var(--brand)] transition-all" style={{ width: `${((activeIndex + 1) / steps.length) * 100}%` }} />
-            </div>
-          </div>
+          <nav className="mt-5" aria-label="Course wizard steps">
+            <ol className="flex">
+              {steps.map((step, i) => {
+                const isLast = i === steps.length - 1;
+                const isFirst = i === 0;
+                const isCurrent = i === activeIndex;
+                const done = i < activeIndex || (isCurrent && isLast && saveComplete);
+                return (
+                  <li key={step.key} className="flex flex-1 flex-col items-center">
+                    <div className="flex w-full items-center">
+                      <div className={`h-px flex-1 transition-colors ${isFirst ? "invisible" : done || isCurrent ? "bg-[var(--brand)]" : "bg-[var(--border)]"}`} />
+                      <button
+                        type="button"
+                        onClick={() => setActiveStep(step.key)}
+                        className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11px] font-[900] transition-all ${
+                          done
+                            ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                            : isCurrent
+                            ? "bg-[var(--brand)] text-white shadow-[0_4px_14px_rgba(0,87,255,0.35)] scale-110"
+                            : "border-2 border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:border-[var(--brand)] hover:text-[var(--brand)]"
+                        }`}
+                      >
+                        {done ? (
+                          <svg viewBox="0 0 12 12" fill="none" className="h-3.5 w-3.5" aria-hidden="true">
+                            <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        ) : i + 1}
+                      </button>
+                      <div className={`h-px flex-1 transition-colors ${isLast ? "invisible" : done ? "bg-[var(--brand)]" : "bg-[var(--border)]"}`} />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveStep(step.key)}
+                      className={`mt-2 text-center text-[10px] font-[800] leading-tight transition-colors ${
+                        done ? "text-emerald-600" : isCurrent ? "text-[var(--brand)]" : "text-[var(--muted)]"
+                      }`}
+                    >
+                      {step.label}
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          </nav>
         </header>
 
         <main className={`my-5 min-h-0 flex-1 rounded-[24px] border border-[var(--border)] bg-[var(--card)] shadow-[0_22px_70px_rgba(15,23,42,0.08)] ${active.key === "structure" ? "overflow-hidden p-0" : "p-5"}`}>
@@ -1158,6 +1195,8 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
             isTranslating={isTranslating}
             translateDescriptionNow={translateDescriptionNow}
             isEditMode={isEditMode}
+            courseId={initialCourse?.courseId}
+            courseStatus={initialCourse?.status}
           />
         </main>
 
@@ -1235,6 +1274,8 @@ function StepBody(props: {
   isTranslating: boolean;
   translateDescriptionNow: () => Promise<void>;
   isEditMode: boolean;
+  courseId?: string;
+  courseStatus?: string;
 }) {
   const { step, state, patch, t } = props;
   const languageChoices: Array<{ value: DraftLanguage; label: string; hint: string }> = [

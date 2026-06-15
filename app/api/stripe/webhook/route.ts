@@ -17,8 +17,8 @@ async function markCheckoutSessionPaid(session: Stripe.Checkout.Session) {
   const intentId = paymentIntentId(session);
 
   const payment = paymentId
-    ? await db.payment.findUnique({ where: { id: paymentId } })
-    : await db.payment.findUnique({ where: { stripeCheckoutSessionId: checkoutSessionId } });
+    ? await db.payment.findUnique({ where: { id: paymentId }, select: { id: true, purpose: true, userId: true, courseId: true, promoCodeId: true, donorEmail: true, donorName: true } })
+    : await db.payment.findUnique({ where: { stripeCheckoutSessionId: checkoutSessionId }, select: { id: true, purpose: true, userId: true, courseId: true, promoCodeId: true, donorEmail: true, donorName: true } });
 
   if (!payment) return;
 
@@ -32,6 +32,13 @@ async function markCheckoutSessionPaid(session: Stripe.Checkout.Session) {
       donorName: payment.donorName
     }
   });
+
+  if (updated.promoCodeId) {
+    await db.promoCode.update({
+      where: { id: updated.promoCodeId },
+      data: { usedCount: { increment: 1 } }
+    }).catch(() => null);
+  }
 
   if (updated.purpose === "COURSE" && updated.userId && updated.courseId) {
     await confirmPaidCourseCheckout({

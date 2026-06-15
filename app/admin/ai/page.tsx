@@ -48,15 +48,15 @@ export default async function AdminAiQualityPage() {
       </header>
 
       <section className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5">
           <p className="pr-eyebrow">Recent chats</p>
           <p className="mt-2 text-3xl font-[900] text-[var(--ink)]">{logs.length}</p>
         </div>
-        <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5">
           <p className="pr-eyebrow">Helpful</p>
           <p className="mt-2 text-3xl font-[900] text-[var(--success)]">{positive}</p>
         </div>
-        <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5">
           <p className="pr-eyebrow">Needs work</p>
           <p className="mt-2 text-3xl font-[900] text-[var(--danger)]">{negative}</p>
         </div>
@@ -64,11 +64,11 @@ export default async function AdminAiQualityPage() {
 
       <section className="grid gap-4">
         {logs.length === 0 ? (
-          <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-white p-8 text-center text-[var(--muted)]">
+          <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-8 text-center text-[var(--muted)]">
             No AI chats logged yet.
           </div>
         ) : logs.map((log) => (
-          <article key={log.id} className="grid gap-4 rounded-[var(--radius-xl)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)]">
+          <article key={log.id} className="grid gap-4 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-[12px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
                 {log.createdAt.toLocaleString()} · {log.locale ?? "unknown"} · {log.user.name ?? log.user.email}

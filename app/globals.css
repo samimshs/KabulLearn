@@ -43,6 +43,8 @@
   --gold-deep:    #8A6100;
   --gold-50:      #FFFBF0;
 
+  --admin-login-bg: #F0F2F8;
+
   --radius-sm:    6px;
   --radius:       10px;
   --radius-lg:    14px;
@@ -84,6 +86,8 @@ html[data-theme="dark"] {
   --gold:         #D4A832;
   --gold-deep:    #B88A00;
   --gold-50:      #1C1500;
+
+  --admin-login-bg: #05070b;
 
   --shadow-sm:    0 1px 3px rgba(0,0,0,0.40), 0 1px 2px rgba(0,0,0,0.28);
   --shadow:       0 4px 12px rgba(0,0,0,0.50), 0 2px 4px rgba(0,0,0,0.30);
@@ -655,6 +659,68 @@ html[dir="rtl"] .kl-home-page .pr-btn-primary:hover::after {
 @keyframes kl-bob {
   0%, 100% { transform: translateX(-50%) translateY(0); }
   50%      { transform: translateX(-50%) translateY(6px); }
+}
+
+/* ── Hero subtext rotator ──────────────────────────────────────────────── */
+
+/*
+  The <p> is position:relative so the absolutely-placed text layer can sit
+  on top of the invisible height anchor without affecting document flow.
+*/
+.kl-hero-rotator {
+  position: relative;
+}
+
+/*
+  The animated text layer sits over the invisible spacer.
+  right:0 ensures RTL text also aligns correctly (fills full width so the
+  RTL text-align:start causes it to flow right-to-left as expected).
+*/
+.kl-hero-rotator-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+/* ── Hero cursor — thin blinker at rest, fat block while active ───────── */
+@keyframes kl-cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Default: thin blinking caret (shown during the 5-second hold) */
+.kl-hero-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  border-radius: 1px;
+  background-color: #000000;
+  vertical-align: -0.1em;
+  margin-inline-start: 2px;
+  pointer-events: none;
+  animation: kl-cursor-blink 1.05s ease-in-out infinite;
+  transition: width 80ms ease, border-radius 80ms ease;
+}
+
+/* Fat block: applied while erasing / scrambling / typing */
+.kl-hero-cursor.is-fat {
+  width: 0.55em;
+  border-radius: 2px;
+  animation: none;
+  opacity: 1;
+}
+
+html[data-theme="dark"] .kl-hero-cursor {
+  background-color: #ffffff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kl-hero-cursor {
+    animation: none;
+    opacity: 1;
+    transition: none;
+  }
 }
 
 html[dir="rtl"] .kl-home-copy {
@@ -1886,6 +1952,12 @@ html[data-theme="dark"] .kl-globe-land {
 html[data-theme="dark"] .kl-globe-rim {
   stroke: #7cb9ff;
   stroke-opacity: 0.35;
+}
+html[data-theme="dark"] .kl-bubble-ps {
+  background: #B45309 !important;
+}
+html[data-theme="dark"] .kl-bubble-ps::after {
+  border-top-color: #B45309 !important;
 }
 /* ── End dark-mode hero visual overrides ─────────────────────────────────── */
 

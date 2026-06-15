@@ -142,7 +142,7 @@ export function LoginForm({
           <span className="h-px flex-1 bg-[var(--border)]" />
         </div>
       ) : null}
-      <label className={`pr-label ${portal === "admin" ? "text-[#d9e5f7]" : ""}`}>
+      <label className={`pr-label ${portal === "admin" ? "!text-[#d9e5f7]" : ""}`}>
         {portal === "admin" ? t.username : t.email}
         <input
           type="email"
@@ -152,7 +152,7 @@ export function LoginForm({
           className={`pr-input h-10 px-3 py-2 text-[13px] ${portal === "admin" ? "border-[#26364f] bg-[#0b182b] text-white placeholder:text-[#6f7f99] focus:border-[#3b82f6] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.18)]" : ""}`}
         />
       </label>
-      <label className={`pr-label ${portal === "admin" ? "text-[#d9e5f7]" : ""}`}>
+      <label className={`pr-label ${portal === "admin" ? "!text-[#d9e5f7]" : ""}`}>
         {t.password}
         <span className="relative block">
           <input

@@ -164,15 +164,19 @@ export default async function CoursePage({
   }
 
   if (!course) return notFound();
-  if (course.status !== CourseStatus.PUBLISHED &&
-      !(course.status === CourseStatus.PENDING_REVIEW && course.publishedAt !== null)) {
-    return notFound();
-  }
-  const resolvedCourseId = course.id;
-  const publicCourseRef = course.slug || course.id;
 
   const session = await auth();
   const userId = session?.user?.id;
+  const isAuthor = userId === course.author.id;
+
+  const isPubliclyVisible =
+    course.status === CourseStatus.PUBLISHED ||
+    (course.status === CourseStatus.PENDING_REVIEW && course.publishedAt !== null);
+
+  if (!isPubliclyVisible && !isAuthor) return notFound();
+
+  const resolvedCourseId = course.id;
+  const publicCourseRef = course.slug || course.id;
 
   if (userId && resolvedSearchParams?.checkout === "success" && resolvedSearchParams.session_id) {
     await confirmPaidCourseCheckout({
@@ -443,6 +447,7 @@ export default async function CoursePage({
       lessonStatuses={lessonStatuses}
       relatedCourses={relatedCourses}
       announcements={announcements}
+      courseStatus={!isPubliclyVisible && isAuthor ? course.status : undefined}
     />
     </>
   );

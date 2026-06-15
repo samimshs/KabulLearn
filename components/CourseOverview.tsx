@@ -87,6 +87,7 @@ type CourseOverviewProps = {
   }>;
   previewMode?: boolean;
   previewBackHref?: string;
+  courseStatus?: string;
 };
 
 const BASE_URL = "https://kabullearn.com";
@@ -214,7 +215,8 @@ export function CourseOverview({
   relatedCourses = [],
   announcements = [],
   previewMode = false,
-  previewBackHref
+  previewBackHref,
+  courseStatus
 }: CourseOverviewProps) {
   const { locale, t, direction } = useLanguage();
   const router = useRouter();
@@ -228,6 +230,19 @@ export function CourseOverview({
   const [enrollError, setEnrollError] = useState<string | null>(null);
   const [checkoutPending, setCheckoutPending] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [promoInput, setPromoInput] = useState("");
+  const [promoValidating, setPromoValidating] = useState(false);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoResult, setPromoResult] = useState<{
+    promoCodeId: string;
+    code: string;
+    discountType: string;
+    discountValue: number;
+    originalCents: number;
+    discountCents: number;
+    finalCents: number;
+    currency: string;
+  } | null>(null);
   const [resumeLessonId, setResumeLessonId] = useState<string | null>(null);
   const [hasVisitedAny, setHasVisitedAny] = useState(false);
   const moduleIds = course.modules.map((module) => module.id);
@@ -250,11 +265,17 @@ export function CourseOverview({
 
   const courseComplete = Boolean(certificateStatus?.eligible || certificateStatus?.hasCertificate);
   const completedModules = courseComplete ? totalModules : passedQuizzes.size;
+  const fmtCurrency = (cents: number, currency: string) =>
+    new Intl.NumberFormat(locale === "en" ? "en-US" : "fa-AF", {
+      style: "currency",
+      currency: currency.toUpperCase()
+    }).format(cents / 100);
+
   const priceLabel = course.isPaid && course.priceCents
-    ? new Intl.NumberFormat(locale === "en" ? "en-US" : "fa-AF", {
-        style: "currency",
-        currency: (course.currency || "usd").toUpperCase()
-      }).format(course.priceCents / 100)
+    ? fmtCurrency(promoResult ? promoResult.finalCents : course.priceCents, course.currency || "usd")
+    : null;
+  const originalPriceLabel = promoResult
+    ? fmtCurrency(promoResult.originalCents, promoResult.currency)
     : null;
   const primaryActionLabel =
     progressPercent >= 100
@@ -293,6 +314,38 @@ export function CourseOverview({
     });
   }
 
+  async function handleApplyPromo() {
+    const code = promoInput.trim();
+    if (!code) return;
+    setPromoValidating(true);
+    setPromoError(null);
+    try {
+      const res = await fetch("/api/promo/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, courseId: course.id })
+      });
+      const data = (await res.json()) as { ok: boolean; error?: string; data?: { promoCodeId: string; discountType: string; discountValue: number; originalCents: number; discountCents: number; finalCents: number; currency: string } };
+      if (!res.ok || !data.ok) {
+        setPromoError(data.error ?? "Invalid promo code.");
+        setPromoResult(null);
+      } else {
+        setPromoResult({ ...data.data!, code });
+        setPromoError(null);
+      }
+    } catch {
+      setPromoError("Could not validate code. Please try again.");
+    } finally {
+      setPromoValidating(false);
+    }
+  }
+
+  function handleRemovePromo() {
+    setPromoResult(null);
+    setPromoInput("");
+    setPromoError(null);
+  }
+
   async function handlePaidCheckout() {
     setCheckoutPending(true);
     setEnrollError(null);
@@ -301,7 +354,7 @@ export function CourseOverview({
       const response = await fetch("/api/stripe/checkout/course", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courseId: course.id })
+        body: JSON.stringify({ courseId: course.id, ...(promoResult ? { promoCode: promoResult.code } : {}) })
       });
       const result = (await response.json()) as { ok: boolean; error?: string; data?: { url?: string; enrolled?: boolean } };
 
@@ -367,7 +420,10 @@ export function CourseOverview({
             </span>
           ) : null}
           {course.isPaid && priceLabel ? (
-            <span className="rounded-full border border-[rgba(0,87,255,0.18)] bg-[var(--brand-50)] px-3 py-1 text-xs font-[900] uppercase tracking-[1px] text-[var(--brand)]">
+            <span className="flex items-center gap-1.5 rounded-full border border-[rgba(0,87,255,0.18)] bg-[var(--brand-50)] px-3 py-1 text-xs font-[900] uppercase tracking-[1px] text-[var(--brand)]">
+              {originalPriceLabel ? (
+                <span className="line-through opacity-60">{originalPriceLabel}</span>
+              ) : null}
               {priceLabel}
             </span>
           ) : (
@@ -387,6 +443,10 @@ export function CourseOverview({
             <span className="pr-btn-primary cursor-default opacity-80" aria-disabled="true">
               Student preview
             </span>
+          ) : courseStatus && courseStatus !== "PUBLISHED" ? (
+            <span className="rounded-full border border-[rgba(0,87,255,0.2)] bg-[var(--brand-50)] px-4 py-2 text-[12.5px] font-[800] text-[var(--brand)]">
+              {courseStatus === "PENDING_REVIEW" ? "Under review — enrollment opens when published" : "Not yet published"}
+            </span>
           ) : enrolled ? (
             resumeLessonId ? (
               <Link
@@ -404,7 +464,18 @@ export function CourseOverview({
               className="pr-btn-primary"
               aria-label={t.buyCourse}
             >
-              {checkoutPending ? "..." : `${t.buyCourse}${priceLabel ? ` · ${priceLabel}` : ""}`}
+              {checkoutPending ? "..." : (
+                <>
+                  {t.buyCourse}
+                  {priceLabel ? (
+                    <span className="ms-1.5 opacity-90">
+                      {originalPriceLabel ? (
+                        <><span className="line-through opacity-60">{originalPriceLabel}</span> {priceLabel}</>
+                      ) : `· ${priceLabel}`}
+                    </span>
+                  ) : null}
+                </>
+              )}
             </button>
           ) : viewerId ? (
             <button
@@ -435,6 +506,58 @@ export function CourseOverview({
 
         {enrollError ? (
           <p className="mt-3 rounded-[var(--radius)] border border-[rgba(196,43,43,0.18)] bg-[var(--danger-50)] px-4 py-3 text-sm font-[800] text-[var(--danger)]" role="alert">{enrollError}</p>
+        ) : null}
+
+        {/* Promo code — only for paid, not enrolled, not in preview */}
+        {course.isPaid && !enrolled && !previewMode && viewerId && !courseStatus ? (
+          <div className="mt-4">
+            {promoResult ? (
+              <div className="flex items-center justify-between rounded-[var(--radius)] border border-[rgba(24,130,92,0.22)] bg-[var(--success-50)] px-3.5 py-2.5">
+                <div>
+                  <span className="text-[12px] font-[900] uppercase tracking-[1px] text-[var(--success)]">{t.promoApplied} · {promoResult.code}</span>
+                  <span className="ms-2 text-[12px] font-[700] text-[var(--success)]">
+                    {t.promoSavings} {fmtCurrency(promoResult.discountCents, promoResult.currency)}
+                    {promoResult.discountType === "PERCENT" ? ` (${promoResult.discountValue}%)` : ""}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRemovePromo}
+                  className="ms-3 text-[12px] font-[800] text-[var(--muted)] hover:text-[var(--danger)] transition"
+                >
+                  {t.removePromoCode}
+                </button>
+              </div>
+            ) : (
+              <details className="group">
+                <summary className="cursor-pointer list-none text-[12.5px] font-[800] text-[var(--brand)] hover:underline">
+                  {t.havePromoCode}
+                </summary>
+                <div className="mt-2 flex items-stretch gap-2">
+                  <input
+                    type="text"
+                    value={promoInput}
+                    onChange={(e) => { setPromoInput(e.target.value.toUpperCase()); setPromoError(null); }}
+                    onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
+                    placeholder={t.promoCodePlaceholder}
+                    className="pr-input h-10 flex-1 px-3 py-2 text-[13px] uppercase tracking-[1px]"
+                    maxLength={30}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    disabled={promoValidating || !promoInput.trim()}
+                    className="pr-btn-secondary !min-h-10 shrink-0 px-4 text-[13px]"
+                  >
+                    {promoValidating ? "..." : t.applyPromoCode}
+                  </button>
+                </div>
+                {promoError ? (
+                  <p className="mt-1.5 text-[12px] font-[800] text-[var(--danger)]">{promoError}</p>
+                ) : null}
+              </details>
+            )}
+          </div>
         ) : null}
       </section>
 

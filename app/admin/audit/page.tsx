@@ -45,7 +45,7 @@ export default async function AdminAuditPage() {
         <Link href="/admin/ai" className="pr-btn-ghost">AI quality review</Link>
       </header>
 
-      <section className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-white shadow-[var(--shadow-sm)]">
+      <section className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
         <div className="grid grid-cols-[1fr_1fr_1fr_1fr] gap-3 border-b border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[11px] font-[900] uppercase tracking-[1px] text-[var(--muted)] max-lg:hidden">
           <span>When</span>
           <span>Actor</span>

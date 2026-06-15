@@ -7,7 +7,8 @@ import { getRequestOrigin, getStripe } from "@/lib/stripe";
 import { confirmLatestPaidCourseCheckout, ensureEnrollmentForPaidCoursePayment } from "@/lib/stripe-course-payments";
 
 const checkoutSchema = z.object({
-  courseId: z.string().min(1)
+  courseId: z.string().min(1),
+  promoCode: z.string().optional()
 });
 
 export async function POST(request: Request) {
@@ -73,9 +74,35 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "This course is free. Use the normal enroll button." }, { status: 400 });
   }
 
-  const amountCents = course.priceCents ?? 0;
-  if (amountCents < 100) {
+  const originalCents = course.priceCents ?? 0;
+  if (originalCents < 100) {
     return NextResponse.json({ ok: false, error: "This paid course does not have a valid price yet." }, { status: 400 });
+  }
+
+  // Validate promo code if provided
+  let finalCents = originalCents;
+  let promoCodeId: string | null = null;
+  const promoCodeInput = parsed.data.promoCode?.trim().toUpperCase();
+
+  if (promoCodeInput) {
+    const promo = await db.promoCode.findUnique({ where: { code: promoCodeInput } });
+    const promoValid =
+      promo &&
+      promo.isActive &&
+      (!promo.expiresAt || promo.expiresAt >= new Date()) &&
+      (promo.maxUses === null || promo.usedCount < promo.maxUses) &&
+      (!promo.courseId || promo.courseId === course.id);
+
+    if (!promoValid) {
+      return NextResponse.json({ ok: false, error: "Invalid or expired promo code." }, { status: 400 });
+    }
+
+    const discount = promo.discountType === "PERCENT"
+      ? Math.round(originalCents * (promo.discountValue / 100))
+      : promo.discountValue;
+
+    finalCents = Math.max(0, originalCents - discount);
+    promoCodeId = promo.id;
   }
 
   const stripe = getStripe();
@@ -83,17 +110,50 @@ export async function POST(request: Request) {
   const courseRef = course.slug || course.id;
   const title = course.titleEn || course.titleDa || course.titlePs || "KabulLearn course";
 
+  // If promo makes course free, enroll directly without Stripe
+  if (finalCents === 0 && promoCodeId) {
+    await db.$transaction([
+      db.enrollment.upsert({
+        where: { userId_courseId: { userId: session.user.id, courseId: course.id } },
+        update: {},
+        create: { userId: session.user.id, courseId: course.id }
+      }),
+      db.payment.create({
+        data: {
+          purpose: "COURSE",
+          status: "PAID",
+          amountCents: 0,
+          originalAmountCents: originalCents,
+          currency: course.currency || "usd",
+          userId: session.user.id,
+          courseId: course.id,
+          promoCodeId,
+          donorEmail: session.user.email ?? null,
+          donorName: session.user.name ?? null,
+          metadata: { courseRef, promoCode: promoCodeInput }
+        }
+      }),
+      db.promoCode.update({
+        where: { id: promoCodeId },
+        data: { usedCount: { increment: 1 } }
+      })
+    ]);
+    return NextResponse.json({ ok: true, data: { enrolled: true, url: `/courses/${encodeURIComponent(courseRef)}` } });
+  }
+
   const payment = await db.payment.create({
     data: {
       purpose: "COURSE",
       status: "PENDING",
-      amountCents,
+      amountCents: finalCents,
+      originalAmountCents: promoCodeId ? originalCents : null,
       currency: course.currency || "usd",
       userId: session.user.id,
       courseId: course.id,
+      promoCodeId,
       donorEmail: session.user.email ?? null,
       donorName: session.user.name ?? null,
-      metadata: { courseRef }
+      metadata: { courseRef, ...(promoCodeInput ? { promoCode: promoCodeInput } : {}) }
     },
     select: { id: true }
   });
@@ -107,9 +167,9 @@ export async function POST(request: Request) {
         quantity: 1,
         price_data: {
           currency: (course.currency || "usd").toLowerCase(),
-          unit_amount: amountCents,
+          unit_amount: finalCents,
           product_data: {
-            name: title,
+            name: promoCodeId ? `${title} (promo applied)` : title,
             description: "KabulLearn paid course access"
           }
         }

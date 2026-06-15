@@ -156,12 +156,7 @@ export function CourseCard({ course, isAuthenticated = false }: { course: Course
   const thumb = { gradient: COURSE_GRADIENTS[thumbIdx], pattern: THUMB_CONFIGS[thumbIdx].pattern };
   const courseHref = `/courses/${encodeURIComponent(course.slug ?? course.id)}`;
   const manageHref = `/educator/courses/${course.id}`;
-  const cardHref = course.isCreatorCourse ? manageHref : courseHref;
-  const actionLabel = course.isCreatorCourse
-    ? t.manageCourse
-    : course.isEnrolled
-      ? t.continueLearning
-      : t.viewCourse;
+  const actionLabel = course.isEnrolled ? t.continueLearning : t.viewCourse;
 
   // Real completion %, from the server — only shown for enrolled courses.
   const lessonPct =
@@ -239,9 +234,23 @@ export function CourseCard({ course, isAuthenticated = false }: { course: Course
         ) : null}
 
         <div className="mt-auto pt-4">
-          <Link href={cardHref} className="pr-btn-primary w-full">
-            {actionLabel}
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href={courseHref} className="pr-btn-primary flex-1">
+              {actionLabel}
+            </Link>
+            {course.isCreatorCourse ? (
+              <Link
+                href={manageHref}
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)]"
+                title={t.manageCourse}
+                aria-label={t.manageCourse}
+              >
+                <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden="true">
+                  <path d="M11.5 2 14 4.5 5.5 13H3v-2.5L11.5 2Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+            ) : null}
+          </div>
 
           {course.instructors && course.instructors.length > 0 ? (
             <div className="mt-3 flex items-center gap-2">

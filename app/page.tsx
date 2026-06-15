@@ -82,7 +82,7 @@ function ComingSoonPage({ locale }: { locale: Locale }) {
 
         <div className="relative min-h-[360px] lg:min-h-[560px]" aria-hidden="true">
           <div className="absolute inset-x-0 top-8 mx-auto h-[420px] w-[420px] rounded-full bg-[rgba(0,87,255,0.10)] blur-3xl lg:h-[560px] lg:w-[560px]" />
-          <div className="absolute left-1/2 top-1/2 grid h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[44px] border border-white/70 bg-white/72 shadow-[0_32px_90px_rgba(0,87,255,0.18)] backdrop-blur-xl lg:h-[430px] lg:w-[430px]">
+          <div className="absolute left-1/2 top-1/2 grid h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-[44px] border border-[var(--card)] bg-[var(--card)] shadow-[0_32px_90px_rgba(0,87,255,0.18)] backdrop-blur-xl lg:h-[430px] lg:w-[430px]">
             <div className="grid h-24 w-24 place-items-center rounded-[28px] bg-[var(--brand)] shadow-[0_18px_45px_rgba(0,87,255,0.30)] lg:h-32 lg:w-32">
               <Image src="/poharana-icon-v3.svg" alt="" width={92} height={92} className="h-16 w-16 lg:h-20 lg:w-20" />
             </div>
@@ -225,7 +225,7 @@ export default async function Home() {
 
           <ul className="kl-feature-list grid grid-cols-2 gap-2 w-fit">
             {features.map((feature) => (
-              <li key={feature.label} className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/75 py-2 pe-3 ps-2 shadow-[var(--shadow-sm)] backdrop-blur-sm">
+              <li key={feature.label} className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--card)] py-2 pe-3 ps-2 shadow-[var(--shadow-sm)] backdrop-blur-sm">
                 <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--brand-50)] text-[var(--brand)]">{feature.icon}</span>
                 <span className="text-[11px] font-[700] leading-snug text-[var(--ink-2)]">{feature.label}</span>
               </li>
@@ -270,7 +270,7 @@ export default async function Home() {
             <h2 className="pr-h2 mt-2">{dict.howItWorksTitle}</h2>
             <ol className="mt-7 grid gap-6 md:grid-cols-3">
               {howSteps.map((step, i) => (
-                <li key={step.title} className="relative rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-6">
+                <li key={step.title} className="relative rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-6">
                   <div className="flex items-center gap-3">
                     <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--brand-50)] text-[var(--brand)]">{HOW_ICONS[i]}</span>
                     <span className="grid h-7 w-7 place-items-center rounded-full bg-[var(--gold-50)] text-[13px] font-[800] text-[var(--gold-deep)] ring-1 ring-[rgba(201,168,76,0.4)]">
@@ -293,7 +293,7 @@ export default async function Home() {
             <p className="mx-auto mt-3 max-w-xl text-[15px] font-[400] leading-relaxed text-white/80">{dict.homeClosingBody}</p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link href="/register" className="pr-btn-primary !border-white hover:!opacity-90">{dict.startLearningFree}</Link>
-              <Link href="/courses" className="pr-btn-ghost !border-white/40 !bg-transparent !text-white hover:!border-white hover:!text-white">{dict.heroCta}</Link>
+              <Link href="/courses" className="pr-btn-ghost !border-[var(--card)] !bg-transparent !text-white hover:!border-white hover:!text-white">{dict.heroCta}</Link>
             </div>
           </section>
         )}

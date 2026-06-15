@@ -43,7 +43,7 @@ function EyeIcon({ open }: { open: boolean }) {
 }
 
 const socialButtonClass =
-  "inline-flex h-10 w-full items-center justify-center gap-2.5 rounded-[11px] border border-[var(--border)] bg-white px-3.5 text-[13px] font-[850] text-[var(--ink)] shadow-[0_6px_18px_rgba(15,23,42,0.045)] transition hover:-translate-y-0.5 hover:border-[rgba(0,87,255,0.24)] hover:bg-[var(--surface)] hover:shadow-[0_10px_24px_rgba(15,23,42,0.07)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.16)]";
+  "inline-flex h-10 w-full items-center justify-center gap-2.5 rounded-[11px] border border-[var(--border)] bg-[var(--card)] px-3.5 text-[13px] font-[850] text-[var(--ink)] shadow-[0_6px_18px_rgba(15,23,42,0.045)] transition hover:-translate-y-0.5 hover:border-[rgba(0,87,255,0.24)] hover:bg-[var(--surface)] hover:shadow-[0_10px_24px_rgba(15,23,42,0.07)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.16)]";
 
 export function RegisterForm({
   googleOAuthEnabled = false,
@@ -73,7 +73,7 @@ export function RegisterForm({
           setPasswordMismatch(false);
         }
       }}
-      className="grid gap-3 rounded-[16px] border border-[var(--border)] bg-white/95 p-4 shadow-[0_18px_56px_rgba(15,23,42,0.08)] backdrop-blur sm:p-5"
+      className="grid gap-3 rounded-[16px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[0_18px_56px_rgba(15,23,42,0.08)] backdrop-blur sm:p-5"
     >
       <input type="hidden" name="locale" value={locale} />
       {oauthEnabled ? (

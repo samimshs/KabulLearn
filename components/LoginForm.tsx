@@ -57,7 +57,7 @@ function EyeIcon({ open }: { open: boolean }) {
 }
 
 const socialButtonClass =
-  "inline-flex h-10 w-full items-center justify-center gap-2.5 rounded-[11px] border border-[var(--border)] bg-white px-3.5 text-[13px] font-[850] text-[var(--ink)] shadow-[0_6px_18px_rgba(15,23,42,0.045)] transition hover:-translate-y-0.5 hover:border-[rgba(0,87,255,0.24)] hover:bg-[var(--surface)] hover:shadow-[0_10px_24px_rgba(15,23,42,0.07)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.16)]";
+  "inline-flex h-10 w-full items-center justify-center gap-2.5 rounded-[11px] border border-[var(--border)] bg-[var(--card)] px-3.5 text-[13px] font-[850] text-[var(--ink)] shadow-[0_6px_18px_rgba(15,23,42,0.045)] transition hover:-translate-y-0.5 hover:border-[rgba(0,87,255,0.24)] hover:bg-[var(--surface)] hover:shadow-[0_10px_24px_rgba(15,23,42,0.07)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.16)]";
 
 export function LoginForm({
   googleOAuthEnabled = false,
@@ -91,8 +91,8 @@ export function LoginForm({
         portal === "admin"
           ? "gap-3 border-[#1f2a3d] bg-[#07111f] p-4 text-white shadow-[0_26px_80px_rgba(0,0,0,0.35)] sm:p-5"
           : portal === "educator"
-            ? "gap-3 border-[rgba(24,130,92,0.18)] bg-white/95 p-4 backdrop-blur sm:p-5"
-            : "gap-3 border-[var(--border)] bg-white/95 p-4 backdrop-blur sm:p-5"
+            ? "gap-3 border-[rgba(24,130,92,0.18)] bg-[var(--card)] p-4 backdrop-blur sm:p-5"
+            : "gap-3 border-[var(--border)] bg-[var(--card)] p-4 backdrop-blur sm:p-5"
       }`}
     >
       {portal === "admin" ? (

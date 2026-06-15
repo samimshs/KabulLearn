@@ -42,7 +42,7 @@ export function CourseRatingForm({
 
   return (
     <form
-      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm lg:p-6"
+      className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)] lg:p-6"
       onSubmit={(event) => {
         event.preventDefault();
         startTransition(async () => {
@@ -52,8 +52,8 @@ export function CourseRatingForm({
         });
       }}
     >
-      <p className="text-xs font-bold uppercase tracking-wider text-slate-500">{t.courseRating}</p>
-      <h3 className="mt-1 text-xl font-bold tracking-tight text-slate-900">{t.howWasCourse}</h3>
+      <p className="text-xs font-bold uppercase tracking-wider text-[var(--muted)]">{t.courseRating}</p>
+      <h3 className="mt-1 text-xl font-bold tracking-tight text-[var(--ink)]">{t.howWasCourse}</h3>
 
       {/* Interactive star row */}
       <div className="mt-4 flex gap-1" role="radiogroup" aria-label={t.courseRating}>
@@ -70,7 +70,7 @@ export function CourseRatingForm({
               onMouseEnter={() => setHover(value)}
               onMouseLeave={() => setHover(0)}
               className={`rounded-md transition duration-150 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
-                active ? "text-amber-400" : "text-slate-300 hover:text-amber-300"
+                active ? "text-amber-400" : "text-[var(--border)] hover:text-amber-300"
               }`}
             >
               <StarIcon filled={active} />
@@ -85,18 +85,18 @@ export function CourseRatingForm({
         onChange={(event) => setComment(event.target.value)}
         rows={3}
         placeholder={t.ratingNotePlaceholder}
-        className="mt-4 w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-200"
+        className="mt-4 w-full resize-none rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-sm font-medium text-[var(--ink)] outline-none transition placeholder:text-[var(--muted-2)] focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-100)]"
       />
 
       {/* Footer: message at start, action at logical end */}
       <div className="mt-4 flex flex-wrap items-center gap-3">
         {message ? (
-          <p className="text-sm font-semibold text-emerald-600">{message}</p>
+          <p className="text-sm font-semibold text-[var(--success)]">{message}</p>
         ) : null}
         <button
           type="submit"
           disabled={isPending}
-          className="ms-auto inline-flex min-h-10 items-center justify-center rounded-lg bg-slate-900 px-5 text-sm font-bold text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 disabled:opacity-50"
+          className="ms-auto inline-flex min-h-10 items-center justify-center rounded-lg bg-[var(--ink)] px-5 text-sm font-bold text-white transition hover:bg-[var(--ink-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-2 disabled:opacity-50"
         >
           {isPending ? t.savingLabel : initialRating ? t.updateRating : t.submitRating}
         </button>

@@ -59,6 +59,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
   const [langOpen, setLangOpen]     = useState(false);
   const [navSheetOpen, setNavSheetOpen] = useState(false);
   const [isMac, setIsMac] = useState(true); // default to Mac (most common); corrected on mount
+  const [isDark, setIsDark] = useState(false);
   const [appNotifUnread, setAppNotifUnread] = useState(unreadAppNotifications);
   const menuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -70,6 +71,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
   // Global Cmd+K / Ctrl+K shortcut, Escape-to-close, + OS detection
   useEffect(() => {
     setIsMac(/Mac|iPhone|iPad|iPod/.test(navigator.platform));
+    setIsDark(document.documentElement.getAttribute("data-theme") === "dark");
 
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -106,12 +108,20 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
     { locale: "en" as const, label: "EN", title: t.english }
   ];
 
+  function toggleTheme() {
+    const next = !isDark;
+    setIsDark(next);
+    document.documentElement.setAttribute("data-theme", next ? "dark" : "light");
+    try { localStorage.setItem("kl-theme", next ? "dark" : "light"); } catch {}
+  }
+
   if (pathname === "/login" || pathname === "/register") {
     return (
       <header dir="ltr" className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/88 backdrop-blur-xl">
         <div className="kl-site-header-inner mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-2 px-4 sm:px-5 lg:px-8">
           <Link href="/" className="pr-focus flex h-11 shrink-0 items-center overflow-hidden" aria-label="KabulLearn home">
-            <img src="/poharana-logo-v3.svg" alt="KabulLearn" className="hidden h-11 w-[166px] max-w-[42vw] object-contain sm:block" />
+            <img src="/poharana-logo-v3.svg" alt="KabulLearn" className="kl-logo-light hidden h-11 w-[166px] max-w-[42vw] object-contain sm:block" />
+            <img src="/poharana-logo-v3-dark.svg" alt="KabulLearn" className="kl-logo-dark h-11 w-[166px] max-w-[42vw] object-contain" />
             <img src="/poharana-icon-v3.svg" alt="KabulLearn" className="h-9 w-9 rounded-[10px] shadow-[0_8px_20px_rgba(0,87,255,0.18)] sm:hidden" />
           </Link>
           <div className="flex items-center gap-2">
@@ -123,7 +133,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
               {languageOptions.find(o => o.locale === locale)?.label}
             </button>
             {langOpen && (
-              <div className="absolute end-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-[10px] border border-[var(--border)] bg-white shadow-[0_8px_24px_rgba(10,9,20,0.1)] sm:hidden">
+              <div className="absolute end-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-[10px] border border-[var(--border)] bg-[var(--card)] shadow-[0_8px_24px_rgba(10,9,20,0.1)] sm:hidden">
                 {languageOptions.map(option => (
                   <button key={option.locale} type="button" onClick={() => { setLocale(option.locale); setLangOpen(false); }} className={`flex w-full items-center gap-3 px-4 py-2.5 text-[13px] transition hover:bg-[var(--surface)] ${locale === option.locale ? "font-[800] text-[var(--brand)]" : "font-[700] text-[var(--ink)]"}`}>
                     <span className="w-8 text-[12px]">{option.label}</span>
@@ -135,7 +145,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
             )}
             <div className="hidden sm:flex h-9 items-center rounded-full border border-[var(--border)] bg-[var(--surface)] p-1 shadow-sm" role="group" aria-label={t.language}>
               {languageOptions.map((option) => (
-                <button key={option.locale} type="button" title={option.title} onClick={() => setLocale(option.locale)} aria-pressed={locale === option.locale} className={`flex h-7 min-w-9 items-center justify-center rounded-full px-2.5 text-[12px] font-[900] transition ${locale === option.locale ? "bg-[var(--brand)] text-white shadow-sm" : "text-[var(--muted)] hover:bg-white hover:text-[var(--ink)]"}`}>
+                <button key={option.locale} type="button" title={option.title} onClick={() => setLocale(option.locale)} aria-pressed={locale === option.locale} className={`flex h-7 min-w-9 items-center justify-center rounded-full px-2.5 text-[12px] font-[900] transition ${locale === option.locale ? "bg-[var(--brand)] text-white shadow-sm" : "text-[var(--muted)] hover:bg-[var(--card)] hover:text-[var(--ink)]"}`}>
                   {option.label}
                 </button>
               ))}
@@ -183,7 +193,12 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
           <img
             src="/poharana-logo-v3.svg"
             alt="KabulLearn"
-            className="hidden h-11 w-[166px] max-w-[42vw] object-contain sm:block"
+            className="kl-logo-light hidden h-11 w-[166px] max-w-[42vw] object-contain sm:block"
+          />
+          <img
+            src="/poharana-logo-v3-dark.svg"
+            alt="KabulLearn"
+            className="kl-logo-dark h-11 w-[166px] max-w-[42vw] object-contain"
           />
           <img
             src="/poharana-icon-v3.svg"
@@ -268,7 +283,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                   <path d="m10 10 2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
                 <span className="hidden lg:block">{t.searchLabel}</span>
-                <kbd className="hidden rounded border border-[var(--border)] bg-white px-1 py-0.5 text-[10px] font-[800] text-[var(--muted-2)] lg:block">{isMac ? "⌘K" : "Ctrl K"}</kbd>
+                <kbd className="hidden rounded border border-[var(--border)] bg-[var(--surface)] px-1 py-0.5 text-[10px] font-[800] text-[var(--muted-2)] lg:block">{isMac ? "⌘K" : "Ctrl K"}</kbd>
               </button>
 
               {/* Support link */}
@@ -295,7 +310,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                       if (unreadCount > 0) setPortalUnreadCount(0);
                     }
                   }}
-                  className="relative grid h-9 w-9 place-items-center rounded-full border border-[var(--border)] bg-white text-[var(--muted)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)]"
+                  className="relative grid h-9 w-9 place-items-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)]"
                 >
                   <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
                     <path d="M6 8a4 4 0 0 1 8 0c0 3 1.2 4.2 1.2 4.2H4.8S6 11 6 8Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -312,7 +327,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                   <div
                     role="dialog"
                     aria-label={t.notificationsLabel}
-                    className="absolute end-0 top-[calc(100%+8px)] z-50 w-[320px] overflow-hidden rounded-[14px] border border-[var(--border)] bg-white shadow-[0_8px_32px_rgba(10,9,20,0.12),0_2px_8px_rgba(10,9,20,0.06)]"
+                    className="absolute end-0 top-[calc(100%+8px)] z-50 w-[320px] overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--card)] shadow-[0_8px_32px_rgba(10,9,20,0.12),0_2px_8px_rgba(10,9,20,0.06)]"
                   >
                     {/* Panel header */}
                     <div className="border-b border-[var(--border)] px-4 py-3">
@@ -446,7 +461,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                 {menuOpen && (
                   <div
                     role="menu"
-                    className="absolute end-0 top-[calc(100%+8px)] z-50 min-w-[200px] overflow-hidden rounded-[14px] border border-[var(--border)] bg-white shadow-[0_8px_32px_rgba(10,9,20,0.12),0_2px_8px_rgba(10,9,20,0.06)]"
+                    className="absolute end-0 top-[calc(100%+8px)] z-50 min-w-[200px] overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--card)] shadow-[0_8px_32px_rgba(10,9,20,0.12),0_2px_8px_rgba(10,9,20,0.06)]"
                   >
                     {/* User info */}
                     <div className="border-b border-[var(--border)] px-4 py-3">
@@ -508,13 +523,32 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
             </>
           )}
 
+          {/* Dark mode toggle */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            className="grid h-9 w-9 place-items-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] shadow-sm transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)]"
+          >
+            {isDark ? (
+              <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
+                <circle cx="10" cy="10" r="4" stroke="currentColor" strokeWidth="1.6" />
+                <path d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.1 4.1l1.1 1.1M14.8 14.8l1.1 1.1M15.9 4.1l-1.1 1.1M5.2 14.8l-1.1 1.1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
+                <path d="M17 11.5A7 7 0 1 1 8.5 3a5.5 5.5 0 0 0 8.5 8.5Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+              </svg>
+            )}
+          </button>
+
           {/* Language toggle — dropdown on xs, pills on sm+ */}
           <div className="relative" ref={langRef}>
             <button type="button" onClick={() => setLangOpen(o => !o)} aria-label={t.language} aria-expanded={langOpen} className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[11px] font-[900] text-[var(--ink)] shadow-sm transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)] sm:hidden">
               {languageOptions.find(o => o.locale === locale)?.label}
             </button>
             {langOpen && (
-              <div className="absolute end-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-[10px] border border-[var(--border)] bg-white shadow-[0_8px_24px_rgba(10,9,20,0.1)] sm:hidden">
+              <div className="absolute end-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-[10px] border border-[var(--border)] bg-[var(--card)] shadow-[0_8px_24px_rgba(10,9,20,0.1)] sm:hidden">
                 {languageOptions.map(option => (
                   <button key={option.locale} type="button" onClick={() => { setLocale(option.locale); setLangOpen(false); }} className={`flex w-full items-center gap-3 px-4 py-2.5 text-[13px] transition hover:bg-[var(--surface)] ${locale === option.locale ? "font-[800] text-[var(--brand)]" : "font-[700] text-[var(--ink)]"}`}>
                     <span className="w-8 text-[12px]">{option.label}</span>
@@ -526,7 +560,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
             )}
             <div className="hidden sm:flex h-9 items-center rounded-full border border-[var(--border)] bg-[var(--surface)] p-1 shadow-sm" role="group" aria-label={t.language}>
               {languageOptions.map((option) => (
-                <button key={option.locale} type="button" title={option.title} onClick={() => setLocale(option.locale)} aria-pressed={locale === option.locale} className={`flex h-7 min-w-9 items-center justify-center rounded-full px-2.5 text-[12px] font-[900] transition ${locale === option.locale ? "bg-[var(--brand)] text-white shadow-sm" : "text-[var(--muted)] hover:bg-white hover:text-[var(--ink)]"}`}>
+                <button key={option.locale} type="button" title={option.title} onClick={() => setLocale(option.locale)} aria-pressed={locale === option.locale} className={`flex h-7 min-w-9 items-center justify-center rounded-full px-2.5 text-[12px] font-[900] transition ${locale === option.locale ? "bg-[var(--brand)] text-white shadow-sm" : "text-[var(--muted)] hover:bg-[var(--card)] hover:text-[var(--ink)]"}`}>
                   {option.label}
                 </button>
               ))}
@@ -544,7 +578,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
         role="dialog"
         aria-modal="true"
         aria-label="Navigation"
-        className="sm:hidden fixed inset-x-0 bottom-0 z-30 overflow-y-auto bg-white"
+        className="sm:hidden fixed inset-x-0 bottom-0 z-30 overflow-y-auto bg-[var(--card)]"
         style={{ top: "64px" }}
       >
         <nav className="flex flex-col gap-0.5 p-4 pb-8">

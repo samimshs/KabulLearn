@@ -71,7 +71,7 @@ function OrderList({ items, emptyText, saveLabel, onSave }: OrderListProps) {
               setOrderedItems((current) => moveItem(current, draggedId, item.id));
               setDraggedId(null);
             }}
-            className={`grid cursor-grab grid-cols-[auto_1fr] items-center gap-3 rounded-[var(--radius)] border bg-white px-3 py-3 text-left shadow-sm transition active:cursor-grabbing ${
+            className={`grid cursor-grab grid-cols-[auto_1fr] items-center gap-3 rounded-[var(--radius)] border bg-[var(--card)] px-3 py-3 text-left shadow-sm transition active:cursor-grabbing ${
               draggedId === item.id ? "border-[var(--brand)] opacity-60" : "border-[var(--border)] hover:border-[rgba(15,118,110,0.35)]"
             }`}
           >
@@ -131,7 +131,7 @@ export function ModuleOrderControl({ courseId, modules }: { courseId: string; mo
 export function LessonOrderControl({ moduleId, lessons }: { moduleId: string; lessons: OrderItem[] }) {
   const { t } = useLanguage();
   return (
-    <div className="rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-white p-3">
+    <div className="rounded-[var(--radius)] border border-dashed border-[var(--border)] bg-[var(--card)] p-3">
       <div className="mb-3">
         <h4 className="text-sm font-[850] text-[var(--ink)]">{t.lessons}</h4>
       </div>

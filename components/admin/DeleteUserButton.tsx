@@ -22,7 +22,7 @@ export function DeleteUserButton({ userId, label }: { userId: string; label: str
       </button>
       {open ? (
         <div className="fixed inset-0 z-[100] grid place-items-center bg-black/50 px-4">
-          <div className="w-full max-w-md rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-6 shadow-[var(--shadow-lg)]">
+          <div className="w-full max-w-md rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-6 shadow-[var(--shadow-lg)]">
             <p className="pr-eyebrow text-[var(--danger)]">Delete user</p>
             <h2 className="mt-3 text-2xl font-[800] tracking-[-0.4px] text-[var(--ink)]">
               This cannot be undone.

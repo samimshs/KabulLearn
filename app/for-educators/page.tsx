@@ -43,7 +43,7 @@ export default async function ForEducatorsPage() {
       <InfoSection title={content.pipelineTitle}>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {content.steps.map((step) => (
-            <article key={step.title} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)]">
+            <article key={step.title} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
               <h3 className="text-lg font-[800] text-[var(--ink)]">{step.title}</h3>
               {step.paragraphs?.map((paragraph) => (
                 <p key={paragraph} className="mt-2 text-sm font-[600] leading-6 text-[var(--muted)]">{paragraph}</p>

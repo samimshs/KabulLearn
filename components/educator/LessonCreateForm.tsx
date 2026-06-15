@@ -80,7 +80,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
           router.refresh();
         });
       }}
-      className="grid gap-4 rounded-3xl border border-stone-200 bg-white p-4"
+      className="grid gap-4 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-4"
     >
       <div className="grid gap-2">
         <p className="text-sm font-black uppercase tracking-wider text-[#0f766e]">{t.newLessonEyebrow}</p>
@@ -88,12 +88,12 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2">
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.lessonTypeLabel}
           <select
             value={type}
             onChange={(event) => setType(event.target.value as LessonType)}
-            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           >
             {lessonTypes.map((lessonType) => (
               <option key={lessonType.value} value={lessonType.value}>
@@ -102,97 +102,97 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
             ))}
           </select>
         </label>
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.englishTitle}
           <input
             value={titleEn}
             onChange={(event) => setTitleEn(event.target.value)}
             placeholder="Lesson title"
-            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2">
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.pashtoTitle}
           <input
             value={titlePs}
             dir="rtl"
             onChange={(event) => setTitlePs(event.target.value)}
             placeholder="د درس سرلیک"
-            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.dariTitle}
           <input
             value={titleDa}
             dir="rtl"
             onChange={(event) => setTitleDa(event.target.value)}
             placeholder="عنوان درس"
-            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
       </div>
 
       <div className="grid gap-2 sm:grid-cols-3">
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.englishDescLabel}
           <input
             value={descriptionEn}
             onChange={(event) => setDescriptionEn(event.target.value)}
             placeholder="Optional English description"
-            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.pashtoDescLabel}
           <input
             value={descriptionPs}
             dir="rtl"
             onChange={(event) => setDescriptionPs(event.target.value)}
             placeholder="اختیاري پښتو تشریح"
-            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.dariDescLabel}
           <input
             value={descriptionDa}
             dir="rtl"
             onChange={(event) => setDescriptionDa(event.target.value)}
             placeholder="توضیح اختیاری دری"
-            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
       </div>
 
       {type === LessonType.VIDEO ? (
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.youtubeUrlLabel}
           <input
             value={youtubeUrl}
             onChange={(event) => setYoutubeUrl(event.target.value)}
             placeholder="https://www.youtube.com/watch?v=..."
-            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
       ) : null}
 
       {type === LessonType.READING ? (
         <div className="grid gap-2 sm:grid-cols-3">
-          <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
             {t.englishContentLabel}
             <textarea
               value={readingEn}
               onChange={(event) => setReadingEn(event.target.value)}
               rows={3}
               placeholder="Reading content"
-              className="min-h-[90px] rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+              className="min-h-[90px] rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
             />
           </label>
-          <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
             {t.pashtoContentLabel}
             <textarea
               value={readingPs}
@@ -200,10 +200,10 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
               onChange={(event) => setReadingPs(event.target.value)}
               rows={3}
               placeholder="لیکنه"
-              className="min-h-[90px] rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+              className="min-h-[90px] rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
             />
           </label>
-          <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
             {t.dariContentLabel}
             <textarea
               value={readingDa}
@@ -211,7 +211,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
               onChange={(event) => setReadingDa(event.target.value)}
               rows={3}
               placeholder="محتوای خواندنی"
-              className="min-h-[90px] rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+              className="min-h-[90px] rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
             />
           </label>
         </div>
@@ -219,16 +219,16 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
 
       {type === LessonType.QUIZ ? (
         <div className="grid gap-2 sm:grid-cols-2">
-          <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
             {t.finalTestLabel}
             <input
               type="checkbox"
               checked={isFinalTest}
               onChange={(event) => setIsFinalTest(event.target.checked)}
-              className="h-5 w-5 rounded border-stone-300 text-[#0f766e]"
+              className="h-5 w-5 rounded border-[var(--border)] text-[#0f766e]"
             />
           </label>
-          <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+          <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
             {t.passingScore}
             <input
               type="number"
@@ -236,7 +236,7 @@ export function LessonCreateForm({ courseId, moduleId }: { courseId: string; mod
               max={100}
               value={passingScore}
               onChange={(event) => setPassingScore(Number(event.target.value))}
-              className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+              className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
             />
           </label>
         </div>

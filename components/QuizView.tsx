@@ -337,7 +337,7 @@ export function QuizView({
                   <Link
                     key={l.id}
                     href={href}
-                    className="flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[14px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.3)] hover:bg-white"
+                    className="flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[14px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.3)] hover:bg-[var(--card)]"
                   >
                     <LessonStateIcon state={lessonStatuses[l.id] === "IN_PROGRESS" ? "in_progress" : "not_started"} kind={lessonKindOf(l)} />
                     <span className="truncate">{usesPashtoContent(locale) ? l.titlePs : l.titleEn}</span>

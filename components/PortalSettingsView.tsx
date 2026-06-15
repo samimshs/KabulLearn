@@ -184,7 +184,7 @@ export function PortalSettingsView({ profile, sessions }: PortalSettingsViewProp
                   type="button"
                   disabled={!image}
                   onClick={() => { if (image) setAvatarViewerOpen(true); }}
-                  className="inline-flex items-center gap-1.5 rounded-[var(--radius)] border border-[var(--border)] bg-white px-3 py-1.5 text-[12px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-[12px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
                     <path d="M3 12s3.2-6 9-6 9 6 9 6-3.2 6-9 6-9-6-9-6Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
@@ -192,7 +192,7 @@ export function PortalSettingsView({ profile, sessions }: PortalSettingsViewProp
                   </svg>
                   {t.viewLabel}
                 </button>
-                <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--radius)] border border-[var(--border)] bg-white px-3 py-1.5 text-[12px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)]">
+                <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 text-[12px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)]">
                   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
                     <path d="M8.5 7.5 10 5h4l1.5 2.5H19A2 2 0 0 1 21 9.5V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5a2 2 0 0 1 2-2h3.5Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
                     <path d="M12 16.5a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor" strokeWidth="1.7" />
@@ -309,11 +309,11 @@ export function PortalSettingsView({ profile, sessions }: PortalSettingsViewProp
 
       {avatarViewerOpen && image ? (
         <div className="fixed inset-0 z-[100] grid place-items-center bg-slate-950/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={t.profilePicturePreview}>
-          <div className="relative max-w-[min(90vw,520px)] rounded-[var(--radius-xl)] border border-white/20 bg-white p-4 shadow-[0_30px_100px_rgba(0,0,0,0.35)]">
+          <div className="relative max-w-[min(90vw,520px)] rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[0_30px_100px_rgba(0,0,0,0.35)]">
             <button
               type="button"
               onClick={() => setAvatarViewerOpen(false)}
-              className="absolute end-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white/90 text-[var(--ink)] shadow-md transition hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.2)]"
+              className="absolute end-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-[var(--surface)] text-[var(--ink)] shadow-md transition hover:bg-[var(--card)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.2)]"
               aria-label={t.closePreview}
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">

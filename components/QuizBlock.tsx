@@ -181,7 +181,7 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
                 ? questionCorrect
                   ? "border-[rgba(0,87,255,0.25)] bg-[var(--brand-50)]"
                   : "border-[rgba(196,43,43,0.25)] bg-[var(--danger-50)]"
-                : "border-[var(--border)] bg-white"
+                : "border-[var(--border)] bg-[var(--card)]"
             }`}
           >
             <div className="flex items-start justify-between gap-4">
@@ -214,7 +214,7 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
                   disabled={submitState !== "idle"}
                   onChange={(event) => setTextAnswers((current) => ({ ...current, [question.id]: event.target.value }))}
                   placeholder={t.enterYourAnswer}
-                  className="min-h-12 rounded-[var(--radius)] border border-[var(--border)] bg-white px-4 text-sm font-[800] text-[var(--ink)] outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[rgba(0,87,255,0.12)] disabled:opacity-80"
+                  className="min-h-12 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-4 text-sm font-[800] text-[var(--ink)] outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[rgba(0,87,255,0.12)] disabled:opacity-80"
                 />
                 {isSubmitted ? (
                   <p className={`text-sm font-[800] ${questionCorrect ? "text-[var(--brand)]" : "text-[var(--danger)]"}`}>
@@ -246,7 +246,7 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
                   className += "border-[var(--brand)] bg-[var(--brand)] text-white";
                 } else {
                   className +=
-                    "border-[var(--border)] bg-[var(--surface)] text-[var(--ink-2)] hover:border-[rgba(0,87,255,0.24)] hover:bg-white";
+                    "border-[var(--border)] bg-[var(--surface)] text-[var(--ink-2)] hover:border-[rgba(0,87,255,0.24)] hover:bg-[var(--card)]";
                 }
 
                 return (

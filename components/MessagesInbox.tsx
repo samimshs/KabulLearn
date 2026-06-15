@@ -176,7 +176,7 @@ export function MessagesInbox() {
                       className={`max-w-[78%] rounded-[14px] px-3.5 py-2 text-[13px] font-[500] leading-relaxed shadow-sm ${
                         m.mine
                           ? "rounded-br-sm bg-[var(--brand)] text-white"
-                          : "rounded-bl-sm bg-white text-[var(--ink)] border border-[var(--border)]"
+                          : "rounded-bl-sm bg-[var(--surface)] text-[var(--ink)] border border-[var(--border)]"
                       }`}
                     >
                       <p className="whitespace-pre-wrap break-words">{m.body}</p>
@@ -214,7 +214,7 @@ export function MessagesInbox() {
                     }}
                     rows={1}
                     placeholder={t.typeMessage}
-                    className="max-h-32 min-h-[42px] flex-1 resize-none rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] font-[500] text-[var(--ink)] outline-none focus:border-[var(--brand)] focus:bg-white"
+                    className="max-h-32 min-h-[42px] flex-1 resize-none rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] font-[500] text-[var(--ink)] outline-none focus:border-[var(--brand)] focus:bg-[var(--card)]"
                   />
                   <button
                     type="submit"

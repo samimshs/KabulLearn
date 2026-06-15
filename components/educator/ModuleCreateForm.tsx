@@ -19,7 +19,7 @@ export function ModuleCreateForm({ courseId }: { courseId: string }) {
 
   return (
     <form
-      className="grid gap-3 rounded-3xl border border-stone-200 bg-white p-4"
+      className="grid gap-3 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-4"
       onSubmit={(event) => {
         event.preventDefault();
         startTransition(async () => {
@@ -55,49 +55,49 @@ export function ModuleCreateForm({ courseId }: { courseId: string }) {
       </div>
 
       <div className="grid gap-2 sm:grid-cols-3">
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.englishTitle}
           <input
             value={titleEn}
             onChange={(event) => setTitleEn(event.target.value)}
             placeholder="Module title"
-            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.pashtoTitle}
           <input
             value={titlePs}
             dir="rtl"
             onChange={(event) => setTitlePs(event.target.value)}
             placeholder="د برخې سرلیک"
-            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.dariTitle}
           <input
             value={titleDa}
             dir="rtl"
             onChange={(event) => setTitleDa(event.target.value)}
             placeholder="عنوان بخش"
-            className="rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
       </div>
 
       <div className="grid gap-2 sm:grid-cols-3">
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.englishSummary}
           <textarea
             value={descriptionEn}
             onChange={(event) => setDescriptionEn(event.target.value)}
             rows={3}
             placeholder="Short module description"
-            className="min-h-[90px] rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="min-h-[90px] rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.pashtoSummary}
           <textarea
             value={descriptionPs}
@@ -105,10 +105,10 @@ export function ModuleCreateForm({ courseId }: { courseId: string }) {
             onChange={(event) => setDescriptionPs(event.target.value)}
             rows={3}
             placeholder="لنډه تشریح"
-            className="min-h-[90px] rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="min-h-[90px] rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.dariSummary}
           <textarea
             value={descriptionDa}
@@ -116,7 +116,7 @@ export function ModuleCreateForm({ courseId }: { courseId: string }) {
             onChange={(event) => setDescriptionDa(event.target.value)}
             rows={3}
             placeholder="توضیح کوتاه بخش"
-            className="min-h-[90px] rounded-xl border border-stone-200 bg-stone-50 px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="min-h-[90px] rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
       </div>

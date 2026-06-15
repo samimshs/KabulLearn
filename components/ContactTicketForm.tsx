@@ -90,7 +90,7 @@ export function ContactTicketForm() {
         </div>
         <h3 className="mt-4 text-lg font-[800] text-[var(--ink)]">{t.ticketSuccessTitle}</h3>
         <p className="mt-1 text-sm font-[600] text-[var(--muted)]">{t.ticketSuccessBody}</p>
-        <div className="mt-5 inline-block rounded-[var(--radius)] border border-[rgba(24,130,92,0.25)] bg-white px-6 py-4">
+        <div className="mt-5 inline-block rounded-[var(--radius)] border border-[rgba(24,130,92,0.25)] bg-[var(--card)] px-6 py-4">
           <p className="text-[11px] font-[800] uppercase tracking-[1.5px] text-[var(--muted)]">{t.ticketNumberLabel}</p>
           <p className="mt-1 text-3xl font-[900] tracking-[2px] text-[var(--success)]">{ticketNumber}</p>
         </div>
@@ -100,7 +100,7 @@ export function ContactTicketForm() {
   }
 
   const inputClass =
-    "h-10 w-full rounded-[var(--radius)] border border-[var(--border)] bg-white px-3 text-sm font-[600] text-[var(--ink)] placeholder:text-[var(--muted-2)] outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-100)]";
+    "h-10 w-full rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 text-sm font-[600] text-[var(--ink)] placeholder:text-[var(--muted-2)] outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-100)]";
 
   return (
     <form onSubmit={handleSubmit} noValidate className="grid gap-5">
@@ -187,7 +187,7 @@ export function ContactTicketForm() {
           onChange={(e) => setDescription(e.target.value)}
           placeholder={t.ticketDescriptionPlaceholder}
           rows={5}
-          className="w-full resize-y rounded-[var(--radius)] border border-[var(--border)] bg-white px-3 py-2.5 text-sm font-[600] text-[var(--ink)] placeholder:text-[var(--muted-2)] outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-100)]"
+          className="w-full resize-y rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm font-[600] text-[var(--ink)] placeholder:text-[var(--muted-2)] outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-100)]"
         />
       </div>
 

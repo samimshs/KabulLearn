@@ -6,7 +6,7 @@ import { RegisterForm } from "@/components/RegisterForm";
 import { useLanguage } from "@/components/LanguageProvider";
 
 function LoadingCard() {
-  return <div className="rounded-[16px] border border-[var(--border)] bg-white p-4 sm:p-5" aria-hidden="true" />;
+  return <div className="rounded-[16px] border border-[var(--border)] bg-[var(--card)] p-4 sm:p-5" aria-hidden="true" />;
 }
 
 export function RegisterPageContent({
@@ -33,7 +33,7 @@ export function RegisterPageContent({
         <RegisterForm googleOAuthEnabled={googleOAuthEnabled} facebookOAuthEnabled={facebookOAuthEnabled} />
       </Suspense>
 
-      <p className="rounded-[16px] border border-[var(--border)] bg-white px-4 py-2.5 text-center text-[13px] font-[650] leading-5 text-[var(--muted)] shadow-[0_10px_28px_rgba(15,23,42,0.035)]">
+      <p className="rounded-[16px] border border-[var(--border)] bg-[var(--card)] px-4 py-2.5 text-center text-[13px] font-[650] leading-5 text-[var(--muted)] shadow-[0_10px_28px_rgba(15,23,42,0.035)]">
         {t.areYouEducator}{" "}
         <Link href="/login" className="font-[800] text-[var(--brand)] hover:underline">
           {t.signInWithEducatorAccount}

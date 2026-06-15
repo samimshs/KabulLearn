@@ -56,7 +56,7 @@ export default async function CertificateVerificationPage({
       <section className="pr-panel w-full max-w-3xl p-8 lg:p-10">
         <p className="pr-eyebrow">{t.certVerificationEyebrow}</p>
         <h1 className="pr-h1 mt-4">{t.certVerifiedTitle}</h1>
-        <div className="mt-6 grid gap-4 rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5">
+        <div className="mt-6 grid gap-4 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5">
           <div>
             <p className="text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">{t.learnerLabel}</p>
             <p className="mt-1 text-xl font-[800] text-[var(--ink)]">{certificate.user.name ?? certificate.user.email}</p>

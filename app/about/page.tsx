@@ -75,7 +75,7 @@ export default async function AboutPage() {
         <h2 className="text-2xl font-[800] tracking-[-0.4px] text-[var(--ink)]">{c.offersTitle}</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-3">
           {c.offers.map((offer) => (
-            <div key={offer.title} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)]">
+            <div key={offer.title} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
               <h3 className="text-[17px] font-[800] text-[var(--ink)]">{offer.title}</h3>
               <p className="mt-2 text-[13px] font-[600] leading-6 text-[var(--muted)]">{offer.description}</p>
             </div>

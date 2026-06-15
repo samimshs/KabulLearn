@@ -164,14 +164,14 @@ export function VideoPlayer({
 
   return (
     <div className="grid gap-3">
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-slate-950 shadow-sm">
         <div className="aspect-video w-full">
           {/* YT IFrame API replaces this div with the actual <iframe> */}
           <div id={playerId} className="h-full w-full" />
         </div>
       </div>
       {courseId && lessonId ? (
-        <div className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">
+        <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4">
           {completed ? (
             <div className="flex items-center gap-2 text-[14px] font-[800] text-[var(--success)]">
               <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-[var(--success)] text-white">

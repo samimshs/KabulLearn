@@ -94,7 +94,7 @@ function DragOrderPanel({
   }
 
   return (
-    <div className="grid gap-3 rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-3">
+    <div className="grid gap-3 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-3">
       <div className="grid gap-2">
         {orderedItems.map((item, index) => (
           <div
@@ -112,8 +112,8 @@ function DragOrderPanel({
               setOrderedItems((current) => moveItem(current, draggedId, item.id));
               setDraggedId(null);
             }}
-            className={`grid cursor-grab grid-cols-[auto_1fr] items-center gap-3 rounded-xl border bg-white px-3 py-3 transition active:cursor-grabbing ${
-              draggedId === item.id ? "border-[#0f766e] opacity-60" : "border-stone-200 hover:border-teal-200"
+            className={`grid cursor-grab grid-cols-[auto_1fr] items-center gap-3 rounded-xl border bg-[var(--card)] px-3 py-3 transition active:cursor-grabbing ${
+              draggedId === item.id ? "border-[#0f766e] opacity-60" : "border-[var(--border)] hover:border-teal-200"
             }`}
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-50 text-xs font-black text-[#0f766e]">
@@ -167,7 +167,7 @@ function ChoiceItem({
   const [message, setMessage] = useState("");
 
   return (
-    <div className={`grid gap-3 rounded-xl border px-4 py-3 text-sm ${choice.isCorrect ? "border-emerald-300 bg-emerald-50" : "border-stone-200 bg-white"}`}>
+    <div className={`grid gap-3 rounded-xl border px-4 py-3 text-sm ${choice.isCorrect ? "border-emerald-300 bg-emerald-50" : "border-[var(--border)] bg-[var(--card)]"}`}>
       <div className="flex items-center justify-between gap-3">
       <div className="grid min-w-0 gap-1">
         <span className={`font-bold ${choice.isCorrect ? "text-emerald-900" : "text-[#1a2e42]"}`}>
@@ -204,9 +204,9 @@ function ChoiceItem({
           }}
         >
           <div className="grid gap-2 sm:grid-cols-3">
-            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.textEn} onChange={(e) => setEdit({ ...edit, textEn: e.target.value })} />
-            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" dir="rtl" value={edit.textPs} onChange={(e) => setEdit({ ...edit, textPs: e.target.value })} />
-            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" dir="rtl" value={edit.textDa} onChange={(e) => setEdit({ ...edit, textDa: e.target.value })} placeholder="دری" />
+            <input className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm" value={edit.textEn} onChange={(e) => setEdit({ ...edit, textEn: e.target.value })} />
+            <input className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm" dir="rtl" value={edit.textPs} onChange={(e) => setEdit({ ...edit, textPs: e.target.value })} />
+            <input className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm" dir="rtl" value={edit.textDa} onChange={(e) => setEdit({ ...edit, textDa: e.target.value })} placeholder="دری" />
           </div>
           <label className="flex items-center gap-2 text-xs font-black text-[#1a2e42]">
             <input type="checkbox" checked={edit.isCorrect} onChange={(e) => setEdit({ ...edit, isCorrect: e.target.checked })} />
@@ -257,7 +257,7 @@ function AddChoiceForm({
           }
         });
       }}
-      className="grid gap-3 rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-3"
+      className="grid gap-3 rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-3"
     >
       <p className="text-xs font-black uppercase tracking-wider text-[#0f766e]">{t.addAnswerChoice}</p>
       <div className="grid gap-2 sm:grid-cols-3">
@@ -266,7 +266,7 @@ function AddChoiceForm({
           onChange={(e) => setTextEn(e.target.value)}
           placeholder={t.englishAnswer}
           required
-          className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+          className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
         />
         <input
           value={textPs}
@@ -274,14 +274,14 @@ function AddChoiceForm({
           onChange={(e) => setTextPs(e.target.value)}
           placeholder="د ځواب متن"
           required
-          className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+          className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
         />
         <input
           value={textDa}
           dir="rtl"
           onChange={(e) => setTextDa(e.target.value)}
           placeholder="متن پاسخ"
-          className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+          className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
         />
       </div>
       <div className="flex items-center justify-between gap-3">
@@ -290,7 +290,7 @@ function AddChoiceForm({
             type="checkbox"
             checked={isCorrect}
             onChange={(e) => setIsCorrect(e.target.checked)}
-            className="h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
+            className="h-4 w-4 rounded border-[var(--border)] text-emerald-600 focus:ring-emerald-500"
           />
           {t.correctAnswerLabel}
         </label>
@@ -332,7 +332,7 @@ function QuestionCard({
   const [isEditPending, startEditTransition] = useTransition();
 
   return (
-    <article className="grid gap-4 rounded-3xl border border-stone-200 bg-white p-5">
+    <article className="grid gap-4 rounded-3xl border border-[var(--border)] bg-[var(--card)] p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="grid gap-1">
           <p className="text-xs font-black uppercase tracking-wider text-[#0f766e]">
@@ -369,7 +369,7 @@ function QuestionCard({
 
       {deleteError ? <p className="text-xs font-bold text-rose-700">{deleteError}</p> : null}
 
-      <details className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-3">
+      <details className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-3">
         <summary className="cursor-pointer text-xs font-black uppercase tracking-wider text-[#0f766e]">{t.editQuestion}</summary>
         <form
           className="mt-3 grid gap-3"
@@ -391,23 +391,23 @@ function QuestionCard({
             });
           }}
         >
-          <select className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.type} onChange={(e) => setEdit({ ...edit, type: e.target.value as QuestionType })}>
+          <select className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm" value={edit.type} onChange={(e) => setEdit({ ...edit, type: e.target.value as QuestionType })}>
             <option value={QuestionType.SINGLE_CHOICE}>{t.singleChoice}</option>
             <option value={QuestionType.MULTIPLE_CHOICE}>{t.multipleChoice}</option>
             <option value={QuestionType.TEXT_INPUT}>{t.textMathAnswer}</option>
           </select>
           <div className="grid gap-2 sm:grid-cols-3">
-            <textarea className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.promptEn} onChange={(e) => setEdit({ ...edit, promptEn: e.target.value })} />
-            <textarea className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" dir="rtl" value={edit.promptPs} onChange={(e) => setEdit({ ...edit, promptPs: e.target.value })} />
-            <textarea className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" dir="rtl" value={edit.promptDa} onChange={(e) => setEdit({ ...edit, promptDa: e.target.value })} placeholder={t.dariPrompt} />
+            <textarea className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm" value={edit.promptEn} onChange={(e) => setEdit({ ...edit, promptEn: e.target.value })} />
+            <textarea className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm" dir="rtl" value={edit.promptPs} onChange={(e) => setEdit({ ...edit, promptPs: e.target.value })} />
+            <textarea className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm" dir="rtl" value={edit.promptDa} onChange={(e) => setEdit({ ...edit, promptDa: e.target.value })} placeholder={t.dariPrompt} />
           </div>
           {edit.type === QuestionType.TEXT_INPUT ? (
-            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.correctAnswer} onChange={(e) => setEdit({ ...edit, correctAnswer: e.target.value })} placeholder={t.correctAnswerLabel} />
+            <input className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm" value={edit.correctAnswer} onChange={(e) => setEdit({ ...edit, correctAnswer: e.target.value })} placeholder={t.correctAnswerLabel} />
           ) : null}
           <div className="grid gap-2 sm:grid-cols-3">
-            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" value={edit.explanationEn} onChange={(e) => setEdit({ ...edit, explanationEn: e.target.value })} placeholder={t.explanationEnLabel} />
-            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" dir="rtl" value={edit.explanationPs} onChange={(e) => setEdit({ ...edit, explanationPs: e.target.value })} placeholder={t.explanationPsLabel} />
-            <input className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm" dir="rtl" value={edit.explanationDa} onChange={(e) => setEdit({ ...edit, explanationDa: e.target.value })} placeholder={t.explanationDaLabel} />
+            <input className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm" value={edit.explanationEn} onChange={(e) => setEdit({ ...edit, explanationEn: e.target.value })} placeholder={t.explanationEnLabel} />
+            <input className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm" dir="rtl" value={edit.explanationPs} onChange={(e) => setEdit({ ...edit, explanationPs: e.target.value })} placeholder={t.explanationPsLabel} />
+            <input className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm" dir="rtl" value={edit.explanationDa} onChange={(e) => setEdit({ ...edit, explanationDa: e.target.value })} placeholder={t.explanationDaLabel} />
           </div>
           <button type="submit" disabled={isEditPending} className="inline-flex h-9 items-center justify-center rounded-xl bg-[#0f766e] px-4 text-xs font-black text-white">
             {isEditPending ? t.saving : t.saveQuestion}
@@ -423,7 +423,7 @@ function QuestionCard({
         </div>
       ) : (
         <div className="grid gap-2">
-          <p className="text-xs font-black uppercase tracking-wider text-[#3d4a5a]">
+          <p className="text-xs font-black uppercase tracking-wider text-[var(--ink-2)]">
             {t.answerChoicesCount} ({choices.length})
             {question.type === QuestionType.SINGLE_CHOICE ? (
               <span className="ms-2 text-[#607083]">{t.oneCorrectAnswer}</span>
@@ -524,15 +524,15 @@ function AddQuestionForm({
           }
         });
       }}
-      className="grid gap-4 rounded-3xl border border-stone-200 bg-[#fffdfa] p-5 shadow-sm"
+      className="grid gap-4 rounded-3xl border border-[var(--border)] bg-[#fffdfa] p-5 shadow-sm"
     >
       <p className="text-sm font-black uppercase tracking-wider text-[#0f766e]">{t.addQuestion}</p>
-      <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+      <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
         {t.questionType}
         <select
           value={type}
           onChange={(e) => setType(e.target.value as QuestionType)}
-          className="rounded-xl border border-stone-200 bg-white px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+          className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-3 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
         >
           <option value={QuestionType.SINGLE_CHOICE}>{t.singleChoice}</option>
           <option value={QuestionType.MULTIPLE_CHOICE}>{t.multipleChoice}</option>
@@ -540,7 +540,7 @@ function AddQuestionForm({
         </select>
       </label>
       <div className="grid gap-3 sm:grid-cols-3">
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.englishPrompt}
           <textarea
             value={promptEn}
@@ -548,10 +548,10 @@ function AddQuestionForm({
             required
             rows={2}
             placeholder="What is...?"
-            className="min-h-[72px] rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="min-h-[72px] rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.pashtoPrompt}
           <textarea
             value={promptPs}
@@ -560,10 +560,10 @@ function AddQuestionForm({
             required
             rows={2}
             placeholder="... دی؟"
-            className="min-h-[72px] rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="min-h-[72px] rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.dariPrompt}
           <textarea
             value={promptDa}
@@ -571,51 +571,51 @@ function AddQuestionForm({
             onChange={(e) => setPromptDa(e.target.value)}
             rows={2}
             placeholder="... است؟"
-            className="min-h-[72px] rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="min-h-[72px] rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
       </div>
       {type === QuestionType.TEXT_INPUT ? (
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.correctAnswerLabel}
           <input
             value={correctAnswer}
             onChange={(e) => setCorrectAnswer(e.target.value)}
             required
             placeholder="Example: 42 or x = 5"
-            className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
           <span className="text-xs font-[700] text-[#607083]">{t.mathAnswerHint}</span>
         </label>
       ) : null}
       <div className="grid gap-3 sm:grid-cols-3">
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.explanationEnLabel}
           <input
             value={explanationEn}
             onChange={(e) => setExplanationEn(e.target.value)}
             placeholder="Shown after student answers"
-            className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.explanationPsLabel}
           <input
             value={explanationPs}
             dir="rtl"
             onChange={(e) => setExplanationPs(e.target.value)}
             placeholder="د ځواب وروسته ښودل کېږي"
-            className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
-        <label className="grid gap-1 text-sm font-medium text-[#3d4a5a]">
+        <label className="grid gap-1 text-sm font-medium text-[var(--ink-2)]">
           {t.explanationDaLabel}
           <input
             value={explanationDa}
             dir="rtl"
             onChange={(e) => setExplanationDa(e.target.value)}
             placeholder="بعد از پاسخ شاگرد نشان داده می‌شود"
-            className="rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+            className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
           />
         </label>
       </div>
@@ -649,7 +649,7 @@ export function QuizBuilderForm({ courseId, lessonId, questions: initialQuestion
       </div>
 
       {questions.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-stone-300 bg-stone-50 p-8 text-center font-bold text-[#3d4a5a]">
+        <div className="rounded-3xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-8 text-center font-bold text-[var(--ink-2)]">
           {t.noQuestionsYet}
         </div>
       ) : (

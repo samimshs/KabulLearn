@@ -78,7 +78,7 @@ export function CourseDiscussion({
           </div>
         ) : (
           threads.map((thread) => (
-            <article key={thread.id} className="grid gap-3 rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-4">
+            <article key={thread.id} className="grid gap-3 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-4">
               <div>
                 <h3 className="text-lg font-[800] text-[var(--ink)]">{thread.title}</h3>
                 <p className="mt-1 text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">

@@ -81,7 +81,7 @@ export default async function SupportKabulLearnPage() {
         ))}
       </section>
 
-      <section className="mt-8 overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-white shadow-[var(--shadow)]">
+      <section className="mt-8 overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow)]">
         <div className="border-b border-[var(--border)] bg-[linear-gradient(135deg,rgba(0,87,255,0.07),rgba(24,130,92,0.08))] px-6 py-6 sm:px-8">
           <p className="pr-eyebrow">{t.donationDashboardEyebrow}</p>
           <h2 className="pr-h2 mt-2">{t.donationDashboardTitle}</h2>

@@ -66,7 +66,7 @@ export default async function LearningPathDetailPage({ params }: { params: Promi
 
   return (
     <main className="pr-page grid gap-8 py-8">
-      <section className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-white shadow-[var(--shadow-sm)]">
+      <section className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
         <div className="h-28" style={{ backgroundColor: path.coverColor }} />
         <div className="grid gap-3 p-6 lg:p-8">
           <Link href="/learning-paths" className="text-[12px] font-[800] text-[var(--brand)] underline-offset-2 hover:underline">
@@ -87,7 +87,7 @@ export default async function LearningPathDetailPage({ params }: { params: Promi
           const lessons = course.modules.reduce((sum, module) => sum + module.lessons.length, 0);
           const level = localizeLevel(course.level, locale);
           return (
-            <article key={course.id} className="grid gap-4 rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)] md:grid-cols-[auto_1fr_auto] md:items-center">
+            <article key={course.id} className="grid gap-4 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)] md:grid-cols-[auto_1fr_auto] md:items-center">
               <span className="grid h-11 w-11 place-items-center rounded-full bg-[var(--brand-50)] text-[15px] font-[900] text-[var(--brand)]">
                 {order + 1}
               </span>

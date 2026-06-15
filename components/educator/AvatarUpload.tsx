@@ -59,11 +59,11 @@ export function AvatarUpload({ name, currentUrl, onChange }: AvatarUploadProps) 
 
   return (
     <div className="flex items-center gap-4">
-      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-dashed border-slate-200 bg-slate-50">
+      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-dashed border-[var(--border)] bg-[var(--surface)]">
         {preview ? (
           <img src={preview} alt="" className="h-full w-full rounded-full object-cover" />
         ) : (
-          <span className="flex h-full w-full items-center justify-center bg-slate-100 text-lg font-[900] text-[var(--brand)]">
+          <span className="flex h-full w-full items-center justify-center bg-[var(--surface)] text-lg font-[900] text-[var(--brand)]">
             {initials(name || "?")}
           </span>
         )}
@@ -81,7 +81,7 @@ export function AvatarUpload({ name, currentUrl, onChange }: AvatarUploadProps) 
         <label
           htmlFor={inputId}
           aria-disabled={status === "uploading"}
-          className="inline-flex h-8 cursor-pointer items-center rounded-[var(--radius)] border border-slate-200 bg-white px-3 text-xs font-[800] text-slate-800 transition hover:border-[var(--brand)] hover:text-[var(--brand)] aria-disabled:pointer-events-none aria-disabled:cursor-wait aria-disabled:opacity-60"
+          className="inline-flex h-8 cursor-pointer items-center rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-3 text-xs font-[800] text-[var(--ink)] transition hover:border-[var(--brand)] hover:text-[var(--brand)] aria-disabled:pointer-events-none aria-disabled:cursor-wait aria-disabled:opacity-60"
         >
           {status === "uploading" ? t.uploadingAvatar : preview ? t.changePhoto : t.uploadPhoto}
         </label>

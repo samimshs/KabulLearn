@@ -105,19 +105,19 @@ export default async function QuizBuilderPage({ params }: Props) {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-4">
-          <div className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4 text-sm font-[800] text-[var(--muted)]">
+          <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4 text-sm font-[800] text-[var(--muted)]">
             Passing score
             <p className="mt-2 text-lg text-[var(--ink)]">{lesson.passingScore ?? 70}%</p>
           </div>
-          <div className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4 text-sm font-[800] text-[var(--muted)]">
+          <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4 text-sm font-[800] text-[var(--muted)]">
             Quiz type
             <p className="mt-2 text-lg text-[var(--ink)]">{lesson.isFinalTest ? "Final test" : "Module quiz"}</p>
           </div>
-          <div className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4 text-sm font-[800] text-[var(--muted)]">
+          <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4 text-sm font-[800] text-[var(--muted)]">
             Questions
             <p className="mt-2 text-lg text-[var(--ink)]">{questions.length}</p>
           </div>
-          <div className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4 text-sm font-[800] text-[var(--muted)]">
+          <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4 text-sm font-[800] text-[var(--muted)]">
             Answer choices
             <p className="mt-2 text-lg text-[var(--ink)]">{answerChoiceCount}</p>
           </div>

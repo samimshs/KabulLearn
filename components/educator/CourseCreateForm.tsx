@@ -329,7 +329,7 @@ function InstructorAvatar({ instructor }: { instructor: InstructorInput }) {
       .join("") || "?";
 
   return (
-    <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-xs font-black text-[var(--brand)]">
+    <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full border border-[var(--border)] bg-[var(--surface)] text-xs font-black text-[var(--brand)]">
       {instructor.avatarUrl ? <img src={instructor.avatarUrl} alt="" className="h-full w-full object-cover" /> : initials}
     </span>
   );
@@ -339,7 +339,7 @@ function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={`h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold outline-none transition focus:border-[var(--brand)] focus:ring-4 focus:ring-blue-100 ${props.className ?? ""}`}
+      className={`h-11 w-full rounded-2xl border border-[var(--border)] bg-[var(--card)] px-4 text-sm font-semibold outline-none transition focus:border-[var(--brand)] focus:ring-4 focus:ring-blue-100 ${props.className ?? ""}`}
     />
   );
 }
@@ -348,7 +348,7 @@ function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
       {...props}
-      className={`w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-4 focus:ring-blue-100 ${props.className ?? ""}`}
+      className={`w-full rounded-2xl border border-[var(--border)] bg-[var(--card)] px-4 py-3 text-sm font-semibold leading-6 outline-none transition focus:border-[var(--brand)] focus:ring-4 focus:ring-blue-100 ${props.className ?? ""}`}
     />
   );
 }
@@ -1098,25 +1098,25 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[1.6px] text-[var(--brand)]">{t.cwTitle}</p>
-              <h1 className="mt-1 text-2xl font-black tracking-[-0.6px] text-slate-950">{active.question}</h1>
+              <h1 className="mt-1 text-2xl font-black tracking-[-0.6px] text-[var(--ink)]">{active.question}</h1>
             </div>
-            <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-600 shadow-sm">
+            <span className="rounded-full bg-[var(--card)] px-3 py-1 text-xs font-black text-[var(--muted)] shadow-sm">
               {savedState === "saving" ? t.cwSaving : savedState === "saved" ? t.cwSaved : t.cwSaveDraft}
             </span>
           </div>
-          <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{active.help}</p>
+          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--muted)]">{active.help}</p>
           <div className="mt-4">
-            <div className="flex items-center justify-between text-xs font-black text-slate-500">
+            <div className="flex items-center justify-between text-xs font-black text-[var(--muted)]">
               <span>{t.cwStepProgress} {activeIndex + 1} {t.cwOf} {steps.length}</span>
               <span>{Math.round(((activeIndex + 1) / steps.length) * 100)}%</span>
             </div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--border)]">
               <div className="h-full rounded-full bg-[var(--brand)] transition-all" style={{ width: `${((activeIndex + 1) / steps.length) * 100}%` }} />
             </div>
           </div>
         </header>
 
-        <main className={`my-5 min-h-0 flex-1 rounded-[24px] border border-slate-200 bg-white shadow-[0_22px_70px_rgba(15,23,42,0.08)] ${active.key === "structure" ? "overflow-hidden p-0" : "p-5"}`}>
+        <main className={`my-5 min-h-0 flex-1 rounded-[24px] border border-[var(--border)] bg-[var(--card)] shadow-[0_22px_70px_rgba(15,23,42,0.08)] ${active.key === "structure" ? "overflow-hidden p-0" : "p-5"}`}>
           <StepBody
             step={active.key}
             state={state}
@@ -1161,12 +1161,12 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
           />
         </main>
 
-        <footer className="sticky bottom-0 flex shrink-0 items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-[0_-14px_36px_rgba(15,23,42,0.08)] backdrop-blur">
+        <footer className="sticky bottom-0 flex shrink-0 items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3 shadow-[0_-14px_36px_rgba(15,23,42,0.08)] backdrop-blur">
           <button
             type="button"
             onClick={() => setActiveStep(steps[Math.max(0, activeIndex - 1)].key)}
             disabled={activeIndex === 0}
-            className="h-10 rounded-xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-600 transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-40"
+            className="h-10 rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 text-sm font-black text-[var(--muted)] transition hover:border-[var(--border)] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {t.cwBack}
           </button>
@@ -1256,30 +1256,30 @@ function StepBody(props: {
   if (step === "description") {
     return (
       <div className="grid gap-4">
-        <label className="grid gap-2 text-sm font-black text-slate-700">
+        <label className="grid gap-2 text-sm font-black text-[var(--ink-2)]">
           {t.cwTitleLabel}
           <TextInput value={state.titleEn} onChange={(event) => patch({ titleEn: event.target.value })} placeholder={t.cwTitlePlaceholder} className="h-12 text-lg font-black" />
           <FieldError message={props.fieldErrors.titleEn} />
         </label>
-        <label className="grid gap-2 text-sm font-black text-slate-700">
+        <label className="grid gap-2 text-sm font-black text-[var(--ink-2)]">
           {t.cwSlugLabel}
           <TextInput value={state.slug} onChange={(event) => patch({ slug: slugify(event.target.value) })} />
           <FieldError message={props.fieldErrors.slug} />
         </label>
-        <label className="grid gap-2 text-sm font-black text-slate-700">
+        <label className="grid gap-2 text-sm font-black text-[var(--ink-2)]">
           {t.cwDescriptionLabel}
           <TextArea value={state.descriptionEn} onChange={(event) => patch({ descriptionEn: event.target.value })} rows={5} placeholder={t.cwDescriptionPlaceholder} />
           <FieldError message={props.fieldErrors.descriptionEn} />
         </label>
         <div className="grid gap-2">
-          <span className="text-xs font-black uppercase tracking-[1.2px] text-slate-500">{t.cwLevelLabel}</span>
+          <span className="text-xs font-black uppercase tracking-[1.2px] text-[var(--muted)]">{t.cwLevelLabel}</span>
           <div className="flex flex-wrap gap-2">
             {(["beginner", "intermediate", "advanced"] as const).map((lvl) => (
               <button
                 key={lvl}
                 type="button"
                 onClick={() => patch({ level: state.level === lvl ? "" : lvl })}
-                className={`rounded-xl border px-4 py-2 text-xs font-black transition ${state.level === lvl ? "border-[var(--brand)] bg-blue-50 text-[var(--brand)]" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"}`}
+                className={`rounded-xl border px-4 py-2 text-xs font-black transition ${state.level === lvl ? "border-[var(--brand)] bg-blue-50 text-[var(--brand)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:border-[var(--border)]"}`}
               >
                 {localizeLevel(lvl, props.locale)}
               </button>
@@ -1287,12 +1287,12 @@ function StepBody(props: {
           </div>
         </div>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-black uppercase tracking-[1.4px] text-slate-500">{t.cwTranslationSuggestions}</p>
+          <p className="text-xs font-black uppercase tracking-[1.4px] text-[var(--muted)]">{t.cwTranslationSuggestions}</p>
           <button
             type="button"
             onClick={props.translateDescriptionNow}
             disabled={props.isTranslating || (!state.descriptionEn.trim() && !state.titleEn.trim())}
-            className="flex items-center gap-1.5 rounded-lg border border-[var(--brand)]/30 bg-blue-50 px-3 py-1.5 text-xs font-black text-[var(--brand)] transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-lg border border-[var(--brand)] bg-blue-50 px-3 py-1.5 text-xs font-black text-[var(--brand)] transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {props.isTranslating ? (
               <>
@@ -1334,14 +1334,14 @@ function StepBody(props: {
               key={choice.value}
               type="button"
               onClick={() => patch({ language: choice.value })}
-              className={`flex items-start gap-3 rounded-2xl border px-4 py-3.5 text-left transition ${active ? "border-[var(--brand)] bg-blue-50" : "border-slate-200 bg-white hover:border-slate-300"}`}
+              className={`flex items-start gap-3 rounded-2xl border px-4 py-3.5 text-left transition ${active ? "border-[var(--brand)] bg-blue-50" : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--border)]"}`}
             >
-              <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${active ? "border-[var(--brand)]" : "border-slate-300"}`}>
+              <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${active ? "border-[var(--brand)]" : "border-[var(--border)]"}`}>
                 {active && <span className="h-2 w-2 rounded-full bg-[var(--brand)]" />}
               </span>
               <span className="grid gap-0.5">
-                <span className={`text-sm font-black ${active ? "text-[var(--brand)]" : "text-slate-800"}`}>{choice.label}</span>
-                <span className="text-xs font-semibold text-slate-500">{choice.hint}</span>
+                <span className={`text-sm font-black ${active ? "text-[var(--brand)]" : "text-[var(--ink)]"}`}>{choice.label}</span>
+                <span className="text-xs font-semibold text-[var(--muted)]">{choice.hint}</span>
               </span>
             </button>
           );
@@ -1356,15 +1356,15 @@ function StepBody(props: {
         <FieldError message={props.fieldErrors.instructors} />
 
         {/* Primary instructor (auto-loaded) */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-3">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3">
           {props.primaryInstructor
             ? <InstructorCard instructor={props.primaryInstructor} label={t.primaryInstructorBadge} />
-            : <p className="text-sm font-bold text-slate-500">{t.loadingProfile}</p>}
+            : <p className="text-sm font-bold text-[var(--muted)]">{t.loadingProfile}</p>}
         </div>
 
         {/* Co-instructors already added */}
         {props.coInstructors.map((instructor) => (
-          <div key={instructor.username} className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white p-3">
+          <div key={instructor.username} className="flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3">
             <InstructorCard instructor={instructor} label={instructor.source === "platform" ? t.platformEducatorBadge : t.externalInstructorBadge} />
             <button
               type="button"
@@ -1380,7 +1380,7 @@ function StepBody(props: {
           {props.availableEducators.length > 0 && (
             <div className="grid max-h-36 gap-1.5 overflow-y-auto">
               {props.availableEducators.slice(0, 5).map((educator) => (
-                <button key={educator.id} type="button" onClick={() => props.addPlatformInstructor(educator)} className="rounded-2xl border border-slate-200 bg-white p-3 text-left transition hover:border-blue-200 hover:bg-blue-50">
+                <button key={educator.id} type="button" onClick={() => props.addPlatformInstructor(educator)} className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3 text-left transition hover:border-blue-200 hover:bg-blue-50">
                   <InstructorCard instructor={educator} label={t.platformEducatorBadge} />
                 </button>
               ))}
@@ -1389,14 +1389,14 @@ function StepBody(props: {
         </div>
 
         {/* Add external instructor */}
-        <div className="rounded-2xl border border-slate-200 bg-stone-50/60">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
           <button
             type="button"
             onClick={() => props.setManualOpen(!props.manualOpen)}
             className="flex w-full items-center justify-between px-4 py-3 text-sm font-black text-[var(--brand)]"
           >
             {t.cwAddExternalInstructor}
-            <span className="text-xs text-slate-400">{props.manualOpen ? "▴" : "▾"}</span>
+            <span className="text-xs text-[var(--muted)]">{props.manualOpen ? "▴" : "▾"}</span>
           </button>
 
           {props.manualOpen ? (
@@ -1414,8 +1414,8 @@ function StepBody(props: {
 
   if (step === "structure") {
     const lesson = props.selectedLesson;
-    const colHeader = "sticky top-0 z-10 border-b border-slate-100 bg-white px-3 py-2.5 text-[10px] font-black uppercase tracking-[1.4px] text-[#0f766e]";
-    const inputSm = "h-8 w-full rounded-xl border border-slate-200 bg-stone-50 px-3 text-xs font-black outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10";
+    const colHeader = "sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--card)] px-3 py-2.5 text-[10px] font-black uppercase tracking-[1.4px] text-[#0f766e]";
+    const inputSm = "h-8 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-xs font-black outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10";
     const pill = "text-[10px] font-black uppercase tracking-[1.2px]";
 
     return (
@@ -1457,12 +1457,12 @@ function StepBody(props: {
     return (
       <div className="grid gap-3">
         {choices.map((choice) => (
-          <button key={choice.value} type="button" onClick={() => patch({ pricing: choice.value })} className={`rounded-2xl border px-4 py-3 text-left text-sm font-black transition ${state.pricing === choice.value ? "border-[var(--brand)] bg-blue-50 text-[var(--brand)]" : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"}`}>
+          <button key={choice.value} type="button" onClick={() => patch({ pricing: choice.value })} className={`rounded-2xl border px-4 py-3 text-left text-sm font-black transition ${state.pricing === choice.value ? "border-[var(--brand)] bg-blue-50 text-[var(--brand)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--ink-2)] hover:border-[var(--border)]"}`}>
             {choice.label}
           </button>
         ))}
         {state.pricing === "paid" ? (
-          <label className="grid gap-2 text-sm font-black text-slate-700">
+          <label className="grid gap-2 text-sm font-black text-[var(--ink-2)]">
             {t.cwPriceUsd}
             <TextInput value={state.priceUsd} onChange={(event) => patch({ priceUsd: event.target.value })} type="number" min="1" step="0.01" />
             <FieldError message={props.fieldErrors.priceCents} />
@@ -1489,8 +1489,8 @@ function StepBody(props: {
   return (
     <div className="grid gap-3">
       {checks.map((check) => (
-        <div key={check.label} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
-          <span className="text-sm font-black text-slate-800">{check.label}</span>
+        <div key={check.label} className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] px-4 py-3">
+          <span className="text-sm font-black text-[var(--ink)]">{check.label}</span>
           <span className={`rounded-full px-3 py-1 text-xs font-black ${check.ok ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
             {check.ok ? t.cwReady : t.cwNeedsAttention}
           </span>
@@ -1507,7 +1507,7 @@ function TBtn({ loading, onClick }: { loading: boolean; onClick: () => void }) {
       type="button"
       disabled={loading}
       onClick={onClick}
-      className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[9px] font-black text-slate-500 transition hover:border-[#0f766e]/50 hover:text-[#0f766e] disabled:opacity-50"
+      className="flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--card)] px-2 py-1 text-[9px] font-black text-[var(--muted)] transition hover:border-[#0f766e]/50 hover:text-[#0f766e] disabled:opacity-50"
     >
       {loading ? (
         <svg className="h-2.5 w-2.5 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -1714,7 +1714,7 @@ function StructureColumns(props: {
   const divider = (col: "col1" | "col2" | "col4") => (
     <div
       onMouseDown={(e) => startResize(col, e)}
-      className="w-1.5 shrink-0 cursor-col-resize select-none bg-slate-100 transition-colors hover:bg-[#0f766e]/30"
+      className="w-1.5 shrink-0 cursor-col-resize select-none bg-[var(--surface)] transition-colors hover:bg-[#0f766e]/30"
     />
   );
 
@@ -1722,7 +1722,7 @@ function StructureColumns(props: {
     <div className="flex min-h-[520px] overflow-hidden rounded-[24px]">
 
       {/* ── Col 1: Modules ── */}
-      <div style={{ width: widths.col1 }} className="flex shrink-0 flex-col overflow-y-auto bg-stone-50/70">
+      <div style={{ width: widths.col1 }} className="flex shrink-0 flex-col overflow-y-auto bg-[var(--surface)]">
         <p className={colHeader}>{t.modules}</p>
         <FieldError message={props.fieldErrors.structure} />
         <div className="flex flex-1 flex-col gap-1 p-2">
@@ -1752,24 +1752,24 @@ function StructureColumns(props: {
                     props.setSelectedModuleId(module.id);
                     props.setSelectedLessonId((state.lessonsByModule[module.id] ?? [])[0]?.id ?? "");
                   }}
-                  className={`flex w-full flex-col rounded-xl px-2.5 py-2 text-left transition ${isActive ? "bg-[#0f766e]/10" : "hover:bg-white"}`}
+                  className={`flex w-full flex-col rounded-xl px-2.5 py-2 text-left transition ${isActive ? "bg-[#0f766e]/10" : "hover:bg-[var(--card)]"}`}
                 >
                   <div className="flex items-center gap-1">
-                    <svg viewBox="0 0 12 12" className="h-2.5 w-2.5 shrink-0 text-slate-300" fill="currentColor">
+                    <svg viewBox="0 0 12 12" className="h-2.5 w-2.5 shrink-0 text-[var(--muted)]" fill="currentColor">
                       <rect y="1" width="12" height="1.5" rx="0.75"/><rect y="5" width="12" height="1.5" rx="0.75"/><rect y="9" width="12" height="1.5" rx="0.75"/>
                     </svg>
-                    <span className={`${pill} ${isActive ? "text-[#0f766e]" : "text-slate-400"}`}>{t.moduleLabel} {index + 1}</span>
+                    <span className={`${pill} ${isActive ? "text-[#0f766e]" : "text-[var(--muted)]"}`}>{t.moduleLabel} {index + 1}</span>
                   </div>
-                  <span className={`mt-0.5 text-xs font-black leading-tight ${isActive ? "text-[#0f766e]" : "text-slate-700"}`}>
+                  <span className={`mt-0.5 text-xs font-black leading-tight ${isActive ? "text-[#0f766e]" : "text-[var(--ink-2)]"}`}>
                     {module.titleEn || t.cwModulePlaceholder}
                   </span>
-                  <span className="mt-1 text-[9px] font-semibold text-slate-400">{lessonCount} {t.lessons}</span>
+                  <span className="mt-1 text-[9px] font-semibold text-[var(--muted)]">{lessonCount} {t.lessons}</span>
                 </button>
               </div>
             );
           })}
         </div>
-        <div className="border-t border-slate-100 p-2">
+        <div className="border-t border-[var(--border)] p-2">
           <button
             type="button"
             onClick={props.addModule}
@@ -1794,7 +1794,7 @@ function StructureColumns(props: {
                 placeholder={t.cwModulePlaceholder}
               />
               <div className="flex items-center justify-between">
-                <span className={`${pill} text-slate-400`}>PS / DA</span>
+                <span className={`${pill} text-[var(--muted)]`}>PS / DA</span>
                 <TBtn loading={isTranslatingModTitle} onClick={() => void translateModuleTitle()} />
               </div>
               <input
@@ -1813,15 +1813,15 @@ function StructureColumns(props: {
               />
             </div>
             <div className="flex flex-wrap gap-1">
-              <button type="button" onClick={() => props.moveModule(selectedModule.id, -1)} className="rounded-lg border border-slate-200 px-2 py-1 text-[10px] font-black text-slate-500 hover:border-slate-300">↑</button>
-              <button type="button" onClick={() => props.moveModule(selectedModule.id, 1)} className="rounded-lg border border-slate-200 px-2 py-1 text-[10px] font-black text-slate-500 hover:border-slate-300">↓</button>
+              <button type="button" onClick={() => props.moveModule(selectedModule.id, -1)} className="rounded-lg border border-[var(--border)] px-2 py-1 text-[10px] font-black text-[var(--muted)] hover:border-[var(--border)]">↑</button>
+              <button type="button" onClick={() => props.moveModule(selectedModule.id, 1)} className="rounded-lg border border-[var(--border)] px-2 py-1 text-[10px] font-black text-[var(--muted)] hover:border-[var(--border)]">↓</button>
               <button type="button" onClick={() => props.removeModule(selectedModule.id)} className="rounded-lg px-2 py-1 text-[10px] font-black text-red-400 hover:bg-red-50">{t.cwRemove}</button>
             </div>
             <div className="flex flex-col gap-1.5">
               {selectedLessons.map((item) => {
                 const isActive = item.id === props.selectedLesson?.id;
                 const badge = item.type === "VIDEO" ? "VID" : item.type === "READING" ? "READ" : item.type === "QUIZ" ? "QUIZ" : item.type.slice(0, 4);
-                const badgeCls = item.type === "VIDEO" ? "bg-teal-50 text-[#0f766e]" : item.type === "QUIZ" ? "bg-amber-50 text-amber-700" : "bg-slate-100 text-slate-500";
+                const badgeCls = item.type === "VIDEO" ? "bg-teal-50 text-[#0f766e]" : item.type === "QUIZ" ? "bg-amber-50 text-amber-700" : "bg-[var(--surface)] text-[var(--muted)]";
                 const isDragOver = dragOverLesson === item.id;
                 return (
                   <div
@@ -1839,24 +1839,24 @@ function StructureColumns(props: {
                     }}
                     className={`rounded-xl transition ${isDragOver ? "ring-2 ring-[#0f766e]/40" : ""}`}
                   >
-                    <div className={`flex items-center gap-1 rounded-xl border px-2.5 py-2 transition ${isActive ? "border-[#0f766e]/30 bg-[#0f766e]/5" : "border-slate-200 bg-white hover:border-slate-300"}`}>
+                    <div className={`flex items-center gap-1 rounded-xl border px-2.5 py-2 transition ${isActive ? "border-[#0f766e]/30 bg-[#0f766e]/5" : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--border)]"}`}>
                       <button
                         type="button"
                         onClick={() => props.setSelectedLessonId(item.id)}
                         className="flex min-w-0 flex-1 items-center gap-2 text-left"
                       >
-                        <svg viewBox="0 0 12 12" className="h-2.5 w-2.5 shrink-0 cursor-grab text-slate-300" fill="currentColor">
+                        <svg viewBox="0 0 12 12" className="h-2.5 w-2.5 shrink-0 cursor-grab text-[var(--muted)]" fill="currentColor">
                           <rect y="1" width="12" height="1.5" rx="0.75"/><rect y="5" width="12" height="1.5" rx="0.75"/><rect y="9" width="12" height="1.5" rx="0.75"/>
                         </svg>
                         <span className={`shrink-0 rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide ${badgeCls}`}>{badge}</span>
-                        <span className={`min-w-0 flex-1 truncate text-xs font-black ${isActive ? "text-[#0f766e]" : "text-slate-700"}`}>
+                        <span className={`min-w-0 flex-1 truncate text-xs font-black ${isActive ? "text-[#0f766e]" : "text-[var(--ink-2)]"}`}>
                           {item.titleEn || t.cwLessonPlaceholder}
                         </span>
                       </button>
                       <button
                         type="button"
                         onClick={() => props.removeLesson(selectedModuleId, item.id)}
-                        className="shrink-0 rounded-md px-1.5 text-sm font-black text-slate-300 hover:bg-red-50 hover:text-red-400"
+                        className="shrink-0 rounded-md px-1.5 text-sm font-black text-[var(--muted)] hover:bg-red-50 hover:text-red-400"
                         aria-label={t.deleteLesson}
                       >×</button>
                     </div>
@@ -1883,11 +1883,11 @@ function StructureColumns(props: {
             {/* Lesson title — EN + PS/DA */}
             <div className="grid gap-1">
               <div className="flex items-center justify-between">
-                <span className={`${pill} text-slate-400`}>{t.cwTitleLabel}</span>
+                <span className={`${pill} text-[var(--muted)]`}>{t.cwTitleLabel}</span>
               </div>
               <input className={inputSm} value={lesson.titleEn} onChange={(e) => patchLesson({ titleEn: e.target.value })} placeholder={t.cwLessonPlaceholder} />
               <div className="flex items-center justify-between">
-                <span className={`${pill} text-slate-400`}>PS / DA</span>
+                <span className={`${pill} text-[var(--muted)]`}>PS / DA</span>
                 <TBtn loading={isTranslatingLsnTitle} onClick={() => void translateLessonTitle()} />
               </div>
               <div className="grid grid-cols-2 gap-1">
@@ -1897,12 +1897,12 @@ function StructureColumns(props: {
             </div>
 
             <label className="grid gap-1">
-              <span className={`${pill} text-slate-400`}>{t.cwLessonType}</span>
+              <span className={`${pill} text-[var(--muted)]`}>{t.cwLessonType}</span>
               <select
                 value={lesson.type}
                 onChange={(e) => patchLesson({ type: e.target.value as LessonKind })}
                 disabled={isPersistedId(lesson.id, "lesson")}
-                className="h-8 rounded-xl border border-slate-200 bg-stone-50 px-2 text-xs font-semibold outline-none focus:border-[#0f766e] disabled:cursor-not-allowed disabled:opacity-70"
+                className="h-8 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-2 text-xs font-semibold outline-none focus:border-[#0f766e] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {props.lessonTypes.map((lt) => <option key={lt.value} value={lt.value}>{lt.label}</option>)}
               </select>
@@ -1910,7 +1910,7 @@ function StructureColumns(props: {
 
             {lesson.type === "VIDEO" && (
               <label className="grid gap-1">
-                <span className={`${pill} text-slate-400`}>{t.cwYoutubeUrl}</span>
+                <span className={`${pill} text-[var(--muted)]`}>{t.cwYoutubeUrl}</span>
                 <input className={inputSm} value={lesson.youtubeUrl} onChange={(e) => patchLesson({ youtubeUrl: e.target.value })} placeholder="https://www.youtube.com/watch?v=..." />
               </label>
             )}
@@ -1918,28 +1918,28 @@ function StructureColumns(props: {
             {lesson.type === "READING" && (
               <div className="grid gap-1">
                 <div className="flex items-center justify-between">
-                  <span className={`${pill} text-slate-400`}>{t.cwReadingContent} (EN)</span>
+                  <span className={`${pill} text-[var(--muted)]`}>{t.cwReadingContent} (EN)</span>
                 </div>
                 <textarea
-                  className="min-h-[140px] w-full rounded-xl border border-slate-200 bg-stone-50 px-3 py-2 text-xs leading-6 outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
+                  className="min-h-[140px] w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs leading-6 outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10"
                   value={lesson.readingEn}
                   onChange={(e) => patchLesson({ readingEn: e.target.value, readingPs: suggestDraft(e.target.value, lesson.readingPs), readingDa: suggestDraft(e.target.value, lesson.readingDa) })}
                   placeholder={t.cwReadingContent}
                 />
                 <div className="flex items-center justify-between">
-                  <span className={`${pill} text-slate-400`}>PS / DA</span>
+                  <span className={`${pill} text-[var(--muted)]`}>PS / DA</span>
                   <TBtn loading={isTranslatingReading} onClick={() => void translateReading()} />
                 </div>
                 <textarea
                   dir="rtl"
-                  className={`min-h-[100px] w-full rounded-xl border border-slate-200 bg-stone-50 px-3 py-2 text-xs leading-6 outline-none focus:border-[#0f766e] ${isTranslatingReading ? "opacity-50" : ""}`}
+                  className={`min-h-[100px] w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs leading-6 outline-none focus:border-[#0f766e] ${isTranslatingReading ? "opacity-50" : ""}`}
                   value={lesson.readingPs}
                   onChange={(e) => patchLesson({ readingPs: e.target.value })}
                   placeholder="متن درس (پښتو)"
                 />
                 <textarea
                   dir="rtl"
-                  className={`min-h-[100px] w-full rounded-xl border border-slate-200 bg-stone-50 px-3 py-2 text-xs leading-6 outline-none focus:border-[#0f766e] ${isTranslatingReading ? "opacity-50" : ""}`}
+                  className={`min-h-[100px] w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs leading-6 outline-none focus:border-[#0f766e] ${isTranslatingReading ? "opacity-50" : ""}`}
                   value={lesson.readingDa}
                   onChange={(e) => patchLesson({ readingDa: e.target.value })}
                   placeholder="متن درس (دری)"
@@ -1949,13 +1949,13 @@ function StructureColumns(props: {
 
             {lesson.type === "QUIZ" && (
               <div className="grid gap-2">
-                <label className="flex items-center gap-2 text-xs font-black text-slate-700">
-                  <input type="checkbox" checked={lesson.isFinalTest} onChange={(e) => patchLesson({ isFinalTest: e.target.checked })} className="h-4 w-4 rounded border-slate-300 text-[#0f766e]" />
+                <label className="flex items-center gap-2 text-xs font-black text-[var(--ink-2)]">
+                  <input type="checkbox" checked={lesson.isFinalTest} onChange={(e) => patchLesson({ isFinalTest: e.target.checked })} className="h-4 w-4 rounded border-[var(--border)] text-[#0f766e]" />
                   {t.finalTestLabel}
                 </label>
                 <label className="grid gap-1">
-                  <span className={`${pill} text-slate-400`}>{t.passingScore}</span>
-                  <input type="number" min={0} max={100} className="h-8 w-24 rounded-xl border border-slate-200 bg-stone-50 px-3 text-xs outline-none focus:border-[#0f766e]" value={lesson.passingScore} onChange={(e) => patchLesson({ passingScore: Number(e.target.value) })} />
+                  <span className={`${pill} text-[var(--muted)]`}>{t.passingScore}</span>
+                  <input type="number" min={0} max={100} className="h-8 w-24 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-xs outline-none focus:border-[#0f766e]" value={lesson.passingScore} onChange={(e) => patchLesson({ passingScore: Number(e.target.value) })} />
                 </label>
               </div>
             )}
@@ -1963,10 +1963,10 @@ function StructureColumns(props: {
             {["PDF", "SLIDES", "ATTACHMENT", "LINK"].includes(lesson.type) && (
               <div className="grid gap-2">
                 <label className="grid gap-1">
-                  <span className={`${pill} text-slate-400`}>
+                  <span className={`${pill} text-[var(--muted)]`}>
                     {lesson.type === "LINK" ? "URL" : `${lesson.type} URL`}
                   </span>
-                  <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-stone-50 pr-2">
+                  <div className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] pr-2">
                     <input
                       className="h-8 flex-1 bg-transparent px-3 text-xs font-semibold outline-none"
                       value={lesson.resourceUrl}
@@ -1978,25 +1978,25 @@ function StructureColumns(props: {
                       <a href={lesson.resourceUrl} target="_blank" rel="noopener noreferrer" className="shrink-0 text-[10px] font-black text-[#0f766e] hover:underline">↗</a>
                     )}
                   </div>
-                  <p className="text-[9px] font-semibold text-slate-400">Paste a public URL (Google Drive, Dropbox, etc.)</p>
+                  <p className="text-[9px] font-semibold text-[var(--muted)]">Paste a public URL (Google Drive, Dropbox, etc.)</p>
                 </label>
                 <label className="grid gap-1">
-                  <span className={`${pill} text-slate-400`}>Notes</span>
-                  <textarea className="min-h-[60px] w-full rounded-xl border border-slate-200 bg-stone-50 px-3 py-2 text-xs leading-6 outline-none focus:border-[#0f766e]" value={lesson.resourceNote} onChange={(e) => patchLesson({ resourceNote: e.target.value })} placeholder={t.cwResourcePlan} />
+                  <span className={`${pill} text-[var(--muted)]`}>Notes</span>
+                  <textarea className="min-h-[60px] w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs leading-6 outline-none focus:border-[#0f766e]" value={lesson.resourceNote} onChange={(e) => patchLesson({ resourceNote: e.target.value })} placeholder={t.cwResourcePlan} />
                 </label>
               </div>
             )}
 
             {lesson.type === "ASSIGNMENT" && (
               <label className="grid gap-1">
-                <span className={`${pill} text-slate-400`}>{t.cwAssignmentPrompt}</span>
-                <textarea className="min-h-[100px] w-full rounded-xl border border-slate-200 bg-stone-50 px-3 py-2 text-xs leading-6 outline-none focus:border-[#0f766e]" value={lesson.resourceNote} onChange={(e) => patchLesson({ resourceNote: e.target.value })} placeholder={t.cwAssignmentPrompt} />
+                <span className={`${pill} text-[var(--muted)]`}>{t.cwAssignmentPrompt}</span>
+                <textarea className="min-h-[100px] w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs leading-6 outline-none focus:border-[#0f766e]" value={lesson.resourceNote} onChange={(e) => patchLesson({ resourceNote: e.target.value })} placeholder={t.cwAssignmentPrompt} />
               </label>
             )}
           </div>
         ) : (
           <div className="flex flex-1 items-center justify-center p-6">
-            <p className="text-center text-xs font-semibold text-slate-400">{t.cwSelectLesson}</p>
+            <p className="text-center text-xs font-semibold text-[var(--muted)]">{t.cwSelectLesson}</p>
           </div>
         )}
       </div>
@@ -2009,15 +2009,15 @@ function StructureColumns(props: {
             <p className={colHeader}>{t.cwQuiz} — {t.questionsLabel}</p>
             <div className="flex flex-1 flex-col gap-3 p-3">
               {(lesson.draftQuestions ?? []).length === 0 && (
-                <p className="pt-4 text-center text-xs font-semibold text-slate-400">No questions yet. Add one below.</p>
+                <p className="pt-4 text-center text-xs font-semibold text-[var(--muted)]">No questions yet. Add one below.</p>
               )}
               {(lesson.draftQuestions ?? []).map((q, qi) => (
-                <div key={q.id} className="grid gap-2 rounded-xl border border-slate-200 bg-white p-3">
+                <div key={q.id} className="grid gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] p-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[9px] font-black uppercase tracking-[1.2px] text-[#0f766e]">Q{qi + 1}</span>
                     <div className="flex items-center gap-1.5">
                       <TBtn loading={translatingQIds.has(q.id)} onClick={() => void translateQuestion(q.id)} />
-                      <button type="button" onClick={() => removeQuestion(q.id)} className="text-xs font-black text-slate-300 hover:text-red-400">×</button>
+                      <button type="button" onClick={() => removeQuestion(q.id)} className="text-xs font-black text-[var(--muted)] hover:text-red-400">×</button>
                     </div>
                   </div>
                   <select
@@ -2029,7 +2029,7 @@ function StructureColumns(props: {
                         { id: createId("c"), textEn: "", textPs: "", textDa: "", isCorrect: false },
                       ],
                     })}
-                    className="h-7 rounded-lg border border-slate-200 bg-stone-50 px-2 text-[10px] font-semibold outline-none focus:border-[#0f766e]"
+                    className="h-7 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 text-[10px] font-semibold outline-none focus:border-[#0f766e]"
                   >
                     <option value="SINGLE_CHOICE">Single choice</option>
                     <option value="MULTIPLE_CHOICE">Multiple choice</option>
@@ -2037,21 +2037,21 @@ function StructureColumns(props: {
                   </select>
                   {/* Prompt — EN / PS / DA */}
                   <input
-                    className="h-7 w-full rounded-lg border border-slate-200 bg-stone-50 px-2 text-xs font-semibold outline-none focus:border-[#0f766e]"
+                    className="h-7 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 text-xs font-semibold outline-none focus:border-[#0f766e]"
                     value={q.promptEn}
                     onChange={(e) => patchQuestion(q.id, { promptEn: e.target.value })}
                     placeholder="Question (English)"
                   />
                   <input
                     dir="rtl"
-                    className="h-7 w-full rounded-lg border border-slate-200 bg-stone-50 px-2 text-xs font-semibold outline-none focus:border-[#0f766e]"
+                    className="h-7 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 text-xs font-semibold outline-none focus:border-[#0f766e]"
                     value={q.promptPs}
                     onChange={(e) => patchQuestion(q.id, { promptPs: e.target.value })}
                     placeholder="پوښتنه (پښتو)"
                   />
                   <input
                     dir="rtl"
-                    className="h-7 w-full rounded-lg border border-slate-200 bg-stone-50 px-2 text-xs font-semibold outline-none focus:border-[#0f766e]"
+                    className="h-7 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 text-xs font-semibold outline-none focus:border-[#0f766e]"
                     value={q.promptDa}
                     onChange={(e) => patchQuestion(q.id, { promptDa: e.target.value })}
                     placeholder="پرسش (دری)"
@@ -2059,7 +2059,7 @@ function StructureColumns(props: {
 
                   {q.type === "TEXT_INPUT" ? (
                     <input
-                      className="h-7 w-full rounded-lg border border-slate-200 bg-stone-50 px-2 text-xs font-semibold outline-none focus:border-[#0f766e]"
+                      className="h-7 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 text-xs font-semibold outline-none focus:border-[#0f766e]"
                       value={q.correctAnswer}
                       onChange={(e) => patchQuestion(q.id, { correctAnswer: e.target.value })}
                       placeholder="Correct answer"
@@ -2082,7 +2082,7 @@ function StructureColumns(props: {
                                   patchChoice(q.id, c.id, { isCorrect: !c.isCorrect });
                                 }
                               }}
-                              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition ${c.isCorrect ? "border-[#0f766e] bg-[#0f766e]" : "border-slate-300 hover:border-slate-400"}`}
+                              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition ${c.isCorrect ? "border-[#0f766e] bg-[#0f766e]" : "border-[var(--border)] hover:border-[var(--muted)]"}`}
                             >
                               {c.isCorrect && (
                                 <svg viewBox="0 0 8 8" className="h-2 w-2" fill="none">
@@ -2091,7 +2091,7 @@ function StructureColumns(props: {
                               )}
                             </button>
                             <input
-                              className={`h-7 flex-1 rounded-lg border px-2 text-xs outline-none focus:border-[#0f766e] ${c.isCorrect ? "border-emerald-200 bg-white font-semibold text-emerald-800" : "border-slate-200 bg-stone-50"}`}
+                              className={`h-7 flex-1 rounded-lg border px-2 text-xs outline-none focus:border-[#0f766e] ${c.isCorrect ? "border-emerald-200 bg-[var(--card)] font-semibold text-emerald-800" : "border-[var(--border)] bg-[var(--surface)]"}`}
                               value={c.textEn}
                               onChange={(e) => patchChoice(q.id, c.id, { textEn: e.target.value })}
                               placeholder={`Choice ${ci + 1} (EN)`}
@@ -2100,21 +2100,21 @@ function StructureColumns(props: {
                               <span className="shrink-0 rounded-md bg-emerald-100 px-1.5 py-0.5 text-[9px] font-black text-emerald-700">✓ Correct</span>
                             ) : (
                               q.choices.length > 2 && (
-                                <button type="button" onClick={() => removeChoice(q.id, c.id)} className="text-[10px] font-black text-slate-300 hover:text-red-400">×</button>
+                                <button type="button" onClick={() => removeChoice(q.id, c.id)} className="text-[10px] font-black text-[var(--muted)] hover:text-red-400">×</button>
                               )
                             )}
                           </div>
                           <div className="grid grid-cols-2 gap-1 pl-[22px]">
                             <input
                               dir="rtl"
-                              className={`h-6 rounded-md border px-2 text-[10px] outline-none focus:border-[#0f766e] ${c.isCorrect ? "border-emerald-200 bg-white" : "border-slate-100 bg-stone-50"}`}
+                              className={`h-6 rounded-md border px-2 text-[10px] outline-none focus:border-[#0f766e] ${c.isCorrect ? "border-emerald-200 bg-[var(--card)]" : "border-[var(--border)] bg-[var(--surface)]"}`}
                               value={c.textPs}
                               onChange={(e) => patchChoice(q.id, c.id, { textPs: e.target.value })}
                               placeholder="پښتو"
                             />
                             <input
                               dir="rtl"
-                              className={`h-6 rounded-md border px-2 text-[10px] outline-none focus:border-[#0f766e] ${c.isCorrect ? "border-emerald-200 bg-white" : "border-slate-100 bg-stone-50"}`}
+                              className={`h-6 rounded-md border px-2 text-[10px] outline-none focus:border-[#0f766e] ${c.isCorrect ? "border-emerald-200 bg-[var(--card)]" : "border-[var(--border)] bg-[var(--surface)]"}`}
                               value={c.textDa}
                               onChange={(e) => patchChoice(q.id, c.id, { textDa: e.target.value })}
                               placeholder="دری"
@@ -2127,24 +2127,24 @@ function StructureColumns(props: {
                   )}
 
                   {/* Explanation */}
-                  <div className="grid gap-1 border-t border-slate-100 pt-2">
-                    <span className="text-[9px] font-black uppercase tracking-[1.2px] text-slate-400">Explanation (shown after answer)</span>
+                  <div className="grid gap-1 border-t border-[var(--border)] pt-2">
+                    <span className="text-[9px] font-black uppercase tracking-[1.2px] text-[var(--muted)]">Explanation (shown after answer)</span>
                     <input
-                      className="h-7 w-full rounded-lg border border-slate-200 bg-stone-50 px-2 text-xs outline-none focus:border-[#0f766e]"
+                      className="h-7 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 text-xs outline-none focus:border-[#0f766e]"
                       value={q.explanationEn}
                       onChange={(e) => patchQuestion(q.id, { explanationEn: e.target.value })}
                       placeholder="Why this is correct (EN)"
                     />
                     <input
                       dir="rtl"
-                      className="h-7 w-full rounded-lg border border-slate-200 bg-stone-50 px-2 text-xs outline-none focus:border-[#0f766e]"
+                      className="h-7 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 text-xs outline-none focus:border-[#0f766e]"
                       value={q.explanationPs}
                       onChange={(e) => patchQuestion(q.id, { explanationPs: e.target.value })}
                       placeholder="توضیح (پښتو)"
                     />
                     <input
                       dir="rtl"
-                      className="h-7 w-full rounded-lg border border-slate-200 bg-stone-50 px-2 text-xs outline-none focus:border-[#0f766e]"
+                      className="h-7 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 text-xs outline-none focus:border-[#0f766e]"
                       value={q.explanationDa}
                       onChange={(e) => patchQuestion(q.id, { explanationDa: e.target.value })}
                       placeholder="توضیح (دری)"
@@ -2174,25 +2174,25 @@ function TranslationFields(props: {
   onChange: (patchValue: Partial<WizardState>) => void;
 }) {
   return (
-    <div className="grid gap-3 rounded-2xl bg-slate-50 p-3">
-      <p className="text-xs font-bold text-slate-500">{props.t.cwMachineSuggested}</p>
+    <div className="grid gap-3 rounded-2xl bg-[var(--surface)] p-3">
+      <p className="text-xs font-bold text-[var(--muted)]">{props.t.cwMachineSuggested}</p>
       <label className="grid gap-1.5">
-        <span className="text-xs font-black uppercase tracking-[1.2px] text-slate-400">{props.t.pashtoTitle}</span>
+        <span className="text-xs font-black uppercase tracking-[1.2px] text-[var(--muted)]">{props.t.pashtoTitle}</span>
         <TextInput dir="rtl" value={props.titlePs} onChange={(event) => props.onChange({ titlePs: event.target.value })} placeholder={props.t.pashtoTitle} />
       </label>
       <label className="grid gap-1.5">
-        <span className="text-xs font-black uppercase tracking-[1.2px] text-slate-400">{props.t.dariTitle}</span>
+        <span className="text-xs font-black uppercase tracking-[1.2px] text-[var(--muted)]">{props.t.dariTitle}</span>
         <TextInput dir="rtl" value={props.titleDa} onChange={(event) => props.onChange({ titleDa: event.target.value })} placeholder={props.t.dariTitle} />
       </label>
       <label className="grid gap-1.5">
-        <span className="text-xs font-black uppercase tracking-[1.2px] text-slate-400">{props.t.pashtoDescLabel}</span>
+        <span className="text-xs font-black uppercase tracking-[1.2px] text-[var(--muted)]">{props.t.pashtoDescLabel}</span>
         <div className="relative">
           <TextArea dir="rtl" value={props.descriptionPs} onChange={(event) => props.onChange({ descriptionPs: event.target.value })} rows={3} placeholder={props.t.pashtoDescLabel} className={props.isTranslating ? "opacity-50" : ""} />
           {props.isTranslating && <span className="absolute inset-0 flex items-center justify-center text-xs font-black text-[var(--brand)]">{props.t.cwTranslating}</span>}
         </div>
       </label>
       <label className="grid gap-1.5">
-        <span className="text-xs font-black uppercase tracking-[1.2px] text-slate-400">{props.t.dariDescLabel}</span>
+        <span className="text-xs font-black uppercase tracking-[1.2px] text-[var(--muted)]">{props.t.dariDescLabel}</span>
         <div className="relative">
           <TextArea dir="rtl" value={props.descriptionDa} onChange={(event) => props.onChange({ descriptionDa: event.target.value })} rows={3} placeholder={props.t.dariDescLabel} className={props.isTranslating ? "opacity-50" : ""} />
           {props.isTranslating && <span className="absolute inset-0 flex items-center justify-center text-xs font-black text-[var(--brand)]">{props.t.cwTranslating}</span>}
@@ -2236,9 +2236,9 @@ function ExternalInstructorForm({
     if (result) patch({ bioPs: result.ps || instructor.bioPs, bioDa: result.fa || instructor.bioDa });
   }
 
-  const inputCls = "h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10";
-  const textareaCls = "w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold leading-6 outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10";
-  const labelCls = "grid gap-1 text-xs font-black uppercase tracking-[1.1px] text-slate-500";
+  const inputCls = "h-10 w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 text-sm font-semibold outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10";
+  const textareaCls = "w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2.5 text-sm font-semibold leading-6 outline-none focus:border-[#0f766e] focus:ring-2 focus:ring-[#0f766e]/10";
+  const labelCls = "grid gap-1 text-xs font-black uppercase tracking-[1.1px] text-[var(--muted)]";
 
   function TranslateBtn({ loading, onClick, disabled }: { loading: boolean; onClick: () => void; disabled: boolean }) {
     return (
@@ -2263,7 +2263,7 @@ function ExternalInstructorForm({
   }
 
   return (
-    <div className="grid gap-4 border-t border-slate-200 px-4 pb-4 pt-3">
+    <div className="grid gap-4 border-t border-[var(--border)] px-4 pb-4 pt-3">
       {/* Avatar */}
       <AvatarUpload
         name={instructor.name}
@@ -2308,7 +2308,7 @@ function ExternalInstructorForm({
           <TranslateBtn loading={isTranslatingTitle} onClick={translateTitle} disabled={!instructor.title?.trim()} />
         </div>
         {/* Title translations */}
-        <div className="grid gap-2 rounded-xl bg-slate-50 p-2.5 sm:grid-cols-2">
+        <div className="grid gap-2 rounded-xl bg-[var(--surface)] p-2.5 sm:grid-cols-2">
           <label className={labelCls}>
             {t.cwInstructorJobTitlePs}
             <input dir="rtl" className={inputCls} value={instructor.titlePs ?? ""} onChange={(e) => patch({ titlePs: e.target.value })} placeholder={t.cwInstructorJobTitlePs} />
@@ -2335,7 +2335,7 @@ function ExternalInstructorForm({
           <TranslateBtn loading={isTranslatingBio} onClick={translateBio} disabled={!instructor.bio?.trim()} />
         </div>
         {/* Bio translations */}
-        <div className="grid gap-2 rounded-xl bg-slate-50 p-2.5 sm:grid-cols-2">
+        <div className="grid gap-2 rounded-xl bg-[var(--surface)] p-2.5 sm:grid-cols-2">
           <label className={labelCls}>
             {t.bioPsLabel}
             <textarea dir="rtl" className={`${textareaCls} min-h-[70px]`} value={instructor.bioPs ?? ""} onChange={(e) => patch({ bioPs: e.target.value })} placeholder={t.bioPsLabel} />
@@ -2376,8 +2376,8 @@ function InstructorCard({ instructor, label }: { instructor: InstructorInput; la
     <div className="flex min-w-0 flex-1 items-center gap-3">
       <InstructorAvatar instructor={instructor} />
       <div className="min-w-0">
-        <p className="truncate text-sm font-black text-slate-950">{instructor.name}</p>
-        <p className="text-xs font-semibold text-slate-500">{label}</p>
+        <p className="truncate text-sm font-black text-[var(--ink)]">{instructor.name}</p>
+        <p className="text-xs font-semibold text-[var(--muted)]">{label}</p>
       </div>
     </div>
   );

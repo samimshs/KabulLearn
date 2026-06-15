@@ -373,7 +373,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
             <h2 className="pr-h2 mt-1">{t.myCourses}</h2>
           </div>
           <div className="flex items-center gap-2">
-            <label className="flex h-9 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 text-[var(--muted)] focus-within:border-[var(--brand)] focus-within:bg-white">
+            <label className="flex h-9 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 text-[var(--muted)] focus-within:border-[var(--brand)] focus-within:bg-[var(--card)]">
               <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" aria-hidden="true">
                 <circle cx="7" cy="7" r="4.2" stroke="currentColor" strokeWidth="1.5" />
                 <path d="m10 10 2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -456,7 +456,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
                             type="button"
                             onClick={() => setDropCandidate({ id: course.id, title })}
                             disabled={isDropping}
-                            className="inline-flex min-h-9 w-full items-center justify-center rounded-[var(--radius)] border border-[rgba(196,43,43,0.2)] bg-white px-3 text-[12px] font-[900] text-[var(--danger)] transition hover:bg-[var(--danger-50)] disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex min-h-9 w-full items-center justify-center rounded-[var(--radius)] border border-[rgba(196,43,43,0.2)] bg-[var(--card)] px-3 text-[12px] font-[900] text-[var(--danger)] transition hover:bg-[var(--danger-50)] disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             {isDropping ? t.droppingLabel : t.dropCourse}
                           </button>
@@ -562,7 +562,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
       </div>
       {dropCandidate ? (
         <div className="fixed inset-0 z-[100] grid place-items-center bg-slate-950/55 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="drop-course-title">
-          <div className="w-full max-w-md rounded-[var(--radius-xl)] border border-[rgba(196,43,43,0.18)] bg-white p-6 text-start shadow-[0_30px_100px_rgba(15,23,42,0.28)]">
+          <div className="w-full max-w-md rounded-[var(--radius-xl)] border border-[rgba(196,43,43,0.18)] bg-[var(--card)] p-6 text-start shadow-[0_30px_100px_rgba(15,23,42,0.28)]">
             <div className="flex items-start gap-4">
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[var(--danger-50)] text-[var(--danger)]">
                 <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden="true">

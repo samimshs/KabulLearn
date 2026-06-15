@@ -93,7 +93,7 @@ export function VideoPlaceholder({
       aria-label={`${title}. ${description}`}
     >
       <div>
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-white text-[var(--brand)] shadow-[var(--shadow-sm)]">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[var(--card)] text-[var(--brand)] shadow-[var(--shadow-sm)]">
           <span className="text-xs font-[900] uppercase tracking-[1px]">Play</span>
         </div>
         <p className="mt-4 text-lg font-[800] text-[var(--ink)]">{title}</p>
@@ -110,7 +110,7 @@ export function LinkGrid({ items }: { items: LinkItem[] }) {
         <Link
           key={item.href}
           href={item.href}
-          className="group rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 hover:border-[rgba(0,87,255,0.28)] hover:shadow-[var(--shadow)]"
+          className="group rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 hover:border-[rgba(0,87,255,0.28)] hover:shadow-[var(--shadow)]"
         >
           <h3 className="text-lg font-[800] text-[var(--ink)]">{item.title}</h3>
           <p className="mt-2 text-sm font-[600] leading-6 text-[var(--muted)]">{item.description}</p>

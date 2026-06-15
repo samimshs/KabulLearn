@@ -62,7 +62,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   } catch { /* auth failure — treat as logged out */ }
 
   return (
-    <html lang={locale} dir={direction} className={manrope.variable}>
+    <html lang={locale} dir={direction} className={manrope.variable} suppressHydrationWarning>
+      <head>
+        {/* Set theme before first paint to avoid flash */}
+        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('kl-theme');if(t==='dark'||(t==null&&matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}` }} />
+      </head>
       <body>
         <LanguageProvider initialLocale={locale}>
           <a href="#main-content" className="kl-skip-link">{t.skipToContent}</a>

@@ -24,7 +24,7 @@ export default async function EducatorResourcesPage() {
       <InfoSection title={content.workflowTitle}>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {content.steps.map((step) => (
-            <article key={step.title} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)]">
+            <article key={step.title} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
               <h3 className="text-lg font-[900] text-[var(--ink)]">{step.title}</h3>
               {step.paragraphs?.map((paragraph) => (
                 <p key={paragraph} className="mt-2 text-sm font-[650] leading-6 text-[var(--muted)]">{paragraph}</p>
@@ -37,7 +37,7 @@ export default async function EducatorResourcesPage() {
       <InfoSection title={content.checklistTitle}>
         <ul className="grid gap-3 text-sm font-[650] leading-6 text-[var(--muted)] md:grid-cols-2">
           {content.checklist.map((item) => (
-            <li key={item} className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">{item}</li>
+            <li key={item} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4">{item}</li>
           ))}
         </ul>
       </InfoSection>
@@ -45,7 +45,7 @@ export default async function EducatorResourcesPage() {
       <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
         <Link
           href="/educator-guidelines"
-          className="group rounded-[var(--radius-xl)] border border-[var(--border)] bg-white p-6 shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 hover:border-[rgba(0,87,255,0.28)] hover:shadow-[var(--shadow)]"
+          className="group rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-6 shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 hover:border-[rgba(0,87,255,0.28)] hover:shadow-[var(--shadow)]"
         >
           <h2 className="text-2xl font-[900] tracking-[-0.5px] text-[var(--ink)]">{content.guidelinesTitle}</h2>
           <p className="mt-2 text-sm font-[650] leading-7 text-[var(--muted)]">{content.guidelinesDescription}</p>

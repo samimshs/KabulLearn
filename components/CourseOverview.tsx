@@ -124,7 +124,7 @@ function ShareButton({ courseId, title, t }: { courseId: string; title: string; 
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute start-0 top-[calc(100%+6px)] z-50 min-w-[200px] overflow-hidden rounded-[12px] border border-[var(--border)] bg-white shadow-[0_8px_24px_rgba(10,9,20,0.12)]">
+          <div className="absolute start-0 top-[calc(100%+6px)] z-50 min-w-[200px] overflow-hidden rounded-[12px] border border-[var(--border)] bg-[var(--card)] shadow-[0_8px_24px_rgba(10,9,20,0.12)]">
             <a
               href={`https://wa.me/?text=${encodeURIComponent(text + "\n" + url)}`}
               target="_blank"
@@ -358,7 +358,7 @@ export function CourseOverview({
               {localizeLevel(course.level, locale)}
             </span>
           ) : null}
-          <span className="rounded-full border border-[var(--border)] bg-white px-3 py-1 text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
+          <span className="rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1 text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
             {completedModules}/{totalModules} {t.modulesComplete}
           </span>
           {enrolled ? (
@@ -376,7 +376,7 @@ export function CourseOverview({
             </span>
           )}
           {ratingSummary && ratingSummary.count > 0 ? (
-            <span className="rounded-full border border-[var(--border)] bg-white px-3 py-1 text-xs font-[900] uppercase tracking-[1px] text-[var(--ink)]">
+            <span className="rounded-full border border-[var(--border)] bg-[var(--card)] px-3 py-1 text-xs font-[900] uppercase tracking-[1px] text-[var(--ink)]">
               ★ {ratingSummary.average.toFixed(1)} ({ratingSummary.count})
             </span>
           ) : null}
@@ -470,11 +470,11 @@ export function CourseOverview({
                 <p className="text-sm font-bold uppercase tracking-wider text-emerald-600">
                   {t.courseCompleteEyebrow}
                 </p>
-                <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+                <h2 className="mt-2 text-3xl font-bold tracking-tight text-[var(--ink)]">
                   {t.congratsFinishedCourse}
                 </h2>
-                <p className="mt-2 text-[15px] font-medium text-slate-500">
-                  {t.yourGradeLabel} <strong className="font-bold text-slate-900">{certificateStatus.grade}%</strong>.{" "}
+                <p className="mt-2 text-[15px] font-medium text-[var(--muted)]">
+                  {t.yourGradeLabel} <strong className="font-bold text-[var(--ink)]">{certificateStatus.grade}%</strong>.{" "}
                   {t.certReadyPreviewHint}
                 </p>
               </div>
@@ -514,7 +514,7 @@ export function CourseOverview({
                   </a>
                   <Link
                     href={`/courses/${encodeURIComponent(course.id)}/certificate`}
-                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-emerald-200 bg-white px-4 text-sm font-bold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-emerald-200 bg-[var(--card)] px-4 text-sm font-bold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
                   >
                     View full
                   </Link>
@@ -570,7 +570,7 @@ export function CourseOverview({
                 {module.lessons.map((lesson) => {
                   const isPreview = lesson.id === previewLessonId;
                   return (
-                  <div key={lesson.id} className={`grid gap-2 rounded-[var(--radius)] border bg-white p-4 ${isPreview && !enrolled ? "border-[rgba(0,87,255,0.25)]" : "border-[var(--border)]"}`}>
+                  <div key={lesson.id} className={`grid gap-2 rounded-[var(--radius)] border bg-[var(--card)] p-4 ${isPreview && !enrolled ? "border-[rgba(0,87,255,0.25)]" : "border-[var(--border)]"}`}>
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-2.5">
                         {enrolled ? <LessonStatusDot status={lessonStatuses[lesson.id]} /> : null}

@@ -49,7 +49,7 @@ export function AdminComposeForm({ users, history = [] }: { users: User[]; histo
             key={t}
             type="button"
             onClick={() => { setTab(t); setStatus(""); }}
-            className={`rounded-lg border px-3 py-1.5 text-xs font-[800] uppercase tracking-[1px] transition ${tab === t ? "border-[var(--brand)] bg-[var(--brand)] text-white" : "border-[var(--border)] bg-white text-[var(--muted)] hover:border-[rgba(0,87,255,0.3)]"}`}
+            className={`rounded-lg border px-3 py-1.5 text-xs font-[800] uppercase tracking-[1px] transition ${tab === t ? "border-[var(--brand)] bg-[var(--brand)] text-white" : "border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:border-[rgba(0,87,255,0.3)]"}`}
           >
             {t === "direct" ? "Direct" : "Broadcast"}
           </button>
@@ -60,7 +60,7 @@ export function AdminComposeForm({ users, history = [] }: { users: User[]; histo
         <select
           value={recipientId}
           onChange={(e) => setRecipientId(e.target.value)}
-          className="rounded-[var(--radius)] border border-[var(--border)] bg-white px-3 py-2 text-sm font-[700] text-[var(--ink)] focus:border-[var(--brand)] focus:outline-none"
+          className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm font-[700] text-[var(--ink)] focus:border-[var(--brand)] focus:outline-none"
         >
           <option value="">— Select recipient —</option>
           {users.map((u) => (
@@ -76,7 +76,7 @@ export function AdminComposeForm({ users, history = [] }: { users: User[]; histo
               key={r}
               type="button"
               onClick={() => setBroadcastRole(r)}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-[800] uppercase tracking-[1px] transition ${broadcastRole === r ? "border-[var(--success)] bg-[var(--success-50)] text-[var(--success)]" : "border-[var(--border)] bg-white text-[var(--muted)]"}`}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-[800] uppercase tracking-[1px] transition ${broadcastRole === r ? "border-[var(--success)] bg-[var(--success-50)] text-[var(--success)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--muted)]"}`}
             >
               All {r.toLowerCase()}s
             </button>
@@ -89,7 +89,7 @@ export function AdminComposeForm({ users, history = [] }: { users: User[]; histo
         onChange={(e) => setBody(e.target.value)}
         rows={4}
         placeholder="Write your message…"
-        className="rounded-[var(--radius)] border border-[var(--border)] bg-white px-3 py-2 text-sm font-[700] text-[var(--ink)] placeholder:text-[var(--muted)] focus:border-[var(--brand)] focus:outline-none"
+        className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm font-[700] text-[var(--ink)] placeholder:text-[var(--muted)] focus:border-[var(--brand)] focus:outline-none"
       />
 
       <div className="flex items-center gap-3">

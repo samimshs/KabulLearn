@@ -25,7 +25,7 @@ function VideoRow({ entry }: { entry: VideoEntry }) {
   }
 
   return (
-    <div className="grid gap-2 rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-4">
+    <div className="grid gap-2 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-4">
       <div>
         <p className="text-sm font-[800] text-[var(--ink)]">{entry.label}</p>
         <p className="text-xs font-[700] text-[var(--muted)]">{entry.page}</p>

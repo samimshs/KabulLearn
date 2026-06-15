@@ -147,7 +147,7 @@ export default async function EducatorCoursePage(props: EducatorCoursePageProps)
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[1.6px] text-[var(--brand)]">{t.courseEditor}</p>
-          <h1 className="mt-1 text-xl font-black tracking-[-0.5px] text-slate-950">{course.titleEn}</h1>
+          <h1 className="mt-1 text-xl font-black tracking-[-0.5px] text-[var(--ink)]">{course.titleEn}</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link href="/educator" className="pr-btn-ghost !min-h-10 px-4 text-sm">{t.back}</Link>

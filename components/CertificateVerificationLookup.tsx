@@ -48,7 +48,7 @@ export function CertificateVerificationLookup({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)]">
+    <form onSubmit={handleSubmit} className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
       <label htmlFor="certificate-code" className="pr-label">
         {label}
         <input

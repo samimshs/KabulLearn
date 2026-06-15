@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { UserRole } from "@prisma/client";
 import { auth } from "@/auth";
@@ -26,7 +25,8 @@ export async function SiteFooter({ rightsReserved }: { rightsReserved: string })
       <div className="mx-auto grid max-w-[1280px] gap-10 px-5 py-10 lg:grid-cols-[1.4fr_2.6fr] lg:px-8">
         <div dir="ltr" className="lg:col-start-1 lg:row-start-1">
           <Link href="/" className="inline-flex items-center gap-3" aria-label="KabulLearn home">
-            <Image src="/poharana-logo-v3.svg" alt="KabulLearn" width={186} height={58} className="h-auto w-[168px]" />
+            <img src="/poharana-logo-v3.svg" alt="KabulLearn" className="kl-logo-light h-auto w-[168px]" />
+            <img src="/poharana-logo-v3-dark.svg" alt="KabulLearn" className="kl-logo-dark h-auto w-[168px]" />
           </Link>
           <p dir="auto" className="mt-4 max-w-sm text-sm font-[600] leading-7 text-[var(--muted)]">
             {content.tagline}

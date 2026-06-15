@@ -440,7 +440,7 @@ export function CreatorDashboardView({
 
               <div className="relative z-10 -mt-20 grid gap-4 px-1 sm:grid-cols-2 lg:-mt-24 lg:grid-cols-4 lg:px-6">
                 {heroMetrics.map((m) => (
-                  <div key={m.key} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5 shadow-sm">
+                  <div key={m.key} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm">
                     <span className="grid h-9 w-9 place-items-center rounded-[10px] bg-[var(--brand-50)] text-[var(--brand)]">
                       <MetricIcon name={m.icon} />
                     </span>
@@ -538,7 +538,7 @@ export function CreatorDashboardView({
                 <div className="flex flex-wrap items-center gap-4">
                   <Link
                     href="/courses"
-                    className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius)] border border-slate-300 bg-white px-5 text-sm font-[900] text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.16)]"
+                    className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-5 text-sm font-[900] text-[var(--ink)] transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.16)]"
                   >
                     {t.exploreExistingCourses}
                   </Link>
@@ -566,7 +566,7 @@ export function CreatorDashboardView({
                   <p className="text-[15px] font-[800] text-[var(--muted)]">{t.noSubmittedCoursesYet}</p>
                 </div>
               ) : (
-                <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-white shadow-[var(--shadow-sm)]">
+                <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
                   {submittedCourses.map((course) => (
                     <div key={course.id} className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border)] p-5 last:border-b-0">
                       <div className="min-w-0">
@@ -597,7 +597,7 @@ export function CreatorDashboardView({
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                   {students.map((name) => (
-                    <article key={name} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)]">
+                    <article key={name} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
                       <p className="text-[15px] font-[900] text-[var(--ink)]">{name}</p>
                     </article>
                   ))}
@@ -633,7 +633,7 @@ export function CreatorDashboardView({
                           className={`rounded-full px-4 py-2 text-[13px] font-[800] transition ${
                             analyticsCourseId === c.id
                               ? "bg-[var(--brand)] text-white shadow-[0_2px_8px_rgba(0,87,255,0.25)]"
-                              : "border border-[var(--border)] bg-white text-[var(--ink-2)] hover:border-[rgba(0,87,255,0.3)]"
+                              : "border border-[var(--border)] bg-[var(--card)] text-[var(--ink-2)] hover:border-[rgba(0,87,255,0.3)]"
                           }`}
                         >
                           {c.title}
@@ -655,7 +655,7 @@ export function CreatorDashboardView({
 
                     return (
                       <div className="grid gap-4">
-                        <div className="flex flex-wrap items-center gap-6 rounded-[var(--radius-xl)] border border-[var(--border)] bg-white px-6 py-5 shadow-[var(--shadow-sm)]">
+                        <div className="flex flex-wrap items-center gap-6 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] px-6 py-5 shadow-[var(--shadow-sm)]">
                           <div>
                             <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">{t.analyticsCourseLabel}</p>
                             <p className="mt-0.5 text-[17px] font-[900] text-[var(--ink)]">{course.title}</p>
@@ -673,7 +673,7 @@ export function CreatorDashboardView({
                         </div>
 
                         {Object.entries(byModule).map(([moduleTitle, lessons]) => (
-                          <div key={moduleTitle} className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-white shadow-[var(--shadow-sm)]">
+                          <div key={moduleTitle} className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
                             <div className="border-b border-[var(--border)] bg-[var(--surface)] px-5 py-3">
                               <p className="text-[12px] font-[900] uppercase tracking-[1.2px] text-[var(--muted)]">{moduleTitle}</p>
                             </div>
@@ -786,7 +786,7 @@ export function CreatorDashboardView({
                     { title: t.resStep3Title, description: t.resStep3Desc },
                     { title: t.resStep4Title, description: t.resStep4Desc }
                   ].map((step) => (
-                    <article key={step.title} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)]">
+                    <article key={step.title} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
                       <h3 className="text-lg font-[900] text-[var(--ink)]">{step.title}</h3>
                       <p className="mt-2 text-sm font-[650] leading-6 text-[var(--muted)]">{step.description}</p>
                     </article>
@@ -798,18 +798,18 @@ export function CreatorDashboardView({
                 <p className="pr-eyebrow">{t.beforeSubmitting}</p>
                 <h2 className="pr-h2 mt-1">{t.courseReadinessChecklist}</h2>
                 <ul className="mt-5 grid gap-3 text-sm font-[650] leading-6 text-[var(--muted)] md:grid-cols-2">
-                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">{t.checklistItem1}</li>
-                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">{t.checklistItem2}</li>
-                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">{t.checklistItem3}</li>
-                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4">{t.checklistItem4}</li>
-                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-white p-4 md:col-span-2">{t.checklistItem5}</li>
+                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4">{t.checklistItem1}</li>
+                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4">{t.checklistItem2}</li>
+                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4">{t.checklistItem3}</li>
+                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4">{t.checklistItem4}</li>
+                  <li className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4 md:col-span-2">{t.checklistItem5}</li>
                 </ul>
               </section>
 
               <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
                 <Link
                   href="/educator-guidelines"
-                  className="group rounded-[var(--radius-xl)] border border-[var(--border)] bg-white p-6 shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 hover:border-[rgba(0,87,255,0.28)] hover:shadow-[var(--shadow)]"
+                  className="group rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-6 shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 hover:border-[rgba(0,87,255,0.28)] hover:shadow-[var(--shadow)]"
                 >
                   <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--brand-50)] text-[var(--brand)]">
                     <NavIcon name="resources" />
@@ -821,9 +821,9 @@ export function CreatorDashboardView({
                   </span>
                 </Link>
 
-                <article className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-white shadow-[var(--shadow-sm)]">
+                <article className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
                   <div className="aspect-video bg-[linear-gradient(135deg,#EFF6FF_0%,#F8FAFC_58%,#EEF2FF_100%)] p-6">
-                    <div className="grid h-full place-items-center rounded-2xl border border-dashed border-slate-200 bg-white/70 text-center">
+                    <div className="grid h-full place-items-center rounded-2xl border border-dashed border-[var(--border)] bg-[var(--card)] text-center">
                       <div>
                         <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[var(--brand)] text-white shadow-[0_12px_28px_rgba(0,87,255,0.22)]">
                           <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor" aria-hidden="true">
@@ -879,7 +879,7 @@ export function CreatorDashboardView({
                   ) : (
                     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                       {studentJourney.certificates.map((cert) => (
-                        <article key={cert.certificateUuid} className="grid gap-4 rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)]">
+                        <article key={cert.certificateUuid} className="grid gap-4 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
                           <div className="flex items-start justify-between gap-3">
                             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#FFF8E8]">
                               <svg viewBox="0 0 24 24" className="h-5 w-5 text-[#C9A84C]" fill="none" aria-hidden="true">
@@ -898,7 +898,7 @@ export function CreatorDashboardView({
                           </div>
                           <a
                             href={`/courses/${encodeURIComponent(cert.courseId)}/certificate/download`}
-                            className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-4 text-[13px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.3)] hover:bg-white"
+                            className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-4 text-[13px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.3)] hover:bg-[var(--card)]"
                           >
                             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
                               <path d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1M16 12l-4 4-4-4M12 16V4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -933,7 +933,7 @@ export function CreatorDashboardView({
                       {studentJourney.enrollments.map((enr) => {
                         const pct = enr.totalLessons > 0 ? Math.round((enr.completedLessons / enr.totalLessons) * 100) : 0;
                         return (
-                          <article key={enr.courseId} className="flex flex-wrap items-center gap-5 rounded-[var(--radius-lg)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)]">
+                          <article key={enr.courseId} className="flex flex-wrap items-center gap-5 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">
                                 <p className="text-[15px] font-[900] text-[var(--ink)]">{enr.courseTitle}</p>
@@ -952,7 +952,7 @@ export function CreatorDashboardView({
                             </div>
                             <Link
                               href={`/courses/${encodeURIComponent(enr.courseId)}`}
-                              className="shrink-0 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[13px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.3)] hover:bg-white"
+                              className="shrink-0 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[13px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.3)] hover:bg-[var(--card)]"
                             >
                               {pct === 100 ? t.reviewCourse : t.continueLearning}
                             </Link>
@@ -975,7 +975,7 @@ export function CreatorDashboardView({
               <PortalSettingsView profile={profile} sessions={sessions} />
               <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--surface)] p-6">
                 <div className="flex flex-wrap items-start gap-4">
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white shadow-[var(--shadow-sm)] text-[var(--muted)]">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--card)] shadow-[var(--shadow-sm)] text-[var(--muted)]">
                     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>

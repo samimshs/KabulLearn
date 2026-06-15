@@ -77,9 +77,9 @@ export default async function CoursePurchaseThankYouPage({
 
   return (
     <main className="pr-page py-12 lg:py-20">
-      <section className="mx-auto max-w-3xl overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-white shadow-[var(--shadow)]">
+      <section className="mx-auto max-w-3xl overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow)]">
         <div className="bg-[linear-gradient(135deg,rgba(0,87,255,0.10),rgba(24,130,92,0.10))] px-6 py-10 text-center sm:px-10">
-          <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-white text-[var(--success)] shadow-[var(--shadow-sm)]" aria-hidden="true">
+          <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[var(--card)] text-[var(--success)] shadow-[var(--shadow-sm)]" aria-hidden="true">
             <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none">
               <path d="M20 6 9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>

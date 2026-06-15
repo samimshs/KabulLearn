@@ -10,7 +10,7 @@ function LoadingCard({ dark = false }: { dark?: boolean }) {
   return (
     <div
       className={`rounded-[16px] border p-4 sm:p-5 ${
-        dark ? "border-[#1f2a3d] bg-[#07111f]" : "border-[var(--border)] bg-white"
+        dark ? "border-[#1f2a3d] bg-[#07111f]" : "border-[var(--border)] bg-[var(--card)]"
       }`}
       aria-hidden="true"
     />
@@ -113,11 +113,11 @@ export function LoginPageContent({
           href="/login"
           className={`flex min-h-[50px] items-center gap-2.5 rounded-[13px] px-2.5 text-start transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.16)] ${
             portal === "student"
-              ? "bg-white text-[var(--ink)] shadow-[0_10px_28px_rgba(0,87,255,0.12)] ring-1 ring-[rgba(0,87,255,0.14)]"
-              : "text-[var(--muted)] hover:bg-white/70 hover:text-[var(--ink)]"
+              ? "bg-[var(--card)] text-[var(--ink)] shadow-[0_10px_28px_rgba(0,87,255,0.12)] ring-1 ring-[rgba(0,87,255,0.14)]"
+              : "text-[var(--muted)] hover:bg-[var(--card)] hover:text-[var(--ink)]"
           }`}
         >
-          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-[10px] ${portal === "student" ? "bg-[var(--brand)] text-white" : "bg-white text-[var(--brand)] ring-1 ring-[var(--border)]"}`}>
+          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-[10px] ${portal === "student" ? "bg-[var(--brand)] text-white" : "bg-[var(--card)] text-[var(--brand)] ring-1 ring-[var(--border)]"}`}>
             <StudentIcon />
           </span>
           <span className="min-w-0">
@@ -129,11 +129,11 @@ export function LoginPageContent({
           href="/login?callbackUrl=%2Feducator"
           className={`flex min-h-[50px] items-center gap-2.5 rounded-[13px] px-2.5 text-start transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.16)] ${
             portal === "educator"
-              ? "bg-white text-[var(--ink)] shadow-[0_10px_28px_rgba(24,130,92,0.12)] ring-1 ring-[rgba(24,130,92,0.16)]"
-              : "text-[var(--muted)] hover:bg-white/70 hover:text-[var(--ink)]"
+              ? "bg-[var(--card)] text-[var(--ink)] shadow-[0_10px_28px_rgba(24,130,92,0.12)] ring-1 ring-[rgba(24,130,92,0.16)]"
+              : "text-[var(--muted)] hover:bg-[var(--card)] hover:text-[var(--ink)]"
           }`}
         >
-          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-[10px] ${portal === "educator" ? "bg-[var(--success)] text-white" : "bg-white text-[var(--success)] ring-1 ring-[var(--border)]"}`}>
+          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-[10px] ${portal === "educator" ? "bg-[var(--success)] text-white" : "bg-[var(--card)] text-[var(--success)] ring-1 ring-[var(--border)]"}`}>
             <EducatorIcon />
           </span>
           <span className="min-w-0">
@@ -199,7 +199,7 @@ export function LoginPageContent({
               },
             ].map((step, i) => (
               <li key={i} className="flex items-center gap-3">
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white text-[var(--brand)] shadow-sm ring-1 ring-[rgba(0,87,255,0.12)]">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--card)] text-[var(--brand)] shadow-sm ring-1 ring-[rgba(0,87,255,0.12)]">
                   {step.icon}
                 </span>
                 <span className="text-[12.5px] font-[700] text-[var(--ink)]">{step.text}</span>
@@ -214,7 +214,7 @@ export function LoginPageContent({
       </Suspense>
 
       {isEducatorLogin ? (
-        <p className="rounded-[16px] border border-[var(--border)] bg-white px-4 py-2.5 text-center text-[13px] font-[650] leading-5 text-[var(--muted)] shadow-[0_10px_28px_rgba(15,23,42,0.035)]">
+        <p className="rounded-[16px] border border-[var(--border)] bg-[var(--card)] px-4 py-2.5 text-center text-[13px] font-[650] leading-5 text-[var(--muted)] shadow-[0_10px_28px_rgba(15,23,42,0.035)]">
           {t.educatorNoAccount}{" "}
           <Link href="/register" className="font-[800] text-[var(--brand)] hover:underline">
             {t.registerAsStudent}
@@ -222,7 +222,7 @@ export function LoginPageContent({
           {t.educatorAccessAfterRegister}
         </p>
       ) : (
-        <p className="rounded-[16px] border border-[var(--border)] bg-white px-4 py-2.5 text-center text-[13px] font-[700] text-[var(--muted)] shadow-[0_10px_28px_rgba(15,23,42,0.035)]">
+        <p className="rounded-[16px] border border-[var(--border)] bg-[var(--card)] px-4 py-2.5 text-center text-[13px] font-[700] text-[var(--muted)] shadow-[0_10px_28px_rgba(15,23,42,0.035)]">
           {t.newToKabulLearn}{" "}
           <Link href="/register" className="font-[900] text-[var(--brand)] hover:underline">
             {t.createFreeStudentAccount}

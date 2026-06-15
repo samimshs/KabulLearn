@@ -183,7 +183,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}
     >
-      <div className="w-full max-w-xl overflow-hidden rounded-[var(--radius-xl)] bg-white shadow-[0_24px_64px_rgba(0,0,0,0.22)] ring-1 ring-black/8">
+      <div className="w-full max-w-xl overflow-hidden rounded-[var(--radius-xl)] bg-[var(--card)] shadow-[0_24px_64px_rgba(0,0,0,0.22)] ring-1 ring-black/8">
 
         {/* Input */}
         <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3">

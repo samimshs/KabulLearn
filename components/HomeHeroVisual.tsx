@@ -169,7 +169,7 @@ function GlobeEarth() {
     <svg className="kl-globe-svg" viewBox="0 0 1000 1000" fill="none" aria-hidden="true">
       <defs>
         <radialGradient id="kl-globe-sphere" cx="40%" cy="32%" r="76%">
-          <stop offset="0%" stopColor="#eef4ff" stopOpacity="0.85" />
+          <stop offset="0%"  stopColor="#eef4ff" stopOpacity="0.85" />
           <stop offset="56%" stopColor="#d4e1fb" stopOpacity="0.42" />
           <stop offset="100%" stopColor="#9fb8ee" stopOpacity="0.5" />
         </radialGradient>
@@ -179,14 +179,14 @@ function GlobeEarth() {
       <circle cx={cx} cy={cy} r={R} fill="url(#kl-globe-sphere)" />
 
       {/* Dotted land */}
-      <g fill="#2f6bff">
+      <g className="kl-globe-land" fill="#2f6bff">
         {dots.map((d, i) => (
           <circle key={i} cx={d.x.toFixed(1)} cy={d.y.toFixed(1)} r={d.r.toFixed(2)} opacity={d.o.toFixed(2)} />
         ))}
       </g>
 
       {/* Crisp rim */}
-      <circle cx={cx} cy={cy} r={R} fill="none" stroke="#2f6bff" strokeOpacity="0.18" strokeWidth="2" />
+      <circle cx={cx} cy={cy} r={R} fill="none" stroke="#2f6bff" strokeOpacity="0.18" strokeWidth="2" className="kl-globe-rim" />
     </svg>
   );
 }

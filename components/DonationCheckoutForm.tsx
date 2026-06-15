@@ -54,7 +54,7 @@ export function DonationCheckoutForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto mt-8 grid max-w-xl gap-4 rounded-[var(--radius-xl)] border border-[var(--border)] bg-white p-5 text-start shadow-[var(--shadow-sm)]">
+    <form onSubmit={handleSubmit} className="mx-auto mt-8 grid max-w-xl gap-4 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-5 text-start shadow-[var(--shadow-sm)]">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {presetAmounts.map((amount) => (
           <button

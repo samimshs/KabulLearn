@@ -175,7 +175,7 @@ export function CourseCard({ course, isAuthenticated = false }: { course: Course
       {/* Thumbnail */}
       <div className="relative h-24 overflow-hidden" style={{ background: thumb.gradient }}>
         {thumb.pattern}
-        <span className="absolute bottom-3 start-3 h-0.5 w-8 rounded-full bg-white opacity-60" />
+        <span className="absolute bottom-3 start-3 h-0.5 w-8 rounded-full bg-[var(--card)] opacity-60" />
       </div>
 
       <div className="flex flex-1 flex-col p-4">

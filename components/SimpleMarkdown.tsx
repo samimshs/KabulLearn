@@ -10,7 +10,7 @@ function renderInline(text: string) {
   });
 }
 
-export function SimpleMarkdown({ content }: { content: string }) {
+export function SimpleMarkdown({ content, style }: { content: string; style?: React.CSSProperties }) {
   const lines = content.split(/\n/);
   const blocks: ReactNode[] = [];
   let listItems: string[] = [];
@@ -62,5 +62,5 @@ export function SimpleMarkdown({ content }: { content: string }) {
 
   flushList();
 
-  return <div className="space-y-4 text-sm font-[500] leading-7 text-[var(--muted)]">{blocks}</div>;
+  return <div className="space-y-4 text-sm font-[500] leading-7 text-[var(--muted)]" style={style}>{blocks}</div>;
 }

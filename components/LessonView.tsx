@@ -12,6 +12,7 @@ import { completeReadingLesson, markLessonInProgress } from "@/lib/actions/video
 import { upsertLessonNote } from "@/lib/actions/note-actions";
 import { toggleLessonBookmark } from "@/lib/actions/bookmark-actions";
 import { LessonStateIcon, lessonKindOf, type LessonState } from "@/components/LessonStateIcon";
+import { Confetti } from "@/components/Confetti";
 import type { Course, Lesson, Module } from "@prisma/client";
 
 type LessonCourse = Pick<
@@ -269,6 +270,9 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
   const [readingDone, setReadingDone] = useState(false);
   const [bookmarked, setBookmarked] = useState(initialBookmarked);
   const [isPendingComplete, startCompleteTransition] = useTransition();
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [scrollPct, setScrollPct] = useState(0);
+  const [fontSize, setFontSize] = useState<14 | 16 | 19>(16);
 
   // Resolve the visual state of any lesson in the sidebar
   const stateOf = (id: string): LessonState => {
@@ -309,10 +313,39 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
     }).catch(() => setBookmarked(!next));
   }
 
+  function changeFontSize(dir: "up" | "down") {
+    const sizes = [14, 16, 19] as const;
+    const idx = sizes.indexOf(fontSize);
+    const next = dir === "up" ? sizes[Math.min(idx + 1, 2)] : sizes[Math.max(idx - 1, 0)];
+    setFontSize(next);
+    try { localStorage.setItem("kl-reading-font-size", String(next)); } catch {}
+  }
+
   useEffect(() => {
     const localPassed = getPassedQuizzes(course.id, moduleIds);
     setPassedQuizzes(new Set([...localPassed, ...serverPassedModuleIds]));
   }, [course.id, moduleIds.join("|"), serverPassedModuleIds.join("|")]);
+
+  // Reading progress bar — only active on reading lessons
+  useEffect(() => {
+    if (!isReadingLesson(lesson) || !lessonContent) return;
+    function onScroll() {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (max <= 0) { setScrollPct(100); return; }
+      setScrollPct(Math.min(100, (window.scrollY / max) * 100));
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [lesson.id]);
+
+  // Font size — persist across sessions
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem("kl-reading-font-size");
+      if (v === "14" || v === "16" || v === "19") setFontSize(Number(v) as 14 | 16 | 19);
+    } catch {}
+  }, []);
 
   // On open: record visit (resume) + mark IN_PROGRESS server-side for enrolled users only.
   useEffect(() => {
@@ -354,6 +387,23 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
 
   return (
   <>
+    {/* Reading progress bar */}
+    {isReadingLesson(lesson) && lessonContent && (
+      <div
+        aria-hidden="true"
+        className="fixed inset-x-0 top-16 h-[3px] bg-[var(--brand-100)]"
+        style={{ zIndex: 39 }}
+      >
+        <div
+          className="h-full bg-[var(--brand)] transition-[width] duration-150 ease-out"
+          style={{ width: `${scrollPct}%` }}
+        />
+      </div>
+    )}
+
+    {/* Confetti burst on lesson completion */}
+    {showConfetti && <Confetti onDone={() => setShowConfetti(false)} />}
+
     <main className="mx-auto grid w-full max-w-[1700px] grid-cols-1 gap-6 px-5 pb-16 pt-3 lg:grid-cols-[300px_minmax(0,1fr)] lg:px-8 lg:pb-20">
 
       {/* ── Sidebar ──────────────────────────────────────────── */}
@@ -539,6 +589,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                   initialCompleted={statuses[lesson.id] === "COMPLETED"}
                   onComplete={() => {
                     setStatuses((prev) => ({ ...prev, [lesson.id]: "COMPLETED" }));
+                    setShowConfetti(true);
                     router.refresh();
                   }}
                 />
@@ -569,9 +620,32 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
             <div className="grid gap-4">
               <article id="content" className="pr-card p-6 lg:p-8">
-                <h2 className="text-[18px] font-[800] tracking-tight text-[var(--ink-2)]">{t.lessonContent}</h2>
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-[18px] font-[800] tracking-tight text-[var(--ink-2)]">{t.lessonContent}</h2>
+                  {/* Font size controls */}
+                  <div className="flex items-center gap-1" aria-label="Font size">
+                    <button
+                      type="button"
+                      onClick={() => changeFontSize("down")}
+                      disabled={fontSize === 14}
+                      aria-label="Decrease font size"
+                      className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[11px] font-[900] text-[var(--muted)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)] disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      A−
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => changeFontSize("up")}
+                      disabled={fontSize === 19}
+                      aria-label="Increase font size"
+                      className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[13px] font-[900] text-[var(--muted)] transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)] disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      A+
+                    </button>
+                  </div>
+                </div>
                 <div className="mt-5 border-t border-[var(--border)] pt-5">
-                  <SimpleMarkdown content={lessonContent} />
+                  <SimpleMarkdown content={lessonContent} style={{ fontSize }} />
                 </div>
                 <div className="mt-8 border-t border-[var(--border)] pt-6">
                   {readingDone ? (
@@ -588,6 +662,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                           await completeReadingLesson({ courseId: course.id, lessonId: lesson.id });
                           setStatuses((prev) => ({ ...prev, [lesson.id]: "COMPLETED" }));
                           setReadingDone(true);
+                          setShowConfetti(true);
                           router.refresh();
                         });
                       }}

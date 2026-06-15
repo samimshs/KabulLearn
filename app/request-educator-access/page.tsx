@@ -71,7 +71,7 @@ export default async function RequestEducatorAccessPage() {
             t.educatorStep4,
           ].map((step, i) => (
             <li key={i} className="flex items-start gap-3 text-[13px] font-[600] text-[var(--ink-2)]">
-              <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-white text-[10px] font-[900] text-[var(--brand)] shadow-sm ring-1 ring-[rgba(0,87,255,0.15)]">
+              <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[var(--card)] text-[10px] font-[900] text-[var(--brand)] shadow-sm ring-1 ring-[rgba(0,87,255,0.15)]">
                 {i + 1}
               </span>
               {step}

@@ -120,7 +120,7 @@ export function MessageInstructorButton({
                 autoFocus
                 maxLength={4000}
                 placeholder={t.writeMessagePlaceholder}
-                className="resize-none rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-3.5 py-3 text-[14px] font-[500] leading-relaxed text-[var(--ink)] outline-none focus:border-[var(--brand)] focus:bg-white"
+                className="resize-none rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-3.5 py-3 text-[14px] font-[500] leading-relaxed text-[var(--ink)] outline-none focus:border-[var(--brand)] focus:bg-[var(--card)]"
               />
 
               {error && (
@@ -162,7 +162,7 @@ function Modal({ children, onClose }: { children: React.ReactNode; onClose: () =
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md overflow-hidden rounded-[18px] border border-[var(--border)] bg-white shadow-[0_24px_80px_rgba(10,9,20,0.3)]"
+        className="w-full max-w-md overflow-hidden rounded-[18px] border border-[var(--border)] bg-[var(--card)] shadow-[0_24px_80px_rgba(10,9,20,0.3)]"
         onClick={(e) => e.stopPropagation()}
       >
         {children}

@@ -36,7 +36,7 @@ export default async function LearnerSupportPage() {
       <InfoSection title={content.faqTitle}>
         <div className="grid gap-4">
           {content.faqs.map((faq) => (
-            <details key={faq.question} className="group rounded-[var(--radius-lg)] border border-[var(--border)] bg-white">
+            <details key={faq.question} className="group rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)]">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-base font-[800] text-[var(--ink)] marker:content-none">
                 <span>{faq.question}</span>
                 <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-[var(--brand)] transition group-open:rotate-45" aria-hidden="true">+</span>

@@ -183,7 +183,7 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
       {open && (
         <div
           dir={direction}
-          className="fixed bottom-24 z-50 flex flex-col overflow-hidden rounded-[20px] border border-[var(--border)] bg-white shadow-[0_16px_48px_rgba(10,9,20,0.18),0_4px_16px_rgba(10,9,20,0.08)] inset-x-3 sm:inset-x-auto sm:right-6 sm:w-[360px]"
+          className="fixed bottom-24 z-50 flex flex-col overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--card)] shadow-[0_16px_48px_rgba(10,9,20,0.18),0_4px_16px_rgba(10,9,20,0.08)] inset-x-3 sm:inset-x-auto sm:right-6 sm:w-[360px]"
           style={{ height: 'min(480px, calc(100dvh - 180px))' }}
         >
           {/* Header */}
@@ -208,7 +208,7 @@ export function CourseChatbox({ courseId }: { courseId?: string }) {
                     key={suggestion}
                     type="button"
                     onClick={() => send(suggestion)}
-                    className="rounded-full border border-[var(--border)] bg-white px-3 py-2 text-start text-[12px] font-[700] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.3)] hover:text-[var(--brand)]"
+                    className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-start text-[12px] font-[700] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.3)] hover:text-[var(--brand)]"
                   >
                     {suggestion}
                   </button>

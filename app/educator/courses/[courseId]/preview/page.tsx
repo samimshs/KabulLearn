@@ -103,14 +103,14 @@ export default async function EducatorCoursePreviewPage({
 
   return (
     <div className="grid gap-5">
-      <section className="mx-auto mt-4 flex w-[min(1180px,calc(100%-32px))] flex-wrap items-center justify-between gap-3 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 shadow-sm">
+      <section className="mx-auto mt-4 flex w-[min(1180px,calc(100%-32px))] flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--brand-50)] px-4 py-3 shadow-sm">
         <div>
           <p className="text-xs font-black uppercase tracking-[1.5px] text-[var(--brand)]">Student preview</p>
           <p className="mt-1 text-sm font-bold text-[var(--ink-2)]">
             This page uses the student course layout, while keeping enrollment and payment actions in preview mode.
           </p>
         </div>
-        <Link href={`/educator/courses/${course.id}`} className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-black text-[var(--brand)] transition hover:border-[rgba(0,87,255,0.4)] hover:bg-blue-50">
+        <Link href={`/educator/courses/${course.id}`} className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-black text-[var(--brand)] transition hover:border-[rgba(0,87,255,0.4)] hover:bg-[var(--brand-50)]">
           Back to editor
         </Link>
       </section>

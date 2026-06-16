@@ -7,10 +7,11 @@ import { db } from "@/lib/db";
 
 const schema = z.object({
   courseId: z.string().min(1),
+  title: z.string().trim().min(3).max(100).optional(),
   body: z.string().trim().min(10).max(1000)
 });
 
-export async function postCourseAnnouncement(input: { courseId: string; body: string }) {
+export async function postCourseAnnouncement(input: { courseId: string; title?: string; body: string }) {
   try {
     const session = await requireEducator();
     const values = schema.parse(input);
@@ -26,7 +27,7 @@ export async function postCourseAnnouncement(input: { courseId: string; body: st
 
     // Save the announcement record
     await db.courseAnnouncement.create({
-      data: { courseId: values.courseId, body: values.body }
+      data: { courseId: values.courseId, title: values.title ?? null, body: values.body }
     });
 
     // Fan out to all enrolled students as AppNotification
@@ -64,6 +65,6 @@ export async function getCourseAnnouncements(courseId: string) {
     where: { courseId },
     orderBy: { createdAt: "desc" },
     take: 10,
-    select: { id: true, body: true, createdAt: true }
+    select: { id: true, title: true, body: true, createdAt: true }
   }).catch(() => []);
 }

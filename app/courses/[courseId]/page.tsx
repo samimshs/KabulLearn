@@ -198,7 +198,7 @@ export default async function CoursePage({
   let userRating: { rating: number; comment: string | null } | null = null;
   let ratingSummary: { average: number; count: number } | undefined;
   let progressPercent = 0;
-  let announcements: Array<{ id: string; body: string; createdAt: Date }> = [];
+  let announcements: Array<{ id: string; title: string | null; body: string; createdAt: Date }> = [];
   let reviews: Array<{ id: string; rating: number; comment: string | null; user: { name: string | null; email: string } }> = [];
   let discussionThreads: Array<{
     id: string;
@@ -303,7 +303,7 @@ export default async function CoursePage({
           where: { courseId: resolvedCourseId },
           orderBy: { createdAt: "desc" },
           take: 10,
-          select: { id: true, body: true, createdAt: true }
+          select: { id: true, title: true, body: true, createdAt: true }
         });
       }
     } catch {

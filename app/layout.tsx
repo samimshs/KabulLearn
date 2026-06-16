@@ -10,6 +10,7 @@ import { BackButton } from "@/components/BackButton";
 import { CourseChatbox } from "@/components/CourseChatbox";
 import { SocialFloat } from "@/components/SocialFloat";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ToastProvider } from "@/components/Toast";
 import { dictionaries, getDirection } from "@/lib/i18n";
 import { normalizeLocale } from "@/lib/server-locale";
 
@@ -69,15 +70,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <LanguageProvider initialLocale={locale}>
-          <a href="#main-content" className="kl-skip-link">{t.skipToContent}</a>
-          {/* Wipes user-scoped localStorage keys whenever the active user changes */}
-          <SessionGuard userId={userId} />
-          <Header />
-          <BackButton />
-          <div id="main-content">{children}</div>
-          <SiteFooter rightsReserved={t.rightsReserved} />
-          <SocialFloat />
-          {userId ? <CourseChatbox /> : null}
+          <ToastProvider>
+            <a href="#main-content" className="kl-skip-link">{t.skipToContent}</a>
+            {/* Wipes user-scoped localStorage keys whenever the active user changes */}
+            <SessionGuard userId={userId} />
+            <Header />
+            <BackButton />
+            <div id="main-content">{children}</div>
+            <SiteFooter rightsReserved={t.rightsReserved} />
+            <SocialFloat />
+            {userId ? <CourseChatbox /> : null}
+          </ToastProvider>
         </LanguageProvider>
       </body>
     </html>

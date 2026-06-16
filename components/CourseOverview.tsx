@@ -82,6 +82,7 @@ type CourseOverviewProps = {
   }>;
   announcements?: Array<{
     id: string;
+    title?: string | null;
     body: string;
     createdAt: Date | string;
   }>;
@@ -568,6 +569,9 @@ export function CourseOverview({
           <div className="mt-5 grid gap-3">
             {announcements.map((announcement) => (
               <article key={announcement.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4">
+                {announcement.title && (
+                  <p className="mb-1 text-[13px] font-[800] text-[var(--ink)]">{announcement.title}</p>
+                )}
                 <p className="whitespace-pre-wrap text-sm font-[600] leading-7 text-[var(--ink-2)]">{announcement.body}</p>
                 <p className="mt-3 text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
                   {new Date(announcement.createdAt).toLocaleDateString(locale === "en" ? "en-US" : `${locale}-AF`, {

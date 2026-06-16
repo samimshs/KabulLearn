@@ -38,7 +38,7 @@ Three roles with completely separate route namespaces:
 | `EDUCATOR` | `/educator`, `/educator/courses/*` | Registers as STUDENT, admin promotes |
 | `ADMIN` | `/admin` | Created only via `npm run db:seed` |
 
-Middleware (`middleware.ts`) enforces the boundary at the edge using the JWT-embedded role — it never touches the database. `lib/rbac.ts` enforces the same rules inside Server Actions via `requireAdmin()` / `requireEducator()`.
+Middleware (`proxy.ts`) enforces the boundary at the edge using the JWT-embedded role — it never touches the database. `lib/rbac.ts` enforces the same rules inside Server Actions via `requireAdmin()` / `requireEducator()`.
 
 After login, `app/auth/redirect/page.tsx` reads the JWT role and redirects each role to its home page (`/admin`, `/educator`, or `/`).
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import {
   getInbox,
@@ -115,7 +116,7 @@ export function MessagesInbox() {
                   }`}
                 >
                   <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--brand-50)] text-[12px] font-[900] text-[var(--brand)]">
-                    {c.avatarUrl ? <img src={c.avatarUrl} alt="" className="h-full w-full object-cover" /> : initials(c.name)}
+                    {c.avatarUrl ? <Image src={c.avatarUrl} alt="" width={40} height={40} className="h-full w-full object-cover" /> : initials(c.name)}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center justify-between gap-2">
@@ -153,7 +154,7 @@ export function MessagesInbox() {
                 ‹
               </button>
               <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--brand-50)] text-[11px] font-[900] text-[var(--brand)]">
-                {partner.avatarUrl ? <img src={partner.avatarUrl} alt="" className="h-full w-full object-cover" /> : initials(partner.name)}
+                {partner.avatarUrl ? <Image src={partner.avatarUrl} alt="" width={36} height={36} className="h-full w-full object-cover" /> : initials(partner.name)}
               </span>
               <div className="min-w-0">
                 <p className="truncate text-[14px] font-[800] text-[var(--ink)]">{partner.name}</p>

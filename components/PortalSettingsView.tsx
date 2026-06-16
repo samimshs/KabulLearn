@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Image from "next/image";
 import {
   changeLearnerPassword,
   exportLearnerData,
@@ -164,7 +165,7 @@ export function PortalSettingsView({ profile, sessions }: PortalSettingsViewProp
                 className="group relative grid h-24 w-24 place-items-center overflow-hidden rounded-full bg-[var(--brand)] text-2xl font-[900] text-white shadow-[var(--shadow)] transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.2)]"
               >
                 {image ? (
-                  <img src={image} alt="" className="h-24 w-24 rounded-full object-cover" />
+                  <Image src={image} alt="" width={96} height={96} className="h-24 w-24 rounded-full object-cover" />
                 ) : (
                   <span>{name.slice(0, 2).toUpperCase()}</span>
                 )}

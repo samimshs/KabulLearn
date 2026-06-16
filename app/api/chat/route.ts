@@ -2,7 +2,8 @@ import { NextRequest } from "next/server";
 import { CourseStatus, UserStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
-import { openai, EMBED_MODEL, CHAT_MODEL, cosineSimilarity } from "@/lib/openai";
+import { Prisma } from "@prisma/client";
+import { openai, EMBED_MODEL, CHAT_MODEL } from "@/lib/openai";
 import { assertRateLimit, assertRateLimitWindow } from "@/lib/security";
 
 const EDUCATOR_INTENT_RE = /\b(educator|teacher|instructor|teach|creator|course creator|create course)\b|استاد|ښوونک|کورس جوړ|کورس جوړوون|مدرس|آموزگار|ساختن کورس|سازنده کورس/i;
@@ -89,29 +90,35 @@ export async function POST(req: NextRequest) {
     model: EMBED_MODEL,
     input: trimmedMessage
   });
-  const queryVec = embResponse.data[0].embedding;
+  const vectorStr = `[${embResponse.data[0].embedding.join(",")}]`;
 
-  // 2. Load all stored embeddings (all content types — similarity search handles relevance)
-  const rows = await db.contentEmbedding.findMany({
-    where: scopedCourseId
-      ? {
-          OR: [
-            { source: "course", sourceKey: scopedCourseId },
-            { source: "lesson", sourceKey: { startsWith: `${scopedCourseId}:` } },
-            { source: { in: ["terms", "privacy", "guide"] } }
-          ]
-        }
-      : undefined,
-    select: {
-      source: true,
-      sourceKey: true,
-      title: true,
-      chunkText: true,
-      embedding: true
-    }
-  });
+  // 2. ANN search via pgvector — fetch top 12, apply educator boost in JS, take top 8
+  type EmbRow = { source: string; sourceKey: string; title: string; chunkText: string; score: number };
 
-  if (rows.length === 0) {
+  const embRows: EmbRow[] = scopedCourseId
+    ? await db.$queryRaw<EmbRow[]>(Prisma.sql`
+        SELECT source, "sourceKey", title, "chunkText",
+          (1 - (embedding <=> ${vectorStr}::vector))::float8 AS score
+        FROM "ContentEmbedding"
+        WHERE embedding IS NOT NULL
+          AND (
+            (source = 'course' AND "sourceKey" = ${scopedCourseId})
+            OR (source = 'lesson' AND "sourceKey" LIKE ${scopedCourseId + ":%"})
+            OR source IN ('terms', 'privacy', 'guide')
+          )
+        ORDER BY embedding <=> ${vectorStr}::vector
+        LIMIT 12
+      `)
+    : await db.$queryRaw<EmbRow[]>(Prisma.sql`
+        SELECT source, "sourceKey", title, "chunkText",
+          (1 - (embedding <=> ${vectorStr}::vector))::float8 AS score
+        FROM "ContentEmbedding"
+        WHERE embedding IS NOT NULL
+        ORDER BY embedding <=> ${vectorStr}::vector
+        LIMIT 12
+      `);
+
+  if (embRows.length === 0) {
     const fallback = new ReadableStream({
       start(c) {
         c.enqueue(new TextEncoder().encode(
@@ -123,14 +130,12 @@ export async function POST(req: NextRequest) {
     return new Response(fallback, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
   }
 
-  // 3. Score and pick the most relevant chunks. Common role/onboarding questions
-  // get a light lexical boost because cross-script embedding matches can be weak.
+  // 3. Apply educator-intent boost and pick top 8
   const educatorIntent = EDUCATOR_INTENT_RE.test(trimmedMessage);
-  const scored = rows.map(row => ({
+  const scored = embRows.map(row => ({
     text: row.chunkText,
     label: `[${row.source}:${row.sourceKey}] ${row.title}`,
-    score: cosineSimilarity(queryVec, JSON.parse(row.embedding) as number[]) +
-      (educatorIntent && row.sourceKey.includes("guide-become-educator") ? 0.35 : 0)
+    score: Number(row.score) + (educatorIntent && row.sourceKey.includes("guide-become-educator") ? 0.35 : 0)
   }));
   scored.sort((a, b) => b.score - a.score);
   const top = scored.slice(0, 8);

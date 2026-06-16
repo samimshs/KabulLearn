@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Modal } from "./Modal";
 import { EducatorProfileForm } from "./EducatorProfileForm";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -20,7 +21,7 @@ export function EditProfileModal({ name, bio, image }: Props) {
     <>
       <div className="flex flex-wrap items-center gap-5 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-6 shadow-[var(--shadow-sm)]">
         {image ? (
-          <img src={image} alt="" className="h-16 w-16 shrink-0 rounded-full border border-[var(--border)] object-cover" />
+          <Image src={image} alt="" width={64} height={64} className="h-16 w-16 shrink-0 rounded-full border border-[var(--border)] object-cover" />
         ) : (
           <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-[var(--brand-50)] text-[20px] font-[800] text-[var(--brand)]">
             <Initials name={name} />

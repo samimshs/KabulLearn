@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition, type Dispatch, type SetStateAction } from "react";
+import Image from "next/image";
 import { LessonType } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { AvatarUpload } from "@/components/educator/AvatarUpload";
@@ -332,7 +333,7 @@ function InstructorAvatar({ instructor }: { instructor: InstructorInput }) {
 
   return (
     <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full border border-[var(--border)] bg-[var(--surface)] text-xs font-black text-[var(--brand)]">
-      {instructor.avatarUrl ? <img src={instructor.avatarUrl} alt="" className="h-full w-full object-cover" /> : initials}
+      {instructor.avatarUrl ? <Image src={instructor.avatarUrl} alt="" width={36} height={36} className="h-full w-full object-cover" /> : initials}
     </span>
   );
 }

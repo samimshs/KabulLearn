@@ -583,12 +583,6 @@ model QuizAttemptSession {
   @@index([courseId])
 }
 
-model RateLimitBucket {
-  key       String   @id
-  count     Int      @default(0)
-  resetAt   DateTime
-  updatedAt DateTime @updatedAt
-}
 
 model CourseRating {
   id       String @id @default(cuid())
@@ -783,9 +777,10 @@ model LearningPathCourse {
 }
 
 model CourseAnnouncement {
-  id       String @id @default(cuid())
+  id       String  @id @default(cuid())
   courseId String
-  body     String @db.Text
+  title    String?
+  body     String  @db.Text
 
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
@@ -809,7 +804,7 @@ model ContentEmbedding {
   sourceKey String   // stable unique key within source (DB id or slug)
   title     String
   chunkText String   @db.Text
-  embedding String   @db.Text
+  embedding Unsupported("vector(1536)")?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

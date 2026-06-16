@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import { useToast } from "@/components/Toast";
 import { CourseStatus } from "@prisma/client";
 import { CourseSubmitButton } from "@/components/educator/CourseSubmitButton";
 import { DeleteCourseButton } from "@/components/educator/DeleteCourseButton";
@@ -95,6 +97,7 @@ type CreatorDashboardViewProps = {
   announcementHistory: Array<{
     id: string;
     courseTitle: string;
+    title: string | null;
     body: string;
     createdAt: string;
   }>;
@@ -252,19 +255,25 @@ function AnnounceView({
   history: CreatorDashboardViewProps["announcementHistory"];
   t: Dictionary;
 }) {
+  const toast = useToast();
   const [courseId, setCourseId] = useState(courses[0]?.id ?? "");
+  const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [sending, setSending] = useState(false);
 
   const publishedCourses = courses.filter((c) => c.enrollments > 0);
 
   async function handleSend() {
     if (!body.trim() || !courseId) return;
-    setStatus("sending");
-    const result = await postCourseAnnouncement({ courseId, body });
-    setStatus(result.ok ? "sent" : "error");
-    if (result.ok) setBody("");
-    setTimeout(() => setStatus("idle"), 3000);
+    setSending(true);
+    const result = await postCourseAnnouncement({ courseId, title: title.trim() || undefined, body });
+    setSending(false);
+    if (result.ok) {
+      toast(t.announceSent, "success");
+      setTitle(""); setBody("");
+    } else {
+      toast(result.error ?? t.announceError, "error");
+    }
   }
 
   return (
@@ -296,6 +305,19 @@ function AnnounceView({
             </div>
             <div>
               <label className="mb-1.5 block text-[12px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
+                Title <span className="font-[600] normal-case tracking-normal">(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                maxLength={100}
+                placeholder="e.g. Week 3 update"
+                className="pr-input w-full py-2.5 text-[14px]"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[12px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">
                 {t.announceMessageLabel}
               </label>
               <textarea
@@ -312,13 +334,11 @@ function AnnounceView({
               <button
                 type="button"
                 onClick={handleSend}
-                disabled={status === "sending" || body.trim().length < 10}
+                disabled={sending || body.trim().length < 10}
                 className="pr-btn-primary disabled:opacity-50"
               >
-                {status === "sending" ? t.announceSending : t.announceSend}
+                {sending ? t.announceSending : t.announceSend}
               </button>
-              {status === "sent" && <span className="text-[13px] font-[700] text-[var(--success)]">{t.announceSent}</span>}
-              {status === "error" && <span className="text-[13px] font-[700] text-[var(--danger)]">{t.announceError}</span>}
             </div>
           </div>
         )}
@@ -337,7 +357,8 @@ function AnnounceView({
                     {new Date(item.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
                   </time>
                 </div>
-                <p className="mt-2 whitespace-pre-wrap text-sm font-[600] leading-6 text-[var(--ink-2)]">{item.body}</p>
+                {item.title && <p className="mt-2 text-[13px] font-[800] text-[var(--ink)]">{item.title}</p>}
+                <p className="mt-1 whitespace-pre-wrap text-sm font-[600] leading-6 text-[var(--ink-2)]">{item.body}</p>
               </article>
             ))}
           </div>
@@ -367,6 +388,12 @@ export function CreatorDashboardView({
   const { t } = useLanguage();
   const [activeView, setActiveView] = useState<CreatorView>("dashboard");
   const [journeyTab, setJourneyTab] = useState<"certificates" | "courses">("certificates");
+
+  function navigateTo(view: CreatorView) {
+    setActiveView(view);
+    const url = view === "dashboard" ? "/educator" : `/educator?view=${view}`;
+    window.history.replaceState({}, "", url);
+  }
   const [analyticsCourseId, setAnalyticsCourseId] = useState<string>(analyticsData[0]?.id ?? "");
   const latestCourse = courses[0] ?? null;
   const editableCourses = useMemo(
@@ -399,8 +426,9 @@ export function CreatorDashboardView({
   ];
 
   useEffect(() => {
-    const view = new URLSearchParams(window.location.search).get("view");
-    if (view === "resources") setActiveView("resources");
+    const view = new URLSearchParams(window.location.search).get("view") as CreatorView | null;
+    const validViews: CreatorView[] = ["dashboard", "creator", "submissions", "students", "messages", "analytics", "announce", "resources", "journey", "settings"];
+    if (view && validViews.includes(view)) setActiveView(view);
   }, []);
 
   return (
@@ -424,7 +452,7 @@ export function CreatorDashboardView({
               <button
                 key={item.key}
                 type="button"
-                onClick={() => setActiveView(item.key)}
+                onClick={() => navigateTo(item.key)}
                 className={`student-portal-nav-link ${activeView === item.key ? "is-active" : ""}`}
                 aria-current={activeView === item.key ? "page" : undefined}
               >
@@ -632,7 +660,7 @@ export function CreatorDashboardView({
                       <article key={student.id} className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
                         <div className="flex items-center gap-3">
                           {student.image ? (
-                            <img src={student.image} alt={student.name} className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-[var(--border)]" />
+                            <Image src={student.image} alt={student.name} width={44} height={44} className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-[var(--border)]" />
                           ) : (
                             <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--brand-50)] ring-2 ring-[var(--border)]">
                               <span className="text-[13px] font-[900] text-[var(--brand)]">{initials}</span>
@@ -908,6 +936,10 @@ export function CreatorDashboardView({
                       <button
                         key={key}
                         type="button"
+                        role="tab"
+                        aria-selected={journeyTab === key}
+                        aria-controls={`journey-panel-${key}`}
+                        id={`journey-tab-${key}`}
                         onClick={() => setJourneyTab(key)}
                         className={journeyTab === key ? "is-active" : ""}
                       >
@@ -919,7 +951,7 @@ export function CreatorDashboardView({
               </div>
 
               {journeyTab === "certificates" ? (
-                <section className="pr-panel portal-settings-section">
+                <section id="journey-panel-certificates" role="tabpanel" aria-labelledby="journey-tab-certificates" className="pr-panel portal-settings-section">
                   <div>
                     <p className="pr-eyebrow">{t.achievementsEyebrow}</p>
                     <h2 className="mt-2 text-2xl font-[900] text-[var(--ink)]">{t.myCertificatesHeading}</h2>
@@ -965,7 +997,7 @@ export function CreatorDashboardView({
               ) : null}
 
               {journeyTab === "courses" ? (
-                <section className="pr-panel portal-settings-section">
+                <section id="journey-panel-courses" role="tabpanel" aria-labelledby="journey-tab-courses" className="pr-panel portal-settings-section">
                   <div>
                     <p className="pr-eyebrow">{t.enrolledAsStudent}</p>
                     <h2 className="mt-2 text-2xl font-[900] text-[var(--ink)]">{t.enrolledCoursesHeading}</h2>

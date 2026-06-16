@@ -179,6 +179,7 @@ export default async function EducatorDashboardPage({
           take: 20,
           select: {
             id: true,
+            title: true,
             body: true,
             createdAt: true,
             course: { select: { titleEn: true, titlePs: true, titleDa: true } }
@@ -326,6 +327,7 @@ export default async function EducatorDashboardPage({
       announcementHistory={announcementRows.map((announcement) => ({
         id: announcement.id,
         courseTitle: announcement.course.titleEn ?? announcement.course.titlePs ?? announcement.course.titleDa ?? "Untitled course",
+        title: announcement.title ?? null,
         body: announcement.body,
         createdAt: announcement.createdAt.toISOString()
       }))}

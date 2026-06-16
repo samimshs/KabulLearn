@@ -1,6 +1,12 @@
 import { createHmac } from "crypto";
+import { Redis } from "@upstash/redis";
 import { LessonType, ProgressStatus } from "@prisma/client";
 import { db } from "@/lib/db";
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
 const DEFAULT_RATE_LIMIT_WINDOW_MS = 60_000;
 
@@ -9,22 +15,12 @@ export async function assertRateLimit(key: string, limit = 30) {
 }
 
 export async function assertRateLimitWindow(key: string, limit: number, windowMs: number) {
-  const now = new Date();
-  const resetAt = new Date(now.getTime() + windowMs);
-
-  // Reset expired window first so the subsequent increment starts from 1
-  await db.rateLimitBucket.updateMany({
-    where: { key, resetAt: { lt: now } },
-    data: { count: 0, resetAt }
-  });
-
-  const bucket = await db.rateLimitBucket.upsert({
-    where: { key },
-    create: { key, count: 1, resetAt },
-    update: { count: { increment: 1 } }
-  });
-
-  if (bucket.count > limit) {
+  const windowSec = Math.ceil(windowMs / 1000);
+  const count = await redis.incr(key);
+  if (count === 1) {
+    await redis.expire(key, windowSec);
+  }
+  if (count > limit) {
     throw new Error("Too many requests. Please wait a moment and try again.");
   }
 }

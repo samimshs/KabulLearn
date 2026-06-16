@@ -390,13 +390,27 @@ async function upsertEmbedding(
     model: EMBED_MODEL,
     input: text.slice(0, 8000)
   });
-  const vector = response.data[0].embedding;
+  const vectorStr = `[${response.data[0].embedding.join(",")}]`;
+  const chunkText = text.slice(0, 4000);
 
-  await db.contentEmbedding.upsert({
-    where: { source_sourceKey: { source, sourceKey } },
-    create: { source, sourceKey, title, chunkText: text.slice(0, 4000), embedding: JSON.stringify(vector) },
-    update: { title, chunkText: text.slice(0, 4000), embedding: JSON.stringify(vector) }
-  });
+  await db.$executeRaw`
+    INSERT INTO "ContentEmbedding" (id, source, "sourceKey", title, "chunkText", embedding, "createdAt", "updatedAt")
+    VALUES (
+      gen_random_uuid()::text,
+      ${source},
+      ${sourceKey},
+      ${title},
+      ${chunkText},
+      ${vectorStr}::vector,
+      now(),
+      now()
+    )
+    ON CONFLICT (source, "sourceKey") DO UPDATE SET
+      title      = EXCLUDED.title,
+      "chunkText" = EXCLUDED."chunkText",
+      embedding  = EXCLUDED.embedding,
+      "updatedAt" = now()
+  `;
 }
 
 function languageBlock(label: string, parts: Array<string | null | undefined>) {

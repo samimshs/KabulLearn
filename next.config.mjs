@@ -14,9 +14,13 @@ const nextConfig = {
     ]
   },
   async headers() {
+    // No security headers in dev — they cause browser enforcement issues
+    // (CSP upgrade-insecure-requests breaks CSS/images on HTTP localhost in Safari)
+    if (isDev) return [];
+
     const csp = [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://www.youtube.com https://www.youtube-nocookie.com https://s.ytimg.com`,
+      "script-src 'self' 'unsafe-inline' https://www.youtube.com https://www.youtube-nocookie.com https://s.ytimg.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://lh3.googleusercontent.com https://i.ytimg.com https://*.ytimg.com https://yt3.ggpht.com",
       "font-src 'self' data:",
@@ -35,26 +39,14 @@ const nextConfig = {
       {
         source: "/(.*)",
         headers: [
-          // Prevent clickjacking — disallow embedding in iframes
           { key: "X-Frame-Options", value: "DENY" },
-          // Prevent MIME-sniffing attacks
           { key: "X-Content-Type-Options", value: "nosniff" },
-          // Don't leak internal URLs (with tokens, route params) in Referer headers
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          // Deny sensitive device access. Leave media/embed features at browser defaults so
-          // cross-origin video providers can negotiate playback inside their iframe.
           {
             key: "Permissions-Policy",
-            value: [
-              "camera=()",
-              "microphone=()",
-              "geolocation=()"
-            ].join(", ")
+            value: ["camera=()", "microphone=()", "geolocation=()"].join(", ")
           },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-          // YouTube embeds need cross-origin media, script, and postMessage flows.
-          // Use explicit non-isolating values so stale/merged platform headers cannot
-          // fall back to same-origin isolation and freeze playback.
           { key: "Cross-Origin-Opener-Policy", value: "unsafe-none" },
           { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
           { key: "Content-Security-Policy", value: csp }

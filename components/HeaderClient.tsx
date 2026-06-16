@@ -128,6 +128,23 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
           <Link href="/support" className="h-9 items-center rounded-[var(--radius)] px-3 text-[13px] font-[700] text-[var(--muted)] transition hover:text-[var(--brand)] inline-flex">
             {t.supportUs}
           </Link>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            className="grid h-9 w-9 place-items-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] shadow-sm transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)]"
+          >
+            {isDark ? (
+              <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
+                <circle cx="10" cy="10" r="4" stroke="currentColor" strokeWidth="1.6" />
+                <path d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.1 4.1l1.1 1.1M14.8 14.8l1.1 1.1M15.9 4.1l-1.1 1.1M5.2 14.8l-1.1 1.1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
+                <path d="M17 11.5A7 7 0 1 1 8.5 3a5.5 5.5 0 0 0 8.5 8.5Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+              </svg>
+            )}
+          </button>
           <div className="relative" ref={langRef}>
             <button type="button" onClick={() => setLangOpen(o => !o)} aria-label={t.language} aria-expanded={langOpen} className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[11px] font-[900] text-[var(--ink)] shadow-sm transition hover:border-[rgba(0,87,255,0.28)] hover:text-[var(--brand)] sm:hidden">
               {languageOptions.find(o => o.locale === locale)?.label}

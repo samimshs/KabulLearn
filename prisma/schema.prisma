@@ -833,3 +833,21 @@ model AiChatLog {
   @@index([rating])
   @@index([createdAt])
 }
+
+model VideoEngagementSummary {
+  id             String   @id @default(cuid())
+  userId         String
+  lessonId       String
+  courseId       String
+  activityDate   DateTime @db.Date
+  maxConsumedPct Float
+  maxPositionSec Float
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, lessonId, activityDate])
+  @@index([userId])
+  @@index([lessonId])
+  @@index([courseId])
+  @@index([activityDate])
+}

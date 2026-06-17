@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/reengage",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/heartbeat-prune",
+      "schedule": "0 2 * * *"
     }
   ]
 }

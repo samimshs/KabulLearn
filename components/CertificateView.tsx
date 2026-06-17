@@ -230,7 +230,7 @@ export function CertificateView({
         <div className="no-print grid gap-4 rounded-[var(--radius-xl)] border border-[rgba(24,130,92,0.2)] bg-[var(--success-50)] p-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
             <p className="pr-eyebrow text-[var(--success)]">{t.congratulationsExcl}</p>
-            <p className="mt-2 text-[16px] font-[700] text-[#0A0914]">
+            <p className="mt-2 text-[16px] font-[700] text-[var(--ink)]">
               {t.youFinishedWithGrade} {grade}%.
             </p>
             <p className="mt-1 text-sm font-[500] text-[var(--muted)]">

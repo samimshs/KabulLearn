@@ -330,9 +330,12 @@ textarea {
   color: var(--brand);
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 2.5px;
   line-height: 1.2;
   text-transform: uppercase;
+}
+
+html:not([dir="rtl"]) .pr-eyebrow {
+  letter-spacing: 2.5px;
 }
 
 .pr-h1 {
@@ -513,8 +516,11 @@ textarea {
 
 .kl-home-page .pr-eyebrow {
   font-size: clamp(14px, 1.08vw, 18px);
-  letter-spacing: 4px;
   line-height: 1.5;
+}
+
+html:not([dir="rtl"]) .kl-home-page .pr-eyebrow {
+  letter-spacing: 4px;
 }
 
 .kl-home-page .pr-h1 {
@@ -732,6 +738,7 @@ html[dir="rtl"] .kl-home-copy {
   direction: rtl;
   text-align: right;
 }
+
 
 @media (max-width: 1023px) {
   html[dir="rtl"] .kl-home-copy {
@@ -2189,8 +2196,11 @@ body:has(.kl-coming-soon-page) > div.fixed.bottom-6.left-6 {
 
   .kl-home-page .pr-eyebrow {
     font-size: 11px;
-    letter-spacing: 3px;
     line-height: 1.7;
+  }
+
+  html:not([dir="rtl"]) .kl-home-page .pr-eyebrow {
+    letter-spacing: 3px;
   }
 
   .kl-home-logo {

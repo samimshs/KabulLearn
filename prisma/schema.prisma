@@ -515,6 +515,7 @@ model QuizSubmission {
 
   @@index([userId, lessonId])
   @@index([lessonId])
+  @@index([userId, lessonId, passed, submittedAt])
 }
 
 model QuizSubmissionAnswer {

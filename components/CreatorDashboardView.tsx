@@ -354,7 +354,7 @@ function AnnounceView({
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-[13px] font-[900] text-[var(--ink)]">{item.courseTitle}</p>
                   <time className="text-[11px] font-[700] text-[var(--muted)]">
-                    {new Date(item.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                    {new Date(item.createdAt).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
                   </time>
                 </div>
                 {item.title && <p className="mt-2 text-[13px] font-[800] text-[var(--ink)]">{item.title}</p>}
@@ -977,7 +977,7 @@ export function CreatorDashboardView({
                           <div>
                             <p className="text-[15px] font-[900] leading-snug text-[var(--ink)]">{cert.courseTitle}</p>
                             <p className="mt-1 text-[12px] font-[700] text-[var(--muted)]">
-                              {t.issuedLabel2} {new Date(cert.issuedAt).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}
+                              {t.issuedLabel2} {new Date(cert.issuedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                             </p>
                           </div>
                           <a

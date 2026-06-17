@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { QuizBlock } from "@/components/QuizBlock";
 import { useLanguage } from "@/components/LanguageProvider";
 import { getPassedQuizzes, quizProgressKey } from "@/lib/progress";
-import { startQuizAttempt, submitQuizAttempt } from "@/lib/actions/quiz-actions";
+import { startQuizAttempt, submitQuizAttempt, getQuizAttemptStatus } from "@/lib/actions/quiz-actions";
 import { LessonStateIcon, lessonKindOf, type LessonState } from "@/components/LessonStateIcon";
 import { usesPashtoContent, type Locale, type Dictionary } from "@/lib/i18n";
 import { type Course, type Module, type Lesson, type Question, type AnswerChoice } from "@prisma/client";
@@ -48,6 +48,7 @@ type QuizViewProps = {
   lessonStatuses?: Record<string, "IN_PROGRESS" | "COMPLETED">;
   isComplete?: boolean;
   previousScore?: number | null;
+  attemptStatus?: { attemptsUsed: number; retryAt: string | null };
 };
 
 /* ── Icons ─────────────────────────────────────────────────── */
@@ -209,11 +210,15 @@ export function QuizView({
   lessonStatuses = {},
   isComplete = false,
   previousScore = null,
+  attemptStatus,
 }: QuizViewProps) {
   const { locale, t, direction } = useLanguage();
   const router = useRouter();
   const [passedQuizzes, setPassedQuizzes] = useState<Set<string>>(new Set(serverPassedModuleIds));
   const [retaking, setRetaking] = useState(false);
+  const [justPassed, setJustPassed] = useState(false);
+  const [liveAttemptsUsed, setLiveAttemptsUsed] = useState(attemptStatus?.attemptsUsed ?? 0);
+  const [liveRetryAt, setLiveRetryAt] = useState<string | null>(attemptStatus?.retryAt ?? null);
 
   const moduleIds = course.modules.map((m) => m.id);
   const moduleIndex = course.modules.findIndex((m) => m.id === module.id);
@@ -245,9 +250,31 @@ export function QuizView({
   const quizTitle = usesPashtoContent(locale) ? quizLesson.titlePs : quizLesson.titleEn;
   const quizDesc = usesPashtoContent(locale) ? quizLesson.descriptionPs ?? "" : quizLesson.descriptionEn ?? "";
   const passingScore = quizLesson.passingScore ?? 70;
+  const isPashto = usesPashtoContent(locale);
+
+  const reviewQuestions = quiz?.questions.map((q) => {
+    const qAny = q as Record<string, unknown>;
+    return {
+      id: q.id,
+      type: q.type,
+      prompt: isPashto ? q.promptPs : (qAny.promptDa as string | null) ?? q.promptEn,
+      correctAnswer: q.correctAnswer ?? null,
+      explanation: q.explanationEn || q.explanationPs
+        ? (isPashto ? q.explanationPs : (qAny.explanationDa as string | null) ?? q.explanationEn) ?? null
+        : null,
+      choices: q.choices.map((c) => {
+        const cAny = c as Record<string, unknown>;
+        return {
+          id: c.id,
+          text: isPashto ? c.textPs : (cAny.textDa as string | null) ?? c.textEn,
+          isCorrect: c.isCorrect,
+        };
+      }),
+    };
+  }) ?? [];
 
   /* ── Previously-passed state ──────────────────────────────── */
-  if (previousScore !== null && !retaking) {
+  if (previousScore !== null && !retaking && !justPassed) {
     const didPass = previousScore >= passingScore;
 
     return (
@@ -302,6 +329,44 @@ export function QuizView({
               )}
             </div>
           </div>
+
+          {reviewQuestions.map((q, idx) => (
+            <article key={q.id} className="rounded-[var(--radius-lg)] border border-[rgba(24,130,92,0.2)] bg-[var(--card)] p-5 shadow-sm">
+              <p className="text-xs font-[800] uppercase tracking-[1.5px] text-[var(--brand)]">
+                {t.quiz} {idx + 1}
+              </p>
+              <h3 className="mt-2 text-xl font-[800] tracking-[-0.35px] text-[var(--ink)]">{q.prompt}</h3>
+
+              {q.type === "TEXT_INPUT" ? (
+                <div className="mt-4 rounded-[var(--radius)] border border-[rgba(24,130,92,0.3)] bg-[var(--success-50)] px-4 py-3">
+                  <p className="text-xs font-[800] uppercase tracking-[1px] text-[var(--success)]">{t.correctAnswer}</p>
+                  <p className="mt-1 text-sm font-[800] text-[var(--ink)]">{q.correctAnswer}</p>
+                </div>
+              ) : (
+                <div className="mt-4 grid gap-2">
+                  {q.choices.map((choice) => (
+                    <div
+                      key={choice.id}
+                      className={`min-h-11 rounded-[var(--radius)] border px-4 py-2.5 text-sm font-[800] ${
+                        choice.isCorrect
+                          ? "border-[var(--success)] bg-[var(--success)] text-white"
+                          : "border-[var(--border)] bg-[var(--surface)] text-[var(--ink-2)]"
+                      }`}
+                    >
+                      {choice.isCorrect ? "✓ " : ""}{choice.text}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {q.explanation ? (
+                <div className="mt-4 rounded-[var(--radius)] border border-[rgba(0,87,255,0.18)] bg-[var(--brand-50)] p-3">
+                  <p className="text-xs font-[800] uppercase tracking-[1.5px] text-[var(--brand)]">{t.explanationLabel}</p>
+                  <p className="mt-1 text-sm font-[600] text-[var(--ink-2)]">{q.explanation}</p>
+                </div>
+              ) : null}
+            </article>
+          ))}
         </section>
       </main>
     );
@@ -355,6 +420,57 @@ export function QuizView({
   }
 
   /* ── Active quiz state ────────────────────────────────────── */
+  function formatRetryTime(iso: string): string {
+    const msLeft = new Date(iso).getTime() - Date.now();
+    if (msLeft <= 0) return "now";
+    const h = Math.floor(msLeft / 3_600_000);
+    const m = Math.ceil((msLeft % 3_600_000) / 60_000);
+    return h > 0 ? `${h}h${m > 0 ? ` ${m}min` : ""}` : `${m} minute${m === 1 ? "" : "s"}`;
+  }
+
+  function attemptBanner() {
+    if (!attemptStatus) return null;
+    const attemptsUsed = liveAttemptsUsed;
+    const retryAt = liveRetryAt;
+    if (retryAt) {
+      return (
+        <div className="rounded-[var(--radius-lg)] border border-[rgba(196,43,43,0.25)] bg-[var(--danger-50)] px-5 py-4">
+          <p className="text-sm font-bold text-[var(--danger)]">
+            {t.quizAllAttemptsUsed.replace("{time}", formatRetryTime(retryAt))}
+          </p>
+        </div>
+      );
+    }
+    if (attemptsUsed === 0) {
+      return (
+        <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] px-5 py-4">
+          <p className="text-sm font-bold text-[var(--ink-2)]">
+            {t.quizAttemptInfo}
+          </p>
+        </div>
+      );
+    }
+    if (attemptsUsed === 1) {
+      return (
+        <div className="rounded-[var(--radius-lg)] border border-[rgba(150,96,0,0.25)] bg-[var(--warning-50)] px-5 py-4">
+          <p className="text-sm font-bold text-[var(--warning)]">
+            {t.quizAttempt2of3}
+          </p>
+        </div>
+      );
+    }
+    if (attemptsUsed === 2) {
+      return (
+        <div className="rounded-[var(--radius-lg)] border border-[rgba(196,43,43,0.25)] bg-[var(--danger-50)] px-5 py-4">
+          <p className="text-sm font-bold text-[var(--danger)]">
+            {t.quizAttempt3of3}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  }
+
   const questions = quiz.questions.map((q) => ({
     id: q.id,
     type: q.type,
@@ -373,6 +489,7 @@ export function QuizView({
       <CourseSidebar {...sidebarProps} />
 
       <section className="order-1 grid min-w-0 auto-rows-min gap-5 lg:order-2">
+        {attemptBanner()}
         <QuizBlock
           title={quizTitle}
           description={quizDesc}
@@ -384,10 +501,7 @@ export function QuizView({
               moduleId: module.id,
               lessonId: quizLesson.id,
             });
-            if (!result.ok) {
-              console.warn("Could not start quiz attempt:", result.error);
-              return null;
-            }
+            if (!result.ok) throw new Error(result.error);
             return result.data.attemptId;
           }}
           onPass={async (selectedAnswers, attemptId) => {
@@ -400,20 +514,18 @@ export function QuizView({
               selectedAnswers,
             });
             if (!result.ok) {
-              // Surface the error so the quiz never falsely shows "Passed"
               throw new Error(result.error);
             }
 
-            // Only mark passed once the server has saved it
             if (result.data.passed) {
               window.localStorage.setItem(quizProgressKey(course.id, module.id), "true");
               setPassedQuizzes((prev) => new Set([...prev, module.id]));
-              // Refresh server data so the course/certificate pages reflect completion right away
+              setJustPassed(true);
               router.refresh();
-              // Final quiz → send the student to the course homepage (rating card + certificate preview)
-              if (!nextLesson) {
-                setTimeout(() => router.push(`/courses/${encodeURIComponent(course.id)}`), 1200);
-              }
+            } else {
+              const freshStatus = await getQuizAttemptStatus(quizLesson.id);
+              setLiveAttemptsUsed(freshStatus.attemptsUsed);
+              setLiveRetryAt(freshStatus.retryAt);
             }
             return result.data;
           }}

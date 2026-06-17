@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { dictionaries } from "@/lib/i18n";
 import { getServerLocale } from "@/lib/server-locale";
 import { confirmPaidCourseCheckout, ensureEnrollmentForPaidCoursePayment } from "@/lib/stripe-course-payments";
+import { ConfettiEffect } from "@/components/ConfettiEffect";
 
 export const metadata = {
   title: "Thank you for your course purchase",
@@ -77,6 +78,7 @@ export default async function CoursePurchaseThankYouPage({
 
   return (
     <main className="pr-page py-12 lg:py-20">
+      {paymentConfirmed && <ConfettiEffect />}
       <section className="mx-auto max-w-3xl overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow)]">
         <div className="bg-[linear-gradient(135deg,rgba(0,87,255,0.10),rgba(24,130,92,0.10))] px-6 py-10 text-center sm:px-10">
           <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[var(--card)] text-[var(--success)] shadow-[var(--shadow-sm)]" aria-hidden="true">

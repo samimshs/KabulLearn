@@ -12,6 +12,7 @@ import { CourseRatingForm } from "@/components/CourseRatingForm";
 import { CourseDiscussion } from "@/components/CourseDiscussion";
 import { MessageInstructorButton } from "@/components/MessageInstructorButton";
 import { CertificatePreview } from "@/components/CertificatePreview";
+import { ConfettiEffect } from "@/components/ConfettiEffect";
 import type { Course, Lesson, Module } from "@prisma/client";
 
 type CourseModule = Pick<Module, "id" | "order" | "titleEn" | "titlePs"> & {
@@ -177,9 +178,10 @@ function ShareButton({ courseId, title, t }: { courseId: string; title: string; 
 
 /* Khan Academy-style status dot for the course-overview lesson list */
 function LessonStatusDot({ status }: { status: "IN_PROGRESS" | "COMPLETED" | undefined }) {
+  const { t } = useLanguage();
   if (status === "COMPLETED") {
     return (
-      <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-[var(--success)] text-white" aria-label="Completed">
+      <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-[var(--success)] text-white" aria-label={t.completed}>
         <svg viewBox="0 0 14 14" className="h-2.5 w-2.5" fill="none" aria-hidden="true">
           <path d="M2.5 7.5 5.5 10.5 11.5 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
@@ -188,13 +190,13 @@ function LessonStatusDot({ status }: { status: "IN_PROGRESS" | "COMPLETED" | und
   }
   if (status === "IN_PROGRESS") {
     return (
-      <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-[#FFF4DE] ring-1 ring-[#F2C879]" aria-label="In progress">
+      <span className="grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full bg-[#FFF4DE] ring-1 ring-[#F2C879]" aria-label={t.inProgress}>
         <span className="h-2 w-2 rounded-full bg-[#D97706]" />
       </span>
     );
   }
   return (
-    <span className="h-[18px] w-[18px] shrink-0 rounded-full border-2 border-[var(--border)]" aria-label="Not started" />
+    <span className="h-[18px] w-[18px] shrink-0 rounded-full border-2 border-[var(--border)]" aria-label={t.notStarted} />
   );
 }
 
@@ -230,6 +232,7 @@ export function CourseOverview({
   const [enrolled, setEnrolled] = useState(isEnrolled);
   const [enrollError, setEnrollError] = useState<string | null>(null);
   const [checkoutPending, setCheckoutPending] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [promoInput, setPromoInput] = useState("");
   const [promoValidating, setPromoValidating] = useState(false);
@@ -371,6 +374,7 @@ export function CourseOverview({
 
       if (result.data?.enrolled) {
         setEnrolled(true);
+        setShowConfetti(true);
         router.refresh();
         return;
       }
@@ -390,6 +394,7 @@ export function CourseOverview({
 
   return (
     <main className="pr-page grid gap-6">
+      {showConfetti && <ConfettiEffect />}
       <Link
         href={previewBackHref ?? "/courses"}
         className="inline-flex items-center gap-1.5 text-[13px] font-[800] uppercase tracking-[1px] text-[var(--brand)] transition hover:text-[var(--brand-hover)]"
@@ -618,7 +623,7 @@ export function CourseOverview({
               <div className="mx-auto w-full max-w-sm">
                 <Link
                   href={`/courses/${encodeURIComponent(course.id)}/certificate`}
-                  aria-label="View full certificate"
+                  aria-label={t.viewFullCertificate}
                   className="block rounded-xl shadow-xl transition duration-200 hover:-translate-y-1 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
                 >
                   <CertificatePreview
@@ -779,7 +784,7 @@ export function CourseOverview({
                 )}
               </Link>
               <div>
-                <p className="pr-eyebrow">About the Instructor</p>
+                <p className="pr-eyebrow">{t.aboutInstructor}</p>
                 <Link href={`/creators/${encodeURIComponent(instructor.username)}`} className="inline-block">
                   <h2 className="mt-2 text-[24px] font-[800] tracking-[-0.5px] text-[var(--ink)] transition hover:text-[var(--brand)]">
                     {instructor.name}
@@ -808,7 +813,7 @@ export function CourseOverview({
 
         return (
           <section className="pr-card p-6 lg:p-7">
-            <p className="pr-eyebrow">About the Instructors</p>
+            <p className="pr-eyebrow">{t.aboutInstructors}</p>
             <div className="mt-5 grid gap-5 sm:grid-cols-2">
               {instructorList.map((instructor) => (
                 <article

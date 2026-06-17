@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { hash } from "bcryptjs";
 import { UserStatus } from "@prisma/client";
 import { z } from "zod";
@@ -10,7 +11,7 @@ import {
   hashVerificationToken,
   sendPasswordResetEmail
 } from "@/lib/email-verification";
-import { assertRateLimit } from "@/lib/security";
+import { assertRateLimit, assertRateLimitWindow, getClientIpFromHeaders } from "@/lib/security";
 import type { Locale } from "@/lib/i18n";
 
 function normalizeLocale(value: FormDataEntryValue | null): Locale {
@@ -103,7 +104,9 @@ export async function requestPasswordReset(
 
   const { email } = parsed.data;
 
+  const ip = getClientIpFromHeaders(await headers());
   try {
+    await assertRateLimitWindow(`password-reset:ip:${ip}`, 10, 60_000);
     await assertRateLimit(`password-reset-request:${email}`, 5);
   } catch {
     return { error: m.tooMany, success: false };

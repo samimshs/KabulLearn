@@ -19,9 +19,9 @@ type PromoCode = {
 type PaidCourse = { id: string; title: string };
 
 const fieldClass =
-  "h-10 w-full rounded-[10px] border border-[#26364f] bg-[#0b182b] px-3 text-[13px] font-[600] text-white placeholder:text-[#4a5e7a] focus:border-[#3b82f6] focus:outline-none focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)] transition";
+  "pr-input w-full";
 
-const labelClass = "block text-[11px] font-[900] uppercase tracking-[1.2px] text-[#7ea7ff] mb-1.5";
+const labelClass = "block text-[11px] font-[900] uppercase tracking-[1.2px] text-[var(--brand)] mb-1.5";
 
 export function AdminPromoCodesSection({
   promoCodes,
@@ -67,8 +67,8 @@ export function AdminPromoCodesSection({
     <div className="p-5 lg:p-6">
 
       {/* ── Create form ────────────────────────────────────────────── */}
-      <div className="rounded-[14px] border border-[#1f2a3d] bg-[#07111f] p-5">
-        <p className="mb-4 text-[11px] font-[900] uppercase tracking-[1.5px] text-[#7ea7ff]">New promo code</p>
+      <div className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] p-5">
+        <p className="mb-4 text-[11px] font-[900] uppercase tracking-[1.5px] text-[var(--brand)]">New promo code</p>
 
         <form ref={formRef} action={handleCreate}>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -84,7 +84,7 @@ export function AdminPromoCodesSection({
                 className={fieldClass + " uppercase tracking-[2px]"}
                 onChange={(e) => { e.target.value = e.target.value.toUpperCase().replace(/\s/g, ""); }}
               />
-              <p className="mt-1 text-[11px] text-[#4a5e7a]">Letters & numbers only, no spaces</p>
+              <p className="mt-1 text-[11px] text-[var(--muted)]">Letters &amp; numbers only, no spaces</p>
             </div>
 
             {/* Discount type */}
@@ -116,7 +116,7 @@ export function AdminPromoCodesSection({
                 placeholder={discountType === "PERCENT" ? "e.g. 20" : "e.g. 5.00"}
                 className={fieldClass}
               />
-              <p className="mt-1 text-[11px] text-[#4a5e7a]">
+              <p className="mt-1 text-[11px] text-[var(--muted)]">
                 {discountType === "PERCENT" ? "100 = completely free" : "Enter in dollars, e.g. 5.00"}
               </p>
             </div>
@@ -132,7 +132,7 @@ export function AdminPromoCodesSection({
                 placeholder="Unlimited"
                 className={fieldClass}
               />
-              <p className="mt-1 text-[11px] text-[#4a5e7a]">Leave blank for unlimited</p>
+              <p className="mt-1 text-[11px] text-[var(--muted)]">Leave blank for unlimited</p>
             </div>
 
             {/* Expiry date */}
@@ -141,9 +141,9 @@ export function AdminPromoCodesSection({
               <input
                 name="expiresAt"
                 type="date"
-                className={fieldClass + " [color-scheme:dark]"}
+                className={fieldClass}
               />
-              <p className="mt-1 text-[11px] text-[#4a5e7a]">Leave blank — no expiry</p>
+              <p className="mt-1 text-[11px] text-[var(--muted)]">Leave blank — no expiry</p>
             </div>
 
             {/* Course restriction */}
@@ -155,7 +155,7 @@ export function AdminPromoCodesSection({
                   <option key={c.id} value={c.id}>{c.title}</option>
                 ))}
               </select>
-              <p className="mt-1 text-[11px] text-[#4a5e7a]">Optional — leave blank for all</p>
+              <p className="mt-1 text-[11px] text-[var(--muted)]">Optional — leave blank for all</p>
             </div>
           </div>
 
@@ -163,7 +163,7 @@ export function AdminPromoCodesSection({
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex h-10 items-center gap-2 rounded-[10px] border border-[#3b82f6] bg-[#3b82f6] px-5 text-[13px] font-[800] text-white shadow-[0_6px_18px_rgba(59,130,246,0.28)] transition hover:border-[#2563eb] hover:bg-[#2563eb] disabled:opacity-50"
+              className="pr-btn-primary disabled:opacity-50"
             >
               {isPending ? (
                 <>
@@ -180,13 +180,13 @@ export function AdminPromoCodesSection({
               )}
             </button>
             {success ? (
-              <span className="flex items-center gap-1.5 text-[13px] font-[800] text-[#34d399]">
+              <span className="flex items-center gap-1.5 text-[13px] font-[800] text-[var(--success)]">
                 <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4"><path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 Promo code created
               </span>
             ) : null}
             {error ? (
-              <span className="text-[13px] font-[800] text-[#f87171]">{error}</span>
+              <span className="text-[13px] font-[800] text-[var(--danger)]">{error}</span>
             ) : null}
           </div>
         </form>
@@ -195,31 +195,31 @@ export function AdminPromoCodesSection({
       {/* ── Existing codes ──────────────────────────────────────────── */}
       <div className="mt-6">
         <div className="mb-3 flex items-center justify-between">
-          <p className="text-[11px] font-[900] uppercase tracking-[1.5px] text-[#8fb5ff]">
+          <p className="text-[11px] font-[900] uppercase tracking-[1.5px] text-[var(--brand)]">
             Promo codes
           </p>
-          <span className="rounded-full border border-[#26364f] bg-[#0b182b] px-2.5 py-0.5 text-[11px] font-[900] text-[#8fb5ff]">
+          <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-2.5 py-0.5 text-[11px] font-[900] text-[var(--brand)]">
             {activeCount} active / {promoCodes.length} total
           </span>
         </div>
 
         {promoCodes.length === 0 ? (
-          <div className="rounded-[14px] border border-dashed border-[#26364f] py-10 text-center">
-            <p className="text-[13px] font-[700] text-[#4a5e7a]">No promo codes yet — create one above.</p>
+          <div className="rounded-[14px] border border-dashed border-[var(--border)] py-10 text-center">
+            <p className="text-[13px] font-[700] text-[var(--muted)]">No promo codes yet — create one above.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-[14px] border border-[#1f2a3d]">
+          <div className="overflow-x-auto rounded-[14px] border border-[var(--border)]">
             <table className="w-full min-w-[640px]">
               <thead>
-                <tr className="border-b border-[#1f2a3d] bg-[#07111f]">
+                <tr className="border-b border-[var(--border)] bg-[var(--surface)]">
                   {["Code", "Discount", "Usage", "Expires", "Scope", "Status", "Actions"].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-[10.5px] font-[900] uppercase tracking-[1.2px] text-[#4a5e7a]">
+                    <th key={h} className="px-4 py-3 text-left text-[10.5px] font-[900] uppercase tracking-[1.2px] text-[var(--muted)]">
                       {h}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1f2a3d]">
+              <tbody className="divide-y divide-[var(--border)]">
                 {promoCodes.map((p) => {
                   const expired = p.expiresAt ? new Date(p.expiresAt) < new Date() : false;
                   const exhausted = p.maxUses !== null && p.usedCount >= p.maxUses;
@@ -227,44 +227,44 @@ export function AdminPromoCodesSection({
                   const statusLabel = !p.isActive ? "Disabled" : expired ? "Expired" : exhausted ? "Used up" : "Active";
 
                   return (
-                    <tr key={p.id} className="bg-[#0b182b] transition hover:bg-[#0f1f33]">
+                    <tr key={p.id} className="bg-[var(--card)] transition hover:bg-[var(--surface)]">
                       <td className="px-4 py-3">
-                        <span className="rounded-[6px] border border-[#26364f] bg-[#07111f] px-2 py-1 font-mono text-[12px] font-[900] tracking-[2px] text-white">
+                        <span className="rounded-[6px] border border-[var(--border)] bg-[var(--surface)] px-2 py-1 font-mono text-[12px] font-[900] tracking-[2px] text-[var(--ink)]">
                           {p.code}
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-[13px] font-[800] text-white">
+                        <span className="text-[13px] font-[800] text-[var(--ink)]">
                           {p.discountType === "PERCENT"
                             ? `${p.discountValue}% off`
                             : `$${(p.discountValue / 100).toFixed(2)} off`}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-[#8fb5ff]">
+                      <td className="px-4 py-3 text-[13px] text-[var(--brand)]">
                         {p.usedCount}
                         {p.maxUses !== null ? (
-                          <span className="text-[#4a5e7a]"> / {p.maxUses}</span>
+                          <span className="text-[var(--muted)]"> / {p.maxUses}</span>
                         ) : (
-                          <span className="text-[#4a5e7a]"> / ∞</span>
+                          <span className="text-[var(--muted)]"> / ∞</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-[#8fb5ff]">
+                      <td className="px-4 py-3 text-[13px] text-[var(--ink-2)]">
                         {p.expiresAt
                           ? new Date(p.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                          : <span className="text-[#4a5e7a]">Never</span>}
+                          : <span className="text-[var(--muted)]">Never</span>}
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-[#8fb5ff]">
+                      <td className="px-4 py-3 text-[13px] text-[var(--ink-2)]">
                         {p.courseTitle
                           ? <span className="max-w-[160px] truncate block" title={p.courseTitle}>{p.courseTitle}</span>
-                          : <span className="text-[#4a5e7a]">All courses</span>}
+                          : <span className="text-[var(--muted)]">All courses</span>}
                       </td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10.5px] font-[900] uppercase tracking-[1px] ${
                           statusOk
-                            ? "bg-[rgba(52,211,153,0.12)] text-[#34d399]"
-                            : "bg-[rgba(248,113,113,0.12)] text-[#f87171]"
+                            ? "bg-[var(--success-50)] text-[var(--success)]"
+                            : "bg-[var(--danger-50)] text-[var(--danger)]"
                         }`}>
-                          <span className={`h-1.5 w-1.5 rounded-full ${statusOk ? "bg-[#34d399]" : "bg-[#f87171]"}`} />
+                          <span className={`h-1.5 w-1.5 rounded-full ${statusOk ? "bg-[var(--success)]" : "bg-[var(--danger)]"}`} />
                           {statusLabel}
                         </span>
                       </td>
@@ -274,16 +274,16 @@ export function AdminPromoCodesSection({
                             type="button"
                             onClick={() => handleToggle(p.id, !p.isActive)}
                             disabled={isPending}
-                            className="text-[12px] font-[800] text-[#8fb5ff] transition hover:text-white disabled:opacity-40"
+                            className="text-[12px] font-[800] text-[var(--brand)] transition hover:text-[var(--ink)] disabled:opacity-40"
                           >
                             {p.isActive ? "Disable" : "Enable"}
                           </button>
-                          <span className="text-[#26364f]">|</span>
+                          <span className="text-[var(--border)]">|</span>
                           <button
                             type="button"
                             onClick={() => handleDelete(p.id, p.code)}
                             disabled={isPending}
-                            className="text-[12px] font-[800] text-[#f87171] transition hover:text-white disabled:opacity-40"
+                            className="text-[12px] font-[800] text-[var(--danger)] transition hover:text-[var(--ink)] disabled:opacity-40"
                           >
                             Delete
                           </button>

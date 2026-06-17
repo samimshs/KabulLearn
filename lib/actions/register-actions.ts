@@ -1,12 +1,13 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { hash } from "bcryptjs";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { UserRole, UserStatus } from "@prisma/client";
 import { createVerificationToken, isDisposableEmail, sendVerificationEmail } from "@/lib/email-verification";
-import { assertRateLimit } from "@/lib/security";
+import { assertRateLimit, assertRateLimitWindow, getClientIpFromHeaders } from "@/lib/security";
 import type { Locale } from "@/lib/i18n";
 
 function normalizeLocale(value: FormDataEntryValue | null): Locale {
@@ -86,7 +87,9 @@ export async function registerUser(
     return { error: m.permanentEmail };
   }
 
+  const ip = getClientIpFromHeaders(await headers());
   try {
+    await assertRateLimitWindow(`register:ip:${ip}`, 10, 60_000);
     await assertRateLimit(`register:${email}`, 5);
   } catch {
     return { error: m.createUnavailable };

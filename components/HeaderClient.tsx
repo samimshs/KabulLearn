@@ -252,7 +252,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
           )}
           {user?.role === "STUDENT" && (
             <Link
-              href="/dashboard"
+              href="/dashboard/my-courses"
               className={`hidden h-9 items-center rounded-[var(--radius)] px-3 text-[13px] font-[800] transition sm:inline-flex ${
                 pathname.startsWith("/dashboard")
                   ? "text-[var(--brand)]"
@@ -534,7 +534,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                 {t.signIn}
               </Link>
               <Link href="/register" className="pr-btn-primary !min-h-9 px-3 sm:px-4">
-                <span className="sm:hidden">Join</span>
+                <span className="sm:hidden">{t.joinLabel}</span>
                 <span className="hidden sm:inline">{t.registerFree}</span>
               </Link>
             </>
@@ -612,7 +612,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
 
           {/* My Dashboard — students */}
           {user?.role === "STUDENT" && (
-            <Link href="/dashboard" onClick={() => setNavSheetOpen(false)}
+            <Link href="/dashboard/my-courses" onClick={() => setNavSheetOpen(false)}
               className={`flex items-center gap-3.5 rounded-[var(--radius-lg)] px-4 py-3.5 text-[15px] font-[700] transition ${pathname.startsWith("/dashboard") ? "bg-[var(--brand-50)] text-[var(--brand)]" : "text-[var(--ink)] hover:bg-[var(--surface)]"}`}
             >
               <svg viewBox="0 0 20 20" className="h-5 w-5 shrink-0" fill="none" aria-hidden="true">

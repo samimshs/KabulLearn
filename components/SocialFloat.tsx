@@ -131,7 +131,7 @@ export function SocialFloat() {
             >
               {social.icon}
               {/* Tooltip — always appears to the right */}
-              <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-md bg-[var(--ink)] px-2.5 py-1 text-[11px] font-[700] text-white shadow-sm opacity-0 transition-opacity duration-100 group-hover:opacity-100">
+              <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-md bg-[#111] px-2.5 py-1 text-[11px] font-[700] text-white shadow-sm opacity-0 transition-opacity duration-100 group-hover:opacity-100">
                 {social.name}
               </span>
             </a>

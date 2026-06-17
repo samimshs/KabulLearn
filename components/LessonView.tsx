@@ -568,7 +568,7 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
                 }`}
                 aria-pressed={bookmarked}
               >
-                {bookmarked ? "Saved" : "Save lesson"}
+                {bookmarked ? t.lessonSaved : t.saveLesson}
               </button>
             ) : null}
           </div>

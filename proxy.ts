@@ -34,7 +34,9 @@ export default auth((request) => {
     pathname.startsWith("/admin") ||
     pathname.startsWith("/educator") ||
     pathname.startsWith("/api/enroll") ||
-    pathname.startsWith("/api/educator");
+    pathname.startsWith("/api/educator") ||
+    pathname.startsWith("/api/chat") ||
+    pathname.startsWith("/api/lesson");
 
   if (isProtectedContent && status === "VERIFICATION_PENDING") {
     const verifyUrl = new URL("/verify-request", request.nextUrl);
@@ -63,5 +65,5 @@ export default auth((request) => {
 });
 
 export const config = {
-  matcher: ["/", "/admin/:path*", "/educator/:path*", "/dashboard/:path*", "/courses/:path*", "/api/enroll", "/api/promo/:path*", "/api/educator/:path*"]
+  matcher: ["/", "/admin/:path*", "/educator/:path*", "/dashboard/:path*", "/courses/:path*", "/api/enroll", "/api/promo/:path*", "/api/educator/:path*", "/api/chat/:path*", "/api/lesson/:path*"]
 };

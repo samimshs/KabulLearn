@@ -3,6 +3,7 @@ import { CourseStatus, LessonType, ProgressStatus, QuestionType } from "@prisma/
 import { QuizView } from "@/components/QuizView";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { getQuizAttemptStatus } from "@/lib/actions/quiz-actions";
 import { getServerLocale, localizedCourseSelect, localizedLessonSelect, localizedModuleSelect } from "@/lib/server-locale";
 import { usesPashtoContent } from "@/lib/i18n";
 
@@ -178,16 +179,10 @@ export default async function QuizPage({
     redirect(`/login?callbackUrl=${encodeURIComponent(`/courses/${encodeURIComponent(courseId)}`)}`);
   }
 
-  let isEnrolled = false;
-  try {
-    const enrollment = await db.enrollment.findUnique({
-      where: { userId_courseId: { userId, courseId } }
-    });
-    isEnrolled = Boolean(enrollment);
-  } catch {
-    // DB error on enrollment check — allow access
-    isEnrolled = true;
-  }
+  const enrollment = await db.enrollment.findUnique({
+    where: { userId_courseId: { userId, courseId } }
+  });
+  const isEnrolled = Boolean(enrollment);
 
   if (!isEnrolled) {
     redirect(`/courses/${encodeURIComponent(courseId)}`);
@@ -196,6 +191,7 @@ export default async function QuizPage({
   let serverPassedModuleIds: string[] = [];
   let lessonStatuses: Record<string, "IN_PROGRESS" | "COMPLETED"> = {};
   let previousScore: number | null = null;
+  let attemptStatus: { attemptsUsed: number; retryAt: string | null } = { attemptsUsed: 0, retryAt: null };
 
   try {
     // Find the quiz lesson for this module (same logic as QuizView)
@@ -203,7 +199,7 @@ export default async function QuizPage({
       (l) => (l.quiz?.questions?.length ?? 0) > 0
     ) ?? module.lessons.at(-1);
 
-    const [progressRows, quizProgress] = await Promise.all([
+    const [progressRows, quizProgress, quizAttemptStatus] = await Promise.all([
       db.userProgress.findMany({
         where: { userId, lesson: { module: { courseId } } },
         select: { lessonId: true, status: true, lesson: { select: { moduleId: true, type: true } } }
@@ -213,7 +209,8 @@ export default async function QuizPage({
             where: { userId_lessonId: { userId, lessonId: quizLesson.id } },
             select: { latestScore: true, bestScore: true }
           })
-        : null
+        : null,
+      quizLesson ? getQuizAttemptStatus(quizLesson.id) : Promise.resolve({ attemptsUsed: 0, retryAt: null })
     ]);
 
     serverPassedModuleIds = Array.from(new Set(
@@ -227,6 +224,7 @@ export default async function QuizPage({
       }
     }
     previousScore = quizProgress?.latestScore ?? quizProgress?.bestScore ?? null;
+    attemptStatus = quizAttemptStatus;
   } catch {
     // progress unavailable
   }
@@ -243,6 +241,7 @@ export default async function QuizPage({
       lessonStatuses={lessonStatuses}
       isComplete={isComplete}
       previousScore={thisModulePassed ? previousScore : null}
+      attemptStatus={thisModulePassed ? undefined : attemptStatus}
     />
   );
 }

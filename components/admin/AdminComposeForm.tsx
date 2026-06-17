@@ -120,7 +120,7 @@ export function AdminComposeForm({ users, history = [] }: { users: User[]; histo
                     {item.recipientCount > 1 ? `Broadcast to ${item.recipientCount} users` : `To ${item.recipients[0] ?? "user"}`}
                   </p>
                   <time className="text-[11px] font-[700] text-[var(--muted)]">
-                    {new Date(item.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                    {new Date(item.createdAt).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
                   </time>
                 </div>
                 {item.recipientCount > 1 ? (

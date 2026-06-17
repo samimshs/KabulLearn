@@ -24,6 +24,7 @@ type DashCourse = {
   completedModules: number;
   totalLessons: number;
   percent: number;
+  isPaid: boolean;
   resumeLessonId: string | null;
   nextModuleTitle: string;
   thumbIndex: number;
@@ -198,7 +199,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
         setDroppingCourseId(null);
         return;
       }
-      setDropStatus("Course dropped.");
+      setDropStatus(t.courseDropped);
       setDroppingCourseId(null);
       setDropCandidate(null);
       router.refresh();
@@ -451,7 +452,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
                             {isComplete ? t.reviewCourse : course.percent > 0 ? t.continueBtn : t.startCourse}
                           </Link>
                         </div>
-                        {!isComplete && (
+                        {!isComplete && !course.isPaid && (
                           <button
                             type="button"
                             onClick={() => setDropCandidate({ id: course.id, title })}
@@ -515,7 +516,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
                       {localize(locale, cert.courseTitleEn, cert.courseTitlePs, cert.courseTitleDa)}
                     </h3>
                     <p className="mt-0.5 text-[12px] font-[600] text-[var(--muted)]">
-                      {t.issuedLabel} {new Date(cert.issuedAt).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}
+                      {t.issuedLabel} {new Date(cert.issuedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
                     </p>
                   </div>
 

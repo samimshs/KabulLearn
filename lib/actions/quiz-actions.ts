@@ -84,6 +84,29 @@ export async function startQuizAttempt(
       lessonId: values.lessonId
     });
 
+    // Attempt limit: 3 failed attempts per 8-hour rolling window. Already-passed students are exempt.
+    const existingProgress = await db.userProgress.findUnique({
+      where: { userId_lessonId: { userId: session.user.id, lessonId: values.lessonId } },
+      select: { status: true }
+    });
+    if (existingProgress && existingProgress.status !== ProgressStatus.COMPLETED) {
+      const WINDOW_MS = 8 * 60 * 60 * 1000;
+      const windowStart = new Date(Date.now() - WINDOW_MS);
+      const recentFailures = await db.quizSubmission.findMany({
+        where: { userId: session.user.id, lessonId: values.lessonId, passed: false, submittedAt: { gte: windowStart } },
+        orderBy: { submittedAt: "desc" },
+        select: { submittedAt: true }
+      });
+      if (recentFailures.length >= 3) {
+        const retryAt = new Date(recentFailures[0].submittedAt.getTime() + WINDOW_MS);
+        const msLeft = retryAt.getTime() - Date.now();
+        const h = Math.floor(msLeft / 3_600_000);
+        const m = Math.ceil((msLeft % 3_600_000) / 60_000);
+        const timeMsg = h > 0 ? `${h}h ${m > 0 ? `${m}min` : ""}`.trim() : `${m} minute${m === 1 ? "" : "s"}`;
+        throw new Error(`You've used all 3 attempts for this quiz in the past 8 hours. Try again in ${timeMsg}.`);
+      }
+    }
+
     const attempt = await db.quizAttemptSession.create({
       data: {
         userId: session.user.id,
@@ -103,7 +126,7 @@ export async function startQuizAttempt(
 
 export async function submitQuizAttempt(
   input: z.infer<typeof quizSubmissionSchema>
-): Promise<ActionResult<{ score: number; passed: boolean }>> {
+): Promise<ActionResult<{ score: number; passed: boolean; retryAt: string | null }>> {
   try {
     const session = await auth();
 
@@ -351,14 +374,57 @@ export async function submitQuizAttempt(
       revalidatePath("/dashboard/my-courses");
     }
 
-    return {
-      ok: true,
-      data: {
-        score,
-        passed
+    let retryAt: string | null = null;
+    if (!passed) {
+      const WINDOW_MS = 8 * 60 * 60 * 1000;
+      const windowStart = new Date(Date.now() - WINDOW_MS);
+      const recentFailures = await db.quizSubmission.findMany({
+        where: { userId: session.user.id, lessonId, passed: false, submittedAt: { gte: windowStart } },
+        orderBy: { submittedAt: "desc" },
+        select: { submittedAt: true },
+        take: 3
+      });
+      if (recentFailures.length >= 3) {
+        retryAt = new Date(recentFailures[0].submittedAt.getTime() + WINDOW_MS).toISOString();
       }
-    };
+    }
+
+    return { ok: true, data: { score, passed, retryAt } };
   } catch (error) {
     return toActionError(error);
+  }
+}
+
+export async function getQuizAttemptStatus(lessonId: string): Promise<{
+  attemptsUsed: number;
+  retryAt: string | null;
+}> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) return { attemptsUsed: 0, retryAt: null };
+
+    const progress = await db.userProgress.findUnique({
+      where: { userId_lessonId: { userId: session.user.id, lessonId } },
+      select: { status: true }
+    });
+    if (progress?.status === ProgressStatus.COMPLETED) return { attemptsUsed: 0, retryAt: null };
+
+    const WINDOW_MS = 8 * 60 * 60 * 1000;
+    const windowStart = new Date(Date.now() - WINDOW_MS);
+    const recentFailures = await db.quizSubmission.findMany({
+      where: { userId: session.user.id, lessonId, passed: false, submittedAt: { gte: windowStart } },
+      orderBy: { submittedAt: "desc" },
+      select: { submittedAt: true },
+      take: 3
+    });
+
+    if (recentFailures.length >= 3) {
+      const retryAt = new Date(recentFailures[0].submittedAt.getTime() + WINDOW_MS).toISOString();
+      return { attemptsUsed: 3, retryAt };
+    }
+
+    return { attemptsUsed: recentFailures.length, retryAt: null };
+  } catch {
+    return { attemptsUsed: 0, retryAt: null };
   }
 }

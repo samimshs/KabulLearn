@@ -167,14 +167,10 @@ export default async function LessonPage({
   // Not enrolled: allow preview lesson, else redirect to course overview
   let isEnrolled = false;
   if (userId) {
-    try {
-      const enrollment = await db.enrollment.findUnique({
-        where: { userId_courseId: { userId, courseId: resolvedCourseId } }
-      });
-      isEnrolled = Boolean(enrollment);
-    } catch {
-      isEnrolled = true;
-    }
+    const enrollment = await db.enrollment.findUnique({
+      where: { userId_courseId: { userId, courseId: resolvedCourseId } }
+    });
+    isEnrolled = Boolean(enrollment);
   }
 
   // Only show the preview banner to unenrolled visitors

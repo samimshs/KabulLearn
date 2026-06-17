@@ -30,7 +30,7 @@ type QuizBlockProps = {
   title?: string;
   description?: string;
   onStart: () => Promise<string | null>;
-  onPass: (selectedAnswers: SelectedAnswer[], attemptId: string) => Promise<{ score: number; passed: boolean }>;
+  onPass: (selectedAnswers: SelectedAnswer[], attemptId: string) => Promise<{ score: number; passed: boolean; retryAt?: string | null }>;
 };
 
 type SubmitState = "idle" | "submitted" | "saving";
@@ -43,6 +43,7 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
   const [score, setScore] = useState<number | null>(null);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [attemptId, setAttemptId] = useState<string | null>(null);
+  const [retryAtIso, setRetryAtIso] = useState<string | null>(null);
   const startedRef = useRef(false);
   const startPromiseRef = useRef<Promise<string | null> | null>(null);
 
@@ -57,8 +58,8 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
     startPromiseRef.current = p;
     p.then((id) => {
       if (!cancelled) setAttemptId(id);
-    }).catch(() => {
-      if (!cancelled) setSubmissionError(t.couldNotStartQuiz);
+    }).catch((err) => {
+      if (!cancelled) setSubmissionError(err instanceof Error ? err.message : t.couldNotStartQuiz);
     });
     return () => {
       cancelled = true;
@@ -111,18 +112,15 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
     return "idle";
   }
 
+  function formatRetryTime(iso: string): string {
+    const msLeft = new Date(iso).getTime() - Date.now();
+    if (msLeft <= 0) return "now";
+    const h = Math.floor(msLeft / 3_600_000);
+    const m = Math.ceil((msLeft % 3_600_000) / 60_000);
+    return h > 0 ? `${h}h${m > 0 ? ` ${m}min` : ""}` : `${m} minute${m === 1 ? "" : "s"}`;
+  }
+
   async function submitQuiz() {
-    const correctCount = questions.filter((q) => isQuestionCorrect(q)).length;
-    const clientScore = Math.round((correctCount / questions.length) * 100);
-    setSubmitState("submitted"); // reveal per-question correct/wrong feedback
-
-    // Failing client-side — no server round-trip needed; let them retry.
-    if (clientScore < passScore) {
-      setScore(clientScore);
-      return;
-    }
-
-    // Passing client-side → the SERVER must confirm before we show "Passed".
     const selectedAnswers = questions.map((q) =>
       q.type === QuestionType.TEXT_INPUT
         ? { questionId: q.id, textAnswer: textAnswers[q.id] ?? "" }
@@ -131,15 +129,15 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
     setSubmitState("saving");
     setSubmissionError(null);
     try {
-      const id = await ensureAttempt(); // waits for the attempt if it's still being created
-      if (!id) {
-        throw new Error(t.couldNotStartQuiz);
-      }
+      const id = await ensureAttempt();
+      if (!id) throw new Error(t.couldNotStartQuiz);
       const result = await onPass(selectedAnswers, id);
-      setScore(result.score); // authoritative score from the server
+      setScore(result.score);
       setSubmitState("submitted");
+      if (!result.passed && result.retryAt) {
+        setRetryAtIso(result.retryAt);
+      }
     } catch (error) {
-      // Server rejected — do NOT show a passed/score banner; surface the error and allow a retry.
       setScore(null);
       setSubmissionError(error instanceof Error ? error.message : t.unableToSaveQuiz);
       setSubmitState("submitted");
@@ -152,6 +150,7 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
     setScore(null);
     setSubmitState("idle");
     setSubmissionError(null);
+    setRetryAtIso(null);
     onStart().then(setAttemptId).catch(() => setSubmissionError(t.couldNotStartQuiz));
   }
 
@@ -285,7 +284,7 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
 
             {isSubmitted && questionCorrect && question.explanation?.[textLocale] ? (
               <div className="mt-4 rounded-[var(--radius)] border border-[rgba(0,87,255,0.18)] bg-[var(--brand-50)] p-3">
-                <p className="text-xs font-[800] uppercase tracking-[1.5px] text-[var(--brand)]">Explanation</p>
+                <p className="text-xs font-[800] uppercase tracking-[1.5px] text-[var(--brand)]">{t.explanationLabel}</p>
                 <p className="mt-1 text-sm font-[600] text-[var(--ink-2)]">{question.explanation[textLocale]}</p>
               </div>
             ) : null}
@@ -310,13 +309,19 @@ export function QuizBlock({ questions, passScore, title, description, onStart, o
               {t.savingLabel}
             </span>
           ) : !passed ? (
-            <button
-              type="button"
-              onClick={reset}
-              className="pr-btn-ghost"
-            >
-              {t.tryAgain}
-            </button>
+            retryAtIso ? (
+              <p className="text-sm font-bold text-[var(--danger)]">
+                {t.quizLockedOut.replace("{time}", formatRetryTime(retryAtIso))}
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={reset}
+                className="pr-btn-ghost"
+              >
+                {t.tryAgain}
+              </button>
+            )
           ) : null}
 
           {score !== null ? (

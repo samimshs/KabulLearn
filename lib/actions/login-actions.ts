@@ -1,11 +1,13 @@
 "use server";
 
+import { headers } from "next/headers";
 import { AuthError } from "next-auth";
 import { UserRole } from "@prisma/client";
 import { compare } from "bcryptjs";
 import { z } from "zod";
 import { signIn } from "@/auth";
 import { db } from "@/lib/db";
+import { assertRateLimitWindow, getClientIpFromHeaders } from "@/lib/security";
 import type { Locale } from "@/lib/i18n";
 
 function normalizeLocale(value: FormDataEntryValue | null): Locale {
@@ -100,6 +102,14 @@ export async function loginUser(_state: LoginState, formData: FormData): Promise
 
   if (callbackRole && callbackRole !== portalRole) {
     return { error: m.notAuthorized };
+  }
+
+  const ip = getClientIpFromHeaders(await headers());
+  try {
+    await assertRateLimitWindow(`login:ip:${ip}`, 15, 60_000);
+    await assertRateLimitWindow(`login:email:${email.toLowerCase()}`, 5, 60_000);
+  } catch {
+    return { error: m.signInUnavailable };
   }
 
   try {

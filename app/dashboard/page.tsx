@@ -47,6 +47,7 @@ export default async function DashboardPage() {
         course: {
           select: {
             id: true,
+            isPaid: true,
             ...localizedCourseSelect(locale),
             instructors: {
               orderBy: { order: "asc" },
@@ -179,6 +180,7 @@ export default async function DashboardPage() {
       percent,
       resumeLessonId,
       nextModuleTitle,
+      isPaid: course.isPaid,
       thumbIndex: idx,
       instructors: course.instructors.map((ci) => ci.profile),
       enrolledAt: e.createdAt

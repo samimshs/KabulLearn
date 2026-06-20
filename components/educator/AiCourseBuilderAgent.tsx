@@ -148,8 +148,17 @@ const AI_COPY = {
     dariPashtoTranslations: "Dari and Pashto translations",
     source: "Source",
     generateDraft: "Generate draft and open editor",
-    generatingDraft: "Generating course draft...",
-    generatingHint: "This takes about 20-40 seconds for larger courses.",
+    generatingDraft: "Generating course draft",
+    generatingHint: "This takes about 20–40 seconds for larger courses.",
+    generatingSteps: [
+      "Analyzing your topic...",
+      "Planning module structure...",
+      "Writing lesson content...",
+      "Generating quiz questions...",
+      "Translating to Pashto & Dari...",
+      "Polishing and reviewing...",
+      "Almost ready...",
+    ],
     back: "Back",
     continue: "Continue",
     savingDraft: "Saving draft...",
@@ -276,8 +285,17 @@ const AI_COPY = {
     dariPashtoTranslations: "دري او پښتو ژباړې",
     source: "سرچینه",
     generateDraft: "مسوده جوړه او اېډیټر پرانیزئ",
-    generatingDraft: "د کورس مسوده جوړېږي...",
+    generatingDraft: "د کورس مسوده جوړېږي",
     generatingHint: "د لویو کورسونو لپاره دا کار شاوخوا ۲۰ تر ۴۰ ثانیو وخت نیسي.",
+    generatingSteps: [
+      "ستاسو موضوع تحلیلوي...",
+      "د ماډیولونو جوړښت پلان کوي...",
+      "د درس منځپانګه لیکي...",
+      "د ازموینې پوښتنې جوړوي...",
+      "پښتو او دري ته ژباړي...",
+      "بیاکتنه او ترمیم...",
+      "نږدې چمتو...",
+    ],
     back: "شاته",
     continue: "دوام",
     savingDraft: "مسوده خوندي کېږي...",
@@ -404,8 +422,17 @@ const AI_COPY = {
     dariPashtoTranslations: "ترجمه دری و پشتو",
     source: "منبع",
     generateDraft: "ساخت مسوده و باز کردن ویرایشگر",
-    generatingDraft: "مسوده کورس در حال ساخت است...",
+    generatingDraft: "مسوده کورس در حال ساخت است",
     generatingHint: "برای کورس‌های بزرگ‌تر، این کار حدود ۲۰ تا ۴۰ ثانیه زمان می‌برد.",
+    generatingSteps: [
+      "موضوع شما را تحلیل می‌کند...",
+      "ساختار ماژول‌ها را برنامه‌ریزی می‌کند...",
+      "محتوای درس را می‌نویسد...",
+      "سوالات آزمون را تولید می‌کند...",
+      "به پشتو و دری ترجمه می‌کند...",
+      "بررسی و اصلاح...",
+      "تقریباً آماده است...",
+    ],
     back: "بازگشت",
     continue: "ادامه",
     savingDraft: "مسوده ذخیره می‌شود...",
@@ -540,6 +567,13 @@ export function AiCourseBuilderAgent({ onBack }: { onBack: () => void }) {
   const [sourceInputTab, setSourceInputTab] = useState<"upload" | "paste">(() => readStorage("sourceInputTab", "upload" as "upload" | "paste"));
   const [pasteText, setPasteText] = useState("");
   const [error, setError] = useState("");
+  const [genStep, setGenStep] = useState(0);
+
+  useEffect(() => {
+    if (!isGenerating) { setGenStep(0); return; }
+    const id = setInterval(() => setGenStep((s) => Math.min(s + 1, copy.generatingSteps.length - 1)), 5200);
+    return () => clearInterval(id);
+  }, [isGenerating, copy.generatingSteps.length]);
 
   // Persist all builder state on every change so returning to the page restores progress
   useEffect(() => {
@@ -1163,9 +1197,9 @@ export function AiCourseBuilderAgent({ onBack }: { onBack: () => void }) {
               >
                 {isGenerating ? copy.generatingDraft : isSaving ? copy.savingDraft : copy.generateDraft}
               </button>
-              {(isGenerating || isSaving) && (
+              {isSaving && (
                 <p className="text-center text-xs font-semibold text-[color:var(--muted)]">
-                  {isGenerating ? copy.generatingHint : copy.savingDraft}
+                  {copy.savingDraft}
                 </p>
               )}
             </div>
@@ -1231,6 +1265,82 @@ export function AiCourseBuilderAgent({ onBack }: { onBack: () => void }) {
           </ul>
         </div>
       </aside>
+
+      {/* Generating overlay */}
+      {isGenerating && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)" }}
+        >
+          <div
+            className="w-full max-w-[360px] rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-8 text-center"
+            style={{ boxShadow: "0 32px 80px rgba(0,0,0,0.25)" }}
+            dir={isRtl ? "rtl" : "ltr"}
+          >
+            {/* Pulsing icon */}
+            <div className="relative mx-auto mb-7 h-[72px] w-[72px]">
+              <div
+                className="absolute inset-0 rounded-full bg-[var(--brand)]"
+                style={{ animation: "kl-pulse-ring 2s ease-out infinite", opacity: 0.4 }}
+              />
+              <div
+                className="absolute inset-0 rounded-full bg-[var(--brand)]"
+                style={{ animation: "kl-pulse-ring 2s ease-out 0.7s infinite", opacity: 0.3 }}
+              />
+              <div className="absolute inset-0 rounded-full border-[3px] border-[var(--brand)]/25 border-t-[var(--brand)] animate-spin" />
+              <div className="absolute inset-[10px] flex items-center justify-center rounded-full bg-[var(--brand)]/10">
+                <svg
+                  className="h-7 w-7 text-[var(--brand)]"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.7}
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h3 className="text-[17px] font-[800] tracking-[-0.3px] text-[var(--ink)]">
+              {copy.generatingDraft}
+            </h3>
+
+            {/* Cycling step message */}
+            <p
+              key={genStep}
+              className="mt-3 min-h-[20px] text-[13px] font-[700] text-[var(--brand)]"
+              style={{ animation: "kl-fade-in 0.45s ease-out" }}
+            >
+              {copy.generatingSteps[genStep]}
+            </p>
+
+            {/* Progress bar */}
+            <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]">
+              <div
+                className="h-full rounded-full bg-[var(--brand)] transition-all duration-1000 ease-out"
+                style={{ width: `${Math.round(((genStep + 1) / copy.generatingSteps.length) * 100)}%` }}
+              />
+            </div>
+
+            {/* Bouncing dots */}
+            <div className="mt-5 flex justify-center gap-2">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="h-2 w-2 rounded-full bg-[var(--brand)] animate-bounce"
+                  style={{ animationDelay: `${i * 0.18}s` }}
+                />
+              ))}
+            </div>
+
+            {/* Hint */}
+            <p className="mt-5 text-[11px] font-[600] text-[var(--muted)]">
+              {copy.generatingHint}
+            </p>
+          </div>
+        </div>
+      )}
+
     </main>
   );
 }

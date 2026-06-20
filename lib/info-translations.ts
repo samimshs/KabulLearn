@@ -2,6 +2,7 @@ import type { Locale } from "@/lib/i18n";
 
 type LinkCard = { title: string; description: string; href: string; cta?: string };
 type Faq = { question: string; answer: string };
+type FaqWithVideo = { question: string; answer: string; videoKey?: string };
 type TextSection = { title: string; paragraphs?: string[]; bullets?: string[] };
 
 export type PublicInfoContent = {
@@ -161,6 +162,13 @@ export type PublicInfoContent = {
     startLearning: string;
     teach: string;
   };
+  faq: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    contactNote: string;
+    items: FaqWithVideo[];
+  };
 };
 
 const commonFooterLinks = {
@@ -254,7 +262,7 @@ function footer(locale: Locale): PublicInfoContent["footer"] {
           { key: "courses", label: f.allCourses, href: "/courses" },
           { key: "certificate", label: f.cert, href: "/certificate-verification" },
           { key: "learner-support", label: f.support, href: "/learner-support" },
-          { key: "faq", label: f.faq, href: "/learner-support#faq" },
+          { key: "faq", label: f.faq, href: "/faq" },
           { key: "my-learning", label: f.learning, href: "/dashboard", studentOnly: true }
         ]
       },
@@ -554,6 +562,60 @@ const en: Omit<PublicInfoContent, "footer"> = {
     orgText: "KabulLearn is operated by KabulHub LLC, based in Chicago, Illinois. Contact us at info@kabulhub.com.",
     startLearning: "Start learning",
     teach: "Teach on KabulLearn"
+  },
+  faq: {
+    eyebrow: "Help & Answers",
+    title: "Frequently Asked Questions",
+    description: "Answers to the most common questions about KabulLearn — for learners, creators, and employers verifying certificates.",
+    contactNote: "Still have questions? Email us at info@kabulhub.com.",
+    items: [
+      {
+        question: "What is KabulLearn?",
+        answer: "KabulLearn is an online learning platform for Afghan learners worldwide. We offer structured courses in English, Pashto, and Dari covering mathematics, data science, programming, and more. Each course includes guided lessons, interactive quizzes, and verifiable certificates.",
+        videoKey: "video:intro"
+      },
+      {
+        question: "How do I create a student account and start learning?",
+        answer: "Creating a student account takes under a minute. Click Register, enter your name, email, and password, then verify your email. Once inside, browse courses, enroll, and track your progress from your personal dashboard.",
+        videoKey: "video:student-walkthrough"
+      },
+      {
+        question: "How do I become a course creator on KabulLearn?",
+        answer: "First register a free student account. Then submit an educator access request from your dashboard explaining what you want to teach. Once an admin approves your request, your account is upgraded and you gain access to the creator portal.",
+        videoKey: "video:creator-walkthrough"
+      },
+      {
+        question: "What languages does KabulLearn support?",
+        answer: "KabulLearn supports English, Pashto (پښتو), and Dari (دری). You can switch languages at any time using the language selector in the navigation bar. Course content availability varies by instructor."
+      },
+      {
+        question: "How do I create a course manually?",
+        answer: "In the educator portal, click New Course and fill in the course details — title, description, and level in all three languages. Then add modules and lessons, upload readings and videos, and build quizzes for each module. Submit the course for admin review when ready.",
+        videoKey: "video:manual-course-creation"
+      },
+      {
+        question: "How do I use the AI agent to create a course?",
+        answer: "The built-in AI agent can generate a complete course outline from a short description. It creates module titles, lesson plans, reading content, and quiz questions automatically. You review and edit the output before publishing.",
+        videoKey: "video:ai-course-creation"
+      },
+      {
+        question: "How do I earn a certificate?",
+        answer: "Complete all required lessons and pass the quiz at the end of each module. Once all module quizzes are passed, an eligible certificate is generated automatically. Download it as a PDF or share it using the QR code or verification link."
+      },
+      {
+        question: "How do I verify a KabulLearn certificate?",
+        answer: "Go to the Certificate Verification page and enter the certificate ID, verification code, or paste the QR scan URL. The system confirms whether the certificate is valid and shows the learner name, course, grade, and issue date.",
+        videoKey: "video:certificate-verification"
+      },
+      {
+        question: "Is KabulLearn free?",
+        answer: "Most KabulLearn courses are free to access. Some courses may have a paid tier. You can browse all available courses without an account and enroll for free after registering."
+      },
+      {
+        question: "How do I contact support?",
+        answer: "Email us at info@kabulhub.com with your name, account email, and a description of the issue. Include screenshots if relevant. We aim to respond within 1–2 business days."
+      }
+    ]
   }
 };
 
@@ -830,6 +892,60 @@ const ps: Omit<PublicInfoContent, "footer"> = {
     orgText: "کابل‌لرن د KabulHub LLC له خوا پرمخ وړل کېږي، چې په شیکاګو، الینوی کې مېشته ده. له موږ سره په info@kabulhub.com اړیکه ونیسئ.",
     startLearning: "زده کړه پیل کړئ",
     teach: "په کابل‌لرن کې تدریس وکړئ"
+  },
+  faq: {
+    eyebrow: "مرسته او ځوابونه",
+    title: "مکرر پوښتنې",
+    description: "د کابل‌لرن د زده‌کوونکو، جوړوونکو، او د سند تصدیق کوونکو لپاره د عمومي پوښتنو ځوابونه.",
+    contactNote: "لا هم پوښتنې لرئ؟ زموږ سره info@kabulhub.com ته بریښنالیک واستوئ.",
+    items: [
+      {
+        question: "کابل‌لرن څه دی؟",
+        answer: "کابل‌لرن د نړۍ د افغان زده‌کوونکو لپاره آنلاین زده کړې پلیټفارم دی. موږ د انګلیسي، پښتو، او دري ژبو کې ترتیب شوي کورسونه وړاندې کوو چې د ریاضیاتو، ډاټا ساینس، پروګرامینګ، او نورو مضامینو پوښښ کوي. هر کورس کې لارښودي درسونه، انټراکتیو ازموینې، او د تصدیق وړ سندونه شامل دي.",
+        videoKey: "video:intro"
+      },
+      {
+        question: "د زده‌کوونکي حساب جوړولو او زده کړې پیل کولو لاره کومه ده؟",
+        answer: "د زده‌کوونکي حساب جوړول یوازې یوه دقیقه وخت نیسي. ثبت‌نامه کلیک وکړئ، خپل نوم، بریښنالیک، او پاسورډ دننه کړئ، بیا خپل بریښنالیک تصدیق کړئ. وروسته له دې کورسونه وپلټئ، نوم‌لیکنه وکړئ، او له خپل شخصي ډشبورډ نه پرمختګ تعقیب کړئ.",
+        videoKey: "video:student-walkthrough"
+      },
+      {
+        question: "د کابل‌لرن کورس جوړوونکی یا استاد څنګه شم؟",
+        answer: "لومړی وړیا د زده‌کوونکي حساب ثبت‌نامه وکړئ. بیا خپل ډشبورډ نه د استاد لاسرسی غوښتنه وسپارئ او تشریح کړئ چې د تدریس کولو هیله لرئ. یوځل چې ادمین ستاسو غوښتنه ومني، ستاسو حساب ارتقاء موندلی او د جوړوونکي پورټل ته لاسرسی ترلاسه کوئ.",
+        videoKey: "video:creator-walkthrough"
+      },
+      {
+        question: "کابل‌لرن کومې ژبې ملاتړ کوي؟",
+        answer: "کابل‌لرن انګلیسي، پښتو، او دري ژبې ملاتړ کوي. تاسو کولای شئ د ناوبریشن بار کې د ژبې انتخاب کوونکي له لارې هر وخت ژبه بدله کړئ. د کورس منځپانګې شتون د استاد پر بنسټ توپیر لري."
+      },
+      {
+        question: "لاسي کورس جوړول د ده?",
+        answer: "د استاد پورټل کې نوی کورس کلیک وکړئ او د کورس توضیحات — عنوان، توضیح، او کچه پر درو ژبو کې ډک کړئ. بیا ماډلونه او درسونه زیات کړئ، لوستلو مواد او ویډیوګانې پورته کړئ، او د هر ماډل لپاره ازموینې جوړ کړئ. کله چې چمتو شئ کورس د بیاکتنې لپاره وسپارئ.",
+        videoKey: "video:manual-course-creation"
+      },
+      {
+        question: "د AI استازي سره کورس جوړولو لاره کومه ده؟",
+        answer: "جوړ شوی AI استازی کولای شي له لنډې توضیح نه بشپړ د کورس لنډیز جوړ کړي. دا اتوماتیک ماډل عنوانونه، د درس پلانونه، د لوستلو منځپانګه، او د ازموینې پوښتنې جوړوي. تاسو د خپرولو دمخه محصول بیاکتنه او ترمیم کوئ.",
+        videoKey: "video:ai-course-creation"
+      },
+      {
+        question: "د سند ترلاسه کولو لاره کومه ده؟",
+        answer: "ټول اړین درسونه بشپړ کړئ او د هر ماډل پای کې ازموینه پاس کړئ. یوځل چې د ټولو ماډلونو ازموینې پاس شي، یو وړ سند اتوماتیک رامنځته کیږي. دا د PDF ب.ڼه کې ډاونلوډ کړئ یا د QR کوډ یا تصدیق لینک له لارې شریک کړئ."
+      },
+      {
+        question: "د کابل‌لرن سند تصدیق کولو لاره کومه ده؟",
+        answer: "د سند تصدیق پاڼې ته لاړ شئ او د سند پیژند، تصدیق کوډ، یا د QR سکین URL پیسټ کړئ. سیسټم به تصدیق وکړي چې ایا سند معتبر دی او د زده‌کوونکي نوم، کورس، نمرې، او د صادرولو نیټه به وښيي.",
+        videoKey: "video:certificate-verification"
+      },
+      {
+        question: "کابل‌لرن وړیا دی؟",
+        answer: "د کابل‌لرن ډیری کورسونه وړیا دي. ځینې کورسونه ممکن تادیه اړین وي. تاسو کولای شئ پرته له حساب نه ټول موجوده کورسونه وپلټئ او ثبت‌نامې وروسته وړیا نوم‌لیکنه وکړئ."
+      },
+      {
+        question: "له ملاتړ سره اړیکه نیولو لاره کومه ده؟",
+        answer: "زموږ سره info@kabulhub.com ته بریښنالیک واستوئ چې خپل نوم، د حساب بریښنالیک، او د ستونزې توضیح پکې وي. که مرسته وکړئ سکرینشاټونه هم ورسره ولیکئ. موږ د ۱-۲ کاري ورځو دننه ځواب ورکولو هڅه کوو."
+      }
+    ]
   }
 };
 
@@ -1089,6 +1205,60 @@ const fa: Omit<PublicInfoContent, "footer"> = {
     orgText: "کابل‌لرن توسط KabulHub LLC، مستقر در شیکاگو، ایلینوی اداره می‌شود. با ما از طریق info@kabulhub.com تماس بگیرید.",
     startLearning: "شروع یادگیری",
     teach: "تدریس در کابل‌لرن"
+  },
+  faq: {
+    eyebrow: "کمک و پاسخ‌ها",
+    title: "سوالات متداول",
+    description: "پاسخ به رایج‌ترین سوالات درباره KabulLearn — برای شاگردان، سازندگان، و کارفرمایانی که گواهی‌ها را تأیید می‌کنند.",
+    contactNote: "هنوز سوال دارید؟ به info@kabulhub.com ایمیل بزنید.",
+    items: [
+      {
+        question: "KabulLearn چیست؟",
+        answer: "KabulLearn یک پلتفرم یادگیری آنلاین برای شاگردان افغان در سراسر جهان است. ما دوره‌های ساختاریافته به زبان‌های انگلیسی، پشتو و دری ارائه می‌دهیم که ریاضیات، علم داده، برنامه‌نویسی و موضوعات دیگر را پوشش می‌دهد. هر دوره شامل درس‌های راهنما، آزمون‌های تعاملی و گواهی‌های قابل تصدیق است.",
+        videoKey: "video:intro"
+      },
+      {
+        question: "چطور حساب دانش‌آموزی بسازم و یادگیری را شروع کنم؟",
+        answer: "ایجاد حساب دانش‌آموزی کمتر از یک دقیقه طول می‌کشد. روی ثبت‌نام کلیک کنید، نام، ایمیل و رمز عبور خود را وارد کنید، سپس ایمیلتان را تأیید کنید. پس از آن دوره‌ها را مرور کنید، ثبت‌نام کنید و پیشرفت خود را از داشبورد شخصی‌تان دنبال کنید.",
+        videoKey: "video:student-walkthrough"
+      },
+      {
+        question: "چطور سازنده دوره در KabulLearn شوم؟",
+        answer: "ابتدا یک حساب دانش‌آموزی رایگان ثبت کنید. سپس از داشبوردتان درخواست دسترسی استاد ارسال کنید و توضیح دهید که می‌خواهید چه چیزی تدریس کنید. پس از تأیید مدیر، حساب شما ارتقا می‌یابد و به پورتال سازنده دسترسی پیدا می‌کنید.",
+        videoKey: "video:creator-walkthrough"
+      },
+      {
+        question: "KabulLearn چه زبان‌هایی را پشتیبانی می‌کند؟",
+        answer: "KabulLearn از زبان‌های انگلیسی، پشتو (پښتو) و دری پشتیبانی می‌کند. می‌توانید در هر زمان با استفاده از انتخابگر زبان در نوار ناوبری زبان را تغییر دهید. در دسترس بودن محتوای دوره بسته به استاد متفاوت است."
+      },
+      {
+        question: "چطور یک دوره را به صورت دستی بسازم؟",
+        answer: "در پورتال استاد، روی دوره جدید کلیک کنید و جزئیات دوره — عنوان، توضیح و سطح را به هر سه زبان پر کنید. سپس ماژول‌ها و درس‌ها اضافه کنید، مطالب خواندنی و ویدیوها بارگذاری کنید و آزمون‌هایی برای هر ماژول بسازید. وقتی آماده شدید دوره را برای بررسی ارسال کنید.",
+        videoKey: "video:manual-course-creation"
+      },
+      {
+        question: "چطور از عامل هوش مصنوعی برای ساخت دوره استفاده کنم؟",
+        answer: "عامل هوش مصنوعی داخلی می‌تواند از یک توضیح کوتاه، طرح کامل دوره را تولید کند. به صورت خودکار عناوین ماژول، طرح درس، محتوای خواندنی و سوالات آزمون می‌سازد. قبل از انتشار خروجی را بررسی و ویرایش می‌کنید.",
+        videoKey: "video:ai-course-creation"
+      },
+      {
+        question: "چطور گواهی به دست بیاورم؟",
+        answer: "همه درس‌های مورد نیاز را تکمیل کنید و آزمون پایان هر ماژول را قبول کنید. پس از قبولی در تمام آزمون‌های ماژول، یک گواهی واجد شرایط به صورت خودکار تولید می‌شود. آن را به صورت PDF دانلود کنید یا با استفاده از کد QR یا لینک تأیید به اشتراک بگذارید."
+      },
+      {
+        question: "چطور گواهی KabulLearn را تأیید کنم؟",
+        answer: "به صفحه تأیید گواهی بروید و شناسه گواهی، کد تأیید یا URL اسکن QR را وارد کنید. سیستم تأیید می‌کند که آیا گواهی معتبر است و نام فراگیر، دوره، نمره و تاریخ صدور را نشان می‌دهد.",
+        videoKey: "video:certificate-verification"
+      },
+      {
+        question: "آیا KabulLearn رایگان است؟",
+        answer: "اکثر دوره‌های KabulLearn رایگان هستند. برخی دوره‌ها ممکن است نیاز به پرداخت داشته باشند. می‌توانید بدون حساب کاربری همه دوره‌های موجود را مرور کنید و پس از ثبت‌نام به صورت رایگان در دوره‌ها شرکت کنید."
+      },
+      {
+        question: "چطور با پشتیبانی تماس بگیرم؟",
+        answer: "با info@kabulhub.com ایمیل بزنید و نام، ایمیل حساب و شرح مشکل را درج کنید. در صورت امکان اسکرین‌شات هم ضمیمه کنید. هدف ما پاسخ در ۱ تا ۲ روز کاری است."
+      }
+    ]
   }
 };
 

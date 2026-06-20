@@ -385,6 +385,7 @@ Status legend: `[ ]` not started, `[~]` in progress, `[x]` complete, `[!]` block
 - [x] Confirm `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are configured.
 - [ ] Confirm `FACEBOOK_CLIENT_ID` and `FACEBOOK_CLIENT_SECRET` are configured if Facebook login is enabled.
 - [ ] Confirm `OPENAI_API_KEY` is configured for AI chat and educator translation helpers.
+- [ ] Confirm `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are configured for rate limits and temporary AI source uploads.
 - [ ] Confirm `BLOB_READ_WRITE_TOKEN` is configured for avatar uploads.
 - [ ] Confirm `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, and `STRIPE_WEBHOOK_SECRET` are configured for payments.
 - [ ] Confirm `CRON_SECRET` is configured for scheduled re-engagement emails.

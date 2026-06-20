@@ -13,15 +13,20 @@ import { getAiSourceText } from "@/lib/ai-source-document-store";
 
 const { auth } = NextAuth(authConfig);
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!
-});
-
 async function checkRateLimit(key: string, limit: number) {
-  const count = await redis.incr(key);
-  if (count === 1) await redis.expire(key, 60);
-  if (count > limit) throw new Error("rate_limit_exceeded");
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return;
+
+  try {
+    const redis = new Redis({ url, token });
+    const count = await redis.incr(key);
+    if (count === 1) await redis.expire(key, 60);
+    if (count > limit) throw new Error("rate_limit_exceeded");
+  } catch (error) {
+    if (error instanceof Error && error.message === "rate_limit_exceeded") throw error;
+    // Redis should protect capacity, not break course generation if temporarily unavailable.
+  }
 }
 
 function languageLabel(language: AiBuilderSettings["primaryLanguage"]) {
@@ -234,6 +239,13 @@ export const POST = auth(async (req) => {
     return Response.json({ ok: false, error: "Too many AI course requests. Please wait a moment and try again." }, { status: 429 });
   }
 
+  if (!process.env.OPENAI_API_KEY) {
+    return Response.json(
+      { ok: false, error: "AI course generation is not configured yet. Add OPENAI_API_KEY to the environment." },
+      { status: 503 }
+    );
+  }
+
   let settings: AiBuilderSettings;
   try {
     settings = clampAiSettings(await req.json() as Parameters<typeof clampAiSettings>[0]);
@@ -241,7 +253,7 @@ export const POST = auth(async (req) => {
     return Response.json({ ok: false, error: "Check the course builder settings and try again." }, { status: 400 });
   }
 
-  const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+  const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   let sourceText = "";
   if (settings.sourceDocument?.sourceType === "upload" && settings.sourceDocument.documentId) {
     sourceText = await getAiSourceText(session.user.id, settings.sourceDocument.documentId) ?? "";

@@ -252,8 +252,8 @@ export function CourseCard({ course, isAuthenticated = false }: { course: Course
             ) : null}
           </div>
 
-          {course.instructors && course.instructors.length > 0 ? (
-            <div className="mt-3 flex items-center gap-2">
+          <div className="mt-3 flex min-h-[28px] items-center gap-2">
+            {course.instructors && course.instructors.length > 0 && (
               <div className="flex items-center -space-x-2 rtl:space-x-reverse">
                 {course.instructors.slice(0, 4).map((inst) => (
                   <Link
@@ -282,8 +282,8 @@ export function CourseCard({ course, isAuthenticated = false }: { course: Course
                   </span>
                 )}
               </div>
-            </div>
-          ) : null}
+            )}
+          </div>
         </div>
       </div>
     </article>

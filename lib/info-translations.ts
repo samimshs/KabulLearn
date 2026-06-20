@@ -175,6 +175,7 @@ const commonFooterLinks = {
     teach: "Teach on KabulLearn",
     portal: "Educator Portal",
     resources: "Resources",
+    guidelines: "Instructor Guidelines",
     company: "Company",
     about: "About KabulLearn",
     legal: "Legal & Trust",
@@ -194,6 +195,7 @@ const commonFooterLinks = {
     teach: "په کابل‌لرن کې تدریس",
     portal: "د استاد پورټل",
     resources: "سرچینې",
+    guidelines: "د استاد لارښوونې",
     company: "شرکت",
     about: "د کابل‌لرن په اړه",
     legal: "قانوني او باور",
@@ -213,6 +215,7 @@ const commonFooterLinks = {
     teach: "تدریس در کابل‌لرن",
     portal: "درگاه استاد",
     resources: "منابع",
+    guidelines: "رهنمودهای استاد",
     company: "شرکت",
     about: "درباره کابل‌لرن",
     legal: "قانونی و اعتماد",
@@ -256,7 +259,8 @@ function footer(locale: Locale): PublicInfoContent["footer"] {
         links: [
           { key: "teach", label: f.teach, href: "/for-educators" },
           { key: "educator-portal", label: f.portal, href: "/educator", educatorOnly: true },
-          { key: "educator-resources", label: f.resources, href: "/educator-resources" }
+          { key: "educator-resources", label: f.resources, href: "/educator-resources" },
+          { key: "educator-guidelines", label: f.guidelines, href: "/educator-guidelines" }
         ]
       },
       {

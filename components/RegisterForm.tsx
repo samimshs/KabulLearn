@@ -79,16 +79,20 @@ export function RegisterForm({
       {oauthEnabled ? (
         <div className="grid gap-2">
           {googleOAuthEnabled ? (
-            <button type="submit" formAction={signInWithGoogle} formNoValidate className={socialButtonClass}>
-              <GoogleIcon />
-              {t.continueWithGoogle}
-            </button>
+            <form action={signInWithGoogle}>
+              <button type="submit" className={`${socialButtonClass} w-full`}>
+                <GoogleIcon />
+                {t.continueWithGoogle}
+              </button>
+            </form>
           ) : null}
           {facebookOAuthEnabled ? (
-            <button type="submit" formAction={signInWithFacebook} formNoValidate className={socialButtonClass}>
-              <FacebookIcon />
-              {t.continueWithFacebook}
-            </button>
+            <form action={signInWithFacebook}>
+              <button type="submit" className={`${socialButtonClass} w-full`}>
+                <FacebookIcon />
+                {t.continueWithFacebook}
+              </button>
+            </form>
           ) : null}
           <div className="px-1 text-center">
             <p className="text-[12.5px] font-[800] text-[var(--ink)]">{t.authTrustHeadline}</p>

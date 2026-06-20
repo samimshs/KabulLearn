@@ -22,7 +22,7 @@ export async function SiteFooter({ rightsReserved }: { rightsReserved: string })
 
   return (
     <footer dir={direction} className="mt-16 border-t border-[var(--border)] bg-[var(--card)]">
-      <div className="mx-auto grid max-w-[1280px] gap-10 px-5 py-10 lg:grid-cols-[1.4fr_2.6fr] lg:px-8">
+      <div dir="ltr" className="mx-auto grid max-w-[1280px] gap-10 px-5 py-10 lg:grid-cols-[1.4fr_2.6fr] lg:px-8">
         <div dir="ltr" className="lg:col-start-1 lg:row-start-1">
           <Link href="/" className="inline-flex items-center gap-3" aria-label="KabulLearn home">
             <img src="/poharana-logo-v3.svg" alt="KabulLearn" className="kl-logo-light h-auto w-[168px]" />
@@ -42,7 +42,7 @@ export async function SiteFooter({ rightsReserved }: { rightsReserved: string })
           </div>
         </div>
 
-        <div dir={direction} className="grid gap-8 sm:grid-cols-3 lg:col-start-2 lg:row-start-1">
+        <div dir={direction} className="grid gap-8 grid-cols-2 sm:grid-cols-4 lg:col-start-2 lg:row-start-1">
           {groups.map((group) => (
             <nav key={group.title} aria-label={group.title}>
               <h2 dir="auto" className="text-sm font-[800] uppercase tracking-[1.5px] text-[var(--ink)]">{group.title}</h2>

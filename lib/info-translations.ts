@@ -52,8 +52,6 @@ export type PublicInfoContent = {
     walkthroughTitle: string;
     videoTitle: string;
     videoDescription: string;
-    faqTitle: string;
-    faqs: Faq[];
   };
   contact: {
     eyebrow: string;
@@ -173,14 +171,14 @@ export type PublicInfoContent = {
 
 const commonFooterLinks = {
   en: {
-    learner: "Learner Navigation",
+    learner: "Learn",
     catalog: "Course Catalog",
     allCourses: "All Courses",
     cert: "Certificate Verification",
     support: "Learner Support",
     faq: "FAQ",
     learning: "My Learning",
-    educator: "Educator Resources",
+    educator: "Teach",
     teach: "Teach on KabulLearn",
     portal: "Educator Portal",
     resources: "Resources",
@@ -191,17 +189,17 @@ const commonFooterLinks = {
     terms: "Terms of Service",
     privacy: "Privacy Policy",
     contact: "Contact",
-    supportDonate: "Support KabulLearn"
+    supportDonate: "Support Our Mission"
   },
   ps: {
-    learner: "د زده‌کوونکو لارښود",
+    learner: "زده کړه",
     catalog: "د کورسونو کتلاګ",
     allCourses: "ټول کورسونه",
     cert: "د سند تصدیق",
     support: "د زده‌کوونکي ملاتړ",
     faq: "پوښتنې او ځوابونه",
     learning: "زما زده کړه",
-    educator: "د استادانو سرچینې",
+    educator: "تدریس",
     teach: "په کابل‌لرن کې تدریس",
     portal: "د استاد پورټل",
     resources: "سرچینې",
@@ -212,17 +210,17 @@ const commonFooterLinks = {
     terms: "د خدمت شرایط",
     privacy: "د محرمیت تګلاره",
     contact: "اړیکه",
-    supportDonate: "د کابل‌لرن ملاتړ"
+    supportDonate: "زموږ موخه ملاتړ کړئ"
   },
   fa: {
-    learner: "رهنمای شاگرد",
+    learner: "یادگیری",
     catalog: "فهرست کورس‌ها",
     allCourses: "همه کورس‌ها",
     cert: "تصدیق گواهی",
     support: "پشتیبانی شاگرد",
     faq: "سوالات متداول",
     learning: "یادگیری من",
-    educator: "منابع استادان",
+    educator: "تدریس",
     teach: "تدریس در کابل‌لرن",
     portal: "درگاه استاد",
     resources: "منابع",
@@ -233,7 +231,7 @@ const commonFooterLinks = {
     terms: "شرایط خدمات",
     privacy: "خط‌مشی رازداری",
     contact: "تماس",
-    supportDonate: "حمایت از کابل‌لرن"
+    supportDonate: "حمایت از مأموریت ما"
   }
 } as const;
 
@@ -260,9 +258,7 @@ function footer(locale: Locale): PublicInfoContent["footer"] {
         links: [
           { key: "catalog", label: f.catalog, href: "/catalog" },
           { key: "courses", label: f.allCourses, href: "/courses" },
-          { key: "certificate", label: f.cert, href: "/certificate-verification" },
           { key: "learner-support", label: f.support, href: "/learner-support" },
-          { key: "faq", label: f.faq, href: "/faq" },
           { key: "my-learning", label: f.learning, href: "/dashboard", studentOnly: true }
         ]
       },
@@ -279,10 +275,17 @@ function footer(locale: Locale): PublicInfoContent["footer"] {
         title: f.company,
         links: [
           { key: "about", label: f.about, href: "/about" },
-          { key: "terms", label: f.terms, href: "/terms" },
-          { key: "privacy", label: f.privacy, href: "/privacy" },
+          { key: "faq", label: f.faq, href: "/faq" },
           { key: "contact", label: f.contact, href: "/contact" },
           { key: "donate", label: f.supportDonate, href: "/support" }
+        ]
+      },
+      {
+        title: f.legal,
+        links: [
+          { key: "terms", label: f.terms, href: "/terms" },
+          { key: "privacy", label: f.privacy, href: "/privacy" },
+          { key: "certificate", label: f.cert, href: "/certificate-verification" }
         ]
       }
     ]
@@ -339,14 +342,6 @@ const en: Omit<PublicInfoContent, "footer"> = {
     walkthroughTitle: "Student portal walkthrough",
     videoTitle: "Student account creation and portal walkthrough",
     videoDescription: "Watch how to create a student account, explore your dashboard, enroll in courses, track your progress, and download your certificates.",
-    faqTitle: "Frequently asked questions",
-    faqs: [
-      { question: "I cannot access a course lesson. What should I check?", answer: "Make sure you are signed in, enrolled in the course, and have completed any required quiz or previous locked section. If the issue continues, send the course name, lesson title, browser, and screenshot to support." },
-      { question: "A video module is not loading.", answer: "Refresh the page, check your internet connection, try another browser, and confirm that embedded video services are not blocked on your network. KabulLearn keeps lessons browser-first, but some videos may depend on external hosting." },
-      { question: "My quiz answer or score looks wrong.", answer: "Retake the quiz if attempts are available. If you believe there is an error in the question, send support the course name, module, question text, and screenshot." },
-      { question: "How do I earn a certificate?", answer: "Complete the required lessons, quizzes, and course milestones. Eligible certificates become available after course requirements are met and can be verified with a QR code or certificate ID." },
-      { question: "Can I learn in English, Pashto, and Dari?", answer: "KabulLearn is designed for trilingual learning. Course availability may vary by instructor and course, but the platform supports English, Pashto, and Dari learning workflows." }
-    ]
   },
   contact: {
     eyebrow: "Contact / Support",
@@ -612,8 +607,56 @@ const en: Omit<PublicInfoContent, "footer"> = {
         answer: "Most KabulLearn courses are free to access. Some courses may have a paid tier. You can browse all available courses without an account and enroll for free after registering."
       },
       {
+        question: "Can I learn in English, Pashto, and Dari?",
+        answer: "KabulLearn is designed for trilingual learning. The platform interface is available in English, Pashto, and Dari. Course content availability in each language may vary by instructor."
+      },
+      {
+        question: "I cannot access a course lesson. What should I check?",
+        answer: "Make sure you are signed in, enrolled in the course, and have completed any required quiz or previously locked section. If the issue continues, send the course name, lesson title, your browser, and a screenshot to support at info@kabulhub.com."
+      },
+      {
+        question: "A video lesson is not loading.",
+        answer: "Refresh the page, check your internet connection, try a different browser, and confirm that embedded video services are not blocked on your network. If the problem persists, contact support with the course and lesson name."
+      },
+      {
+        question: "My quiz answer or score looks wrong.",
+        answer: "Retake the quiz if attempts are still available. If you believe there is an error in the question itself, send support the course name, module, question text, and a screenshot to info@kabulhub.com."
+      },
+      {
+        question: "How do I reset my password?",
+        answer: "On the sign-in page, click \"Forgot password?\" and enter your account email. You will receive a reset link by email. Follow the link to create a new password. If you do not see the email, check your spam or junk folder."
+      },
+      {
+        question: "How do I change the platform language?",
+        answer: "Use the language selector in the navigation bar at the top of any page. You can switch between English, Pashto, and Dari at any time. Your preference is saved to your account once you are signed in."
+      },
+      {
+        question: "Can I access KabulLearn on my phone or tablet?",
+        answer: "Yes. KabulLearn works on any modern smartphone or tablet through your browser — no app download needed. For the best experience, use an up-to-date browser such as Chrome, Safari, or Firefox."
+      },
+      {
+        question: "How do I track my learning progress?",
+        answer: "Your progress is saved automatically as you complete lessons and quizzes. Go to your dashboard (My Courses) to see completed lessons, quiz scores, and your overall progress for each enrolled course."
+      },
+      {
+        question: "What is the AI learning assistant and where do I find it?",
+        answer: "The AI learning assistant is a built-in chatbot available to signed-in, verified learners. Look for the chat icon on any course or lesson page. It answers questions about course content, platform features, certificates, and how to navigate KabulLearn."
+      },
+      {
+        question: "What can I ask the AI assistant?",
+        answer: "Ask it about lesson topics, course content, how to use the platform, certificate questions, or general learning help. It draws answers from course materials and platform guides. If a question falls outside the available content, it will say so clearly rather than guessing."
+      },
+      {
+        question: "Does the AI assistant respond in Pashto and Dari?",
+        answer: "Yes. The assistant automatically detects the language of your message and replies in the same language — English, Pashto, or Dari. You can switch languages at any point in the conversation."
+      },
+      {
+        question: "Are there any limits on using the AI assistant?",
+        answer: "The AI assistant is available to signed-in learners who have verified their email. You can send up to 100 messages per day, and each message can be up to 1,200 characters. If you reach the daily limit, you can continue the following day."
+      },
+      {
         question: "How do I contact support?",
-        answer: "Email us at info@kabulhub.com with your name, account email, and a description of the issue. Include screenshots if relevant. We aim to respond within 1–2 business days."
+        answer: "Use the contact form at kabullearn.com/contact or email us directly at info@kabulhub.com. Include your name, account email, and a description of the issue — screenshots help too. We aim to respond within 1–2 business days."
       }
     ]
   }
@@ -669,14 +712,6 @@ const ps: Omit<PublicInfoContent, "footer"> = {
     walkthroughTitle: "د زده‌کوونکي پورټل لارښود",
     videoTitle: "د زده‌کوونکي حساب جوړول او د پورټل لارښود",
     videoDescription: "وګورئ چې د زده‌کوونکي حساب جوړ کړئ، خپل ډشبورډ وڅیړئ، کورسونو کې نوم‌لیکنه وکړئ، پرمختګ تعقیب کړئ او سندونه ډاونلوډ کړئ.",
-    faqTitle: "ډېرې پوښتل شوې پوښتنې",
-    faqs: [
-      { question: "درس ته لاسرسی نه لرم. څه باید وګورم؟", answer: "ډاډ ترلاسه کړئ چې ننوتي یاست، په کورس کې مو نوم‌لیکنه کړې، او اړینه ازموینه یا پخوانۍ تړلې برخه مو بشپړه کړې ده. که ستونزه پاتې وي، د کورس نوم، د درس نوم، براوزر، او سکرین‌شاټ ملاتړ ته واستوئ." },
-      { question: "ویډیو نه پورته کېږي.", answer: "پاڼه تازه کړئ، انټرنېټ وګورئ، بل براوزر وازمویئ، او ډاډ ترلاسه کړئ چې ویډیويي خدمتونه ستاسو په شبکه کې نه دي بند." },
-      { question: "د ازموینې نمره یا ځواب ناسم ښکاري.", answer: "که هڅې پاتې وي، ازموینه بیا وکړئ. که د پوښتنې تېروتنه وي، د کورس نوم، برخه، د پوښتنې متن، او سکرین‌شاټ واستوئ." },
-      { question: "څنګه سند ترلاسه کړم؟", answer: "اړین درسونه، ازموینې، او د کورس پړاوونه بشپړ کړئ. وړ سندونه د اړتیاوو له بشپړېدو وروسته د QR کوډ یا د سند پېژند له لارې تصدیقېدای شي." },
-      { question: "ایا په انګلیسي، پښتو او دري زده کړه کولی شم؟", answer: "کابل‌لرن د درې ژبې زده کړې لپاره جوړ شوی. د هر کورس ژبې د استاد او کورس له مخې توپیر کولی شي." }
-    ]
   },
   contact: {
     eyebrow: "اړیکه / ملاتړ",
@@ -942,8 +977,56 @@ const ps: Omit<PublicInfoContent, "footer"> = {
         answer: "د کابل‌لرن ډیری کورسونه وړیا دي. ځینې کورسونه ممکن تادیه اړین وي. تاسو کولای شئ پرته له حساب نه ټول موجوده کورسونه وپلټئ او ثبت‌نامې وروسته وړیا نوم‌لیکنه وکړئ."
       },
       {
+        question: "ایا پښتو، دري، او انګلیسي کې زده کولای شم؟",
+        answer: "کابل‌لرن د درې ژبو زده کړې لپاره جوړ شوی. د مرکز بڼه پښتو، دري، او انګلیسي کې شته. د هر کورس ژبه د استاد او کورس له مخې توپیر کولای شي."
+      },
+      {
+        question: "یو درس ته لاسرسی نه لرم. څه باید وګورم؟",
+        answer: "ډاډ ترلاسه کړئ چې ننوتي یاست، د کورس نوم‌لیکنه مو کړې، او اړینه ازموینه یا مخکینۍ تړلې برخه مو بشپړه کړې ده. که ستونزه پاتې وي، د کورس نوم، د درس سرلیک، براوزر، او سکرین‌شاټ info@kabulhub.com ته واستوئ."
+      },
+      {
+        question: "ویډیو درس نه پورته کېږي.",
+        answer: "پاڼه تازه کړئ، انټرنېټ وګورئ، بل براوزر وازمویئ، او ډاډ ترلاسه کړئ چې ویډیویي خدمتونه ستاسو شبکه کې بند نه دي. که ستونزه پاتې وي، د کورس او درس نوم ملاتړ ته واستوئ."
+      },
+      {
+        question: "د ازموینې ځواب یا نمره ناسمه ښکاري.",
+        answer: "که هڅې پاتې وي، ازموینه بیا وکړئ. که تاسو د پوښتنه کې تېروتنه وینئ، د کورس نوم، برخه، د پوښتنې متن، او سکرین‌شاټ info@kabulhub.com ته واستوئ."
+      },
+      {
+        question: "پاسورډ بیاتنظیم کولو لاره کومه ده؟",
+        answer: "د ننوتو پاڼه کې «پاسورډ مو هیر کړی؟» باندې کلیک وکړئ او خپل د حساب بریښنالیک دننه کړئ. تاسو ته به د بیاتنظیم لینک راشي. لینک تعقیب کړئ او نوی پاسورډ جوړ کړئ. که بریښنالیک ونه ګورئ، د سپم فولډر وګورئ."
+      },
+      {
+        question: "د مرکز ژبه بدلولو لاره کومه ده؟",
+        answer: "د هر پاڼه پورتنۍ ناوبار کې د ژبې انتخاب کوونکی وکاروئ. تاسو کولای شئ هر وخت انګلیسي، پښتو، او دري ته لاړ شئ. ستاسو د ژبې غوراوی د حساب کې ننوتو وروسته خوندي کېږي."
+      },
+      {
+        question: "ایا کابل‌لرن پر مبایل یا ټابلیټ کارولای شم؟",
+        answer: "هو. کابل‌لرن هر عصري سمارټفون یا ټابلیټ کې د براوزر له لارې کار کوي — د اپ ډاونلوډ اړتیا نشته. غوره تجربې لپاره له تازه شوي براوزر لکه کروم، سفاري، یا فایرفاکس سره کار وکړئ."
+      },
+      {
+        question: "د زده کړې پرمختګ تعقیبولو لاره کومه ده؟",
+        answer: "ستاسو پرمختګ د هر درس او ازموینې له بشپړولو وروسته اوتوماتیک خوندي کېږي. ډشبورډ (زما کورسونه) ته لاړ شئ ترڅو بشپړ شوي درسونه، د ازموینې نمرې، او د هر نوم‌لیکل شوي کورس ټولیز پرمختګ وګورئ."
+      },
+      {
+        question: "د AI زده کړې مرستیال څه دی او چیرې موندل کېږي؟",
+        answer: "د AI زده کړې مرستیال یو جوړ شوی چاټبوت دی چې د تصدیق شوو ننوتو زده‌کوونکو لپاره شته. د کورس او درس پاڼو کې د چاټ آیکون ولټوئ. دا د کورس منځپانګې، د مرکز ځانګړتیاوو، سندونو، او د کابل‌لرن کارولو تر پوښتنو ځواب ورکوي."
+      },
+      {
+        question: "AI مرستیال ته کومې پوښتنې کولای شم؟",
+        answer: "تاسو کولای شئ د درس موضوعاتو، کورس منځپانګې، د مرکز کارولو، سندونو، یا د زده کړې عمومي پوښتنو بارې وپوښتئ. مرستیال خپل ځوابونه له کورس موادو او د مرکز لارښوونو نه اخلي. که پوښتنه د شته منځپانګې دائرې نه وتلې وي، به یې ډاګیزه ووایي."
+      },
+      {
+        question: "ایا AI مرستیال پښتو او دري کې هم ځواب ورکوي؟",
+        answer: "هو. مرستیال ستاسو د پیغام ژبه اوتوماتیک کشفوي او ورته ژبه کې — انګلیسي، پښتو، یا دري — ځواب ورکوي. تاسو کولای شئ چاټ کې هر وخت ژبه بدله کړئ."
+      },
+      {
+        question: "د AI مرستیال کارولو کومې محدودیتونه شته؟",
+        answer: "AI مرستیال د هغو ننوتو زده‌کوونکو لپاره شته چې بریښنالیک یې تصدیق شوی. تاسو هره ورځ تر ۱۰۰ پیغامونه لیږلای شئ، او هر پیغام کولای شي تر ۱٬۲۰۰ حروفو اوږد وي. که ورځني حد ته ورسېدئ، سبا ادامه ورکولای شئ."
+      },
+      {
         question: "له ملاتړ سره اړیکه نیولو لاره کومه ده؟",
-        answer: "زموږ سره info@kabulhub.com ته بریښنالیک واستوئ چې خپل نوم، د حساب بریښنالیک، او د ستونزې توضیح پکې وي. که مرسته وکړئ سکرینشاټونه هم ورسره ولیکئ. موږ د ۱-۲ کاري ورځو دننه ځواب ورکولو هڅه کوو."
+        answer: "د اړیکې فورم kabullearn.com/contact کې وکاروئ یا مستقیم info@kabulhub.com ته بریښنالیک واستوئ. خپل نوم، د حساب بریښنالیک، او د ستونزې توضیح پکې ولیکئ — سکرینشاټونه هم مرسته کوي. موږ د ۱-۲ کاري ورځو دننه ځواب ورکولو هڅه کوو."
       }
     ]
   }
@@ -1000,14 +1083,6 @@ const fa: Omit<PublicInfoContent, "footer"> = {
     walkthroughTitle: "راهنمای پورتال دانش‌آموز",
     videoTitle: "ایجاد حساب دانش‌آموزی و راهنمای پورتال",
     videoDescription: "ببینید چطور حساب دانش‌آموزی بسازید، داشبورد خود را کشف کنید، در دوره‌ها ثبت‌نام کنید، پیشرفت خود را دنبال کنید و گواهی‌های خود را دانلود کنید.",
-    faqTitle: "پرسش‌های متداول",
-    faqs: [
-      { question: "به درس کورس دسترسی ندارم. چه چیز را بررسی کنم؟", answer: "مطمئن شوید وارد حساب شده‌اید، در کورس ثبت‌نام دارید و آزمون یا بخش قفل‌شده قبلی را تکمیل کرده‌اید. اگر مشکل ادامه داشت، نام کورس، درس، مرورگر و تصویر صفحه را به پشتیبانی بفرستید." },
-      { question: "ویدیو بارگذاری نمی‌شود.", answer: "صفحه را تازه کنید، اینترنت را بررسی کنید، مرورگر دیگری امتحان کنید، و مطمئن شوید خدمات ویدیویی در شبکه شما مسدود نیست." },
-      { question: "پاسخ یا نمره آزمون اشتباه به نظر می‌رسد.", answer: "اگر تلاش باقی مانده است، آزمون را دوباره انجام دهید. اگر در پرسش خطا می‌بینید، نام کورس، بخش، متن پرسش و تصویر صفحه را بفرستید." },
-      { question: "چگونه گواهی بگیرم؟", answer: "درس‌ها، آزمون‌ها و مراحل لازم کورس را کامل کنید. گواهی‌های واجد شرایط پس از تکمیل نیازمندی‌ها با QR یا شناسه گواهی قابل تصدیق می‌شوند." },
-      { question: "آیا می‌توانم به انگلیسی، پشتو و دری یاد بگیرم؟", answer: "کابل‌لرن برای یادگیری سه‌زبانه ساخته شده است. زبان‌های هر کورس ممکن است بر اساس استاد و کورس فرق کند." }
-    ]
   },
   contact: {
     ...ps.contact,
@@ -1255,8 +1330,56 @@ const fa: Omit<PublicInfoContent, "footer"> = {
         answer: "اکثر دوره‌های KabulLearn رایگان هستند. برخی دوره‌ها ممکن است نیاز به پرداخت داشته باشند. می‌توانید بدون حساب کاربری همه دوره‌های موجود را مرور کنید و پس از ثبت‌نام به صورت رایگان در دوره‌ها شرکت کنید."
       },
       {
+        question: "آیا می‌توانم به پشتو، دری و انگلیسی یاد بگیرم؟",
+        answer: "کابل‌لرن برای یادگیری سه‌زبانه ساخته شده است. رابط پلتفرم به انگلیسی، پشتو و دری در دسترس است. محتوای دوره‌ها بر اساس استاد و دوره ممکن است متفاوت باشد."
+      },
+      {
+        question: "به درسی از کورس دسترسی ندارم. چه کاری انجام دهم؟",
+        answer: "مطمئن شوید وارد حساب شده‌اید، در کورس ثبت‌نام کرده‌اید، و آزمون یا بخش قفل‌شده قبلی را تکمیل کرده‌اید. اگر مشکل ادامه داشت، نام کورس، عنوان درس، مرورگر و تصویر صفحه را به info@kabulhub.com بفرستید."
+      },
+      {
+        question: "درس ویدیویی بارگذاری نمی‌شود.",
+        answer: "صفحه را تازه کنید، اتصال اینترنت را بررسی کنید، مرورگر دیگری امتحان کنید، و مطمئن شوید خدمات ویدیویی در شبکه شما مسدود نیست. اگر مشکل باقی ماند، نام کورس و درس را به پشتیبانی اطلاع دهید."
+      },
+      {
+        question: "پاسخ یا نمره آزمون اشتباه به نظر می‌رسد.",
+        answer: "اگر تلاش باقی مانده، آزمون را دوباره انجام دهید. اگر در سوال اشتباهی می‌بینید، نام کورس، بخش، متن سوال و تصویر صفحه را به info@kabulhub.com بفرستید."
+      },
+      {
+        question: "چطور رمز عبورم را بازنشانی کنم؟",
+        answer: "در صفحه ورود روی «رمز عبور را فراموش کرده‌اید؟» کلیک کنید و ایمیل حساب خود را وارد کنید. یک لینک بازنشانی دریافت خواهید کرد. لینک را دنبال کنید و رمز عبور جدید بسازید. اگر ایمیل را نمی‌بینید، پوشه هرزنامه را بررسی کنید."
+      },
+      {
+        question: "چطور زبان پلتفرم را تغییر دهم؟",
+        answer: "از انتخاب‌کننده زبان در نوار ناوبری بالای هر صفحه استفاده کنید. می‌توانید در هر زمان بین انگلیسی، پشتو و دری جابجا شوید. ترجیح زبانی شما پس از ورود به حساب ذخیره می‌شود."
+      },
+      {
+        question: "آیا می‌توانم از KabulLearn روی گوشی یا تبلت استفاده کنم؟",
+        answer: "بله. KabulLearn روی هر گوشی هوشمند یا تبلت مدرن از طریق مرورگر کار می‌کند — نیازی به دانلود اپلیکیشن ندارید. برای بهترین تجربه، از مرورگر به‌روز مانند Chrome، Safari یا Firefox استفاده کنید."
+      },
+      {
+        question: "چطور پیشرفت یادگیریم را پیگیری کنم؟",
+        answer: "پیشرفت شما با تکمیل هر درس و آزمون به‌صورت خودکار ذخیره می‌شود. به داشبورد (کورس‌های من) بروید تا درس‌های تکمیل‌شده، نمرات آزمون و پیشرفت کلی در هر دوره ثبت‌نام‌شده را ببینید."
+      },
+      {
+        question: "دستیار یادگیری هوش مصنوعی چیست و کجا پیدا می‌شود؟",
+        answer: "دستیار یادگیری هوش مصنوعی یک چت‌بات داخلی است که برای شاگردان تأییدشده وارد‌شده در دسترس است. آیکون چت را در صفحات کورس و درس پیدا کنید. به سوالات درباره محتوای دوره، ویژگی‌های پلتفرم، گواهی‌ها و نحوه استفاده از کابل‌لرن پاسخ می‌دهد."
+      },
+      {
+        question: "از دستیار هوش مصنوعی چه چیزی می‌توانم بپرسم؟",
+        answer: "می‌توانید درباره موضوعات درس، محتوای دوره، نحوه استفاده از پلتفرم، گواهی‌ها یا سوالات کلی یادگیری بپرسید. دستیار پاسخ‌ها را از مواد دوره و راهنماهای پلتفرم می‌گیرد. اگر سوالی خارج از محتوای موجود باشد، صریحاً اعلام می‌کند."
+      },
+      {
+        question: "آیا دستیار هوش مصنوعی به پشتو و دری هم پاسخ می‌دهد؟",
+        answer: "بله. دستیار زبان پیام شما را به‌صورت خودکار تشخیص می‌دهد و به همان زبان — انگلیسی، پشتو یا دری — پاسخ می‌دهد. می‌توانید در هر لحظه زبان را در مکالمه تغییر دهید."
+      },
+      {
+        question: "آیا محدودیتی برای استفاده از دستیار هوش مصنوعی وجود دارد؟",
+        answer: "دستیار هوش مصنوعی برای شاگردانی که ایمیل‌شان تأیید شده در دسترس است. می‌توانید روزانه تا ۱۰۰ پیام بفرستید و هر پیام می‌تواند تا ۱٬۲۰۰ کاراکتر باشد. اگر به حد روزانه رسیدید، روز بعد می‌توانید ادامه دهید."
+      },
+      {
         question: "چطور با پشتیبانی تماس بگیرم؟",
-        answer: "با info@kabulhub.com ایمیل بزنید و نام، ایمیل حساب و شرح مشکل را درج کنید. در صورت امکان اسکرین‌شات هم ضمیمه کنید. هدف ما پاسخ در ۱ تا ۲ روز کاری است."
+        answer: "از فرم تماس در kabullearn.com/contact استفاده کنید یا مستقیماً به info@kabulhub.com ایمیل بزنید. نام، ایمیل حساب و شرح مشکل را درج کنید — اسکرین‌شات هم کمک می‌کند. هدف ما پاسخ در ۱ تا ۲ روز کاری است."
       }
     ]
   }

@@ -5,12 +5,15 @@ import { HomeHeroVisual } from "@/components/HomeHeroVisual";
 import { HeroSubtextRotator } from "@/components/HeroSubtextRotator";
 import { CourseCard, type CourseCardRow } from "@/components/CourseCard";
 import { EducatorCta } from "@/components/CourseDashboard";
+import { VideoPlaceholder } from "@/components/InfoPage";
 import { auth } from "@/auth";
 import { getServerLocale } from "@/lib/server-locale";
 import { dictionaries } from "@/lib/i18n";
 import { db } from "@/lib/db";
 import { CourseStatus } from "@prisma/client";
 import type { Locale } from "@/lib/i18n";
+import { getSiteVideoUrls } from "@/lib/actions/site-settings-actions";
+import { VIDEO_KEYS } from "@/lib/site-settings-keys";
 
 function formatNumber(value: number, locale: Locale) {
   const numberLocale = locale === "en" ? "en-US" : `${locale}-AF`;
@@ -126,6 +129,8 @@ export default async function Home() {
       icon: <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.7" /><path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18" stroke="currentColor" strokeWidth="1.5" /></svg>,
     },
   ];
+
+  const videos = await getSiteVideoUrls().catch(() => ({} as Record<string, string>));
 
   let courseCount = 0, lessonCount = 0, learnerCount = 0;
   let featured: CourseCardRow[] = [];
@@ -255,6 +260,14 @@ export default async function Home() {
       </section>
 
       <div id="kl-home-more" className="kl-home-body">
+        <section className="mt-14">
+          <VideoPlaceholder
+            title={dict.introVideoTitle}
+            description={dict.introVideoDescription}
+            youtubeUrl={videos[VIDEO_KEYS.intro]}
+          />
+        </section>
+
         {featured.length > 0 && (
           <section className="mt-14" aria-label={dict.featuredCoursesTitle}>
             <div className="flex flex-wrap items-end justify-between gap-3">

@@ -5,6 +5,9 @@ import { CourseStatus } from "@prisma/client";
 import { getPublicInfoContent } from "@/lib/info-translations";
 import { getServerLocale } from "@/lib/server-locale";
 import { dictionaries } from "@/lib/i18n";
+import { VideoPlaceholder } from "@/components/InfoPage";
+import { getSiteVideoUrls } from "@/lib/actions/site-settings-actions";
+import { VIDEO_KEYS } from "@/lib/site-settings-keys";
 
 export const metadata: Metadata = {
   title: "About — KabulLearn",
@@ -19,6 +22,7 @@ export default async function AboutPage() {
   let courseCount = 0;
   let lessonCount = 0;
   let learnerCount = 0;
+  const videos = await getSiteVideoUrls().catch(() => ({} as Record<string, string>));
   try {
     [courseCount, lessonCount, learnerCount] = await Promise.all([
       db.course.count({ where: { status: CourseStatus.PUBLISHED } }),
@@ -47,6 +51,13 @@ export default async function AboutPage() {
           <Link href="/for-educators" className="pr-btn-ghost">{c.teach}</Link>
         </div>
       </section>
+
+      {/* Intro video */}
+      <VideoPlaceholder
+        title={t.introVideoTitle}
+        description={t.introVideoDescription}
+        youtubeUrl={videos[VIDEO_KEYS.intro]}
+      />
 
       {/* Mission */}
       <section className="pr-card p-6 sm:p-8">

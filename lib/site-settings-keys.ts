@@ -1,4 +1,5 @@
 export const VIDEO_KEYS = {
+  intro:                   "video:intro",
   studentWalkthrough:      "video:student-walkthrough",
   creatorWalkthrough:      "video:creator-walkthrough",
   manualCourseCreation:    "video:manual-course-creation",

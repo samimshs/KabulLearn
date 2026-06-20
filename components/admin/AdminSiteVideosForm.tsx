@@ -54,6 +54,7 @@ function VideoRow({ entry }: { entry: VideoEntry }) {
 
 export function AdminSiteVideosForm({ currentValues }: { currentValues: Record<string, string> }) {
   const entries: VideoEntry[] = [
+    { key: VIDEO_KEYS.intro,                   label: "KabulLearn intro (homepage + about page)",        page: "/" },
     { key: VIDEO_KEYS.studentWalkthrough,      label: "Student account creation & portal walkthrough",  page: "/learner-support" },
     { key: VIDEO_KEYS.creatorWalkthrough,      label: "Creator account creation & portal walkthrough",  page: "/educator-resources" },
     { key: VIDEO_KEYS.manualCourseCreation,    label: "Manual course creation",                         page: "/educator-guidelines" },

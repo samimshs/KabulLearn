@@ -13,17 +13,20 @@ export default async function CertificateVerificationPage({
   const t = dictionaries[locale];
   const decodedCode = decodeURIComponent(code);
 
+  // uuid column is @db.Uuid — passing a non-UUID string causes a Postgres type
+  // error, not a null result. Only include the uuid filter when the code is
+  // actually UUID-shaped so bad inputs hit notFound() instead of the catch block.
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const isUuid = UUID_RE.test(decodedCode);
+
   // This page is employer-facing trust infrastructure — a DB hiccup must show
   // a graceful "try again" panel, never a crash or a false "not found".
   let certificate;
   try {
     certificate = await db.certificate.findFirst({
-      where: {
-        OR: [
-          { uuid: decodedCode },
-          { verificationCode: decodedCode }
-        ]
-      },
+      where: isUuid
+        ? { OR: [{ uuid: decodedCode }, { verificationCode: decodedCode }] }
+        : { verificationCode: decodedCode },
       select: {
         uuid: true,
         verificationCode: true,

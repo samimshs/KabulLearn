@@ -84,17 +84,16 @@ export function LoginForm({
     }
   }, [state.redirectTo]);
 
+  const wrapperClass = `grid rounded-[16px] border shadow-[0_18px_56px_rgba(15,23,42,0.08)] ${
+    portal === "admin"
+      ? "gap-3 border-[#1f2a3d] bg-[#07111f] p-4 text-white shadow-[0_26px_80px_rgba(0,0,0,0.35)] sm:p-5"
+      : portal === "educator"
+        ? "gap-3 border-[rgba(24,130,92,0.18)] bg-[var(--card)] p-4 backdrop-blur sm:p-5"
+        : "gap-3 border-[var(--border)] bg-[var(--card)] p-4 backdrop-blur sm:p-5"
+  }`;
+
   return (
-    <form
-      action={formAction}
-      className={`grid rounded-[16px] border shadow-[0_18px_56px_rgba(15,23,42,0.08)] ${
-        portal === "admin"
-          ? "gap-3 border-[#1f2a3d] bg-[#07111f] p-4 text-white shadow-[0_26px_80px_rgba(0,0,0,0.35)] sm:p-5"
-          : portal === "educator"
-            ? "gap-3 border-[rgba(24,130,92,0.18)] bg-[var(--card)] p-4 backdrop-blur sm:p-5"
-            : "gap-3 border-[var(--border)] bg-[var(--card)] p-4 backdrop-blur sm:p-5"
-      }`}
-    >
+    <div className={wrapperClass}>
       {portal === "admin" ? (
         <div className="flex items-center gap-3 border-b border-[#1f2a3d] pb-4">
           <img
@@ -112,83 +111,91 @@ export function LoginForm({
           </div>
         </div>
       ) : null}
-      <input type="hidden" name="callbackUrl" value={callbackUrl} />
-      <input type="hidden" name="locale" value={locale} />
-      <input type="hidden" name="portal" value={portal} />
+
+      {/* OAuth buttons — each in its own form so they never nest inside the credentials form */}
       {oauthEnabled ? (
-        <div className="grid gap-2">
-          {googleOAuthEnabled ? (
-            <form action={signInWithGoogle}>
-              <input type="hidden" name="callbackUrl" value={callbackUrl} />
-              <button type="submit" className={`${socialButtonClass} w-full`}>
-                <GoogleIcon />
-                {t.continueWithGoogle}
-              </button>
-            </form>
-          ) : null}
-          {facebookOAuthEnabled ? (
-            <form action={signInWithFacebook}>
-              <input type="hidden" name="callbackUrl" value={callbackUrl} />
-              <button type="submit" className={`${socialButtonClass} w-full`}>
-                <FacebookIcon />
-                {t.continueWithFacebook}
-              </button>
-            </form>
-          ) : null}
-          <div className="px-1 text-center">
-            <p className="text-[12.5px] font-[800] text-[var(--ink)]">{t.authTrustHeadline}</p>
-            <p className="mt-0.5 text-[11.5px] font-[650] text-[var(--muted)]">{t.authTrustSubline}</p>
+        <>
+          <div className="grid gap-2">
+            {googleOAuthEnabled ? (
+              <form action={signInWithGoogle}>
+                <input type="hidden" name="callbackUrl" value={callbackUrl} />
+                <input type="hidden" name="portal" value={portal} />
+                <button type="submit" className={`${socialButtonClass} w-full`}>
+                  <GoogleIcon />
+                  {t.continueWithGoogle}
+                </button>
+              </form>
+            ) : null}
+            {facebookOAuthEnabled ? (
+              <form action={signInWithFacebook}>
+                <input type="hidden" name="callbackUrl" value={callbackUrl} />
+                <input type="hidden" name="portal" value={portal} />
+                <button type="submit" className={`${socialButtonClass} w-full`}>
+                  <FacebookIcon />
+                  {t.continueWithFacebook}
+                </button>
+              </form>
+            ) : null}
+            <div className="px-1 text-center">
+              <p className="text-[12.5px] font-[800] text-[var(--ink)]">{t.authTrustHeadline}</p>
+              <p className="mt-0.5 text-[11.5px] font-[650] text-[var(--muted)]">{t.authTrustSubline}</p>
+            </div>
           </div>
-        </div>
+          <div className="flex items-center gap-3 py-0.5 text-[10.5px] font-[900] uppercase tracking-[1.4px] text-[var(--muted)]">
+            <span className="h-px flex-1 bg-[var(--border)]" />
+            {t.or}
+            <span className="h-px flex-1 bg-[var(--border)]" />
+          </div>
+        </>
       ) : null}
-      {oauthEnabled ? (
-        <div className="flex items-center gap-3 py-0.5 text-[10.5px] font-[900] uppercase tracking-[1.4px] text-[var(--muted)]">
-          <span className="h-px flex-1 bg-[var(--border)]" />
-          {t.or}
-          <span className="h-px flex-1 bg-[var(--border)]" />
-        </div>
-      ) : null}
-      <label className={`pr-label ${portal === "admin" ? "!text-[#d9e5f7]" : ""}`}>
-        {portal === "admin" ? t.username : t.email}
-        <input
-          type="text"
-          inputMode="email"
-          name="email"
-          autoComplete="username"
-          required
-          className={`pr-input h-10 px-3 py-2 text-[13px] ${portal === "admin" ? "border-[#26364f] bg-[#0b182b] text-white placeholder:text-[#6f7f99] focus:border-[#3b82f6] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.18)]" : ""}`}
-        />
-      </label>
-      <label className={`pr-label ${portal === "admin" ? "!text-[#d9e5f7]" : ""}`}>
-        {t.password}
-        <span className="relative block">
+
+      {/* Credentials form — only submit button is Sign in, so Enter always triggers it */}
+      <form action={formAction} className="contents">
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
+        <input type="hidden" name="locale" value={locale} />
+        <input type="hidden" name="portal" value={portal} />
+        <label className={`pr-label ${portal === "admin" ? "!text-[#d9e5f7]" : ""}`}>
+          {portal === "admin" ? t.username : t.email}
           <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            autoComplete="current-password"
+            type="text"
+            inputMode="email"
+            name="email"
+            autoComplete="username"
             required
-            className={`pr-input h-10 px-3 py-2 pe-10 text-[13px] ${portal === "admin" ? "border-[#26364f] bg-[#0b182b] text-white placeholder:text-[#6f7f99] focus:border-[#3b82f6] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.18)]" : ""}`}
+            className={`pr-input h-10 px-3 py-2 text-[13px] ${portal === "admin" ? "border-[#26364f] bg-[#0b182b] text-white placeholder:text-[#6f7f99] focus:border-[#3b82f6] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.18)]" : ""}`}
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword((value) => !value)}
-            className={`absolute inset-y-0 end-0 grid w-10 place-items-center rounded-e-[var(--radius)] transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.16)] ${
-              portal === "admin" ? "text-[#9fb0c8] hover:text-white" : "text-[var(--muted)] hover:text-[var(--brand)]"
-            }`}
-            aria-label={showPassword ? t.hidePassword : t.showPassword}
-            aria-pressed={showPassword}
-          >
-            <EyeIcon open={showPassword} />
-          </button>
-        </span>
-      </label>
-      {state.error ? <p className="rounded-[var(--radius)] border border-[rgba(196,43,43,0.2)] bg-[var(--danger-50)] px-3.5 py-2.5 text-[13px] font-[800] text-[var(--danger)]">{state.error}</p> : null}
-      <SubmitButton portal={portal} />
+        </label>
+        <label className={`pr-label ${portal === "admin" ? "!text-[#d9e5f7]" : ""}`}>
+          {t.password}
+          <span className="relative block">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              autoComplete="current-password"
+              required
+              className={`pr-input h-10 px-3 py-2 pe-10 text-[13px] ${portal === "admin" ? "border-[#26364f] bg-[#0b182b] text-white placeholder:text-[#6f7f99] focus:border-[#3b82f6] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.18)]" : ""}`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              className={`absolute inset-y-0 end-0 grid w-10 place-items-center rounded-e-[var(--radius)] transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.16)] ${
+                portal === "admin" ? "text-[#9fb0c8] hover:text-white" : "text-[var(--muted)] hover:text-[var(--brand)]"
+              }`}
+              aria-label={showPassword ? t.hidePassword : t.showPassword}
+              aria-pressed={showPassword}
+            >
+              <EyeIcon open={showPassword} />
+            </button>
+          </span>
+        </label>
+        {state.error ? <p className="rounded-[var(--radius)] border border-[rgba(196,43,43,0.2)] bg-[var(--danger-50)] px-3.5 py-2.5 text-[13px] font-[800] text-[var(--danger)]">{state.error}</p> : null}
+        <SubmitButton portal={portal} />
       {portal !== "admin" ? (
         <a href="/forgot-login" className="text-center text-[13px] font-[800] text-[var(--brand)] hover:underline">
           {t.forgotPasswordOrEmail}
         </a>
       ) : null}
-    </form>
+      </form>
+    </div>
   );
 }

@@ -60,53 +60,55 @@ export function RegisterForm({
   const [passwordMismatch, setPasswordMismatch] = useState(false);
 
   return (
-    <form
-      action={formAction}
-      onSubmit={(event) => {
-        const form = event.currentTarget;
-        const password = String(new FormData(form).get("password") || "");
-        const confirmPassword = String(new FormData(form).get("confirmPassword") || "");
-        if (password !== confirmPassword) {
-          event.preventDefault();
-          setPasswordMismatch(true);
-        } else {
-          setPasswordMismatch(false);
-        }
-      }}
-      className="grid gap-3 rounded-[16px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[0_18px_56px_rgba(15,23,42,0.08)] backdrop-blur sm:p-5"
-    >
-      <input type="hidden" name="locale" value={locale} />
+    <div className="grid gap-3 rounded-[16px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[0_18px_56px_rgba(15,23,42,0.08)] backdrop-blur sm:p-5">
+      {/* OAuth buttons in their own forms — must stay outside the credentials form */}
       {oauthEnabled ? (
-        <div className="grid gap-2">
-          {googleOAuthEnabled ? (
-            <form action={signInWithGoogle}>
-              <button type="submit" className={`${socialButtonClass} w-full`}>
-                <GoogleIcon />
-                {t.continueWithGoogle}
-              </button>
-            </form>
-          ) : null}
-          {facebookOAuthEnabled ? (
-            <form action={signInWithFacebook}>
-              <button type="submit" className={`${socialButtonClass} w-full`}>
-                <FacebookIcon />
-                {t.continueWithFacebook}
-              </button>
-            </form>
-          ) : null}
-          <div className="px-1 text-center">
-            <p className="text-[12.5px] font-[800] text-[var(--ink)]">{t.authTrustHeadline}</p>
-            <p className="mt-0.5 text-[11.5px] font-[650] text-[var(--muted)]">{t.authTrustSubline}</p>
+        <>
+          <div className="grid gap-2">
+            {googleOAuthEnabled ? (
+              <form action={signInWithGoogle}>
+                <button type="submit" className={`${socialButtonClass} w-full`}>
+                  <GoogleIcon />
+                  {t.continueWithGoogle}
+                </button>
+              </form>
+            ) : null}
+            {facebookOAuthEnabled ? (
+              <form action={signInWithFacebook}>
+                <button type="submit" className={`${socialButtonClass} w-full`}>
+                  <FacebookIcon />
+                  {t.continueWithFacebook}
+                </button>
+              </form>
+            ) : null}
+            <div className="px-1 text-center">
+              <p className="text-[12.5px] font-[800] text-[var(--ink)]">{t.authTrustHeadline}</p>
+              <p className="mt-0.5 text-[11.5px] font-[650] text-[var(--muted)]">{t.authTrustSubline}</p>
+            </div>
           </div>
-        </div>
+          <div className="flex items-center gap-3 py-0.5 text-[10.5px] font-[900] uppercase tracking-[1.4px] text-[var(--muted)]">
+            <span className="h-px flex-1 bg-[var(--border)]" />
+            {t.or}
+            <span className="h-px flex-1 bg-[var(--border)]" />
+          </div>
+        </>
       ) : null}
-      {oauthEnabled ? (
-        <div className="flex items-center gap-3 py-0.5 text-[10.5px] font-[900] uppercase tracking-[1.4px] text-[var(--muted)]">
-          <span className="h-px flex-1 bg-[var(--border)]" />
-          {t.or}
-          <span className="h-px flex-1 bg-[var(--border)]" />
-        </div>
-      ) : null}
+      <form
+        action={formAction}
+        className="contents"
+        onSubmit={(event) => {
+          const form = event.currentTarget;
+          const password = String(new FormData(form).get("password") || "");
+          const confirmPassword = String(new FormData(form).get("confirmPassword") || "");
+          if (password !== confirmPassword) {
+            event.preventDefault();
+            setPasswordMismatch(true);
+          } else {
+            setPasswordMismatch(false);
+          }
+        }}
+      >
+      <input type="hidden" name="locale" value={locale} />
       <label className="pr-label">
         {t.fullName}
         <input
@@ -213,6 +215,7 @@ export function RegisterForm({
           {t.signIn}
         </Link>
       </p>
-    </form>
+      </form>
+    </div>
   );
 }

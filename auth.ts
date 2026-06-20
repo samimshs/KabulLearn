@@ -44,8 +44,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         try {
           await assertRateLimit(`login-ip:${getClientIpFromHeaders(request.headers)}`, 20);
           await assertRateLimit(`login:${parsed.data.email}`, 10);
-        } catch {
-          return null;
+        } catch (e) {
+          // Only block on genuine rate-limit violations, not Redis connection failures
+          if (e instanceof Error && e.message.startsWith("Too many requests")) return null;
+          // Redis unavailable — fail open and continue
         }
 
         const user = await db.user.findUnique({

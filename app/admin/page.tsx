@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import type { ReactNode } from "react";
+import React from "react";
 import { CourseStatus, EducatorRequestStatus, LessonType, QuestionType, UserRole } from "@prisma/client";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
@@ -12,6 +12,7 @@ import { getSiteVideoUrls } from "@/lib/actions/site-settings-actions";
 import { DeleteUserButton } from "@/components/admin/DeleteUserButton";
 import { DeleteCourseButton } from "@/components/educator/DeleteCourseButton";
 import { ReassignCourseButton } from "@/components/admin/ReassignCourseButton";
+import { AdminSidebarNav } from "@/components/admin/AdminSidebarNav";
 import { AdminComposeForm, type AdminMessageHistoryItem } from "@/components/admin/AdminComposeForm";
 import { AdminSiteVideosForm } from "@/components/admin/AdminSiteVideosForm";
 import { ReindexButton } from "@/components/admin/ReindexButton";
@@ -55,44 +56,6 @@ function roleClass(role: UserRole) {
   return "border-[var(--border)] bg-[var(--surface)] text-[var(--ink-2)]";
 }
 
-function AdminFoldout({
-  title,
-  eyebrow,
-  description,
-  badge,
-  defaultOpen = false,
-  children
-}: {
-  title: string;
-  eyebrow: string;
-  description?: string;
-  badge?: ReactNode;
-  defaultOpen?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <details open={defaultOpen} className="group rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
-      <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-4 px-5 py-4 lg:px-6">
-        <div>
-          <p className="pr-eyebrow">{eyebrow}</p>
-          <h2 className="mt-1 text-[20px] font-[800] tracking-[-0.35px] text-[var(--ink)]">{title}</h2>
-          {description ? <p className="mt-1 text-sm font-[600] leading-6 text-[var(--muted)]">{description}</p> : null}
-        </div>
-        <div className="flex items-center gap-3">
-          {badge}
-          <span className="grid h-9 w-9 place-items-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] transition group-open:rotate-180">
-            <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" aria-hidden="true">
-              <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </span>
-        </div>
-      </summary>
-      <div className="border-t border-[var(--border)]">
-        {children}
-      </div>
-    </details>
-  );
-}
 
 async function handlePublish(formData: FormData) {
   "use server";
@@ -431,672 +394,578 @@ export default async function AdminDashboardPage({
     { label: "Submissions", value: totalSubmissions, tone: "text-[var(--ink)]" }
   ];
 
+  const navItems = [
+    { id: "overview",  label: "Overview",         icon: "M3 13l4-4 4 4 4-4 4 4M3 17l4-4 4 4 4-4 4 4" },
+    { id: "review",    label: "Review queue",      icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",     badge: reviewCount,            badgeTone: "warning" as const },
+    { id: "courses",   label: "All courses",       icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" },
+    { id: "requests",  label: "Access requests",   icon: "M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z", badge: pendingRequests.length, badgeTone: "purple" as const },
+    { id: "users",     label: "Users & roles",     icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
+    { id: "promo",     label: "Promo codes",       icon: "M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" },
+    { id: "messaging", label: "Messaging",         icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" },
+    { id: "videos",    label: "Site videos",       icon: "M15 10l4.553-2.069A1 1 0 0121 8.845v6.31a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" },
+  ];
+
+  function SectionHeading({ eyebrow, title, badge }: { eyebrow: string; title: string; badge?: React.ReactNode }) {
+    return (
+      <div className="mb-8 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-5">
+        <div>
+          <p className="text-[11px] font-[800] uppercase tracking-[1.5px] text-[var(--brand)]">{eyebrow}</p>
+          <h2 className="mt-1 text-[22px] font-[900] tracking-[-0.4px] text-[var(--ink)]">{title}</h2>
+        </div>
+        {badge}
+      </div>
+    );
+  }
+
+  function StatCard({ value, label, tone, sublabel }: { value: number | string; label: string; tone: string; sublabel?: string }) {
+    return (
+      <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
+        <p className={`text-[32px] font-[900] leading-none tracking-[-1px] ${tone}`}>{typeof value === "number" ? value.toLocaleString() : value}</p>
+        <p className="mt-2.5 text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">{label}</p>
+        {sublabel && <p className="mt-1 text-[11px] font-[600] text-[var(--muted)]">{sublabel}</p>}
+      </div>
+    );
+  }
+
   return (
-    <main className="pr-page grid gap-6">
-      <section className="overflow-hidden rounded-[var(--radius-xl)] border border-[#26364f] bg-[#07111f] shadow-[0_24px_70px_rgba(4,11,25,0.24)]">
-        <div className="grid gap-8 p-7 lg:grid-cols-[1fr_auto] lg:items-end lg:p-10">
-          <div>
-            <p className="pr-eyebrow text-[#7ea7ff]">Admin Console</p>
-            <h1 className="mt-4 text-[clamp(34px,5vw,58px)] font-[800] leading-[1.02] tracking-[-1.2px] text-white">
-              Platform operations
-            </h1>
-            <p className="mt-5 max-w-2xl text-sm font-[600] leading-7 text-[#b7c4d8]">
-              Review course submissions, manage user access, and handle account recovery from one controlled workspace.
-            </p>
-          </div>
-          <div className="rounded-[var(--radius-lg)] border border-[#26364f] bg-[#0b182b] p-4 font-mono text-xs leading-6 text-[#9fb4d3] lg:min-w-72">
-            <p>session.role = ADMIN</p>
-            <p>access.scope = privileged</p>
-            <p>review.queue = {reviewCount}</p>
-            <div className="mt-3 flex flex-wrap gap-2 font-sans">
-              <Link href="/admin/audit" className="rounded-full border border-[#26364f] px-3 py-1 text-[11px] font-[800] text-white hover:bg-[var(--card)]/10">
-                Audit logs
-              </Link>
-              <Link href="/admin/ai" className="rounded-full border border-[#26364f] px-3 py-1 text-[11px] font-[800] text-white hover:bg-[var(--card)]/10">
-                AI review
-              </Link>
+    <div className="flex min-h-screen bg-[var(--surface)]">
+      <AdminSidebarNav items={navItems} />
+
+      {/* ── Content ──────────────────────────────────────────────── */}
+      <div className="flex-1 min-w-0">
+
+        {/* Alert bar */}
+        {(reviewCount > 0 || pendingRequests.length > 0) && (
+          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-[rgba(217,119,6,0.2)] bg-[rgba(254,243,199,0.96)] px-6 py-3 backdrop-blur-sm dark:border-[rgba(217,119,6,0.15)] dark:bg-[rgba(78,52,5,0.95)]">
+            <div className="flex items-center gap-3">
+              <span className="grid h-6 w-6 place-items-center rounded-full bg-[var(--warning)] text-white">
+                <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="currentColor"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+              </span>
+              <p className="text-[13px] font-[800] text-[var(--warning)]">
+                {[reviewCount > 0 && `${reviewCount} course${reviewCount > 1 ? "s" : ""} awaiting review`, pendingRequests.length > 0 && `${pendingRequests.length} educator request${pendingRequests.length > 1 ? "s" : ""} pending`].filter(Boolean).join(" · ")}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              {reviewCount > 0 && <a href="#review" className="rounded-full bg-[var(--warning)] px-3 py-1 text-[11px] font-[900] text-white">Review now →</a>}
+              {pendingRequests.length > 0 && <a href="#requests" className="rounded-full border border-[rgba(124,58,237,0.3)] bg-[rgba(124,58,237,0.08)] px-3 py-1 text-[11px] font-[900] text-[#7C3AED]">View requests →</a>}
             </div>
           </div>
-        </div>
-      </section>
+        )}
 
-      {dbError ? (
-        <div className="rounded-[var(--radius-lg)] border border-[rgba(150,96,0,0.2)] bg-[var(--warning-50)] p-8 text-center">
-          <p className="pr-eyebrow text-[var(--warning)]">Database unavailable</p>
-          <p className="mt-2 font-[700] text-[var(--warning)]">
-            Could not load dashboard data. Please refresh in a moment.
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-6">
-          <AdminFoldout title="Platform snapshot" eyebrow="Overview" defaultOpen>
-            <section className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-6" aria-label="Admin metrics">
-              {metrics.map((metric) => (
-                <div key={metric.label} className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)]">
-                  <p className={`text-[28px] font-[800] leading-none tracking-[-0.5px] ${metric.tone}`}>
-                    {metric.value.toLocaleString()}
-                  </p>
-                  <p className="mt-2 text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--muted)]">
-                    {metric.label}
-                  </p>
+        {/* DB error */}
+        {dbError && (
+          <div className="m-6 rounded-[var(--radius-xl)] border border-[rgba(150,96,0,0.2)] bg-[var(--warning-50)] p-8 text-center">
+            <p className="text-[15px] font-[800] text-[var(--warning)]">Database unavailable — please refresh in a moment.</p>
+          </div>
+        )}
+
+        <div className="px-6 pb-24 pt-8 lg:px-10 grid gap-16">
+
+          {/* ═══════════════════════════════════════════════════════
+              OVERVIEW
+          ═══════════════════════════════════════════════════════ */}
+          <section id="overview">
+            <SectionHeading eyebrow="Dashboard" title="Platform overview" />
+
+            {/* Stats grid */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+              <StatCard value={publishedCount}          label="Published courses" tone="text-[var(--success)]" />
+              <StatCard value={reviewCount}             label="Awaiting review"   tone={reviewCount > 0 ? "text-[var(--warning)]" : "text-[var(--muted)]"} />
+              <StatCard value={draftCount}              label="Drafts"            tone="text-[var(--muted)]" />
+              <StatCard value={users.length}            label="Total users"       tone="text-[var(--brand)]" />
+              <StatCard value={totalEnrollments}        label="Enrollments"       tone="text-[var(--ink)]" />
+              <StatCard value={totalSubmissions}        label="Quiz submissions"  tone="text-[var(--ink)]" />
+            </div>
+
+            {/* Bottom row */}
+            <div className="mt-6 grid gap-5 lg:grid-cols-3">
+
+              {/* DAU / WAU */}
+              <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] overflow-hidden">
+                <div className="px-5 pt-5 pb-4 border-b border-[var(--border)]">
+                  <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">Engagement</p>
+                  <p className="mt-1 text-[16px] font-[900] text-[var(--ink)]">Active users</p>
                 </div>
-              ))}
-            </section>
-          </AdminFoldout>
-
-          {/* ── Platform Analytics ──────────────────────────────── */}
-          <AdminFoldout title="Platform analytics" eyebrow="Analytics" defaultOpen>
-          <section className="grid gap-6 p-5 lg:grid-cols-2">
-            {/* AI content index */}
-            <div className="pr-card overflow-hidden">
-              <div className="border-b border-[var(--border)] p-5">
-                <p className="pr-eyebrow">Content AI</p>
-                <h2 className="pr-h2 mt-1">AI lesson index</h2>
-                <p className="mt-1 text-[13px] text-[var(--muted)]">Builds the semantic search index used by the AI chatbox on lesson pages. Run this after adding or editing lesson content.</p>
-              </div>
-              <div className="p-5">
-                <ReindexButton />
-              </div>
-            </div>
-
-            {/* DAU / WAU / Totals */}
-            <div className="pr-card overflow-hidden">
-              <div className="border-b border-[var(--border)] p-5">
-                <p className="pr-eyebrow">Engagement</p>
-                <h2 className="pr-h2 mt-1">Active users</h2>
-              </div>
-              <div className="grid grid-cols-2 divide-x divide-[var(--border)] divide-y sm:grid-cols-4 sm:divide-y-0">
-                {[
-                  { label: "DAU (today)", value: dau, tone: "text-[var(--brand)]" },
-                  { label: "WAU (7 days)", value: wau, tone: "text-[var(--success)]" },
-                  { label: "Total users", value: totalUsers, tone: "text-[var(--ink)]" },
-                  { label: "Enrollments", value: totalEnrollments, tone: "text-[var(--ink)]" }
-                ].map((stat) => (
-                  <div key={stat.label} className="p-5">
-                    <p className={`text-[26px] font-[800] leading-none tracking-[-0.4px] ${stat.tone}`}>
-                      {stat.value.toLocaleString()}
-                    </p>
-                    <p className="mt-2 text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">
-                      {stat.label}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Recent signups */}
-            <div className="pr-card overflow-hidden">
-              <div className="border-b border-[var(--border)] p-5">
-                <p className="pr-eyebrow">Growth</p>
-                <h2 className="pr-h2 mt-1">Recent sign-ups</h2>
-              </div>
-              <ul className="divide-y divide-[var(--border)]">
-                {recentSignups.length === 0 ? (
-                  <li className="p-5 text-sm font-[700] text-[var(--muted)]">No sign-ups yet.</li>
-                ) : recentSignups.map((u) => (
-                  <li key={u.id} className="flex items-center justify-between gap-3 px-5 py-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-[13px] font-[800] text-[var(--ink)]">{u.name ?? "Unnamed"}</p>
-                      <p className="truncate text-[12px] font-[500] text-[var(--muted)]">{u.email}</p>
+                <div className="grid grid-cols-2 divide-x divide-[var(--border)]">
+                  {[{ label: "DAU", value: dau, tone: "text-[var(--brand)]" }, { label: "WAU (7d)", value: wau, tone: "text-[var(--success)]" }].map((s) => (
+                    <div key={s.label} className="p-5">
+                      <p className={`text-[26px] font-[900] leading-none ${s.tone}`}>{s.value.toLocaleString()}</p>
+                      <p className="mt-1.5 text-[10px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">{s.label}</p>
                     </div>
-                    <div className="shrink-0 text-right">
-                      <span className={`inline-block rounded-full border px-2 py-0.5 text-[10px] font-[800] uppercase tracking-[0.8px] ${roleClass(u.role)}`}>
-                        {u.role.toLowerCase()}
-                      </span>
-                      <p className="mt-1 text-[11px] font-[600] text-[var(--muted)]">
-                        {u.createdAt.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Top courses */}
-            <div className="pr-card overflow-hidden lg:col-span-2">
-              <div className="border-b border-[var(--border)] p-5">
-                <p className="pr-eyebrow">Engagement</p>
-                <h2 className="pr-h2 mt-1">Top courses by enrollment</h2>
-              </div>
-              {topCourses.length === 0 ? (
-                <p className="p-5 text-sm font-[700] text-[var(--muted)]">No published courses yet.</p>
-              ) : (
-                <ul className="divide-y divide-[var(--border)]">
-                  {topCourses.map((course, i) => (
-                    <li key={course.id} className="flex items-center gap-4 px-5 py-3">
-                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-[12px] font-[800] text-[var(--muted)]">
-                        {i + 1}
-                      </span>
-                      <p className="flex-1 truncate text-[13px] font-[800] text-[var(--ink)]">{course.titleEn}</p>
-                      <span className="shrink-0 rounded-full bg-[rgba(0,87,255,0.08)] px-3 py-1 text-[12px] font-[800] text-[var(--brand)]">
-                        {course._count.enrollments.toLocaleString()} enrolled
-                      </span>
-                    </li>
                   ))}
+                </div>
+                <div className="px-5 pb-5">
+                  <ReindexButton />
+                </div>
+              </div>
+
+              {/* Recent sign-ups */}
+              <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] overflow-hidden">
+                <div className="px-5 py-4 border-b border-[var(--border)]">
+                  <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">Growth</p>
+                  <p className="mt-1 text-[16px] font-[900] text-[var(--ink)]">Recent sign-ups</p>
+                </div>
+                <ul className="divide-y divide-[var(--border)]">
+                  {recentSignups.length === 0 ? (
+                    <li className="px-5 py-4 text-[13px] font-[700] text-[var(--muted)]">No sign-ups yet.</li>
+                  ) : recentSignups.slice(0, 6).map((u) => {
+                    const initials = (u.name ?? u.email).split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? "").join("") || "?";
+                    const hue = u.id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
+                    return (
+                      <li key={u.id} className="flex items-center gap-3 px-5 py-2.5">
+                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11px] font-[900] text-white" style={{ background: `hsl(${hue},55%,45%)` }}>{initials}</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[13px] font-[800] text-[var(--ink)]">{u.name ?? "Unnamed"}</p>
+                          <p className="truncate text-[11px] font-[500] text-[var(--muted)]">{u.email}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className={`inline-block rounded-full border px-2 py-0.5 text-[9px] font-[900] uppercase tracking-[0.8px] ${roleClass(u.role)}`}>{u.role.toLowerCase()}</span>
+                          <p className="mt-0.5 text-[10px] text-[var(--muted)]">{u.createdAt.toLocaleDateString(undefined, { month: "short", day: "numeric" })}</p>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
-              )}
+              </div>
+
+              {/* Top courses */}
+              <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] overflow-hidden">
+                <div className="px-5 py-4 border-b border-[var(--border)]">
+                  <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">Popularity</p>
+                  <p className="mt-1 text-[16px] font-[900] text-[var(--ink)]">Top courses</p>
+                </div>
+                {topCourses.length === 0 ? (
+                  <p className="px-5 py-4 text-[13px] font-[700] text-[var(--muted)]">No published courses yet.</p>
+                ) : (
+                  <ul className="divide-y divide-[var(--border)]">
+                    {topCourses.map((course, i) => {
+                      const maxEnr = topCourses[0]._count.enrollments || 1;
+                      const pct = Math.round((course._count.enrollments / maxEnr) * 100);
+                      return (
+                        <li key={course.id} className="px-5 py-3">
+                          <div className="flex items-center gap-3">
+                            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-[11px] font-[900] text-[var(--muted)]">{i + 1}</span>
+                            <p className="flex-1 truncate text-[13px] font-[800] text-[var(--ink)]">{course.titleEn}</p>
+                            <span className="shrink-0 text-[12px] font-[800] text-[var(--brand)]">{course._count.enrollments}</span>
+                          </div>
+                          <div className="mt-2 ml-9 h-1 rounded-full bg-[var(--surface)]">
+                            <div className="h-1 rounded-full bg-[var(--brand)] transition-all" style={{ width: `${pct}%` }} />
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
             </div>
           </section>
-          </AdminFoldout>
 
-          <AdminFoldout
-            title="All courses"
-            eyebrow="Course inventory"
-            badge={(
-              <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
-                {courses.length} total
-              </span>
-            )}
-          >
-            {courses.length === 0 ? (
-              <div className="p-6">
-                <div className="pr-muted-box text-center font-[800] text-[var(--muted)]">
-                  No courses found.
-                </div>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[860px] border-collapse text-left">
-                  <thead className="bg-[var(--surface)]">
-                    <tr className="text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--muted)]">
-                      <th className="px-5 py-3">Course</th>
-                      <th className="px-5 py-3">Status</th>
-                      <th className="px-5 py-3">Author</th>
-                      <th className="px-5 py-3">Activity</th>
-                      <th className="px-5 py-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--border)] bg-[var(--card)]">
-                    {courses.map((course) => (
-                      <tr key={course.id} className="align-top">
-                        <td className="px-5 py-4">
-                          <p className="text-sm font-[800] text-[var(--ink)]">{course.titleEn}</p>
-                          <p className="mt-1 max-w-md line-clamp-2 text-sm font-[500] leading-6 text-[var(--muted)]">{course.descriptionEn}</p>
-                        </td>
-                        <td className="px-5 py-4">
-                          <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-[800] uppercase tracking-[1px] ${statusClass(course.status)}`}>
-                            {statusLabel(course.status)}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4 text-sm font-[700] text-[var(--ink-2)]">
-                          {course.author.name ?? course.author.email}
-                        </td>
-                        <td className="px-5 py-4 text-sm font-[700] text-[var(--muted)]">
-                          {course._count.modules} modules · {course._count.enrollments} enrollments
-                        </td>
-                        <td className="px-5 py-4">
-                          <div className="flex justify-end gap-2">
-                            <ReassignCourseButton
-                              courseId={course.id}
-                              courseTitle={course.titleEn}
-                              currentAuthorId={course.authorId}
-                              educators={educators}
-                            />
-                            <DeleteCourseButton courseId={course.id} label={course.titleEn} />
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </AdminFoldout>
-
-          <AdminFoldout
-            title="Courses awaiting review"
-            eyebrow="Review queue"
-            defaultOpen={pendingCourses.length > 0}
-            badge={(
-              <span className="rounded-full border border-[rgba(150,96,0,0.2)] bg-[var(--warning-50)] px-3 py-1 text-xs font-[800] uppercase tracking-[1px] text-[var(--warning)]">
-                {pendingCourses.length} pending
-              </span>
-            )}
-          >
+          {/* ═══════════════════════════════════════════════════════
+              REVIEW QUEUE
+          ═══════════════════════════════════════════════════════ */}
+          <section id="review">
+            <SectionHeading
+              eyebrow="Content moderation"
+              title="Review queue"
+              badge={
+                <span className={`rounded-full border px-3 py-1 text-[12px] font-[900] ${reviewCount > 0 ? "border-[rgba(150,96,0,0.25)] bg-[var(--warning-50)] text-[var(--warning)]" : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]"}`}>
+                  {reviewCount} pending
+                </span>
+              }
+            />
 
             {pendingCourses.length === 0 ? (
-              <div className="p-6">
-                <div className="pr-muted-box text-center font-[800] text-[var(--muted)]">
-                  No courses are waiting for review right now.
+              <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] px-8 py-14 text-center shadow-[var(--shadow-sm)]">
+                <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-[var(--success-50)] text-[var(--success)]">
+                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
+                <p className="mt-4 text-[15px] font-[800] text-[var(--ink-2)]">Queue is clear</p>
+                <p className="mt-1 text-[13px] font-[600] text-[var(--muted)]">No courses are waiting for review.</p>
               </div>
             ) : (
-              <div className="divide-y divide-[var(--border)]">
+              <div className="grid gap-5">
                 {pendingCourses.map((course) => (
-                  <article key={course.id} className="grid gap-5 bg-[var(--card)] p-5 lg:p-6">
-                    <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className={`rounded-full border px-3 py-1 text-xs font-[800] uppercase tracking-[1px] ${statusClass(course.status)}`}>
-                            {statusLabel(course.status)}
-                          </span>
-                          <span className={`rounded-full border px-3 py-1 text-xs font-[800] uppercase tracking-[1px] ${course.isPaid ? "border-[rgba(0,87,255,0.18)] bg-[var(--brand-50)] text-[var(--brand)]" : "border-[rgba(24,130,92,0.2)] bg-[var(--success-50)] text-[var(--success)]"}`}>
-                            {coursePriceLabel(course)}
-                          </span>
-                          <span className="truncate text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
-                            {course.slug}
-                          </span>
+                  <article key={course.id} className="overflow-hidden rounded-[var(--radius-xl)] border border-[rgba(150,96,0,0.25)] bg-[var(--card)] shadow-[var(--shadow)]">
+                    {/* Urgency top strip */}
+                    <div className="h-1 bg-gradient-to-r from-[var(--warning)] to-[#f59e0b]" />
+
+                    <div className="p-6">
+                      <div className="flex flex-wrap items-start gap-4 lg:flex-nowrap">
+                        {/* Course info */}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] ${statusClass(course.status)}`}>{statusLabel(course.status)}</span>
+                            <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] ${course.isPaid ? "border-[rgba(0,87,255,0.18)] bg-[var(--brand-50)] text-[var(--brand)]" : "border-[rgba(24,130,92,0.2)] bg-[var(--success-50)] text-[var(--success)]"}`}>{coursePriceLabel(course)}</span>
+                            <span className="text-[11px] font-[700] text-[var(--muted)]">{course.slug}</span>
+                          </div>
+                          <h3 className="mt-3 text-[20px] font-[900] tracking-[-0.3px] text-[var(--ink)]">{course.titleEn}</h3>
+                          <p className="mt-1.5 text-[13px] font-[500] leading-6 text-[var(--muted)] line-clamp-2">{course.descriptionEn}</p>
+                          <p className="mt-3 text-[13px] font-[700] text-[var(--ink-2)]">
+                            {course.author.name || course.author.email}
+                            <span className="font-[500] text-[var(--muted)]"> · {course._count.modules} modules · {course._count.enrollments} enrollments</span>
+                          </p>
                         </div>
-                        <h3 className="mt-3 text-xl font-[800] tracking-[-0.35px] text-[var(--ink)]">
-                          {course.titleEn}
-                        </h3>
-                        <p className="mt-2 max-w-4xl text-sm font-[500] leading-6 text-[var(--muted)]">
-                          {course.descriptionEn}
-                        </p>
-                        <p className="mt-3 text-sm font-[700] text-[var(--ink-2)]">
-                          {course.author.name || course.author.email}
-                          <span className="text-[var(--muted)]"> · {coursePriceLabel(course)} · {course._count.modules} modules · {course._count.enrollments} enrollments</span>
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap gap-2 lg:justify-end">
-                        <form action={handlePublish}>
-                          <input type="hidden" name="courseId" value={course.id} />
-                          <button type="submit" className="inline-flex min-h-[40px] items-center justify-center rounded-[var(--radius)] bg-[var(--success)] px-4 text-sm font-[800] text-white transition hover:bg-[#126b4b]">
-                            Publish
-                          </button>
-                        </form>
-                        <details className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)]">
-                          <summary className="cursor-pointer list-none px-4 py-2 text-sm font-[800] text-[var(--danger)]">
-                            Return
-                          </summary>
-                          <form action={handleReject} className="grid gap-2 border-t border-[var(--border)] p-3">
-                          <input type="hidden" name="courseId" value={course.id} />
-                            <textarea
-                              name="reviewNote"
-                              required
-                              minLength={5}
-                              placeholder="Reason for return"
-                              className="pr-input min-h-24 w-72"
-                            />
-                          <button type="submit" className="pr-btn-danger !min-h-10 px-4">
-                              Send note
-                          </button>
+
+                        {/* Actions */}
+                        <div className="flex shrink-0 flex-col gap-2 lg:min-w-48">
+                          <form action={handlePublish}>
+                            <input type="hidden" name="courseId" value={course.id} />
+                            <button type="submit" className="w-full rounded-[var(--radius-lg)] bg-[var(--success)] px-5 py-2.5 text-[13px] font-[900] text-white transition hover:bg-[#126b4b]">
+                              ✓ Publish
+                            </button>
                           </form>
+                          <details className="rounded-[var(--radius-lg)] border border-[rgba(220,38,38,0.2)] bg-[rgba(220,38,38,0.04)]">
+                            <summary className="cursor-pointer list-none px-4 py-2.5 text-[13px] font-[800] text-[#dc2626]">✕ Return to educator</summary>
+                            <form action={handleReject} className="grid gap-2 border-t border-[rgba(220,38,38,0.15)] p-3">
+                              <input type="hidden" name="courseId" value={course.id} />
+                              <textarea name="reviewNote" required minLength={5} placeholder="Reason for return (shown to educator)" className="pr-input min-h-20 text-[13px]" />
+                              <button type="submit" className="pr-btn-danger !min-h-9 text-[12px]">Send note</button>
+                            </form>
+                          </details>
+                        </div>
+                      </div>
+
+                      {/* Review panels */}
+                      <div className="mt-5 grid gap-3">
+                        <details className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)]">
+                          <summary className="cursor-pointer list-none px-4 py-3 text-[13px] font-[800] text-[var(--brand)]">Review course content</summary>
+                          <div className="grid gap-4 border-t border-[var(--border)] p-4">
+                            {course.modules.length === 0 ? (
+                              <div className="rounded-[var(--radius)] border border-[rgba(150,96,0,0.2)] bg-[var(--warning-50)] px-4 py-3 text-[13px] font-[800] text-[var(--warning)]">No modules — return to draft before publishing.</div>
+                            ) : course.modules.map((module) => (
+                              <section key={module.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4">
+                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                  <div>
+                                    <p className="text-[10px] font-[800] uppercase tracking-[1.5px] text-[var(--muted)]">Module {module.order}</p>
+                                    <h4 className="mt-1 text-[15px] font-[800] text-[var(--ink)]">{module.titleEn}</h4>
+                                    {module.descriptionEn ? <p className="mt-1 text-[13px] font-[500] leading-5 text-[var(--muted)]">{module.descriptionEn}</p> : null}
+                                  </div>
+                                  <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[11px] font-[800] text-[var(--muted)]">{module.lessons.length} lessons</span>
+                                </div>
+                                {module.lessons.length === 0 ? (
+                                  <p className="mt-3 rounded-[var(--radius)] border border-[rgba(150,96,0,0.2)] bg-[var(--warning-50)] px-4 py-3 text-[13px] font-[800] text-[var(--warning)]">This module has no lessons.</p>
+                                ) : (
+                                  <div className="mt-3 grid gap-2">
+                                    {module.lessons.map((lesson) => (
+                                      <article key={lesson.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-3">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                          <span className="rounded-full border border-[rgba(0,87,255,0.18)] bg-[var(--brand-50)] px-2 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] text-[var(--brand)]">{lesson.type}</span>
+                                          <span className="text-[11px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">Lesson {lesson.order}</span>
+                                          {lesson.isFinalTest ? <span className="rounded-full border border-[rgba(150,96,0,0.2)] bg-[var(--warning-50)] px-2 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] text-[var(--warning)]">Final test · {lesson.passingScore ?? 80}%</span> : null}
+                                        </div>
+                                        <h5 className="mt-1.5 text-[13px] font-[800] text-[var(--ink)]">{lesson.titleEn}</h5>
+                                        {lesson.type === LessonType.VIDEO ? <p className="mt-1 break-all text-[12px] font-[700] text-[var(--brand)]">{lesson.youtubeUrl ?? "Missing YouTube URL"}</p> : null}
+                                        {lesson.type === LessonType.READING && lesson.readingEn ? <p className="mt-1 line-clamp-2 text-[12px] font-[500] text-[var(--muted)]">{lesson.readingEn}</p> : null}
+                                        {lesson.type === LessonType.QUIZ ? (
+                                          <div className="mt-1.5 grid gap-1.5">
+                                            <p className="text-[12px] font-[700] text-[var(--muted)]">{lesson.quiz?.questions.length ?? 0} questions</p>
+                                            {lesson.quiz?.questions.slice(0, 3).map((q) => (
+                                              <div key={q.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-3 py-2">
+                                                <p className="text-[10px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">{q.type === QuestionType.TEXT_INPUT ? "Text / math" : q.type === QuestionType.MULTIPLE_CHOICE ? "Multiple choice" : "Single choice"}</p>
+                                                <p className="mt-0.5 text-[12px] font-[700] text-[var(--ink-2)]">{q.promptEn}</p>
+                                                {q.type === QuestionType.TEXT_INPUT ? <p className="mt-0.5 text-[11px] font-[800] text-[var(--brand)]">Answer: {q.correctAnswer ?? "Missing"}</p> : <p className="mt-0.5 text-[11px] font-[800] text-[var(--brand)]">{q.choices.filter((c) => c.isCorrect).length} correct choice(s)</p>}
+                                              </div>
+                                            ))}
+                                          </div>
+                                        ) : null}
+                                      </article>
+                                    ))}
+                                  </div>
+                                )}
+                              </section>
+                            ))}
+                          </div>
+                        </details>
+
+                        {course.reviewEvents.length > 0 && (
+                          <details className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)]">
+                            <summary className="cursor-pointer list-none px-4 py-3 text-[13px] font-[800] text-[var(--brand)]">Review history ({course.reviewEvents.length})</summary>
+                            <div className="grid gap-2 border-t border-[var(--border)] p-4">
+                              {course.reviewEvents.map((event) => (
+                                <div key={event.id} className="rounded-[var(--radius)] bg-[var(--card)] p-3">
+                                  <p className="text-[10px] font-[800] uppercase tracking-[1px] text-[var(--muted)]">{event.type} · {event.createdAt.toLocaleString()} · {event.actor.name ?? event.actor.email}</p>
+                                  {event.note ? <p className="mt-1 text-[13px] font-[600] text-[var(--ink-2)]">{event.note}</p> : null}
+                                </div>
+                              ))}
+                            </div>
+                          </details>
+                        )}
+
+                        <details className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)]">
+                          <summary className="cursor-pointer list-none px-4 py-3 text-[13px] font-[800] text-[var(--brand)]">Review checklist</summary>
+                          <div className="grid gap-3 border-t border-[var(--border)] p-4">
+                            {["Clear learning outcome", "Complete lesson content", "Quiz answers verified", "Bilingual student content", "No broken links"].map((label) => {
+                              const item = course.reviewChecklistItems.find((e) => e.label === label);
+                              return (
+                                <form key={label} action={handleSaveChecklistItem} className="grid gap-2 rounded-[var(--radius)] bg-[var(--card)] p-3 sm:grid-cols-[1fr_auto] sm:items-center">
+                                  <input type="hidden" name="courseId" value={course.id} />
+                                  <input type="hidden" name="label" value={label} />
+                                  <label className="flex items-center gap-2 text-[13px] font-[800] text-[var(--ink-2)]">
+                                    <input name="passed" type="checkbox" defaultChecked={item?.passed ?? false} className="h-4 w-4" />
+                                    {label}
+                                  </label>
+                                  <input name="note" defaultValue={item?.note ?? ""} placeholder="Optional note" className="pr-input text-[13px] sm:min-w-56" />
+                                  <button type="submit" className="pr-btn-secondary !min-h-9 text-[12px] sm:col-span-2">Save</button>
+                                </form>
+                              );
+                            })}
+                          </div>
                         </details>
                       </div>
                     </div>
-
-                    <details className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)]">
-                      <summary className="cursor-pointer list-none px-4 py-3 text-sm font-[800] text-[var(--brand)]">
-                        Review course content
-                      </summary>
-                      <div className="grid gap-4 border-t border-[var(--border)] p-4">
-                        {course.modules.length === 0 ? (
-                          <div className="rounded-[var(--radius)] border border-[rgba(150,96,0,0.2)] bg-[var(--warning-50)] px-4 py-3 text-sm font-[800] text-[var(--warning)]">
-                            No modules have been added yet. Return this course to draft before publishing.
-                          </div>
-                        ) : (
-                          course.modules.map((module) => (
-                            <section key={module.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4">
-                              <div className="flex flex-wrap items-start justify-between gap-3">
-                                <div>
-                                  <p className="text-[11px] font-[800] uppercase tracking-[1.5px] text-[var(--muted)]">
-                                    Module {module.order}
-                                  </p>
-                                  <h4 className="mt-1 text-base font-[800] text-[var(--ink)]">{module.titleEn}</h4>
-                                  {module.descriptionEn ? (
-                                    <p className="mt-2 text-sm font-[500] leading-6 text-[var(--muted)]">{module.descriptionEn}</p>
-                                  ) : null}
-                                </div>
-                                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-[800] text-[var(--muted)]">
-                                  {module.lessons.length} lessons
-                                </span>
-                              </div>
-
-                              {module.lessons.length === 0 ? (
-                                <p className="mt-4 rounded-[var(--radius)] border border-[rgba(150,96,0,0.2)] bg-[var(--warning-50)] px-4 py-3 text-sm font-[800] text-[var(--warning)]">
-                                  This module has no lessons.
-                                </p>
-                              ) : (
-                                <div className="mt-4 grid gap-3">
-                                  {module.lessons.map((lesson) => (
-                                    <article key={lesson.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4">
-                                      <div className="flex flex-wrap items-center gap-2">
-                                        <span className="rounded-full border border-[rgba(0,87,255,0.18)] bg-[var(--brand-50)] px-2.5 py-1 text-[11px] font-[800] uppercase tracking-[1px] text-[var(--brand)]">
-                                          {lesson.type}
-                                        </span>
-                                        <span className="text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
-                                          Lesson {lesson.order}
-                                        </span>
-                                        {lesson.isFinalTest ? (
-                                          <span className="rounded-full border border-[rgba(150,96,0,0.2)] bg-[var(--warning-50)] px-2.5 py-1 text-[11px] font-[800] uppercase tracking-[1px] text-[var(--warning)]">
-                                            Final test · {lesson.passingScore ?? 80}%
-                                          </span>
-                                        ) : null}
-                                      </div>
-                                      <h5 className="mt-2 text-sm font-[800] text-[var(--ink)]">{lesson.titleEn}</h5>
-                                      {lesson.descriptionEn ? (
-                                        <p className="mt-1 text-sm font-[500] leading-6 text-[var(--muted)]">{lesson.descriptionEn}</p>
-                                      ) : null}
-                                      {lesson.type === LessonType.VIDEO ? (
-                                        <p className="mt-2 break-all text-xs font-[700] text-[var(--brand)]">
-                                          {lesson.youtubeUrl ?? "Missing YouTube URL"}
-                                        </p>
-                                      ) : null}
-                                      {lesson.type === LessonType.READING && lesson.readingEn ? (
-                                        <p className="mt-2 line-clamp-3 text-sm font-[500] leading-6 text-[var(--muted)]">
-                                          {lesson.readingEn}
-                                        </p>
-                                      ) : null}
-                                      {lesson.type === LessonType.QUIZ ? (
-                                        <div className="mt-2 grid gap-2">
-                                          <p className="text-sm font-[700] text-[var(--muted)]">
-                                            {lesson.quiz?.questions.length ?? 0} questions
-                                          </p>
-                                          {lesson.quiz?.questions.slice(0, 3).map((question) => (
-                                            <div key={question.id} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-3 py-2">
-                                              <p className="text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
-                                                {question.type === QuestionType.TEXT_INPUT
-                                                  ? "Text / math answer"
-                                                  : question.type === QuestionType.MULTIPLE_CHOICE
-                                                    ? "Multiple choice"
-                                                    : "Single choice"}
-                                              </p>
-                                              <p className="mt-1 text-sm font-[700] text-[var(--ink-2)]">{question.promptEn}</p>
-                                              {question.type === QuestionType.TEXT_INPUT ? (
-                                                <p className="mt-1 text-xs font-[800] text-[var(--brand)]">
-                                                  Correct answer: {question.correctAnswer ?? "Missing"}
-                                                </p>
-                                              ) : (
-                                                <p className="mt-1 text-xs font-[800] text-[var(--brand)]">
-                                                  {question.choices.filter((choice) => choice.isCorrect).length} correct choice(s)
-                                                </p>
-                                              )}
-                                            </div>
-                                          ))}
-                                        </div>
-                                      ) : null}
-                                    </article>
-                                  ))}
-                                </div>
-                              )}
-                            </section>
-                          ))
-                        )}
-                      </div>
-                    </details>
-                    {course.reviewEvents.length > 0 ? (
-                      <details className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)]">
-                        <summary className="cursor-pointer list-none px-4 py-3 text-sm font-[800] text-[var(--brand)]">
-                          Review history
-                        </summary>
-                        <div className="grid gap-2 border-t border-[var(--border)] p-4">
-                          {course.reviewEvents.map((event) => (
-                            <div key={event.id} className="rounded-[var(--radius)] bg-[var(--surface)] p-3">
-                              <p className="text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">
-                                {event.type} · {event.createdAt.toLocaleString()} · {event.actor.name ?? event.actor.email}
-                              </p>
-                              {event.note ? <p className="mt-1 text-sm font-[600] text-[var(--ink-2)]">{event.note}</p> : null}
-                            </div>
-                          ))}
-                        </div>
-                      </details>
-                    ) : null}
-                    <details className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)]">
-                      <summary className="cursor-pointer list-none px-4 py-3 text-sm font-[800] text-[var(--brand)]">
-                        Review checklist
-                      </summary>
-                      <div className="grid gap-3 border-t border-[var(--border)] p-4">
-                        {["Clear learning outcome", "Complete lesson content", "Quiz answers verified", "Bilingual student content", "No broken links"].map((label) => {
-                          const item = course.reviewChecklistItems.find((entry) => entry.label === label);
-                          return (
-                            <form key={label} action={handleSaveChecklistItem} className="grid gap-2 rounded-[var(--radius)] bg-[var(--surface)] p-3 sm:grid-cols-[1fr_auto] sm:items-center">
-                              <input type="hidden" name="courseId" value={course.id} />
-                              <input type="hidden" name="label" value={label} />
-                              <label className="flex items-center gap-2 text-sm font-[800] text-[var(--ink-2)]">
-                                <input name="passed" type="checkbox" defaultChecked={item?.passed ?? false} />
-                                {label}
-                              </label>
-                              <input name="note" defaultValue={item?.note ?? ""} placeholder="Optional note" className="pr-input sm:min-w-64" />
-                              <button type="submit" className="pr-btn-secondary !min-h-9 sm:col-span-2">
-                                Save checklist item
-                              </button>
-                            </form>
-                          );
-                        })}
-                      </div>
-                    </details>
                   </article>
                 ))}
               </div>
             )}
-          </AdminFoldout>
+          </section>
 
-          {/* ── Educator Access Requests ───────────────────────────── */}
-          <AdminFoldout
-            title="Access requests"
-            eyebrow="Educator access"
-            defaultOpen={pendingRequests.length > 0}
-            badge={pendingRequests.length > 0 ? (
-              <span className="rounded-full border border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.06)] px-3 py-1 text-xs font-[800] uppercase tracking-[1px] text-[#7C3AED]">
-                {pendingRequests.length} pending
-              </span>
-            ) : null}
-          >
+          {/* ═══════════════════════════════════════════════════════
+              ALL COURSES
+          ═══════════════════════════════════════════════════════ */}
+          <section id="courses">
+            <SectionHeading
+              eyebrow="Course inventory"
+              title="All courses"
+              badge={
+                <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[12px] font-[900] text-[var(--muted)]">
+                  {courses.length} total · {publishedCount} live · {draftCount} draft
+                </span>
+              }
+            />
 
-            {educatorRequests.length === 0 ? (
-              <div className="p-6">
-                <div className="pr-muted-box text-center font-[800] text-[var(--muted)]">No educator access requests yet.</div>
+            {courses.length === 0 ? (
+              <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] px-8 py-12 text-center">
+                <p className="text-[14px] font-[800] text-[var(--muted)]">No courses yet.</p>
               </div>
             ) : (
-              <div className="divide-y divide-[var(--border)]">
+              <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[820px] border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-[var(--border)] bg-[var(--surface)] text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--muted)]">
+                        <th className="px-5 py-3">Course</th>
+                        <th className="px-5 py-3">Status</th>
+                        <th className="px-5 py-3">Author</th>
+                        <th className="px-5 py-3">Stats</th>
+                        <th className="px-5 py-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--border)]">
+                      {courses.map((course) => (
+                        <tr key={course.id} className="group transition hover:bg-[var(--surface)]">
+                          <td className="px-5 py-4 max-w-xs">
+                            <p className="text-[13px] font-[800] text-[var(--ink)]">{course.titleEn}</p>
+                            <p className="mt-0.5 line-clamp-1 text-[12px] font-[500] text-[var(--muted)]">{course.descriptionEn}</p>
+                          </td>
+                          <td className="px-5 py-4">
+                            <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] ${statusClass(course.status)}`}>{statusLabel(course.status)}</span>
+                          </td>
+                          <td className="px-5 py-4 text-[13px] font-[700] text-[var(--ink-2)]">{course.author.name ?? course.author.email}</td>
+                          <td className="px-5 py-4 text-[12px] font-[600] text-[var(--muted)]">{course._count.modules}m · {course._count.enrollments} enrolled</td>
+                          <td className="px-5 py-4">
+                            <div className="flex justify-end gap-2">
+                              <ReassignCourseButton courseId={course.id} courseTitle={course.titleEn} currentAuthorId={course.authorId} educators={educators} />
+                              <DeleteCourseButton courseId={course.id} label={course.titleEn} />
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* ═══════════════════════════════════════════════════════
+              ACCESS REQUESTS
+          ═══════════════════════════════════════════════════════ */}
+          <section id="requests">
+            <SectionHeading
+              eyebrow="Educator access"
+              title="Access requests"
+              badge={pendingRequests.length > 0 ? (
+                <span className="rounded-full border border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.06)] px-3 py-1 text-[12px] font-[900] text-[#7C3AED]">{pendingRequests.length} pending</span>
+              ) : undefined}
+            />
+
+            {educatorRequests.length === 0 ? (
+              <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] px-8 py-12 text-center">
+                <p className="text-[14px] font-[800] text-[var(--muted)]">No educator access requests yet.</p>
+              </div>
+            ) : (
+              <div className="grid gap-3">
                 {educatorRequests.map((req) => {
                   const isPending = req.status === EducatorRequestStatus.PENDING;
                   const isApproved = req.status === EducatorRequestStatus.APPROVED;
                   return (
-                    <div key={req.id} className="grid gap-4 p-5 lg:grid-cols-[1fr_auto] lg:items-start">
-                      <div className="grid gap-2">
-                        {/* User + status */}
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-[14px] font-[800] text-[var(--ink)]">{req.user.name ?? "Unnamed"}</span>
-                          <span className="text-[13px] font-[500] text-[var(--muted)]">{req.user.email}</span>
-                          <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-[800] uppercase tracking-[0.8px] ${
-                            isPending ? "border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.06)] text-[#7C3AED]"
-                            : isApproved ? "border-[rgba(24,130,92,0.2)] bg-[var(--success-50)] text-[var(--success)]"
-                            : "border-[rgba(220,38,38,0.18)] bg-red-50 text-red-700"
-                          }`}>
-                            {req.status.toLowerCase()}
-                          </span>
-                          <span className="text-[11px] text-[var(--muted-2)]">
-                            {new Date(req.createdAt).toLocaleDateString(undefined, { dateStyle: "medium" })}
-                          </span>
+                    <div key={req.id} className={`overflow-hidden rounded-[var(--radius-xl)] border bg-[var(--card)] shadow-[var(--shadow-sm)] ${isPending ? "border-[rgba(124,58,237,0.25)]" : "border-[var(--border)]"}`}>
+                      {isPending && <div className="h-0.5 bg-gradient-to-r from-[#7C3AED] to-[#a78bfa]" />}
+                      <div className="p-5 lg:grid lg:grid-cols-[1fr_auto] lg:items-start lg:gap-6">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-[15px] font-[900] text-[var(--ink)]">{req.user.name ?? "Unnamed"}</span>
+                            <span className="text-[13px] font-[500] text-[var(--muted)]">{req.user.email}</span>
+                            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-[900] uppercase tracking-[0.8px] ${isPending ? "border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.06)] text-[#7C3AED]" : isApproved ? "border-[rgba(24,130,92,0.2)] bg-[var(--success-50)] text-[var(--success)]" : "border-[rgba(220,38,38,0.18)] bg-red-50 text-red-700"}`}>{req.status.toLowerCase()}</span>
+                            <span className="text-[11px] text-[var(--muted-2)]">{new Date(req.createdAt).toLocaleDateString(undefined, { dateStyle: "medium" })}</span>
+                          </div>
+                          <p className="mt-2 max-w-2xl text-[13px] font-[500] leading-relaxed text-[var(--ink-2)]">{req.message}</p>
+                          {req.adminNote && <p className="mt-1.5 text-[12px] font-[600] text-[var(--muted)]">Admin note: {req.adminNote}</p>}
                         </div>
-
-                        {/* Message */}
-                        <p className="max-w-2xl text-[13px] font-[500] leading-relaxed text-[var(--ink-2)]">{req.message}</p>
-
-                        {/* Admin note if exists */}
-                        {req.adminNote && (
-                          <p className="text-[12px] font-[600] text-[var(--muted)]">Admin note: {req.adminNote}</p>
+                        {isPending ? (
+                          <div className="mt-4 flex flex-col gap-2 lg:mt-0 lg:min-w-52">
+                            <form action={handleApproveEducatorRequest}>
+                              <input type="hidden" name="requestId" value={req.id} />
+                              <button type="submit" className="w-full rounded-[var(--radius-lg)] bg-[#7C3AED] px-4 py-2.5 text-[12px] font-[900] text-white transition hover:bg-[#6d28d9]">✓ Approve — upgrade to Educator</button>
+                            </form>
+                            <form action={handleRejectEducatorRequest} className="grid gap-1.5">
+                              <input type="hidden" name="requestId" value={req.id} />
+                              <input name="adminNote" placeholder="Reason (shown to user)" className="pr-input text-[12px]" />
+                              <button type="submit" className="pr-btn-danger !min-h-9 text-[12px]">✕ Reject</button>
+                            </form>
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-[12px] font-[700] text-[var(--muted)] lg:mt-0">{isApproved ? "Upgraded to Educator" : "Request rejected"}</p>
                         )}
                       </div>
-
-                      {/* Actions */}
-                      {isPending && (
-                        <div className="flex flex-col gap-2 lg:min-w-56">
-                          <form action={handleApproveEducatorRequest} className="grid gap-2">
-                            <input type="hidden" name="requestId" value={req.id} />
-                            <button type="submit" className="pr-btn-primary !min-h-9 w-full text-[12px]">
-                              ✓ Approve — upgrade to Educator
-                            </button>
-                          </form>
-                          <form action={handleRejectEducatorRequest} className="grid gap-2">
-                            <input type="hidden" name="requestId" value={req.id} />
-                            <input name="adminNote" placeholder="Reason (shown to user)" className="pr-input text-[12px]" />
-                            <button type="submit" className="pr-btn-danger !min-h-9 w-full text-[12px]">
-                              ✕ Reject
-                            </button>
-                          </form>
-                        </div>
-                      )}
-
-                      {!isPending && (
-                        <span className="text-[12px] font-[700] text-[var(--muted)]">
-                          {isApproved ? "Account upgraded to Educator" : "Request rejected"}
-                        </span>
-                      )}
                     </div>
                   );
                 })}
               </div>
             )}
-          </AdminFoldout>
+          </section>
 
-          {/* ── Users & Roles ──────────────────────────────────────── */}
-          <AdminFoldout
-            title="Users and roles"
-            eyebrow="Access control"
-            description="Promote educators, protect admin access, issue temporary recovery passwords, and remove test users."
-          >
-            <div className="border-b border-[var(--border)] bg-[var(--card)] p-5 lg:p-6">
-              <form className="flex flex-wrap gap-2" action="/admin">
-                <select name="role" defaultValue={roleFilter} className="pr-input max-w-56">
+          {/* ═══════════════════════════════════════════════════════
+              USERS & ROLES
+          ═══════════════════════════════════════════════════════ */}
+          <section id="users">
+            <SectionHeading eyebrow="Access control" title="Users & roles" />
+
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <form className="flex gap-2" action="/admin">
+                <select name="role" defaultValue={roleFilter} className="pr-input max-w-48 text-[13px]">
                   <option value="">All roles</option>
                   {Object.values(UserRole).map((role) => (
                     <option key={role} value={role}>{roleLabel(role)}</option>
                   ))}
                 </select>
-                <button type="submit" className="pr-btn-secondary !min-h-10">Filter</button>
+                <button type="submit" className="pr-btn-secondary !min-h-10 px-4 text-[13px]">Filter</button>
               </form>
+              <span className="text-[12px] font-[700] text-[var(--muted)]">{users.length} users</span>
             </div>
 
             {users.length === 0 ? (
-              <div className="p-6">
-                <div className="pr-muted-box text-center font-[800] text-[var(--muted)]">
-                  No users found.
-                </div>
+              <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] px-8 py-12 text-center">
+                <p className="text-[14px] font-[800] text-[var(--muted)]">No users found.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[920px] border-collapse text-left">
-                  <thead className="bg-[var(--surface)]">
-                    <tr className="text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--muted)]">
-                      <th className="px-5 py-3">User</th>
-                      <th className="px-5 py-3">Current role</th>
-                      <th className="px-5 py-3">Change role</th>
-                      <th className="px-5 py-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--border)] bg-[var(--card)]">
-                    {users.map((user) => (
-                      <tr key={user.id} className="align-top">
-                        <td className="px-5 py-4">
-                          <p className="text-sm font-[800] text-[var(--ink)]">{user.name ?? "Unnamed user"}</p>
-                          <p className="mt-1 text-sm font-[500] text-[var(--muted)]">{user.email}</p>
-                        </td>
-                        <td className="px-5 py-4">
-                          <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-[800] uppercase tracking-[1px] ${roleClass(user.role)}`}>
-                            {roleLabel(user.role)}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4">
-                          <div className="flex flex-wrap gap-2">
-                            {Object.values(UserRole).map((roleOption) => (
-                              <form key={roleOption} action={handleUpdateUserRole}>
-                                <input type="hidden" name="userId" value={user.id} />
-                                <input type="hidden" name="role" value={roleOption} />
-                                <input
-                                  type="password"
-                                  name="adminPassword"
-                                  autoComplete="current-password"
-                                  placeholder="Admin password"
-                                  className="pr-input mb-1 h-8 text-xs"
-                                />
-                                <button
-                                  type="submit"
-                                  disabled={roleOption === user.role}
-                                  className={`inline-flex h-9 min-w-24 items-center justify-center rounded-[var(--radius)] px-3 text-xs font-[800] transition ${
-                                    roleOption === user.role
-                                      ? "cursor-not-allowed border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]"
-                                      : "border border-[var(--border)] bg-[var(--card)] text-[var(--ink)] hover:border-[rgba(0,87,255,0.3)] hover:text-[var(--brand)]"
-                                  }`}
-                                >
-                                  {roleLabel(roleOption)}
-                                </button>
-                              </form>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="px-5 py-4">
-                          <details className="group ms-auto w-72 max-w-full rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)]">
-                            <summary className="cursor-pointer list-none px-4 py-2 text-right text-xs font-[800] uppercase tracking-[1px] text-[var(--brand)]">
-                              Reset password
-                            </summary>
-                            <form action={handleResetUserPassword} className="grid gap-2 border-t border-[var(--border)] p-3">
-                              <input type="hidden" name="userId" value={user.id} />
-                              <label className="sr-only" htmlFor={`password-${user.id}`}>
-                                Temporary password
-                              </label>
-                              <input
-                                id={`password-${user.id}`}
-                                name="password"
-                                type="text"
-                                minLength={8}
-                                placeholder="Temporary password"
-                                className="pr-input"
-                              />
-                              <input
-                                name="adminPassword"
-                                type="password"
-                                autoComplete="current-password"
-                                placeholder="Your admin password"
-                                className="pr-input"
-                              />
-                              <button type="submit" className="pr-btn-secondary !min-h-9 w-full">
-                                Save temporary password
-                              </button>
-                            </form>
-                          </details>
-                          <div className="mt-2 text-right">
-                            <DeleteUserButton userId={user.id} label={user.email} />
-                          </div>
-                        </td>
+              <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[860px] border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-[var(--border)] bg-[var(--surface)] text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--muted)]">
+                        <th className="px-5 py-3">User</th>
+                        <th className="px-5 py-3">Role</th>
+                        <th className="px-5 py-3">Change role</th>
+                        <th className="px-5 py-3 text-right">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--border)]">
+                      {users.map((user) => {
+                        const initials = (user.name ?? user.email).split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? "").join("") || "?";
+                        const hue = user.id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
+                        return (
+                          <tr key={user.id} className="group transition hover:bg-[var(--surface)]">
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-3">
+                                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[12px] font-[900] text-white" style={{ background: `hsl(${hue},50%,42%)` }}>{initials}</span>
+                                <div>
+                                  <p className="text-[13px] font-[800] text-[var(--ink)]">{user.name ?? "Unnamed user"}</p>
+                                  <p className="text-[12px] font-[500] text-[var(--muted)]">{user.email}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-5 py-4">
+                              <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] ${roleClass(user.role)}`}>{roleLabel(user.role)}</span>
+                            </td>
+                            <td className="px-5 py-4">
+                              <div className="flex flex-wrap gap-2">
+                                {Object.values(UserRole).map((roleOption) => (
+                                  <form key={roleOption} action={handleUpdateUserRole}>
+                                    <input type="hidden" name="userId" value={user.id} />
+                                    <input type="hidden" name="role" value={roleOption} />
+                                    <input type="password" name="adminPassword" autoComplete="current-password" placeholder="Admin pw" className="pr-input mb-1 h-8 text-[12px]" />
+                                    <button type="submit" disabled={roleOption === user.role} className={`h-8 min-w-20 rounded-[var(--radius)] px-3 text-[11px] font-[800] transition ${roleOption === user.role ? "cursor-not-allowed border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]" : "border border-[var(--border)] bg-[var(--card)] text-[var(--ink)] hover:border-[rgba(0,87,255,0.3)] hover:text-[var(--brand)]"}`}>
+                                      {roleLabel(roleOption)}
+                                    </button>
+                                  </form>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-5 py-4">
+                              <details className="group/pw ms-auto w-64 max-w-full rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)]">
+                                <summary className="cursor-pointer list-none px-4 py-2 text-right text-[12px] font-[800] uppercase tracking-[1px] text-[var(--brand)]">Reset password</summary>
+                                <form action={handleResetUserPassword} className="grid gap-2 border-t border-[var(--border)] p-3">
+                                  <input type="hidden" name="userId" value={user.id} />
+                                  <input id={`pw-${user.id}`} name="password" type="text" minLength={8} placeholder="Temporary password" className="pr-input text-[13px]" />
+                                  <input name="adminPassword" type="password" autoComplete="current-password" placeholder="Your admin password" className="pr-input text-[13px]" />
+                                  <button type="submit" className="pr-btn-secondary !min-h-9 text-[12px]">Save temporary password</button>
+                                </form>
+                              </details>
+                              <div className="mt-2 text-right">
+                                <DeleteUserButton userId={user.id} label={user.email} />
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
-          </AdminFoldout>
+          </section>
 
-          {/* ── Promo codes ───────────────────────────────────────────── */}
-          <AdminFoldout
-            title="Promo codes"
-            eyebrow="Discounts"
-            description="Create discount codes for paid courses. Supports percentage and fixed-amount discounts, usage limits, expiry dates, and per-course restrictions."
-          >
-            <AdminPromoCodesSection promoCodes={promoCodes} paidCourses={paidCourses} />
-          </AdminFoldout>
+          {/* ═══════════════════════════════════════════════════════
+              PROMO CODES
+          ═══════════════════════════════════════════════════════ */}
+          <section id="promo">
+            <SectionHeading eyebrow="Discounts" title="Promo codes" />
+            <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
+              <AdminPromoCodesSection promoCodes={promoCodes} paidCourses={paidCourses} />
+            </div>
+          </section>
 
-          {/* ── Messaging ─────────────────────────────────────────────── */}
-          <AdminFoldout
-            title="Message users"
-            eyebrow="Admin messaging"
-            description="Send a direct message to any individual user, or broadcast to all educators or all students at once."
-          >
-            <div className="p-5 lg:p-6">
-              <div className="mb-5 flex justify-end">
-                <Link href="/admin/messages" className="pr-btn-ghost shrink-0">
+          {/* ═══════════════════════════════════════════════════════
+              MESSAGING
+          ═══════════════════════════════════════════════════════ */}
+          <section id="messaging">
+            <SectionHeading
+              eyebrow="Admin messaging"
+              title="Message users"
+              badge={
+                <Link href="/admin/messages" className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[12px] font-[800] text-[var(--ink-2)] transition hover:text-[var(--brand)]">
                   Open inbox →
                 </Link>
-              </div>
+              }
+            />
+            <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-6 shadow-[var(--shadow-sm)]">
               <AdminComposeForm users={users} history={adminMessageHistory} />
             </div>
-          </AdminFoldout>
+          </section>
 
-          {/* ── Site videos ───────────────────────────────────────────── */}
-          <AdminFoldout
-            title="Instruction & demo videos"
-            eyebrow="Site content"
-            description="Paste a YouTube link for each page placeholder. Leave blank to keep the default placeholder visible."
-          >
-            <div className="p-5 lg:p-6">
+          {/* ═══════════════════════════════════════════════════════
+              SITE VIDEOS
+          ═══════════════════════════════════════════════════════ */}
+          <section id="videos">
+            <SectionHeading eyebrow="Site content" title="Instruction & demo videos" />
+            <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-6 shadow-[var(--shadow-sm)]">
               <AdminSiteVideosForm currentValues={siteVideos} />
             </div>
-          </AdminFoldout>
+          </section>
 
         </div>
-      )}
-    </main>
+      </div>
+    </div>
   );
 }

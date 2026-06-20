@@ -250,6 +250,7 @@ export default async function DashboardPage() {
       streak={streak ? { current: streak.currentStreak, longest: streak.longestStreak } : null}
       courses={courses}
       recommended={recommended}
+      isNewUser={enrollments.length === 0}
       bookmarks={bookmarks}
       certificates={certificates.map((cert) => ({
         id: cert.id,

@@ -16,9 +16,15 @@ export async function assertRateLimit(key: string, limit = 30) {
 
 export async function assertRateLimitWindow(key: string, limit: number, windowMs: number) {
   const windowSec = Math.ceil(windowMs / 1000);
-  const count = await redis.incr(key);
-  if (count === 1) {
-    await redis.expire(key, windowSec);
+  let count: number;
+  try {
+    count = await redis.incr(key);
+    if (count === 1) {
+      await redis.expire(key, windowSec);
+    }
+  } catch {
+    // Redis unavailable — fail open so login still works when Upstash is unreachable
+    return;
   }
   if (count > limit) {
     throw new Error("Too many requests. Please wait a moment and try again.");

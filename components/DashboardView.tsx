@@ -66,6 +66,7 @@ type DashboardViewProps = {
   recommended: RecommendedCourse[];
   certificates: DashCertificate[];
   bookmarks: Array<{ lessonId: string; lessonTitle: string; lessonType: string; courseId: string; courseTitle: string; courseSlug: string }>;
+  isNewUser?: boolean;
 };
 
 
@@ -170,7 +171,7 @@ function activeViewFromPath(pathname: string) {
   return "dashboard";
 }
 
-export function DashboardView({ userName, userProfile, sessions, dbError, stats, overall, streak, courses, recommended, certificates, bookmarks }: DashboardViewProps) {
+export function DashboardView({ userName, userProfile, sessions, dbError, stats, overall, streak, courses, recommended, certificates, bookmarks, isNewUser }: DashboardViewProps) {
   const { locale, t } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
@@ -274,7 +275,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
           <div>
             <p className="text-[11px] font-[800] uppercase tracking-[3px] text-white/70">{t.myLearning}</p>
             <h1 className="mt-3 text-[clamp(28px,4vw,42px)] font-[800] leading-tight tracking-[-1px]">
-              {t.welcomeBack}{firstName ? `, ${firstName}` : ""} 👋
+              {isNewUser ? t.welcome : t.welcomeBack}{firstName ? `, ${firstName}` : ""} 👋
             </h1>
             <p className="mt-2 text-[15px] font-[500] text-white/80">{t.continueJourney}</p>
           </div>

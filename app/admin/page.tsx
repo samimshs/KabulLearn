@@ -11,6 +11,7 @@ import { approveEducatorRequest, rejectEducatorRequest } from "@/lib/actions/edu
 import { getSiteVideoUrls } from "@/lib/actions/site-settings-actions";
 import { DeleteUserButton } from "@/components/admin/DeleteUserButton";
 import { DeleteCourseButton } from "@/components/educator/DeleteCourseButton";
+import { ReassignCourseButton } from "@/components/admin/ReassignCourseButton";
 import { AdminComposeForm, type AdminMessageHistoryItem } from "@/components/admin/AdminComposeForm";
 import { AdminSiteVideosForm } from "@/components/admin/AdminSiteVideosForm";
 import { ReindexButton } from "@/components/admin/ReindexButton";
@@ -171,6 +172,7 @@ export default async function AdminDashboardPage({
   type AdminCourse = {
     id: string; slug: string; status: CourseStatus; titleEn: string; descriptionEn: string; reviewNote: string | null;
     isPaid: boolean; priceCents: number | null;
+    authorId: string;
     author: { name: string | null; email: string };
     _count: { modules: number; enrollments: number };
     modules: Array<{
@@ -237,6 +239,7 @@ export default async function AdminDashboardPage({
   let adminMessageHistory: AdminMessageHistoryItem[] = [];
   let promoCodes: Array<{ id: string; code: string; discountType: string; discountValue: number; maxUses: number | null; usedCount: number; expiresAt: Date | null; isActive: boolean; courseId: string | null; courseTitle?: string | null }> = [];
   let paidCourses: Array<{ id: string; title: string }> = [];
+  let educators: Array<{ id: string; name: string | null; email: string }> = [];
   let dbError = false;
 
   const today = new Date();
@@ -250,6 +253,7 @@ export default async function AdminDashboardPage({
         select: {
           id: true, slug: true, status: true, titleEn: true, descriptionEn: true, reviewNote: true,
           isPaid: true, priceCents: true,
+          authorId: true,
           author: { select: { name: true, email: true } },
           _count: { select: { modules: true, enrollments: true } },
           modules: {
@@ -403,6 +407,11 @@ export default async function AdminDashboardPage({
     ]);
     promoCodes = promoRows.map((p) => ({ ...p, courseTitle: p.course?.titleEn ?? null }));
     paidCourses = paidCourseRows.map((c) => ({ id: c.id, title: c.titleEn }));
+    educators = await db.user.findMany({
+      where: { role: UserRole.EDUCATOR },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, email: true }
+    });
   } catch {
     // promo codes unavailable — section will be empty
   }
@@ -616,7 +625,13 @@ export default async function AdminDashboardPage({
                           {course._count.modules} modules · {course._count.enrollments} enrollments
                         </td>
                         <td className="px-5 py-4">
-                          <div className="flex justify-end">
+                          <div className="flex justify-end gap-2">
+                            <ReassignCourseButton
+                              courseId={course.id}
+                              courseTitle={course.titleEn}
+                              currentAuthorId={course.authorId}
+                              educators={educators}
+                            />
                             <DeleteCourseButton courseId={course.id} label={course.titleEn} />
                           </div>
                         </td>

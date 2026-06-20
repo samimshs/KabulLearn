@@ -187,6 +187,37 @@ export default async function DashboardPage() {
     };
   });
 
+  // Bookmarked lessons
+  let bookmarks: Array<{ lessonId: string; lessonTitle: string; lessonType: string; courseId: string; courseTitle: string; courseSlug: string }> = [];
+  if (!dbError) {
+    try {
+      const rows = await db.lessonBookmark.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        select: {
+          lessonId: true,
+          lesson: {
+            select: {
+              titleEn: true, titlePs: true, titleDa: true, type: true,
+              module: { select: { course: { select: { id: true, slug: true, titleEn: true, titlePs: true, titleDa: true } } } }
+            }
+          }
+        }
+      });
+      bookmarks = rows.map((r) => {
+        const course = r.lesson.module.course;
+        return {
+          lessonId: r.lessonId,
+          lessonTitle: r.lesson.titleEn ?? r.lesson.titlePs ?? r.lesson.titleDa ?? "",
+          lessonType: r.lesson.type,
+          courseId: course.id,
+          courseTitle: course.titleEn ?? course.titlePs ?? course.titleDa ?? "",
+          courseSlug: course.slug
+        };
+      });
+    } catch { /* bookmarks unavailable */ }
+  }
+
   // Streak
   const streak = await getUserStreak(userId).catch(() => null);
 
@@ -219,6 +250,7 @@ export default async function DashboardPage() {
       streak={streak ? { current: streak.currentStreak, longest: streak.longestStreak } : null}
       courses={courses}
       recommended={recommended}
+      bookmarks={bookmarks}
       certificates={certificates.map((cert) => ({
         id: cert.id,
         grade: cert.grade,

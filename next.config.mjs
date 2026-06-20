@@ -4,7 +4,9 @@ const isDev = process.env.NODE_ENV === "development";
 const nextConfig = {
   // pdfkit ships .afm font metric files that webpack can't bundle — load it as a
   // native CommonJS module in the Node runtime instead.
-  serverExternalPackages: ["pdfkit"],
+  // pdf-parse v2 uses pdfjs-dist which dynamically imports a Web Worker; if bundled
+  // the worker file ends up at the wrong .next path and the import fails at runtime.
+  serverExternalPackages: ["pdfkit", "pdf-parse", "pdfjs-dist"],
   images: {
     remotePatterns: [
       // Vercel Blob (user-uploaded avatars)

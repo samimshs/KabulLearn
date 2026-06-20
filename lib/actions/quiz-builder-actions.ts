@@ -16,7 +16,7 @@ function toActionError(error: unknown): ActionResult<never> {
   return { ok: false, error: "Something went wrong." };
 }
 
-const addQuestionSchema = z.object({
+const questionBaseSchema = z.object({
   lessonId: z.string().min(1),
   type: z.nativeEnum(QuestionType),
   promptEn: z.string().min(1, "English prompt is required"),
@@ -26,7 +26,12 @@ const addQuestionSchema = z.object({
   explanationEn: z.string().optional(),
   explanationPs: z.string().optional(),
   explanationDa: z.string().optional()
-}).superRefine((data, ctx) => {
+});
+
+function validateTextQuestionAnswer(
+  data: Pick<z.infer<typeof questionBaseSchema>, "type" | "correctAnswer">,
+  ctx: z.RefinementCtx
+) {
   if (data.type === QuestionType.TEXT_INPUT && !data.correctAnswer) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -34,7 +39,9 @@ const addQuestionSchema = z.object({
       message: "Text or math-answer questions require the correct answer."
     });
   }
-});
+}
+
+const addQuestionSchema = questionBaseSchema.superRefine(validateTextQuestionAnswer);
 
 const addChoiceSchema = z.object({
   questionId: z.string().min(1),
@@ -42,6 +49,26 @@ const addChoiceSchema = z.object({
   textPs: z.string().min(1, "Pashto text is required"),
   textDa: z.string().trim().optional(),
   isCorrect: z.boolean()
+});
+
+const replacementChoiceSchema = addChoiceSchema.omit({ questionId: true });
+
+const replacementQuestionSchema = questionBaseSchema.omit({ lessonId: true }).extend({
+  choices: z.array(replacementChoiceSchema).default([])
+}).superRefine((data, ctx) => {
+  validateTextQuestionAnswer(data, ctx);
+  if (data.type !== QuestionType.TEXT_INPUT && data.choices.length < 2) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["choices"],
+      message: "Choice questions need at least two answer choices."
+    });
+  }
+});
+
+const replaceQuizQuestionsSchema = z.object({
+  lessonId: z.string().min(1),
+  questions: z.array(replacementQuestionSchema).max(100)
 });
 
 const reorderQuestionsSchema = z.object({
@@ -137,6 +164,87 @@ export async function addQuizQuestion(
   }
 }
 
+export async function replaceQuizQuestions(
+  input: z.infer<typeof replaceQuizQuestionsSchema>
+): Promise<ActionResult> {
+  try {
+    const educator = await requireEducator();
+    const values = replaceQuizQuestionsSchema.parse(input);
+
+    const quiz = await db.quiz.findUnique({
+      where: { lessonId: values.lessonId },
+      select: {
+        id: true,
+        lesson: { select: { module: { select: { course: { select: { id: true, authorId: true } } } } } }
+      }
+    });
+
+    if (!quiz) throw new Error("Quiz not found for this lesson.");
+
+    const course = quiz.lesson.module.course;
+    if (!canManageCourse({ requesterId: educator.id, requesterRole: educator.role, authorId: course.authorId })) {
+      throw new AuthorizationError();
+    }
+
+    await db.$transaction(async (tx) => {
+      const existingQuestions = await tx.question.findMany({
+        where: { quizId: quiz.id },
+        select: { id: true }
+      });
+      const existingQuestionIds = existingQuestions.map((question) => question.id);
+
+      if (existingQuestionIds.length > 0) {
+        await tx.quizSubmissionAnswer.deleteMany({
+          where: { questionId: { in: existingQuestionIds } }
+        });
+        await tx.answerChoice.deleteMany({
+          where: { questionId: { in: existingQuestionIds } }
+        });
+      }
+      await tx.question.deleteMany({ where: { quizId: quiz.id } });
+
+      for (const [questionIndex, question] of values.questions.entries()) {
+        const questionRow = await tx.question.create({
+          data: {
+            quizId: quiz.id,
+            order: questionIndex + 1,
+            type: question.type,
+            promptEn: question.promptEn,
+            promptPs: question.promptPs,
+            promptDa: question.promptDa,
+            correctAnswer: question.type === QuestionType.TEXT_INPUT ? question.correctAnswer : null,
+            explanationEn: question.explanationEn,
+            explanationPs: question.explanationPs,
+            explanationDa: question.explanationDa
+          },
+          select: { id: true }
+        });
+
+        if (question.type !== QuestionType.TEXT_INPUT) {
+          await tx.answerChoice.createMany({
+            data: question.choices.map((choice, choiceIndex) => ({
+              questionId: questionRow.id,
+              order: choiceIndex + 1,
+              textEn: choice.textEn,
+              textPs: choice.textPs,
+              textDa: choice.textDa,
+              isCorrect: choice.isCorrect
+            }))
+          });
+        }
+      }
+    });
+
+    await sendCourseBackToReview(course.id);
+    revalidatePath(`/educator/courses/${course.id}/quizzes/${values.lessonId}`);
+    revalidatePath(`/educator/courses/${course.id}`);
+    revalidatePath("/admin");
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
 export async function updateQuizQuestion(input: {
   questionId: string;
   type: QuestionType;
@@ -150,7 +258,11 @@ export async function updateQuizQuestion(input: {
 }): Promise<ActionResult> {
   try {
     const educator = await requireEducator();
-    const values = addQuestionSchema.omit({ lessonId: true }).extend({ questionId: z.string().min(1) }).parse(input);
+    const values = questionBaseSchema
+      .omit({ lessonId: true })
+      .extend({ questionId: z.string().min(1) })
+      .superRefine(validateTextQuestionAnswer)
+      .parse(input);
 
     const question = await db.question.findUnique({
       where: { id: values.questionId },

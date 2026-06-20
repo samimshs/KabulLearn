@@ -561,14 +561,18 @@ export function LessonView({ course, lesson, serverPassedModuleIds = [], lessonS
               <button
                 type="button"
                 onClick={onToggleBookmark}
-                className={`rounded-full border px-3 py-1.5 text-[12px] font-[900] transition ${
+                title={bookmarked ? t.lessonSaved : t.saveLesson}
+                aria-label={bookmarked ? t.lessonSaved : t.saveLesson}
+                aria-pressed={bookmarked}
+                className={`grid h-9 w-9 place-items-center rounded-full border transition ${
                   bookmarked
                     ? "border-[rgba(0,87,255,0.24)] bg-[var(--brand-50)] text-[var(--brand)]"
                     : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[rgba(0,87,255,0.3)] hover:text-[var(--brand)]"
                 }`}
-                aria-pressed={bookmarked}
               >
-                {bookmarked ? t.lessonSaved : t.saveLesson}
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill={bookmarked ? "currentColor" : "none"} aria-hidden="true">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
             ) : null}
           </div>

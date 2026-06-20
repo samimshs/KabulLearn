@@ -193,6 +193,20 @@ export default async function EducatorCoursePage(props: EducatorCoursePageProps)
               resourceUrl: "",
               passingScore: lesson.passingScore ?? 70,
               isFinalTest: lesson.isFinalTest,
+              aiGeneratedAssets: lesson.aiGeneratedAssets as {
+                slides?: Array<{
+                  slideNumber?: number;
+                  title?: string;
+                  narration?: { english?: string; dari?: string; pashto?: string };
+                }>;
+                videoPlan?: {
+                  renderStatus?: "not_started" | "rendering" | "completed" | "failed";
+                  lastRenderedAt?: string;
+                  voiceLanguage?: string;
+                  durationSeconds?: number;
+                  lastRenderError?: string | null;
+                };
+              } | null,
               draftQuestions: (lesson.quiz?.questions ?? []).map((q) => ({
                 id: q.id,
                 promptEn: q.promptEn,

@@ -394,6 +394,7 @@ model Lesson {
   readingEn    String? @db.Text
   readingPs    String? @db.Text
   readingDa    String? @db.Text
+  aiGeneratedAssets Json?
   isFinalTest  Boolean @default(false)
   passingScore Int?
 

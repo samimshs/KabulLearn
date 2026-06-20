@@ -45,6 +45,8 @@ type CourseOverviewProps = {
       avatarUrl: string | null;
       professionalTitle: string | null;
       bio: string | null;
+      bioPs?: string | null;
+      bioDa?: string | null;
       linkedinUrl?: string | null;
       youtubeUrl?: string | null;
       userId?: string | null;
@@ -55,6 +57,8 @@ type CourseOverviewProps = {
       avatarUrl: string | null;
       professionalTitle: string | null;
       bio: string | null;
+      bioPs?: string | null;
+      bioDa?: string | null;
       linkedinUrl?: string | null;
       youtubeUrl?: string | null;
       userId?: string | null;
@@ -716,9 +720,16 @@ export function CourseOverview({
                         )}
                       </div>
                       {previewMode ? (
-                        <span className="shrink-0 text-xs font-[900] uppercase tracking-[1px] text-[var(--brand)]">
-                          {isPreview ? t.preview : t.locked}
-                        </span>
+                        <Link
+                          href={
+                            lesson.type === "QUIZ"
+                              ? `/courses/${encodeURIComponent(course.id)}/quizzes/${encodeURIComponent(module.id)}`
+                              : `/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(lesson.id)}`
+                          }
+                          className="shrink-0 text-sm font-[800] text-[var(--brand)] hover:underline"
+                        >
+                          Preview →
+                        </Link>
                       ) : enrolled && unlocked ? (
                         <Link
                           href={
@@ -793,8 +804,8 @@ export function CourseOverview({
                 {instructor.professionalTitle ? (
                   <p className="mt-1 text-sm font-[800] text-[var(--brand)]">{instructor.professionalTitle}</p>
                 ) : null}
-                {instructor.bio ? (
-                  <p className="mt-3 max-w-3xl text-sm font-[500] leading-7 text-[var(--muted)]">{instructor.bio}</p>
+                {(localize(locale, instructor.bio, instructor.bioPs, instructor.bioDa)) ? (
+                  <p className="mt-3 max-w-3xl text-sm font-[500] leading-7 text-[var(--muted)]">{localize(locale, instructor.bio, instructor.bioPs, instructor.bioDa)}</p>
                 ) : null}
               </div>
               <div className="shrink-0">
@@ -841,8 +852,8 @@ export function CourseOverview({
                       ) : null}
                     </div>
                   </div>
-                  {instructor.bio ? (
-                    <p className="line-clamp-4 text-sm font-[500] leading-6 text-[var(--muted)]">{instructor.bio}</p>
+                  {(localize(locale, instructor.bio, instructor.bioPs, instructor.bioDa)) ? (
+                    <p className="line-clamp-4 text-sm font-[500] leading-6 text-[var(--muted)]">{localize(locale, instructor.bio, instructor.bioPs, instructor.bioDa)}</p>
                   ) : null}
                   <div className="mt-auto flex items-center gap-3 pt-1">
                     <Link

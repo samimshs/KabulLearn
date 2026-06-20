@@ -75,6 +75,8 @@ export default async function CoursePage({
     avatarUrl: string | null;
     professionalTitle: string | null;
     bio: string | null;
+    bioPs: string | null;
+    bioDa: string | null;
     linkedinUrl: string | null;
     youtubeUrl: string | null;
     userId: string | null;
@@ -122,6 +124,8 @@ export default async function CoursePage({
             avatarUrl: true,
             professionalTitle: true,
             bio: true,
+            bioPs: true,
+            bioDa: true,
             linkedinUrl: true,
             youtubeUrl: true,
             userId: true
@@ -137,6 +141,8 @@ export default async function CoursePage({
                 avatarUrl: true,
                 professionalTitle: true,
                 bio: true,
+                bioPs: true,
+                bioDa: true,
                 linkedinUrl: true,
                 youtubeUrl: true,
                 userId: true
@@ -426,6 +432,8 @@ export default async function CoursePage({
               avatarUrl: null,
               professionalTitle: null,
               bio: null,
+              bioPs: null,
+              bioDa: null,
               linkedinUrl: null,
               youtubeUrl: null,
               userId: null

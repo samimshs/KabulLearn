@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { CourseStatus, LessonType, ProgressStatus } from "@prisma/client";
+import { CourseStatus, LessonType, ProgressStatus, UserRole } from "@prisma/client";
 import { auth } from "@/auth";
 import { LessonView } from "@/components/LessonView";
 import { db } from "@/lib/db";
@@ -85,6 +85,7 @@ type CourseForLesson = {
   level: string | null;
   status: CourseStatus;
   publishedAt: Date | null;
+  authorId: string;
   modules: Array<{
     id: string; titleEn: string; titlePs: string; order: number;
     lessons: LessonInPage[];
@@ -111,6 +112,7 @@ export default async function LessonPage({
         ...localizedCourseSelect(locale),
         status: true,
         publishedAt: true,
+        authorId: true,
         modules: {
           orderBy: [{ order: "asc" }],
           select: {
@@ -135,7 +137,14 @@ export default async function LessonPage({
   }
 
   if (!course) return notFound();
-  if (course.status !== CourseStatus.PUBLISHED &&
+
+  const session = await auth();
+  const userId = session?.user?.id;
+  const isEducatorAuthor =
+    session?.user?.role === UserRole.EDUCATOR && course.authorId === userId;
+
+  if (!isEducatorAuthor &&
+      course.status !== CourseStatus.PUBLISHED &&
       !(course.status === CourseStatus.PENDING_REVIEW && course.publishedAt !== null)) {
     return notFound();
   }
@@ -145,9 +154,6 @@ export default async function LessonPage({
   if (!lesson) {
     return notFound();
   }
-
-  const session = await auth();
-  const userId = session?.user?.id;
 
   // Determine which lesson is the free preview (first non-quiz lesson of the first module)
   const firstModule = course.modules.reduce((a, b) => a.order <= b.order ? a : b);
@@ -164,9 +170,11 @@ export default async function LessonPage({
     }
   }
 
-  // Not enrolled: allow preview lesson, else redirect to course overview
+  // Educator-authors can view any lesson without enrollment
   let isEnrolled = false;
-  if (userId) {
+  if (isEducatorAuthor) {
+    isEnrolled = true;
+  } else if (userId) {
     const enrollment = await db.enrollment.findUnique({
       where: { userId_courseId: { userId, courseId: resolvedCourseId } }
     });
@@ -208,7 +216,7 @@ export default async function LessonPage({
   // If the student passed a quiz in every module, the course is complete
   // and all content should remain freely accessible for review
   const totalModules = course.modules.length;
-  const isComplete = totalModules > 0 && serverPassedModuleIds.length >= totalModules;
+  const isComplete = isEducatorAuthor || (totalModules > 0 && serverPassedModuleIds.length >= totalModules);
 
   // The query selects English + the ACTIVE locale's field (titlePs for ps,
   // titleDa for fa). Fold that into the `…Ps` field the views read for any

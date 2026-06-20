@@ -22,9 +22,8 @@ function fmtStat(value: number, locale: Locale): string {
   return `${formatNumber(value, locale)}+`;
 }
 
-function isComingSoonHost(host: string | null) {
-  const normalized = (host ?? "").toLowerCase().split(":")[0];
-  return normalized === "kabullearn.com" || normalized === "www.kabullearn.com";
+function isComingSoonHost(_host: string | null) {
+  return false;
 }
 
 const comingSoonCopy: Record<Locale, {

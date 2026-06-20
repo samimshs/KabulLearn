@@ -125,6 +125,71 @@ export async function updateUserRole(input: z.infer<typeof updateUserRoleSchema>
   }
 }
 
+export async function reassignCourse(input: { courseId: string; newAuthorId: string }): Promise<ActionResult> {
+  try {
+    const admin = await requireAdmin();
+    const { courseId, newAuthorId } = input;
+
+    const [course, newAuthor] = await Promise.all([
+      db.course.findUnique({ where: { id: courseId }, select: { id: true, authorId: true, titleEn: true } }),
+      db.user.findUnique({ where: { id: newAuthorId }, select: { id: true, role: true, name: true, email: true } })
+    ]);
+    if (!course) throw new Error("Course not found.");
+    if (!newAuthor) throw new Error("User not found.");
+    if (newAuthor.role !== UserRole.EDUCATOR) throw new Error("The selected user is not an educator.");
+    if (course.authorId === newAuthorId) throw new Error("This user is already the course author.");
+
+    // Ensure the new author has a CreatorProfile (educators always should, but guard anyway)
+    let newProfile = await db.creatorProfile.findUnique({ where: { userId: newAuthorId }, select: { id: true } });
+    if (!newProfile) {
+      newProfile = await db.creatorProfile.create({
+        data: {
+          userId: newAuthorId,
+          createdById: newAuthorId,
+          name: newAuthor.name ?? newAuthor.email,
+          username: newAuthor.email.split("@")[0].toLowerCase().replace(/[^a-z0-9]+/g, "-")
+        },
+        select: { id: true }
+      });
+    }
+
+    // Get old author's profile id so we can remove their CourseInstructor row
+    const oldProfile = await db.creatorProfile.findUnique({ where: { userId: course.authorId }, select: { id: true } });
+
+    await db.$transaction([
+      // Transfer ownership
+      db.course.update({ where: { id: courseId }, data: { authorId: newAuthorId } }),
+      // Remove old author's instructor card (if they had one)
+      ...(oldProfile
+        ? [db.courseInstructor.deleteMany({ where: { courseId, profileId: oldProfile.id } })]
+        : []),
+      // Upsert new author's instructor card at order 0
+      db.courseInstructor.upsert({
+        where: { courseId_profileId: { courseId, profileId: newProfile.id } },
+        create: { courseId, profileId: newProfile.id, order: 0 },
+        update: { order: 0 }
+      }),
+      db.adminAuditLog.create({
+        data: {
+          actorId: admin.id,
+          action: "course.reassign",
+          targetId: courseId,
+          targetType: "Course",
+          metadata: { from: course.authorId, to: newAuthorId }
+        }
+      })
+    ]);
+
+    revalidatePath("/admin");
+    revalidatePath(`/courses/${courseId}`);
+    revalidatePath("/educator");
+
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
 export async function resetUserPassword(input: z.infer<typeof resetUserPasswordSchema>): Promise<ActionResult> {
   try {
     const admin = await requireAdmin();

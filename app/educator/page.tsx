@@ -218,6 +218,20 @@ export default async function EducatorDashboardPage({
       }).catch(() => [])
     : [];
 
+  const rawBookmarks = await db.lessonBookmark.findMany({
+    where: { userId: educator.id },
+    orderBy: { createdAt: "desc" },
+    select: {
+      lessonId: true,
+      lesson: {
+        select: {
+          titleEn: true, titlePs: true, titleDa: true, type: true,
+          module: { select: { course: { select: { id: true, slug: true, titleEn: true, titlePs: true, titleDa: true } } } }
+        }
+      }
+    }
+  }).catch(() => []);
+
   const completedLessonIds = new Set(rawProgress.map((p) => p.lessonId));
   const certCourseIds = new Set(rawCerts.map((c) => c.courseId));
 
@@ -239,6 +253,17 @@ export default async function EducatorDashboardPage({
         totalLessons: allLessons.length,
         completedLessons: allLessons.filter((l) => completedLessonIds.has(l.id)).length,
         hasCertificate: certCourseIds.has(e.course.id)
+      };
+    }),
+    bookmarks: rawBookmarks.map((r) => {
+      const course = r.lesson.module.course;
+      return {
+        lessonId: r.lessonId,
+        lessonTitle: r.lesson.titleEn ?? r.lesson.titlePs ?? r.lesson.titleDa ?? "",
+        lessonType: r.lesson.type,
+        courseId: course.id,
+        courseTitle: course.titleEn ?? course.titlePs ?? course.titleDa ?? "",
+        courseSlug: course.slug
       };
     })
   };

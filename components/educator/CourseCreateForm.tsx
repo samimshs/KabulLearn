@@ -18,7 +18,7 @@ import {
   updateLesson as updateLessonAction,
   updateModule as updateModuleAction
 } from "@/lib/actions/course-actions";
-import { addQuizQuestion, addAnswerChoice } from "@/lib/actions/quiz-builder-actions";
+import { addQuizQuestion, addAnswerChoice, replaceQuizQuestions } from "@/lib/actions/quiz-builder-actions";
 import { localizeLevel, type Dictionary } from "@/lib/i18n";
 import type { InstructorInput } from "@/lib/validators/course";
 
@@ -26,6 +26,10 @@ type StepKey = "description" | "language" | "instructors" | "structure" | "prici
 type LessonKind = "VIDEO" | "READING" | "QUIZ" | "PDF" | "SLIDES" | "ATTACHMENT" | "ASSIGNMENT" | "LINK";
 type DraftLanguage = "en" | "ps" | "fa" | "trilingual";
 type TranslationContext = "courseTitle" | "courseDescription" | "moduleTitle" | "lessonTitle" | "lessonSummary" | "readingContent" | "instructorTitle" | "instructorBio" | "quizPrompt" | "answerChoice" | "quizExplanation";
+type CourseMessageKey = keyof Pick<
+  Dictionary,
+  "checkFieldsAndRetry" | "couldNotCreateCourse" | "couldNotSaveCourse" | "courseDraftCreated" | "courseUpdated" | "cwDraftCreatedWithSkipped"
+>;
 
 type InstructorProfile = InstructorInput & {
   id?: string;
@@ -58,6 +62,21 @@ type DraftQuestion = {
   choices: DraftChoice[];
 };
 
+type AiGeneratedAssets = {
+  lessonType?: "reading" | "video";
+  slides?: Array<{
+    slideNumber?: number;
+    title?: string | { english?: string; dari?: string; pashto?: string };
+    onScreenText?: string | { english?: string; dari?: string; pashto?: string };
+    equationsLatex?: string[];
+    narration?: {
+      english?: string;
+      dari?: string;
+      pashto?: string;
+    };
+  }>;
+};
+
 type DraftLesson = {
   id: string;
   titleEn: string;
@@ -76,6 +95,7 @@ type DraftLesson = {
   passingScore: number;
   isFinalTest: boolean;
   draftQuestions: DraftQuestion[];
+  aiGeneratedAssets?: AiGeneratedAssets | null;
 };
 
 type DraftModule = {
@@ -146,6 +166,38 @@ function emptyQuestion(): DraftQuestion {
   };
 }
 
+function serializeQuizQuestions(questions: DraftQuestion[]) {
+  return questions
+    .map((question) => {
+      const promptEn = question.promptEn.trim();
+      if (!promptEn) return null;
+      if (question.type === "TEXT_INPUT" && !question.correctAnswer.trim()) return null;
+      const choices = question.type === "TEXT_INPUT"
+        ? []
+        : question.choices
+            .filter((choice) => choice.textEn.trim())
+            .map((choice) => ({
+              textEn: choice.textEn.trim(),
+              textPs: choice.textPs.trim() || choice.textEn.trim(),
+              textDa: choice.textDa.trim() || undefined,
+              isCorrect: choice.isCorrect
+            }));
+      if (question.type !== "TEXT_INPUT" && choices.length < 2) return null;
+      return {
+        type: question.type,
+        promptEn,
+        promptPs: question.promptPs.trim() || promptEn,
+        promptDa: question.promptDa.trim() || undefined,
+        correctAnswer: question.type === "TEXT_INPUT" ? question.correctAnswer.trim() : undefined,
+        explanationEn: question.explanationEn.trim() || undefined,
+        explanationPs: question.explanationPs.trim() || undefined,
+        explanationDa: question.explanationDa.trim() || undefined,
+        choices
+      };
+    })
+    .filter((question): question is NonNullable<typeof question> => question !== null);
+}
+
 function emptyLesson(): DraftLesson {
   return {
     id: createId("lesson"),
@@ -165,6 +217,7 @@ function emptyLesson(): DraftLesson {
     passingScore: 70,
     isFinalTest: false,
     draftQuestions: [],
+    aiGeneratedAssets: null,
   };
 }
 
@@ -239,6 +292,32 @@ function stateFromInitialCourse(initialCourse: CourseWizardInitial): WizardState
   };
 }
 
+function preserveInitialAiAssets(state: WizardState, initialCourse?: CourseWizardInitial): WizardState {
+  if (!initialCourse) return state;
+
+  const assetsByLessonId = new Map<string, AiGeneratedAssets | null | undefined>();
+  for (const module of initialCourse.modules) {
+    for (const lesson of module.lessons) {
+      assetsByLessonId.set(lesson.id, lesson.aiGeneratedAssets);
+    }
+  }
+
+  return {
+    ...state,
+    lessonsByModule: Object.fromEntries(
+      Object.entries(state.lessonsByModule).map(([moduleId, lessons]) => [
+        moduleId,
+        lessons.map((lesson) => ({
+          ...lesson,
+          aiGeneratedAssets: assetsByLessonId.has(lesson.id)
+            ? assetsByLessonId.get(lesson.id) ?? null
+            : lesson.aiGeneratedAssets ?? null
+        }))
+      ])
+    )
+  };
+}
+
 function isPersistedId(id: string, prefix: string) {
   return Boolean(id && !id.startsWith(`${prefix}-`));
 }
@@ -294,6 +373,39 @@ async function fetchDraftTranslation(text: string, context: TranslationContext) 
   });
   if (!response.ok) return null;
   const payload = await response.json() as { ok: boolean; data?: { ps?: string; fa?: string } };
+  return payload.ok ? payload.data ?? null : null;
+}
+
+async function fetchQuizTranslation(questions: DraftQuestion[]) {
+  const response = await fetch("/api/educator/translate-quiz", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      questions: questions.map((question) => ({
+        id: question.id,
+        promptEn: question.promptEn,
+        explanationEn: question.explanationEn,
+        choices: question.choices.map((choice) => ({
+          id: choice.id,
+          textEn: choice.textEn
+        }))
+      }))
+    })
+  });
+  if (!response.ok) return null;
+  const payload = await response.json() as {
+    ok: boolean;
+    data?: {
+      questions?: Array<{
+        id: string;
+        promptPs?: string;
+        promptDa?: string;
+        explanationPs?: string;
+        explanationDa?: string;
+        choices?: Array<{ id: string; textPs?: string; textDa?: string }>;
+      }>;
+    };
+  };
   return payload.ok ? payload.data ?? null : null;
 }
 
@@ -367,6 +479,7 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [savedState, setSavedState] = useState<"idle" | "saving" | "saved">("idle");
   const [message, setMessage] = useState("");
+  const [messageKey, setMessageKey] = useState<CourseMessageKey | null>(null);
   const [messageTone, setMessageTone] = useState<"error" | "success" | "warning">("error");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [isPending, startTransition] = useTransition();
@@ -391,7 +504,7 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
   ], [t, isEditMode]);
 
   const activeIndex = Math.max(0, steps.findIndex((step) => step.key === activeStep));
-  const saveComplete = isEditMode && messageTone === "success" && Boolean(message);
+  const saveComplete = isEditMode && messageTone === "success" && Boolean(message || messageKey);
   const instructors = useMemo(() => primaryInstructor ? [primaryInstructor, ...coInstructors] : coInstructors, [primaryInstructor, coInstructors]);
   const selectedModule = state.modules.find((module) => module.id === selectedModuleId) ?? state.modules[0];
   const selectedLessons = selectedModule ? state.lessonsByModule[selectedModule.id] ?? [] : [];
@@ -423,11 +536,11 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
             draftQuestions: (l.draftQuestions ?? []).map((q) => ({ ...emptyQuestion(), ...q })),
           }));
         }
-        const restored: WizardState = {
+        const restored: WizardState = preserveInitialAiAssets({
           ...raw,
           modules: raw.modules.map((m) => ({ ...emptyModule(), ...m })),
           lessonsByModule: migratedLessons,
-        };
+        }, initialCourse);
         setState(restored);
         setSelectedModuleId(restored.modules[0]?.id ?? "");
         setSelectedLessonId(restored.lessonsByModule[restored.modules[0]?.id]?.[0]?.id ?? "");
@@ -619,6 +732,7 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
 
   function patch(patchValue: Partial<WizardState>) {
     setMessage("");
+    setMessageKey(null);
     setMessageTone("error");
     setFieldErrors({});
     setState((prev) => {
@@ -628,6 +742,11 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
       }
       return next;
     });
+  }
+
+  function setTranslatedMessage(key: CourseMessageKey) {
+    setMessage("");
+    setMessageKey(key);
   }
 
   function addPlatformInstructor(instructor: InstructorSearchResult) {
@@ -805,6 +924,7 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
     });
     if (!updateResult.ok) {
       setMessageTone("error");
+      setMessageKey(null);
       setMessage(updateResult.error);
       return;
     }
@@ -882,8 +1002,18 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
             isFinalTest: type === LessonType.QUIZ ? lesson.isFinalTest : false,
             passingScore: type === LessonType.QUIZ ? lesson.passingScore : undefined
           });
-          if (!result.ok) skippedLessons += 1;
-          else persistedLessonIdsByModule[moduleId].push(lesson.id);
+          if (!result.ok) {
+            skippedLessons += 1;
+          } else {
+            persistedLessonIdsByModule[moduleId].push(lesson.id);
+            if (type === LessonType.QUIZ) {
+              const quizResult = await replaceQuizQuestions({
+                lessonId: lesson.id,
+                questions: serializeQuizQuestions(lesson.draftQuestions ?? [])
+              });
+              if (!quizResult.ok) skippedLessons += 1;
+            }
+          }
           continue;
         }
 
@@ -907,29 +1037,28 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
           skippedLessons += 1;
         } else {
           persistedLessonIdsByModule[moduleId].push(result.data.lessonId);
-          if (type === LessonType.QUIZ && (lesson.draftQuestions ?? []).length > 0) {
-            for (const q of lesson.draftQuestions) {
-              if (!q.promptEn.trim()) continue;
+          const serializedQuestions = serializeQuizQuestions(lesson.draftQuestions ?? []);
+          if (type === LessonType.QUIZ && serializedQuestions.length > 0) {
+            for (const q of serializedQuestions) {
               const qResult = await addQuizQuestion({
                 lessonId: result.data.lessonId,
                 type: q.type as "SINGLE_CHOICE" | "MULTIPLE_CHOICE" | "TEXT_INPUT",
-                promptEn: q.promptEn.trim(),
-                promptPs: q.promptPs.trim() || q.promptEn.trim(),
-                promptDa: q.promptDa.trim() || undefined,
-                correctAnswer: q.type === "TEXT_INPUT" ? q.correctAnswer.trim() || undefined : undefined,
-                explanationEn: q.explanationEn.trim() || undefined,
-                explanationPs: q.explanationPs.trim() || undefined,
-                explanationDa: q.explanationDa.trim() || undefined,
+                promptEn: q.promptEn,
+                promptPs: q.promptPs,
+                promptDa: q.promptDa,
+                correctAnswer: q.correctAnswer,
+                explanationEn: q.explanationEn,
+                explanationPs: q.explanationPs,
+                explanationDa: q.explanationDa,
               });
               if (!qResult.ok) continue;
               if (q.type !== "TEXT_INPUT") {
                 for (const c of q.choices) {
-                  if (!c.textEn.trim()) continue;
                   await addAnswerChoice({
                     questionId: qResult.data.questionId,
-                    textEn: c.textEn.trim(),
-                    textPs: c.textPs.trim() || c.textEn.trim(),
-                    textDa: c.textDa.trim() || undefined,
+                    textEn: c.textEn,
+                    textPs: c.textPs,
+                    textDa: c.textDa,
                     isCorrect: c.isCorrect,
                   });
                 }
@@ -953,7 +1082,7 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
     setDeletedLessonIds([]);
     setDeletedModuleIds([]);
     setMessageTone(skippedLessons ? "warning" : "success");
-    setMessage(skippedLessons ? t.cwDraftCreatedWithSkipped : t.courseUpdated);
+    setTranslatedMessage(skippedLessons ? "cwDraftCreatedWithSkipped" : "courseUpdated");
     router.refresh();
   }
 
@@ -962,7 +1091,7 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) {
       setMessageTone("error");
-      setMessage(t.checkFieldsAndRetry);
+      setTranslatedMessage("checkFieldsAndRetry");
       return;
     }
 
@@ -1001,7 +1130,12 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
         if (response.status === 401) { router.push("/login?callbackUrl=%2Feducator"); return; }
         if (!response.ok || !result.ok || !result.data?.courseId) {
           setMessageTone("error");
-          setMessage(result.error ?? t.couldNotCreateCourse);
+          if (result.error) {
+            setMessageKey(null);
+            setMessage(result.error);
+          } else {
+            setTranslatedMessage("couldNotCreateCourse");
+          }
           if (result.fieldErrors?.slug?.[0]) setFieldErrors({ slug: result.fieldErrors.slug[0] });
           return;
         }
@@ -1048,29 +1182,28 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
               passingScore: type === LessonType.QUIZ ? lesson.passingScore : undefined
             });
             if (!lessonResult.ok) { skippedLessons += 1; continue; }
-            if (type === LessonType.QUIZ && lesson.draftQuestions.length > 0) {
-              for (const q of lesson.draftQuestions) {
-                if (!q.promptEn.trim()) continue;
+            const serializedQuestions = serializeQuizQuestions(lesson.draftQuestions ?? []);
+            if (type === LessonType.QUIZ && serializedQuestions.length > 0) {
+              for (const q of serializedQuestions) {
                 const qResult = await addQuizQuestion({
                   lessonId: lessonResult.data.lessonId,
                   type: q.type as "SINGLE_CHOICE" | "MULTIPLE_CHOICE" | "TEXT_INPUT",
-                  promptEn: q.promptEn.trim(),
-                  promptPs: q.promptPs.trim() || q.promptEn.trim(),
-                  promptDa: q.promptDa.trim() || undefined,
-                  correctAnswer: q.type === "TEXT_INPUT" ? q.correctAnswer.trim() || undefined : undefined,
-                  explanationEn: q.explanationEn.trim() || undefined,
-                  explanationPs: q.explanationPs.trim() || undefined,
-                  explanationDa: q.explanationDa.trim() || undefined,
+                  promptEn: q.promptEn,
+                  promptPs: q.promptPs,
+                  promptDa: q.promptDa,
+                  correctAnswer: q.correctAnswer,
+                  explanationEn: q.explanationEn,
+                  explanationPs: q.explanationPs,
+                  explanationDa: q.explanationDa,
                 });
                 if (!qResult.ok) continue;
                 if (q.type !== "TEXT_INPUT") {
                   for (const c of q.choices) {
-                    if (!c.textEn.trim()) continue;
                     await addAnswerChoice({
                       questionId: qResult.data.questionId,
-                      textEn: c.textEn.trim(),
-                      textPs: c.textPs.trim() || c.textEn.trim(),
-                      textDa: c.textDa.trim() || undefined,
+                      textEn: c.textEn,
+                      textPs: c.textPs,
+                      textDa: c.textDa,
                       isCorrect: c.isCorrect,
                     });
                   }
@@ -1082,33 +1215,37 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
 
         window.localStorage.removeItem(storageKey);
         setMessageTone(skippedLessons ? "warning" : "success");
-        setMessage(skippedLessons ? t.cwDraftCreatedWithSkipped : t.courseDraftCreated);
+        setTranslatedMessage(skippedLessons ? "cwDraftCreatedWithSkipped" : "courseDraftCreated");
         router.refresh();
         router.push(`/educator/courses/${encodeURIComponent(courseId)}`);
-      } catch {
+      } catch (error) {
+        console.error(isEditMode ? "Course update failed:" : "Course creation failed:", error);
         setMessageTone("error");
-        setMessage(t.couldNotCreateCourse);
+        setTranslatedMessage(isEditMode ? "couldNotSaveCourse" : "couldNotCreateCourse");
       }
     });
   }
 
   const active = steps[activeIndex];
+  const isStructureStep = active.key === "structure";
 
   return (
-    <section className={`min-h-[calc(100vh-120px)] bg-[var(--surface)] px-4 py-5 ${className}`}>
-      <div className={`mx-auto flex min-h-[calc(100vh-160px)] w-full flex-col transition-all ${active.key === "structure" ? "max-w-[1400px]" : "max-w-3xl"}`}>
-        <header className="shrink-0">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[1.6px] text-[var(--brand)]">{t.cwTitle}</p>
-              <h1 className="mt-1 text-2xl font-black tracking-[-0.6px] text-[var(--ink)]">{active.question}</h1>
+    <section className={`min-h-[calc(100vh-120px)] bg-[var(--surface)] px-4 py-3 ${className}`}>
+      <div className={`mx-auto flex min-h-[calc(100vh-145px)] w-full flex-col transition-all ${isStructureStep ? "max-w-[1400px]" : "max-w-3xl"}`}>
+        <header className="sticky top-0 z-20 shrink-0 border-b border-[var(--border)] bg-[var(--surface)]/95 pb-3 pt-1 backdrop-blur">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-[10px] font-black uppercase tracking-[1.5px] text-[var(--brand)]">{t.cwTitle}</p>
+                <span className="rounded-full bg-[var(--card)] px-2 py-0.5 text-[10px] font-black text-[var(--muted)] shadow-sm">
+                  {savedState === "saving" ? t.cwSaving : savedState === "saved" ? t.cwSaved : t.cwSaveDraft}
+                </span>
+              </div>
+              <h1 className="mt-1 text-xl font-black tracking-[-0.4px] text-[var(--ink)]">{active.question}</h1>
+              <p className="mt-1 text-xs font-semibold leading-5 text-[var(--muted)]">{active.help}</p>
             </div>
-            <span className="rounded-full bg-[var(--card)] px-3 py-1 text-xs font-black text-[var(--muted)] shadow-sm">
-              {savedState === "saving" ? t.cwSaving : savedState === "saved" ? t.cwSaved : t.cwSaveDraft}
-            </span>
           </div>
-          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--muted)]">{active.help}</p>
-          <nav className="mt-5" aria-label="Course wizard steps">
+          <nav className="mt-3" aria-label="Course wizard steps">
             <ol className="flex">
               {steps.map((step, i) => {
                 const isLast = i === steps.length - 1;
@@ -1122,10 +1259,10 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
                       <button
                         type="button"
                         onClick={() => setActiveStep(step.key)}
-                        className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11px] font-[900] transition-all ${
+                        className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[10px] font-[900] transition-all ${
                           done
                             ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                            : isCurrent
+                          : isCurrent
                             ? "bg-[var(--brand)] text-white shadow-[0_4px_14px_rgba(0,87,255,0.35)] scale-110"
                             : "border-2 border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:border-[var(--brand)] hover:text-[var(--brand)]"
                         }`}
@@ -1141,7 +1278,7 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
                     <button
                       type="button"
                       onClick={() => setActiveStep(step.key)}
-                      className={`mt-2 text-center text-[10px] font-[800] leading-tight transition-colors ${
+                      className={`mt-1.5 hidden text-center text-[10px] font-[800] leading-tight transition-colors sm:block ${
                         done ? "text-emerald-600" : isCurrent ? "text-[var(--brand)]" : "text-[var(--muted)]"
                       }`}
                     >
@@ -1154,7 +1291,7 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
           </nav>
         </header>
 
-        <main className={`my-5 min-h-0 flex-1 rounded-[24px] border border-[var(--border)] bg-[var(--card)] shadow-[0_22px_70px_rgba(15,23,42,0.08)] ${active.key === "structure" ? "overflow-hidden p-0" : "p-5"}`}>
+        <main className={`my-3 min-h-0 flex-1 rounded-[22px] border border-[var(--border)] bg-[var(--card)] shadow-[0_18px_50px_rgba(15,23,42,0.07)] ${isStructureStep ? "overflow-hidden p-0" : "p-5"}`}>
           <StepBody
             step={active.key}
             state={state}
@@ -1191,6 +1328,7 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
             removeLesson={removeLesson}
             allLessons={allLessons}
             message={message}
+            messageKey={messageKey}
             messageTone={messageTone}
             instructors={instructors}
             isTranslating={isTranslating}
@@ -1270,6 +1408,7 @@ function StepBody(props: {
   removeLesson: (moduleId: string, lessonId: string) => void;
   allLessons: DraftLesson[];
   message: string;
+  messageKey: CourseMessageKey | null;
   messageTone: "error" | "success" | "warning";
   instructors: InstructorProfile[];
   isTranslating: boolean;
@@ -1527,6 +1666,7 @@ function StepBody(props: {
       : props.messageTone === "warning"
         ? "border-amber-200 bg-amber-50 text-amber-800"
         : "border-[rgba(196,43,43,0.18)] bg-[var(--danger-50)] text-[var(--danger)]";
+  const displayMessage = props.messageKey ? t[props.messageKey] : props.message;
 
   return (
     <div className="grid gap-3">
@@ -1538,7 +1678,7 @@ function StepBody(props: {
           </span>
         </div>
       ))}
-      {props.message ? <p className={`rounded-2xl border px-4 py-3 text-sm font-black ${messageClass}`}>{props.message}</p> : null}
+      {displayMessage ? <p className={`rounded-2xl border px-4 py-3 text-sm font-black ${messageClass}`}>{displayMessage}</p> : null}
     </div>
   );
 }
@@ -1588,10 +1728,9 @@ function StructureColumns(props: {
 }) {
   // — column widths (resizable) —
   const [widths, setWidths] = useState({ col1: 180, col2: 200, col4: 300 });
-  const [translatingQIds, setTranslatingQIds] = useState<Set<string>>(new Set());
-  const [isTranslatingReading, setIsTranslatingReading] = useState(false);
-  const [isTranslatingModTitle, setIsTranslatingModTitle] = useState(false);
-  const [isTranslatingLsnTitle, setIsTranslatingLsnTitle] = useState(false);
+  const [isTranslatingAll, setIsTranslatingAll] = useState(false);
+  const [isTranslatingQuiz, setIsTranslatingQuiz] = useState(false);
+  const [loadingAiAssetsLessonId, setLoadingAiAssetsLessonId] = useState<string | null>(null);
 
   const { state, lesson, t, selectedModuleId, selectedModule, selectedLessons, colHeader, inputSm, pill } = props;
   const dragModuleRef = useRef<string | null>(null);
@@ -1624,6 +1763,26 @@ function StructureColumns(props: {
     if (!lesson) return;
     props.updateLesson(selectedModuleId, lesson.id, patch);
   }
+
+  useEffect(() => {
+    if (!lesson || !isPersistedId(lesson.id, "lesson") || lesson.aiGeneratedAssets?.slides?.length) return;
+    if (loadingAiAssetsLessonId === lesson.id) return;
+    let cancelled = false;
+    setLoadingAiAssetsLessonId(lesson.id);
+    fetch(`/api/educator/ai-course/lesson-assets?lessonId=${encodeURIComponent(lesson.id)}`)
+      .then((response) => response.json())
+      .then((payload: { ok: boolean; data?: AiGeneratedAssets | null }) => {
+        if (cancelled || !payload.ok || !payload.data?.slides?.length) return;
+        props.updateLesson(selectedModuleId, lesson.id, { aiGeneratedAssets: payload.data });
+      })
+      .catch(() => null)
+      .finally(() => {
+        if (!cancelled) setLoadingAiAssetsLessonId(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [lesson?.id, lesson?.aiGeneratedAssets?.slides?.length, loadingAiAssetsLessonId, selectedModuleId, props]);
 
   function patchQuestion(qId: string, patch: Partial<DraftQuestion>) {
     if (!lesson) return;
@@ -1674,84 +1833,84 @@ function StructureColumns(props: {
     });
   }
 
-  async function translateModuleTitle() {
-    if (!selectedModule?.titleEn.trim()) return;
-    // Capture IDs before await so navigation mid-flight doesn't corrupt a different module.
-    const moduleId = selectedModule.id;
-    const text = selectedModule.titleEn;
-    setIsTranslatingModTitle(true);
-    const r = await fetchDraftTranslation(text, "moduleTitle");
-    if (r) props.updateModule(moduleId, { titlePs: r.ps, titleDa: r.fa });
-    setIsTranslatingModTitle(false);
-  }
 
-  async function translateLessonTitle() {
-    if (!lesson?.titleEn.trim()) return;
-    const moduleId = selectedModuleId;
-    const lessonId = lesson.id;
-    const text = lesson.titleEn;
-    setIsTranslatingLsnTitle(true);
-    const r = await fetchDraftTranslation(text, "lessonTitle");
-    if (r) props.updateLesson(moduleId, lessonId, { titlePs: r.ps, titleDa: r.fa });
-    setIsTranslatingLsnTitle(false);
-  }
-
-  async function translateReading() {
-    if (!lesson?.readingEn.trim()) return;
-    const moduleId = selectedModuleId;
-    const lessonId = lesson.id;
-    const text = lesson.readingEn;
-    setIsTranslatingReading(true);
-    const r = await fetchDraftTranslation(text, "readingContent");
-    if (r) props.updateLesson(moduleId, lessonId, { readingPs: r.ps, readingDa: r.fa });
-    setIsTranslatingReading(false);
-  }
-
-  async function translateQuestion(qId: string) {
+  async function translateAll() {
     if (!lesson) return;
-    const q = lesson.draftQuestions.find((x) => x.id === qId);
-    if (!q?.promptEn.trim()) return;
-    // Snapshot everything we need before the await.
-    const moduleId = selectedModuleId;
-    const lessonId = lesson.id;
-    const snapshotQuestions = lesson.draftQuestions;
-    setTranslatingQIds((prev) => new Set([...prev, qId]));
+    setIsTranslatingAll(true);
+    try {
+      const moduleId = selectedModuleId;
+      const lessonId = lesson.id;
+      const snapshotModule = selectedModule;
+      const snapshotLesson = lesson;
 
-    const promptP = fetchDraftTranslation(q.promptEn, "quizPrompt");
-    const explanationP = q.explanationEn.trim()
-      ? fetchDraftTranslation(q.explanationEn, "quizExplanation")
-      : Promise.resolve(null);
-    const choicePs = q.choices.map((c) =>
-      c.textEn.trim() ? fetchDraftTranslation(c.textEn, "answerChoice") : Promise.resolve(null)
-    );
-    const [promptResult, explanationResult, ...choiceResults] = await Promise.all([promptP, explanationP, ...choicePs]);
+      const titleTasks = [
+        snapshotModule?.titleEn.trim()
+          ? fetchDraftTranslation(snapshotModule.titleEn, "moduleTitle").then((r) => {
+              if (r && snapshotModule) props.updateModule(snapshotModule.id, { titlePs: r.ps, titleDa: r.fa });
+            })
+          : null,
+        snapshotLesson.titleEn.trim()
+          ? fetchDraftTranslation(snapshotLesson.titleEn, "lessonTitle").then((r) => {
+              if (r) props.updateLesson(moduleId, lessonId, { titlePs: r.ps, titleDa: r.fa });
+            })
+          : null,
+        snapshotLesson.readingEn.trim()
+          ? fetchDraftTranslation(snapshotLesson.readingEn, "readingContent").then((r) => {
+              if (r) props.updateLesson(moduleId, lessonId, { readingPs: r.ps, readingDa: r.fa });
+            })
+          : null
+      ].filter(Boolean) as Promise<void>[];
+
+      const quizTask = translateQuizQuestions(snapshotLesson, moduleId, lessonId);
+
+      await Promise.all([...titleTasks, quizTask].filter(Boolean));
+    } finally {
+      setIsTranslatingAll(false);
+    }
+  }
+
+  async function translateQuizQuestions(targetLesson = lesson, moduleId = selectedModuleId, lessonId = lesson?.id ?? "") {
+    if (!targetLesson || !lessonId) return;
+    const snapshotQuestions = targetLesson.draftQuestions ?? [];
+    if (!snapshotQuestions.some((q) => q.promptEn.trim() || q.explanationEn.trim() || q.choices.some((c) => c.textEn.trim()))) return;
+
+    const translation = await fetchQuizTranslation(snapshotQuestions);
+    const translatedQuestions = translation?.questions ?? [];
+    if (translatedQuestions.length === 0) return;
 
     props.updateLesson(moduleId, lessonId, {
       draftQuestions: snapshotQuestions.map((dq) => {
-        if (dq.id !== qId) return dq;
+        const tr = translatedQuestions.find((x) => x.id === dq.id);
+        if (!tr) return dq;
         return {
           ...dq,
-          promptPs: promptResult?.ps ?? dq.promptPs,
-          promptDa: promptResult?.fa ?? dq.promptDa,
-          explanationPs: explanationResult?.ps ?? dq.explanationPs,
-          explanationDa: explanationResult?.fa ?? dq.explanationDa,
-          choices: dq.choices.map((c, ci) => {
-            const r = choiceResults[ci];
-            if (!r) return c;
-            return { ...c, textPs: r.ps ?? c.textPs, textDa: r.fa ?? c.textDa };
-          }),
+          promptPs: tr.promptPs || dq.promptPs,
+          promptDa: tr.promptDa || dq.promptDa,
+          explanationPs: tr.explanationPs || dq.explanationPs,
+          explanationDa: tr.explanationDa || dq.explanationDa,
+          choices: dq.choices.map((c) => {
+            const translatedChoice = tr.choices?.find((choice) => choice.id === c.id);
+            return translatedChoice
+              ? { ...c, textPs: translatedChoice.textPs || c.textPs, textDa: translatedChoice.textDa || c.textDa }
+              : c;
+          })
         };
-      }),
-    });
-
-    setTranslatingQIds((prev) => {
-      const next = new Set(prev);
-      next.delete(qId);
-      return next;
+      })
     });
   }
 
+  async function translateCurrentQuizOnly() {
+    if (!lesson) return;
+    setIsTranslatingQuiz(true);
+    try {
+      await translateQuizQuestions();
+    } finally {
+      setIsTranslatingQuiz(false);
+    }
+  }
+
   const showQuizCol = lesson?.type === "QUIZ";
+  const hasAiAssets = Boolean(lesson?.aiGeneratedAssets?.slides?.length);
 
   const divider = (col: "col1" | "col2" | "col4") => (
     <div
@@ -1835,10 +1994,7 @@ function StructureColumns(props: {
                 onChange={(e) => props.updateModule(selectedModule.id, { titleEn: e.target.value })}
                 placeholder={t.cwModulePlaceholder}
               />
-              <div className="flex items-center justify-between">
-                <span className={`${pill} text-[var(--muted)]`}>PS / DA</span>
-                <TBtn loading={isTranslatingModTitle} onClick={() => void translateModuleTitle()} />
-              </div>
+              <span className={`${pill} text-[var(--muted)]`}>PS / DA</span>
               <input
                 dir="rtl"
                 className={inputSm}
@@ -1919,7 +2075,19 @@ function StructureColumns(props: {
 
       {/* ── Col 3: Lesson content ── */}
       <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
-        <p className={colHeader}>{t.lessonContent}</p>
+        <div className={`flex items-center justify-between gap-3 ${colHeader}`}>
+          <span>{t.lessonContent}</span>
+          {lesson && (
+            <button
+              type="button"
+              onClick={() => void translateAll()}
+              disabled={isTranslatingAll || isTranslatingQuiz}
+              className="rounded-lg border border-[#0f766e]/30 bg-[#0f766e]/5 px-2 py-0.5 normal-case text-[9px] font-black tracking-[0.06em] text-[#0f766e] transition hover:bg-[#0f766e]/10 disabled:cursor-wait disabled:opacity-50"
+            >
+              {isTranslatingAll ? "Translating…" : "Translate all · PS/DA"}
+            </button>
+          )}
+        </div>
         {lesson ? (
           <div className="flex flex-col gap-3 p-3">
             {/* Lesson title — EN + PS/DA */}
@@ -1928,10 +2096,7 @@ function StructureColumns(props: {
                 <span className={`${pill} text-[var(--muted)]`}>{t.cwTitleLabel}</span>
               </div>
               <input className={inputSm} value={lesson.titleEn} onChange={(e) => patchLesson({ titleEn: e.target.value })} placeholder={t.cwLessonPlaceholder} />
-              <div className="flex items-center justify-between">
-                <span className={`${pill} text-[var(--muted)]`}>PS / DA</span>
-                <TBtn loading={isTranslatingLsnTitle} onClick={() => void translateLessonTitle()} />
-              </div>
+              <span className={`${pill} text-[var(--muted)]`}>PS / DA</span>
               <div className="grid grid-cols-2 gap-1">
                 <input dir="rtl" className={inputSm} value={lesson.titlePs} onChange={(e) => patchLesson({ titlePs: e.target.value })} placeholder="عنوان لوست (پښتو)" />
                 <input dir="rtl" className={inputSm} value={lesson.titleDa} onChange={(e) => patchLesson({ titleDa: e.target.value })} placeholder="عنوان لوست (دری)" />
@@ -1957,6 +2122,10 @@ function StructureColumns(props: {
               </label>
             )}
 
+            {hasAiAssets && lesson && (
+              <AiLessonInfoPanel assets={lesson.aiGeneratedAssets} />
+            )}
+
             {lesson.type === "READING" && (
               <div className="grid gap-1">
                 <div className="flex items-center justify-between">
@@ -1968,24 +2137,27 @@ function StructureColumns(props: {
                   onChange={(e) => patchLesson({ readingEn: e.target.value, readingPs: suggestDraft(e.target.value, lesson.readingPs), readingDa: suggestDraft(e.target.value, lesson.readingDa) })}
                   placeholder={t.cwReadingContent}
                 />
-                <div className="flex items-center justify-between">
-                  <span className={`${pill} text-[var(--muted)]`}>PS / DA</span>
-                  <TBtn loading={isTranslatingReading} onClick={() => void translateReading()} />
+                <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)]">
+                  <div className="px-3 py-2 text-xs font-black text-[var(--ink-2)]">
+                    Pashto / Dari translations
+                  </div>
+                  <div className="grid gap-2 border-t border-[var(--border)] p-3">
+                    <textarea
+                      dir="rtl"
+                      className={`min-h-[86px] w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs leading-6 outline-none focus:border-[#0f766e] ${isTranslatingAll ? "opacity-50" : ""}`}
+                      value={lesson.readingPs}
+                      onChange={(e) => patchLesson({ readingPs: e.target.value })}
+                      placeholder="متن درس (پښتو)"
+                    />
+                    <textarea
+                      dir="rtl"
+                      className={`min-h-[86px] w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs leading-6 outline-none focus:border-[#0f766e] ${isTranslatingAll ? "opacity-50" : ""}`}
+                      value={lesson.readingDa}
+                      onChange={(e) => patchLesson({ readingDa: e.target.value })}
+                      placeholder="متن درس (دری)"
+                    />
+                  </div>
                 </div>
-                <textarea
-                  dir="rtl"
-                  className={`min-h-[100px] w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs leading-6 outline-none focus:border-[#0f766e] ${isTranslatingReading ? "opacity-50" : ""}`}
-                  value={lesson.readingPs}
-                  onChange={(e) => patchLesson({ readingPs: e.target.value })}
-                  placeholder="متن درس (پښتو)"
-                />
-                <textarea
-                  dir="rtl"
-                  className={`min-h-[100px] w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs leading-6 outline-none focus:border-[#0f766e] ${isTranslatingReading ? "opacity-50" : ""}`}
-                  value={lesson.readingDa}
-                  onChange={(e) => patchLesson({ readingDa: e.target.value })}
-                  placeholder="متن درس (دری)"
-                />
               </div>
             )}
 
@@ -2048,7 +2220,19 @@ function StructureColumns(props: {
         <>
           {divider("col4")}
           <div style={{ width: widths.col4 }} className="flex shrink-0 flex-col overflow-y-auto">
-            <p className={colHeader}>{t.cwQuiz} — {t.questionsLabel}</p>
+            <div className={`flex items-center justify-between gap-2 ${colHeader}`}>
+              <span>{t.cwQuiz} — {t.questionsLabel}</span>
+              {(lesson.draftQuestions ?? []).length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => void translateCurrentQuizOnly()}
+                  disabled={isTranslatingAll || isTranslatingQuiz}
+                  className="rounded-lg border border-[#0f766e]/30 bg-[#0f766e]/5 px-2 py-0.5 normal-case text-[9px] font-black tracking-[0.06em] text-[#0f766e] transition hover:bg-[#0f766e]/10 disabled:cursor-wait disabled:opacity-50"
+                >
+                  {isTranslatingQuiz ? "Translating..." : "Translate quiz · PS/DA"}
+                </button>
+              )}
+            </div>
             <div className="flex flex-1 flex-col gap-3 p-3">
               {(lesson.draftQuestions ?? []).length === 0 && (
                 <p className="pt-4 text-center text-xs font-semibold text-[var(--muted)]">No questions yet. Add one below.</p>
@@ -2058,7 +2242,6 @@ function StructureColumns(props: {
                   <div className="flex items-center justify-between">
                     <span className="text-[9px] font-black uppercase tracking-[1.2px] text-[#0f766e]">Q{qi + 1}</span>
                     <div className="flex items-center gap-1.5">
-                      <TBtn loading={translatingQIds.has(q.id)} onClick={() => void translateQuestion(q.id)} />
                       <button type="button" onClick={() => removeQuestion(q.id)} className="text-xs font-black text-[var(--muted)] hover:text-red-400">×</button>
                     </div>
                   </div>
@@ -2203,6 +2386,68 @@ function StructureColumns(props: {
       )}
 
     </div>
+  );
+}
+
+function AiLessonInfoPanel({ assets }: { assets?: AiGeneratedAssets | null }) {
+  const [expanded, setExpanded] = useState(false);
+  const slideCount = assets?.slides?.length ?? 0;
+  if (!slideCount) return null;
+
+  const lessonType = assets?.lessonType ?? "reading";
+  const isVideo = lessonType === "video";
+
+  function getSlideTitle(title: string | { english?: string; dari?: string; pashto?: string } | undefined) {
+    if (!title) return "";
+    return typeof title === "string" ? title : title.english || title.dari || title.pashto || "";
+  }
+
+  return (
+    <section className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.5px] ${isVideo ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700"}`}>
+            AI · {isVideo ? "Video lesson" : "Reading lesson"}
+          </span>
+          <span className="text-[11px] font-semibold text-[color:var(--muted)]">
+            {slideCount} slide{slideCount !== 1 ? "s" : ""} generated
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          className="text-[11px] font-black text-[color:var(--brand)] hover:underline"
+        >
+          {expanded ? "Hide outline" : "View outline"}
+        </button>
+      </div>
+      {isVideo && (
+        <p className="mt-2 text-[11px] font-semibold text-[color:var(--muted)]">
+          Add a YouTube URL in the field above once you have recorded this video.
+        </p>
+      )}
+      {expanded && (
+        <div className="mt-3 space-y-1.5">
+          {assets?.slides?.map((slide, i) => (
+            <div key={i} className="rounded-xl bg-[color:var(--card)] p-2.5">
+              <p className="text-[11px] font-black text-[color:var(--ink)]">
+                {slide.slideNumber ?? i + 1}. {getSlideTitle(slide.title)}
+              </p>
+              {isVideo && slide.narration?.english && (
+                <p className="mt-1 line-clamp-2 text-[10px] font-semibold leading-4 text-[color:var(--muted)]">
+                  {slide.narration.english}
+                </p>
+              )}
+              {slide.equationsLatex && slide.equationsLatex.length > 0 && (
+                <p className="mt-1 text-[10px] font-bold text-[color:var(--brand)]">
+                  {slide.equationsLatex.slice(0, 2).join(" · ")}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 

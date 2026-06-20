@@ -1,7 +1,7 @@
 import { UserRole } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { CourseCreateForm } from "@/components/educator/CourseCreateForm";
+import { CourseCreationChoice } from "@/components/educator/CourseCreationChoice";
 
 export default async function NewEducatorCoursePage() {
   const session = await auth();
@@ -15,5 +15,5 @@ export default async function NewEducatorCoursePage() {
     redirect("/dashboard");
   }
 
-  return <CourseCreateForm />;
+  return <CourseCreationChoice />;
 }

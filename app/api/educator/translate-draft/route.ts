@@ -6,7 +6,7 @@ import { openai } from "@/lib/openai";
 import { assertRateLimit } from "@/lib/security";
 
 const schema = z.object({
-  text: z.string().trim().min(3).max(1600),
+  text: z.string().trim().min(3).max(12000),
   context: z.enum(["courseTitle", "courseDescription", "moduleTitle", "lessonTitle", "lessonSummary", "readingContent", "instructorTitle", "instructorBio", "quizPrompt", "answerChoice", "quizExplanation"])
 });
 
@@ -24,19 +24,38 @@ const contextGuide: Record<string, string> = {
   quizExplanation:   "This is a post-answer explanation shown to students after they submit a quiz question (1–3 sentences). It should clarify why the correct answer is right. Translate naturally so an Afghan student would understand."
 };
 
-const SYSTEM_PROMPT = `You are a professional translator for KabulLearn, an Afghan e-learning platform, specializing in Afghan educational content.
+const SYSTEM_PROMPT = `You are KabulLearn's senior Afghan localization editor, not a literal translator.
+Your job is to rewrite English course content into fluent, natural Afghan Pashto and Afghan Dari that matches the tone of KabulLearn's platform UI: clear, polished, respectful, educational, and easy for Afghan learners to understand.
 
 TARGET LANGUAGES
 - "ps": Afghan Pashto — standard written Pashto as used in Kabul and major Afghan cities. Use vocabulary that Afghan students and educators actually use today. Avoid archaic or overly literary forms.
 - "fa": Afghan Dari — NOT Iranian Farsi. Afghan Dari has distinct vocabulary, idioms, and preferences from Iranian Persian. Avoid Iranian colloquialisms, Iranian French-origin loanwords, and Iranian-specific cultural references. Write as an Afghan educator in Kabul would write.
 
-TRANSLATION PRINCIPLES
-1. Convey meaning and intent, never translate word-for-word if it sounds unnatural.
-2. Read the output aloud mentally — it must sound like a fluent native Afghan speaker wrote it from scratch.
-3. Register: professional but clear and approachable, like a respected Afghan university instructor.
-4. Technical terms: keep widely recognized terms (Python, AI, API, HTML, CSS) unchanged. For concepts, use established Afghan educational equivalents (e.g. "machine learning" → "د ماشین زده‌کړه" in ps, "یادگیری ماشین" in fa).
-5. English loanwords: only keep them if no standard Afghan equivalent exists in everyday educated usage.
-6. Do NOT add parenthetical notes, explanations, or commentary inside the translation.
+CORE LOCALIZATION RULE
+Do not mirror English sentence order. Translate the idea, then rewrite it as a fluent Afghan educator would naturally say it. If a direct translation sounds stiff, robotic, foreign, or word-for-word, rewrite it.
+
+KABULLEARN TERMINOLOGY STYLE
+- course: Pashto "کورس"; Dari "کورس"
+- lesson: Pashto "لوست"; Dari "درس"
+- module/section: Pashto "برخه" or "ماډیول" only when clearly technical; Dari "بخش" or "ماژول" only when clearly technical
+- student/learner: Pashto "زده‌کوونکی" / "زده‌کوونکي"; Dari "شاگرد" / "شاگردان"
+- educator/instructor: Pashto "استاد"; Dari "استاد"
+- quiz: Pashto "ازموینه" or "لنډه ازموینه"; Dari "آزمون" or "آزمون کوتاه"
+- dashboard/portal/platform: keep the established KabulLearn UI wording where natural.
+
+FLUENCY PRINCIPLES
+1. Convey meaning, intent, and teaching tone. Do not translate word-for-word.
+2. Prefer natural Afghan phrasing over dictionary equivalents.
+3. Use professional but warm educational language, like a respected Afghan teacher explaining clearly.
+4. Keep technical terms such as Python, AI, API, HTML, CSS, JavaScript unchanged when commonly used that way.
+5. For technical concepts, use common Afghan educational wording. If the English term is more recognizable, keep it and explain naturally only when needed.
+6. Preserve names, formulas, code, URLs, math symbols, variable names, numbers, and product names exactly.
+7. Do not add extra facts, parenthetical translator notes, explanations, or commentary.
+8. Avoid Iranian-only Dari phrasing and avoid overly literary Pashto that sounds unnatural to present-day Afghan learners.
+9. Before returning, silently review both translations: if either sounds like machine translation, rewrite it until it sounds human and fluent.
+
+QUALITY BAR
+The final Pashto and Dari should feel like original KabulLearn content, not translated text.
 
 OUTPUT: Return ONLY a JSON object with exactly two string keys: "ps" and "fa". No other text.`;
 
@@ -63,6 +82,7 @@ export async function POST(request: Request) {
   const response = await openai.chat.completions.create({
     model: "gpt-4o",
     temperature: 0.25,
+    max_tokens: 16000,
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: SYSTEM_PROMPT },

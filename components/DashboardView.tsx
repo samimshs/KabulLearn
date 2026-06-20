@@ -65,6 +65,7 @@ type DashboardViewProps = {
   courses: DashCourse[];
   recommended: RecommendedCourse[];
   certificates: DashCertificate[];
+  bookmarks: Array<{ lessonId: string; lessonTitle: string; lessonType: string; courseId: string; courseTitle: string; courseSlug: string }>;
 };
 
 
@@ -139,19 +140,20 @@ function ProgressRing({ percent, size = 132 }: { percent: number; size?: number 
   );
 }
 
-function iconPath(name: "dashboard" | "courses" | "certificates" | "messages" | "settings") {
+function iconPath(name: "dashboard" | "courses" | "certificates" | "messages" | "settings" | "bookmarks") {
   const paths = {
     dashboard: "M4 6.5 12 3l8 3.5v11A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-11Z M9 20v-6h6v6",
     courses: "M4 5.5C6.2 4.7 9.7 5 12 6.6v12c-2.3-1.6-5.8-1.9-8-1.1v-12Z M12 6.6c2.3-1.6 5.8-1.9 8-1.1v12c-2.2-.8-5.7-.5-8 1.1v-12Z",
     certificates: "M12 13.5A5.5 5.5 0 1 0 12 2.5a5.5 5.5 0 0 0 0 11Z M8.8 12.7 7.5 21l4.5-2.5 4.5 2.5-1.3-8.3",
     messages: "M4.5 5h15v10h-9L6 18.5V15H4.5V5Z",
-    settings: "M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z M19.4 15a8 8 0 0 0 .1-1l2-1.5-2-3.5-2.4 1a8 8 0 0 0-1.7-1L15 6.5h-4L10.6 9a8 8 0 0 0-1.7 1l-2.4-1-2 3.5 2 1.5a8 8 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a8 8 0 0 0 1.7 1l.4 2.5h4l.4-2.5a8 8 0 0 0 1.7-1l2.4 1 2-3.5-2.1-1.5Z"
+    settings: "M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z M19.4 15a8 8 0 0 0 .1-1l2-1.5-2-3.5-2.4 1a8 8 0 0 0-1.7-1L15 6.5h-4L10.6 9a8 8 0 0 0-1.7 1l-2.4-1-2 3.5 2 1.5a8 8 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a8 8 0 0 0 1.7-1l2.4 1 2-3.5-2.1-1.5Z",
+    bookmarks: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
   };
 
   return paths[name];
 }
 
-function PortalIcon({ name }: { name: "dashboard" | "courses" | "certificates" | "messages" | "settings" }) {
+function PortalIcon({ name }: { name: "dashboard" | "courses" | "certificates" | "messages" | "settings" | "bookmarks" }) {
   return (
     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
       <path d={iconPath(name)} stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
@@ -164,10 +166,11 @@ function activeViewFromPath(pathname: string) {
   if (pathname.endsWith("/certificates")) return "certificates";
   if (pathname.endsWith("/messages")) return "messages";
   if (pathname.endsWith("/settings")) return "settings";
+  if (pathname.endsWith("/bookmarks")) return "bookmarks";
   return "dashboard";
 }
 
-export function DashboardView({ userName, userProfile, sessions, dbError, stats, overall, streak, courses, recommended, certificates }: DashboardViewProps) {
+export function DashboardView({ userName, userProfile, sessions, dbError, stats, overall, streak, courses, recommended, certificates, bookmarks }: DashboardViewProps) {
   const { locale, t } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
@@ -228,6 +231,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
     { href: "/dashboard", label: t.dashboard, icon: "dashboard" as const, view: "dashboard" },
     { href: "/dashboard/my-courses", label: t.myCourses, icon: "courses" as const, view: "courses" },
     { href: "/dashboard/certificates", label: t.certificatesTitle, icon: "certificates" as const, view: "certificates" },
+    { href: "/dashboard/bookmarks", label: t.bookmarksNavLabel, icon: "bookmarks" as const, view: "bookmarks" },
     { href: "/dashboard/messages", label: t.messagesTitle, icon: "messages" as const, view: "messages" },
     { href: "/dashboard/settings", label: t.settingsTitle, icon: "settings" as const, view: "settings" },
   ];
@@ -544,6 +548,47 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
           </div>
         )}
       </section>
+          ) : null}
+
+          {activeView === "bookmarks" ? (
+            <section className="grid gap-4">
+              <div className="flex flex-wrap items-end justify-between gap-2">
+                <div>
+                  <p className="pr-eyebrow">{t.myLearning}</p>
+                  <h2 className="pr-h2 mt-1">{t.bookmarksHeading}</h2>
+                </div>
+                {bookmarks.length > 0 ? (
+                  <span className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-[12px] font-[800] text-[var(--muted)]">
+                    {bookmarks.length} {bookmarks.length === 1 ? t.bookmarkSingular : t.bookmarkPlural}
+                  </span>
+                ) : null}
+              </div>
+              {bookmarks.length === 0 ? (
+                <div className="pr-muted-box text-center">
+                  <p className="text-[15px] font-[800] text-[var(--ink-2)]">{t.noBookmarksYet}</p>
+                  <p className="mt-1 text-sm font-[500] text-[var(--muted)]">{t.bookmarksHint}</p>
+                </div>
+              ) : (
+                <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
+                  {bookmarks.map((b, i) => (
+                    <Link
+                      key={b.lessonId}
+                      href={`/courses/${encodeURIComponent(b.courseId)}/lessons/${encodeURIComponent(b.lessonId)}`}
+                      className={`flex items-center gap-4 px-5 py-4 transition hover:bg-[var(--surface)] ${i > 0 ? "border-t border-[var(--border)]" : ""}`}
+                    >
+                      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--brand-50)] text-[var(--brand)]" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="truncate text-[15px] font-[800] tracking-[-0.2px] text-[var(--ink)]">{b.lessonTitle}</h3>
+                        <p className="mt-0.5 truncate text-[12px] font-[600] text-[var(--muted)]">{b.courseTitle}</p>
+                      </div>
+                      <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-[var(--muted)]" fill="none" aria-hidden="true"><path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </section>
           ) : null}
 
           {activeView === "messages" ? (

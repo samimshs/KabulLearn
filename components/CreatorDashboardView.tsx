@@ -33,6 +33,14 @@ export type StudentJourney = {
     completedLessons: number;
     hasCertificate: boolean;
   }>;
+  bookmarks: Array<{
+    lessonId: string;
+    lessonTitle: string;
+    lessonType: string;
+    courseId: string;
+    courseTitle: string;
+    courseSlug: string;
+  }>;
 };
 
 type CreatorCourse = {
@@ -387,7 +395,7 @@ export function CreatorDashboardView({
 }: CreatorDashboardViewProps) {
   const { t } = useLanguage();
   const [activeView, setActiveView] = useState<CreatorView>("dashboard");
-  const [journeyTab, setJourneyTab] = useState<"certificates" | "courses">("certificates");
+  const [journeyTab, setJourneyTab] = useState<"certificates" | "courses" | "bookmarks">("certificates");
 
   function navigateTo(view: CreatorView) {
     setActiveView(view);
@@ -932,7 +940,7 @@ export function CreatorDashboardView({
                     <p className="pr-copy mt-2 max-w-2xl">{t.studentJourneyDesc}</p>
                   </div>
                   <div className="portal-settings-tabs" role="tablist" aria-label={t.myStudentJourneyTitle}>
-                    {([["certificates", t.journeyTabCertificates], ["courses", t.journeyTabCourses]] as const).map(([key, label]) => (
+                    {([["certificates", t.journeyTabCertificates], ["courses", t.journeyTabCourses], ["bookmarks", t.journeyTabBookmarks]] as const).map(([key, label]) => (
                       <button
                         key={key}
                         type="button"
@@ -1049,6 +1057,39 @@ export function CreatorDashboardView({
                   {recommendedCourses.length > 0 ? (
                     <RecommendedCourses courses={recommendedCourses} />
                   ) : null}
+                </section>
+              ) : null}
+
+              {journeyTab === "bookmarks" ? (
+                <section id="journey-panel-bookmarks" role="tabpanel" aria-labelledby="journey-tab-bookmarks" className="pr-panel portal-settings-section">
+                  <div>
+                    <p className="pr-eyebrow">{t.bookmarksEyebrow}</p>
+                    <h2 className="mt-2 text-2xl font-[900] text-[var(--ink)]">{t.bookmarksHeading}</h2>
+                  </div>
+                  {studentJourney.bookmarks.length === 0 ? (
+                    <div className="pr-muted-box py-12 text-center">
+                      <p className="text-[14px] font-[700] text-[var(--muted)]">{t.noBookmarksYet}</p>
+                    </div>
+                  ) : (
+                    <div className="grid gap-2">
+                      {studentJourney.bookmarks.map((b) => (
+                        <Link
+                          key={b.lessonId}
+                          href={`/courses/${encodeURIComponent(b.courseId)}/lessons/${encodeURIComponent(b.lessonId)}`}
+                          className="flex items-center gap-4 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] px-5 py-4 shadow-[var(--shadow-sm)] transition hover:border-[rgba(0,87,255,0.25)] hover:bg-[var(--surface)]"
+                        >
+                          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--brand-50)] text-[var(--brand)]" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[14px] font-[800] text-[var(--ink)]">{b.lessonTitle}</p>
+                            <p className="mt-0.5 truncate text-[12px] font-[600] text-[var(--muted)]">{b.courseTitle}</p>
+                          </div>
+                          <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-[var(--muted)]" fill="none" aria-hidden="true"><path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </section>
               ) : null}
             </section>

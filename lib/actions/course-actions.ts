@@ -266,9 +266,14 @@ export async function submitCourseForReview(input: { courseId: string }): Promis
       if (lesson.type === LessonType.READING) return !lesson.readingEn && !lesson.readingPs;
       if (lesson.type === LessonType.QUIZ) {
         if (!lesson.quiz || lesson.quiz.questions.length === 0) return true;
-        return lesson.quiz.questions.some((question) => {
+        // Questions with no choices are AI generation artifacts — skip them when checking
+        const checkableQuestions = lesson.quiz.questions.filter(
+          (q) => q.type === "TEXT_INPUT" || q.choices.length > 0
+        );
+        if (checkableQuestions.length === 0) return true; // all questions are empty artifacts
+        return checkableQuestions.some((question) => {
           if (question.type === "TEXT_INPUT") return !question.correctAnswer;
-          return question.choices.length === 0 || !question.choices.some((choice) => choice.isCorrect);
+          return !question.choices.some((choice) => choice.isCorrect);
         });
       }
       return false;

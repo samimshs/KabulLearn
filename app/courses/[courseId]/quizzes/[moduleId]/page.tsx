@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { CourseStatus, LessonType, ProgressStatus, QuestionType } from "@prisma/client";
+import { CourseStatus, LessonType, ProgressStatus, QuestionType, UserRole } from "@prisma/client";
 import { QuizView } from "@/components/QuizView";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
@@ -13,6 +13,7 @@ type QuizCourse = {
   level: string | null;
   status: CourseStatus;
   publishedAt: Date | null;
+  authorId: string;
   modules: Array<{
     id: string; titleEn: string; titlePs: string;
     descriptionEn: string | null; descriptionPs: string | null;
@@ -60,6 +61,7 @@ export default async function QuizPage({
         ...localizedCourseSelect(locale),
         status: true,
         publishedAt: true,
+        authorId: true,
         modules: {
           orderBy: [{ order: "asc" }],
           select: {
@@ -109,7 +111,14 @@ export default async function QuizPage({
   }
 
   if (!course) return notFound();
-  if (course.status !== CourseStatus.PUBLISHED &&
+
+  const session = await auth();
+  const userId = session?.user?.id;
+  const isEducatorAuthor =
+    session?.user?.role === UserRole.EDUCATOR && course.authorId === userId;
+
+  if (!isEducatorAuthor &&
+      course.status !== CourseStatus.PUBLISHED &&
       !(course.status === CourseStatus.PENDING_REVIEW && course.publishedAt !== null)) {
     return notFound();
   }
@@ -172,20 +181,17 @@ export default async function QuizPage({
     return notFound();
   }
 
-  const session = await auth();
-  const userId = session?.user?.id;
-
   if (!userId) {
     redirect(`/login?callbackUrl=${encodeURIComponent(`/courses/${encodeURIComponent(courseId)}`)}`);
   }
 
-  const enrollment = await db.enrollment.findUnique({
-    where: { userId_courseId: { userId, courseId } }
-  });
-  const isEnrolled = Boolean(enrollment);
-
-  if (!isEnrolled) {
-    redirect(`/courses/${encodeURIComponent(courseId)}`);
+  if (!isEducatorAuthor) {
+    const enrollment = await db.enrollment.findUnique({
+      where: { userId_courseId: { userId, courseId } }
+    });
+    if (!enrollment) {
+      redirect(`/courses/${encodeURIComponent(courseId)}`);
+    }
   }
 
   let serverPassedModuleIds: string[] = [];
@@ -230,7 +236,7 @@ export default async function QuizPage({
   }
 
   const totalModules = course.modules.length;
-  const isComplete = totalModules > 0 && serverPassedModuleIds.length >= totalModules;
+  const isComplete = isEducatorAuthor || (totalModules > 0 && serverPassedModuleIds.length >= totalModules);
   const thisModulePassed = serverPassedModuleIds.includes(moduleId);
 
   return (

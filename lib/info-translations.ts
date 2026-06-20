@@ -281,9 +281,9 @@ const en: Omit<PublicInfoContent, "footer"> = {
     openAll: "Open all courses",
     learnerSupport: "Learner support",
     categoriesTitle: "Top-level categories",
-    walkthroughTitle: "Catalog walkthrough",
-    videoTitle: "Learner catalog video placeholder",
-    videoDescription: "Add a short video explaining how to browse categories, enroll in a course, and continue learning.",
+    walkthroughTitle: "AI agent course creation",
+    videoTitle: "AI agent course creation",
+    videoDescription: "Watch how to use the built-in AI agent to generate course outlines, lesson content, and quiz questions automatically.",
     categories: [
       { title: "Mathematics", description: "Foundations for quantitative reasoning, problem solving, and technical learning.", href: "/courses?category=Mathematics", cta: "Browse mathematics" },
       { title: "Statistics", description: "Probability, variation, inference, and applied statistical thinking with practical examples.", href: "/courses?category=Statistics", cta: "Browse statistics" },
@@ -310,9 +310,9 @@ const en: Omit<PublicInfoContent, "footer"> = {
       "Verification confirms that a certificate record exists in KabulLearn systems and has not been invalidated. It does not guarantee employment, licensing, admissions, or third-party acceptance.",
       "If a certificate appears incorrect or suspicious, contact support with the certificate code and a screenshot."
     ],
-    walkthroughTitle: "Verification walkthrough",
-    videoTitle: "Certificate verification video placeholder",
-    videoDescription: "Add a short walkthrough for employers and learners explaining QR codes, certificate IDs, and verification results."
+    walkthroughTitle: "Certificate verification",
+    videoTitle: "Certificate verification walkthrough",
+    videoDescription: "Watch how to verify a KabulLearn certificate using the certificate ID, verification code, or QR code."
   },
   support: {
     eyebrow: "Learner Navigation",
@@ -320,9 +320,9 @@ const en: Omit<PublicInfoContent, "footer"> = {
     description: "Get help with course access, video modules, interactive quizzes, account access, and verifiable certificates.",
     goCourses: "Go to courses",
     contactSupport: "Contact support",
-    walkthroughTitle: "Learner walkthrough",
-    videoTitle: "Learner instruction video placeholder",
-    videoDescription: "Add a video explaining how to register, enroll, watch lessons, complete quizzes, and download certificates.",
+    walkthroughTitle: "Student portal walkthrough",
+    videoTitle: "Student account creation and portal walkthrough",
+    videoDescription: "Watch how to create a student account, explore your dashboard, enroll in courses, track your progress, and download your certificates.",
     faqTitle: "Frequently asked questions",
     faqs: [
       { question: "I cannot access a course lesson. What should I check?", answer: "Make sure you are signed in, enrolled in the course, and have completed any required quiz or previous locked section. If the issue continues, send the course name, lesson title, browser, and screenshot to support." },
@@ -410,8 +410,8 @@ const en: Omit<PublicInfoContent, "footer"> = {
     guidelinesDescription: "Review standards for lesson structure, trilingual content, quizzes, media quality, copyright, and submission readiness.",
     openGuidelines: "Open guidelines",
     becomeEducatorLink: "Teach on KabulLearn",
-    videoTitle: "Educator onboarding video",
-    videoDescription: "Add a short walkthrough showing how approved instructors create drafts, add lessons, and submit for review.",
+    videoTitle: "Creator account creation and portal walkthrough",
+    videoDescription: "Watch how to apply for educator access, set up your creator profile, navigate the educator dashboard, and prepare to publish your first course.",
     steps: [
       { title: "1. Register", paragraphs: ["Create a free KabulLearn account with your real name and reachable email address."] },
       { title: "2. Request Access", paragraphs: ["Submit a request explaining what you would like to teach. Admin will upgrade your existing account."] },
@@ -432,9 +432,9 @@ const en: Omit<PublicInfoContent, "footer"> = {
     description: "Use these guidelines to prepare course videos, readings, quizzes, translations, and uploads that meet KabulLearn quality and trust standards.",
     goPortal: "Go to educator portal",
     teach: "Teach on KabulLearn",
-    walkthroughTitle: "Instructor walkthrough",
-    videoTitle: "Instructor guidelines video placeholder",
-    videoDescription: "Add a training video for recording lessons, formatting trilingual content, uploading materials, and submitting for review.",
+    walkthroughTitle: "Manual course creation",
+    videoTitle: "Manual course creation walkthrough",
+    videoDescription: "Step-by-step walkthrough showing how to create modules, add lessons with readings and videos, build quizzes, and submit your course for review.",
     structureTitle: "Course structure",
     structureItems: [
       "Start with clear learner outcomes and prerequisites.",
@@ -557,9 +557,9 @@ const ps: Omit<PublicInfoContent, "footer"> = {
     openAll: "ټول کورسونه پرانیزئ",
     learnerSupport: "د زده‌کوونکي ملاتړ",
     categoriesTitle: "اصلي برخې",
-    walkthroughTitle: "د کتلاګ لارښود",
-    videoTitle: "د زده‌کوونکي د کتلاګ ویډیو ځای",
-    videoDescription: "دلته لنډه ویډیو زیاته کړئ چې د برخو پلټنه، په کورس کې نوم‌لیکنه، او د زده کړې دوام تشریح کړي.",
+    walkthroughTitle: "د AI استازي سره کورس جوړول",
+    videoTitle: "د AI استازي سره کورس جوړول",
+    videoDescription: "وګورئ چې د جوړ شوي AI استازي سره د کورس لنډیز، د درس منځپانګه، او د ازموینې پوښتنې ته اتوماتیک ورسئ.",
     categories: [
       { title: "ریاضیات", description: "د شمېرني فکر، مسئلو حل، او تخنیکي زده کړې بنسټونه.", href: "/courses?category=Mathematics", cta: "ریاضیات وپلټئ" },
       { title: "احصایه", description: "احتمال، بدلون، استنباط، او عملي احصایوي فکر.", href: "/courses?category=Statistics", cta: "احصایه وپلټئ" },
@@ -586,9 +586,9 @@ const ps: Omit<PublicInfoContent, "footer"> = {
       "تصدیق دا ښيي چې د سند ریکارډ د کابل‌لرن په سیستم کې شته او باطل شوی نه دی. دا د کار، جواز، داخلې، یا د درېیم اړخ د منلو ضمانت نه کوي.",
       "که سند ناسم یا مشکوک ښکاري، د سند کوډ او سکرین‌شاټ له ملاتړ سره شریک کړئ."
     ],
-    walkthroughTitle: "د تصدیق لارښود",
-    videoTitle: "د سند تصدیق ویډیو ځای",
-    videoDescription: "د کار ورکوونکو او زده‌کوونکو لپاره لنډه ویډیو زیاته کړئ چې QR کوډونه، د سند پېژند، او د تصدیق پایلې تشریح کړي."
+    walkthroughTitle: "د سند تصدیق",
+    videoTitle: "د سند تصدیق لارښود",
+    videoDescription: "وګورئ چې د KabulLearn سند د سند پیژند، د تصدیق کوډ، یا د سند د QR کوډ لخوا تصدیق کړئ."
   },
   support: {
     eyebrow: "د زده‌کوونکو لارښود",
@@ -596,9 +596,9 @@ const ps: Omit<PublicInfoContent, "footer"> = {
     description: "د کورس لاسرسي، ویډیو درسونو، تعاملي ازموینو، حساب، او د تصدیق وړ سندونو لپاره مرسته ترلاسه کړئ.",
     goCourses: "کورسونو ته لاړ شئ",
     contactSupport: "له ملاتړ سره اړیکه",
-    walkthroughTitle: "د زده‌کوونکي لارښود",
-    videoTitle: "د زده‌کوونکي لارښود ویډیو ځای",
-    videoDescription: "د نوم‌لیکنې، په کورس کې شاملېدو، درس کتلو، ازموینو بشپړولو، او سند ډاونلوډولو په اړه ویډیو زیاته کړئ.",
+    walkthroughTitle: "د زده‌کوونکي پورټل لارښود",
+    videoTitle: "د زده‌کوونکي حساب جوړول او د پورټل لارښود",
+    videoDescription: "وګورئ چې د زده‌کوونکي حساب جوړ کړئ، خپل ډشبورډ وڅیړئ، کورسونو کې نوم‌لیکنه وکړئ، پرمختګ تعقیب کړئ او سندونه ډاونلوډ کړئ.",
     faqTitle: "ډېرې پوښتل شوې پوښتنې",
     faqs: [
       { question: "درس ته لاسرسی نه لرم. څه باید وګورم؟", answer: "ډاډ ترلاسه کړئ چې ننوتي یاست، په کورس کې مو نوم‌لیکنه کړې، او اړینه ازموینه یا پخوانۍ تړلې برخه مو بشپړه کړې ده. که ستونزه پاتې وي، د کورس نوم، د درس نوم، براوزر، او سکرین‌شاټ ملاتړ ته واستوئ." },
@@ -686,8 +686,8 @@ const ps: Omit<PublicInfoContent, "footer"> = {
     guidelinesDescription: "د درس جوړښت، درې ژبي منځپانګې، ازموینې، د رسنیو کیفیت، کاپي‌رایټ، او د سپارلو معیارونه وګورئ.",
     openGuidelines: "لارښوونې پرانیزئ",
     becomeEducatorLink: "په کابل‌لرن کې تدریس وکړئ",
-    videoTitle: "د استاد د پیل ویډیو",
-    videoDescription: "لنډه ویډیو زیاته کړئ چې استادان څنګه مسودې جوړوي، درسونه زیاتوي، او بیاکتنې ته یې سپاري.",
+    videoTitle: "د جوړوونکي حساب جوړول او د پورټل لارښود",
+    videoDescription: "وګورئ چې د استاد لاسرسی وغواړئ، خپل پروفایل تنظیم کړئ، د استاد ډشبورډ وکتل کړئ، او خپل لومړی کورس د خپرولو لپاره چمتو کړئ.",
     steps: [
       { title: "۱. نوم‌لیکنه", paragraphs: ["د خپل اصلي نوم او فعال برېښنالیک په کارولو سره وړیا حساب جوړ کړئ."] },
       { title: "۲. لاسرسی وغواړئ", paragraphs: ["تشریح کړئ چې څه تدریسول غواړئ. مدیر به ستاسو حساب لوړ کړي."] },
@@ -708,9 +708,9 @@ const ps: Omit<PublicInfoContent, "footer"> = {
     description: "دا لارښوونې وکاروئ، څو د کورس ویډیوګانې، لوستنې، ازموینې، ژباړې، او پورته کېدونکي مواد د کابل‌لرن د کیفیت او باور له معیارونو سره برابر چمتو کړئ.",
     goPortal: "د استاد پورټل ته لاړ شئ",
     teach: "په کابل‌لرن کې تدریس وکړئ",
-    walkthroughTitle: "د استاد لارښوونې",
-    videoTitle: "د استاد لارښوونو ویډیو ځای",
-    videoDescription: "د درسونو ثبت، درې ژبي منځپانګه، د موادو پورته کول، او د بیاکتنې لپاره سپارلو په اړه روزنیزه ویډیو زیاته کړئ.",
+    walkthroughTitle: "لاسي کورس جوړول",
+    videoTitle: "د لاسي کورس جوړولو لارښود",
+    videoDescription: "ګام‌پر‌ګام لارښود چې وښيي د ماډولونو جوړول، د لوستلو او ویډیو سره درسونه زیاتول، د ازموینو جوړول، او کورس د بیاکتنې لپاره سپارل.",
     structureTitle: "د کورس جوړښت",
     structureItems: [
       "له روښانه زده‌کړیزو موخو او مخکینیو اړتیاوو سره پیل وکړئ.",
@@ -835,9 +835,9 @@ const fa: Omit<PublicInfoContent, "footer"> = {
     openAll: "همه کورس‌ها را باز کنید",
     learnerSupport: "پشتیبانی شاگرد",
     categoriesTitle: "دسته‌بندی‌های اصلی",
-    walkthroughTitle: "راهنمای فهرست",
-    videoTitle: "جای ویدیوی راهنمای فهرست",
-    videoDescription: "یک ویدیوی کوتاه درباره مرور دسته‌ها، ثبت‌نام در کورس و ادامه یادگیری اضافه کنید.",
+    walkthroughTitle: "ساخت دوره با عامل هوش مصنوعی",
+    videoTitle: "ساخت دوره با عامل هوش مصنوعی",
+    videoDescription: "ببینید چطور با استفاده از عامل هوش مصنوعی داخلی، طرح دوره، محتوای درس و سوالات آزمون را به‌صورت خودکار تولید کنید.",
     categories: [
       { title: "ریاضیات", description: "بنیادهای استدلال کمی، حل مسئله، و یادگیری فنی.", href: "/courses?category=Mathematics", cta: "مرور ریاضیات" },
       { title: "احصائیه", description: "احتمال، تغییر، استنباط، و تفکر آماری کاربردی.", href: "/courses?category=Statistics", cta: "مرور احصائیه" },
@@ -862,9 +862,9 @@ const fa: Omit<PublicInfoContent, "footer"> = {
     lookupButton: "تصدیق گواهی",
     meaningTitle: "تصدیق چه معنی دارد",
     meaningParagraphs: ["تصدیق نشان می‌دهد که رکورد گواهی در سیستم کابل‌لرن وجود دارد و باطل نشده است. این به معنای ضمانت استخدام، جواز، پذیرش یا قبول از سوی طرف سوم نیست.", "اگر گواهی نادرست یا مشکوک به نظر می‌رسد، کد گواهی و تصویر صفحه را به پشتیبانی بفرستید."],
-    walkthroughTitle: "راهنمای تصدیق",
-    videoTitle: "جای ویدیوی تصدیق گواهی",
-    videoDescription: "برای کارفرمایان و شاگردان ویدیوی کوتاهی درباره QR، شناسه گواهی و نتایج تصدیق اضافه کنید."
+    walkthroughTitle: "تصدیق گواهی",
+    videoTitle: "راهنمای تصدیق گواهی",
+    videoDescription: "ببینید چطور گواهی KabulLearn را با استفاده از شناسه گواهی، کد تصدیق، یا کد QR تأیید کنید."
   },
   support: {
     ...ps.support,
@@ -873,9 +873,9 @@ const fa: Omit<PublicInfoContent, "footer"> = {
     description: "برای دسترسی به کورس، ویدیوها، آزمون‌های تعاملی، حساب و گواهی‌های قابل تصدیق کمک بگیرید.",
     goCourses: "رفتن به کورس‌ها",
     contactSupport: "تماس با پشتیبانی",
-    walkthroughTitle: "رهنمای شاگرد",
-    videoTitle: "جای ویدیوی رهنمای شاگرد",
-    videoDescription: "ویدیویی درباره ثبت‌نام، شامل شدن در کورس، دیدن درس‌ها، تکمیل آزمون‌ها و دریافت گواهی اضافه کنید.",
+    walkthroughTitle: "راهنمای پورتال دانش‌آموز",
+    videoTitle: "ایجاد حساب دانش‌آموزی و راهنمای پورتال",
+    videoDescription: "ببینید چطور حساب دانش‌آموزی بسازید، داشبورد خود را کشف کنید، در دوره‌ها ثبت‌نام کنید، پیشرفت خود را دنبال کنید و گواهی‌های خود را دانلود کنید.",
     faqTitle: "پرسش‌های متداول",
     faqs: [
       { question: "به درس کورس دسترسی ندارم. چه چیز را بررسی کنم؟", answer: "مطمئن شوید وارد حساب شده‌اید، در کورس ثبت‌نام دارید و آزمون یا بخش قفل‌شده قبلی را تکمیل کرده‌اید. اگر مشکل ادامه داشت، نام کورس، درس، مرورگر و تصویر صفحه را به پشتیبانی بفرستید." },
@@ -949,8 +949,8 @@ const fa: Omit<PublicInfoContent, "footer"> = {
     guidelinesDescription: "معیارهای ساختار درس، محتوای سه‌زبانه، آزمون‌ها، کیفیت رسانه، حق مؤلف و آمادگی ارسال را بررسی کنید.",
     openGuidelines: "باز کردن رهنمودها",
     becomeEducatorLink: "در کابل‌لرن تدریس کنید",
-    videoTitle: "ویدیوی آغاز استاد",
-    videoDescription: "ویدیوی کوتاهی اضافه کنید که نشان دهد استادان تأییدشده چگونه پیش‌نویس می‌سازند، درس اضافه می‌کنند و برای بررسی می‌فرستند.",
+    videoTitle: "ایجاد حساب سازنده و راهنمای پورتال",
+    videoDescription: "ببینید چطور درخواست دسترسی استاد بدهید، پروفایل سازنده‌ی خود را تنظیم کنید، داشبورد استاد را مرور کنید و برای انتشار اولین دوره‌تان آماده شوید.",
     steps: [
       { title: "۱. ثبت‌نام", paragraphs: ["با نام واقعی و ایمیل قابل دسترس حساب رایگان بسازید."] },
       { title: "۲. درخواست دسترسی", paragraphs: ["توضیح دهید چه چیزی می‌خواهید تدریس کنید. مدیر حساب شما را ارتقا می‌دهد."] },
@@ -965,9 +965,9 @@ const fa: Omit<PublicInfoContent, "footer"> = {
     description: "از این رهنمودها برای آماده‌سازی ویدیوها، خواندنی‌ها، آزمون‌ها، ترجمه‌ها، و بارگذاری‌های کورس استفاده کنید که با معیارهای کیفیت و اعتماد کابل‌لرن مطابقت دارند.",
     goPortal: "به پورتال استادان بروید",
     teach: "در کابل‌لرن تدریس کنید",
-    walkthroughTitle: "راهنمایی استاد",
-    videoTitle: "جای ویدیوی رهنمودهای استاد",
-    videoDescription: "یک ویدیوی آموزشی برای ثبت درس‌ها، قالب‌بندی محتوای سه‌زبانه، بارگذاری مواد، و ارسال برای بررسی اضافه کنید.",
+    walkthroughTitle: "ساخت دستی دوره",
+    videoTitle: "راهنمای ساخت دستی دوره",
+    videoDescription: "راهنمای گام‌به‌گام برای ساخت ماژول‌ها، افزودن درس‌ها با متن و ویدیو، ایجاد آزمون‌ها، و ارسال دوره برای بررسی.",
     structureTitle: "ساختار کورس",
     structureItems: [
       "با هدف‌های روشن شاگرد و پیش‌نیازها شروع کنید.",

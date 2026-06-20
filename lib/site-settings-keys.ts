@@ -1,9 +1,9 @@
 export const VIDEO_KEYS = {
-  learnerSupport:           "video:learner-support",
-  educatorResources:        "video:educator-resources",
-  certificateVerification:  "video:certificate-verification",
-  catalog:                  "video:catalog",
-  educatorGuidelines:       "video:educator-guidelines",
+  studentWalkthrough:      "video:student-walkthrough",
+  creatorWalkthrough:      "video:creator-walkthrough",
+  manualCourseCreation:    "video:manual-course-creation",
+  aiCourseCreation:        "video:ai-course-creation",
+  certificateVerification: "video:certificate-verification",
 } as const;
 
 export type VideoKey = typeof VIDEO_KEYS[keyof typeof VIDEO_KEYS];

@@ -18,7 +18,7 @@ export default async function CertificateNotFound() {
         <h1 className="pr-h1 mt-5">{t.certNotFoundTitle}</h1>
         <p className="pr-copy mt-4">{t.certNotFoundBody}</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href="/verify" className="pr-btn-primary">{t.certNotFoundCta}</Link>
+          <Link href="/certificate-verification" className="pr-btn-primary">{t.certNotFoundCta}</Link>
           <Link href="/" className="pr-btn-ghost">{t.notFoundCta}</Link>
         </div>
       </section>

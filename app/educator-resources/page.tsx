@@ -54,7 +54,7 @@ export default async function EducatorResourcesPage() {
           </span>
         </Link>
 
-        <VideoPlaceholder title={content.videoTitle} description={content.videoDescription} youtubeUrl={videos[VIDEO_KEYS.educatorResources]} />
+        <VideoPlaceholder title={content.videoTitle} description={content.videoDescription} youtubeUrl={videos[VIDEO_KEYS.creatorWalkthrough]} />
       </section>
     </main>
   );

@@ -33,7 +33,7 @@ export default async function CatalogPage() {
         <VideoPlaceholder
           title={content.videoTitle}
           description={content.videoDescription}
-          youtubeUrl={videos[VIDEO_KEYS.catalog]}
+          youtubeUrl={videos[VIDEO_KEYS.aiCourseCreation]}
         />
       </InfoSection>
     </main>

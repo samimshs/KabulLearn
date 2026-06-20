@@ -54,11 +54,11 @@ function VideoRow({ entry }: { entry: VideoEntry }) {
 
 export function AdminSiteVideosForm({ currentValues }: { currentValues: Record<string, string> }) {
   const entries: VideoEntry[] = [
-    { key: VIDEO_KEYS.learnerSupport,          label: "Learner support walkthrough",      page: "/learner-support" },
-    { key: VIDEO_KEYS.educatorResources,       label: "Educator resources overview",      page: "/educator-resources" },
-    { key: VIDEO_KEYS.educatorGuidelines,      label: "Instructor guidelines walkthrough",page: "/educator-guidelines" },
-    { key: VIDEO_KEYS.catalog,                 label: "Course catalog introduction",      page: "/catalog" },
-    { key: VIDEO_KEYS.certificateVerification, label: "Certificate verification demo",    page: "/certificate-verification" },
+    { key: VIDEO_KEYS.studentWalkthrough,      label: "Student account creation & portal walkthrough",  page: "/learner-support" },
+    { key: VIDEO_KEYS.creatorWalkthrough,      label: "Creator account creation & portal walkthrough",  page: "/educator-resources" },
+    { key: VIDEO_KEYS.manualCourseCreation,    label: "Manual course creation",                         page: "/educator-guidelines" },
+    { key: VIDEO_KEYS.aiCourseCreation,        label: "AI agent course creation",                       page: "/catalog" },
+    { key: VIDEO_KEYS.certificateVerification, label: "Certificate verification",                       page: "/certificate-verification" },
   ];
 
   return (

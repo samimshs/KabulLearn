@@ -29,7 +29,7 @@ export default async function EducatorGuidelinesPage() {
         <VideoPlaceholder
           title={content.videoTitle}
           description={content.videoDescription}
-          youtubeUrl={videos[VIDEO_KEYS.educatorGuidelines]}
+          youtubeUrl={videos[VIDEO_KEYS.manualCourseCreation]}
         />
       </InfoSection>
 

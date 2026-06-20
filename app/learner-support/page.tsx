@@ -29,7 +29,7 @@ export default async function LearnerSupportPage() {
         <VideoPlaceholder
           title={content.videoTitle}
           description={content.videoDescription}
-          youtubeUrl={videos[VIDEO_KEYS.learnerSupport]}
+          youtubeUrl={videos[VIDEO_KEYS.studentWalkthrough]}
         />
       </InfoSection>
 

@@ -124,7 +124,8 @@ async function upsertCreatorProfile(input: {
   });
 
   if (existing && existing.createdById !== input.creatorId) {
-    throw new Error("That author username is already used. Choose a different author username.");
+    // Profile belongs to another creator — link to it without modifying it
+    return existing.id;
   }
 
   const profileData = {
@@ -539,13 +540,6 @@ export async function updateCourse(input: UpdateCourseInputType): Promise<Action
     // Upsert all instructor profiles and rebuild junction rows
     const profileIds: string[] = [];
     for (const inst of values.instructors) {
-      const existing = await db.creatorProfile.findUnique({
-        where: { username: inst.username },
-        select: { id: true, createdById: true }
-      });
-      if (existing && existing.createdById !== educator.id) {
-        throw new Error(`Username "${inst.username}" is already in use.`);
-      }
       const profile = await upsertCreatorProfile({
         creatorId: educator.id,
         profile: {

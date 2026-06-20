@@ -170,6 +170,7 @@ const commonFooterLinks = {
     allCourses: "All Courses",
     cert: "Certificate Verification",
     support: "Learner Support",
+    faq: "FAQ",
     learning: "My Learning",
     educator: "Educator Resources",
     teach: "Teach on KabulLearn",
@@ -190,6 +191,7 @@ const commonFooterLinks = {
     allCourses: "ټول کورسونه",
     cert: "د سند تصدیق",
     support: "د زده‌کوونکي ملاتړ",
+    faq: "پوښتنې او ځوابونه",
     learning: "زما زده کړه",
     educator: "د استادانو سرچینې",
     teach: "په کابل‌لرن کې تدریس",
@@ -210,6 +212,7 @@ const commonFooterLinks = {
     allCourses: "همه کورس‌ها",
     cert: "تصدیق گواهی",
     support: "پشتیبانی شاگرد",
+    faq: "سوالات متداول",
     learning: "یادگیری من",
     educator: "منابع استادان",
     teach: "تدریس در کابل‌لرن",
@@ -251,6 +254,7 @@ function footer(locale: Locale): PublicInfoContent["footer"] {
           { key: "courses", label: f.allCourses, href: "/courses" },
           { key: "certificate", label: f.cert, href: "/certificate-verification" },
           { key: "learner-support", label: f.support, href: "/learner-support" },
+          { key: "faq", label: f.faq, href: "/learner-support#faq" },
           { key: "my-learning", label: f.learning, href: "/dashboard", studentOnly: true }
         ]
       },

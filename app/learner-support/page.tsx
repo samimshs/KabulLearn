@@ -33,7 +33,7 @@ export default async function LearnerSupportPage() {
         />
       </InfoSection>
 
-      <InfoSection title={content.faqTitle}>
+      <InfoSection id="faq" title={content.faqTitle}>
         <div className="grid gap-4">
           {content.faqs.map((faq) => (
             <details key={faq.question} className="group rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)]">

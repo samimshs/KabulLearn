@@ -14,19 +14,10 @@ function applyCourseEmbedHeaders(response: NextResponse, pathname: string) {
   return response;
 }
 
-function isComingSoonHost(host: string | null) {
-  const normalized = (host ?? "").toLowerCase().split(":")[0];
-  return normalized === "kabullearn.com" || normalized === "www.kabullearn.com";
-}
-
 export default auth((request) => {
   const { pathname } = request.nextUrl;
   const role = request.auth?.user?.role;
   const status = request.auth?.user?.status;
-
-  if (pathname === "/" && isComingSoonHost(request.headers.get("host"))) {
-    return NextResponse.rewrite(new URL("/coming-soon.html", request.nextUrl));
-  }
 
   const isProtectedContent =
     pathname.startsWith("/dashboard") ||

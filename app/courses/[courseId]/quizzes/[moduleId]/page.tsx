@@ -114,10 +114,11 @@ export default async function QuizPage({
 
   const session = await auth();
   const userId = session?.user?.id;
+  const isAdmin = session?.user?.role === UserRole.ADMIN;
   const isEducatorAuthor =
     session?.user?.role === UserRole.EDUCATOR && course.authorId === userId;
 
-  if (!isEducatorAuthor &&
+  if (!isAdmin && !isEducatorAuthor &&
       course.status !== CourseStatus.PUBLISHED &&
       !(course.status === CourseStatus.PENDING_REVIEW && course.publishedAt !== null)) {
     return notFound();
@@ -185,7 +186,7 @@ export default async function QuizPage({
     redirect(`/login?callbackUrl=${encodeURIComponent(`/courses/${encodeURIComponent(courseId)}`)}`);
   }
 
-  if (!isEducatorAuthor) {
+  if (!isAdmin && !isEducatorAuthor) {
     const enrollment = await db.enrollment.findUnique({
       where: { userId_courseId: { userId, courseId } }
     });
@@ -236,7 +237,7 @@ export default async function QuizPage({
   }
 
   const totalModules = course.modules.length;
-  const isComplete = isEducatorAuthor || (totalModules > 0 && serverPassedModuleIds.length >= totalModules);
+  const isComplete = isAdmin || isEducatorAuthor || (totalModules > 0 && serverPassedModuleIds.length >= totalModules);
   const thisModulePassed = serverPassedModuleIds.includes(moduleId);
 
   return (

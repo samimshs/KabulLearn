@@ -140,10 +140,11 @@ export default async function LessonPage({
 
   const session = await auth();
   const userId = session?.user?.id;
+  const isAdmin = session?.user?.role === UserRole.ADMIN;
   const isEducatorAuthor =
     session?.user?.role === UserRole.EDUCATOR && course.authorId === userId;
 
-  if (!isEducatorAuthor &&
+  if (!isAdmin && !isEducatorAuthor &&
       course.status !== CourseStatus.PUBLISHED &&
       !(course.status === CourseStatus.PENDING_REVIEW && course.publishedAt !== null)) {
     return notFound();
@@ -170,9 +171,9 @@ export default async function LessonPage({
     }
   }
 
-  // Educator-authors can view any lesson without enrollment
+  // Admins and educator-authors can view any lesson without enrollment
   let isEnrolled = false;
-  if (isEducatorAuthor) {
+  if (isAdmin || isEducatorAuthor) {
     isEnrolled = true;
   } else if (userId) {
     const enrollment = await db.enrollment.findUnique({
@@ -216,7 +217,7 @@ export default async function LessonPage({
   // If the student passed a quiz in every module, the course is complete
   // and all content should remain freely accessible for review
   const totalModules = course.modules.length;
-  const isComplete = isEducatorAuthor || (totalModules > 0 && serverPassedModuleIds.length >= totalModules);
+  const isComplete = isAdmin || isEducatorAuthor || (totalModules > 0 && serverPassedModuleIds.length >= totalModules);
 
   // The query selects English + the ACTIVE locale's field (titlePs for ps,
   // titleDa for fa). Fold that into the `…Ps` field the views read for any

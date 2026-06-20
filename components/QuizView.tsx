@@ -407,7 +407,7 @@ export function QuizView({
                     <LessonStateIcon state={lessonStatuses[l.id] === "IN_PROGRESS" ? "in_progress" : "not_started"} kind={lessonKindOf(l)} />
                     <span className="truncate">{usesPashtoContent(locale) ? l.titlePs : l.titleEn}</span>
                     <span className="ms-auto text-[12px] font-[800] text-[var(--brand)]">
-                      {isQuiz ? t.testYourSkills : t.continueLesson} →
+                      {isQuiz ? t.testYourSkills : t.continueLesson}
                     </span>
                   </Link>
                 );

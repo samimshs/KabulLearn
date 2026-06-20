@@ -32,7 +32,7 @@ export function RecommendedCourses({ courses }: { courses: RecommendedCourse[] }
           <p className="pr-eyebrow">{t.recommendedTitle}</p>
         </div>
         <Link href="/courses" className="text-[12px] font-[800] text-[var(--brand)] hover:underline underline-offset-2">
-          {t.browseCourses} →
+          {t.browseCourses}
         </Link>
       </div>
 

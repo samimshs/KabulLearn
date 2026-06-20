@@ -276,7 +276,7 @@ export default async function Home() {
                 <h2 className="pr-h2 mt-2">{dict.featuredCoursesTitle}</h2>
               </div>
               <Link href="/courses" className="text-[14px] font-[800] text-[var(--brand)] hover:underline underline-offset-2">
-                {dict.viewAllCourses} →
+                {dict.viewAllCourses}
               </Link>
             </div>
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

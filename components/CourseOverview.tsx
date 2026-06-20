@@ -728,7 +728,7 @@ export function CourseOverview({
                           }
                           className="shrink-0 text-sm font-[800] text-[var(--brand)] hover:underline"
                         >
-                          Preview →
+                          {t.preview} {direction === "rtl" ? "←" : "→"}
                         </Link>
                       ) : enrolled && unlocked ? (
                         <Link
@@ -747,7 +747,7 @@ export function CourseOverview({
                           href={`/courses/${encodeURIComponent(course.id)}/lessons/${encodeURIComponent(lesson.id)}`}
                           className="shrink-0 text-sm font-[800] text-[var(--brand)] hover:underline"
                         >
-                          {t.preview} →
+                          {t.preview} {direction === "rtl" ? "←" : "→"}
                         </Link>
                       ) : !enrolled ? (
                         <span className="text-xs font-[800] uppercase tracking-[1px] text-[var(--muted)]">{t.enrollNow}</span>
@@ -860,7 +860,7 @@ export function CourseOverview({
                       href={`/creators/${encodeURIComponent(instructor.username)}`}
                       className="text-[12px] font-[800] uppercase tracking-[1px] text-[var(--muted)] transition hover:text-[var(--brand)]"
                     >
-                      View profile →
+                      {localize(locale, "View profile →", "پروفایل وګورئ ←", "مشاهده پروفایل ←")}
                     </Link>
                     {instructor.userId ? (
                       <MessageInstructorButton

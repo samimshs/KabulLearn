@@ -400,7 +400,7 @@ export function HeaderClient({ user, initialUnread = 0, messagePreviews = [], ap
                         onClick={() => setNotifOpen(false)}
                         className="mt-2 mb-1 block text-[12px] font-[800] text-[var(--brand)] hover:underline underline-offset-2"
                       >
-                        {t.seeAllMessages} →
+                        {t.seeAllMessages}
                       </Link>
                     </div>
 

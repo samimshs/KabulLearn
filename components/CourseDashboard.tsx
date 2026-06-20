@@ -68,17 +68,15 @@ export function CourseDashboard({ courses, dbError, isAuthenticated = false, ava
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const result = courses.filter((c) => {
-      const desc  = localize(locale, c.descriptionEn, c.descriptionPs, c.descriptionDa ?? undefined);
-      const localizedTitle = localize(locale, c.titleEn, c.titlePs, c.titleDa ?? undefined);
-      const titleDa = c.titleDa ?? "";
-      const descDa = c.descriptionDa ?? "";
       const level = localizeLevel(c.level, locale);
       const authorName = c.instructors?.[0]?.name ?? "";
       const authorUsername = c.instructors?.[0]?.username ?? "";
-      return (
-        (!q || localizedTitle.toLowerCase().includes(q) || desc.toLowerCase().includes(q) || titleDa.toLowerCase().includes(q) || descDa.toLowerCase().includes(q) || authorName.toLowerCase().includes(q) || authorUsername.toLowerCase().includes(q))
-        && (!levelFilter || level === levelFilter)
-      );
+      const matchesQuery = !q || [
+        c.titleEn, c.titlePs, c.titleDa,
+        c.descriptionEn, c.descriptionPs, c.descriptionDa,
+        authorName, authorUsername,
+      ].some((v) => v?.toLowerCase().includes(q));
+      return matchesQuery && (!levelFilter || level === levelFilter);
     });
     if (sortBy === "az") {
       result.sort((a, b) => {
@@ -119,6 +117,7 @@ export function CourseDashboard({ courses, dbError, isAuthenticated = false, ava
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t.searchPlaceholder}
+              dir="auto"
               className="pr-input text-[15px]"
               style={{ paddingInlineStart: "2.75rem", paddingBlock: "14px" }}
             />

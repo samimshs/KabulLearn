@@ -1986,10 +1986,6 @@ html[data-theme="dark"] .kl-bubble-ps::after {
 }
 /* ── End dark-mode hero visual overrides ─────────────────────────────────── */
 
-body:has(.kl-home-page) > footer {
-  display: none;
-}
-
 body:has(.kl-coming-soon-page) > header,
 body:has(.kl-coming-soon-page) > footer,
 body:has(.kl-coming-soon-page) > div.fixed.bottom-6.left-6 {

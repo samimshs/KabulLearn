@@ -213,7 +213,7 @@ function ProgressDonut({ percent }: { percent: number }) {
 function CourseRow({ course, t }: { course: CreatorCourse; t: Dictionary }) {
   return (
     <article className="flex overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] transition hover:shadow-[var(--shadow)]">
-      <div className="flex flex-1 flex-wrap items-start gap-4 p-5">
+      <div className="flex min-w-0 flex-1 flex-wrap items-start gap-4 p-4 sm:p-5">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-[800] uppercase tracking-[1px] ${statusBadgeClass(course.status, course.latestReview)}`}>
@@ -240,7 +240,7 @@ function CourseRow({ course, t }: { course: CreatorCourse; t: Dictionary }) {
             )}
           </div>
         </div>
-        <div className="flex shrink-0 flex-wrap gap-2">
+        <div className="grid w-full shrink-0 gap-2 sm:w-auto sm:grid-flow-col sm:auto-cols-max sm:items-start">
           <Link href={`/educator/courses/${course.id}`} className="pr-btn-primary !min-h-9 px-4 text-[13px]">
             {t.editCourse}
           </Link>
@@ -474,7 +474,7 @@ export function CreatorDashboardView({
         <div className="student-portal-content grid gap-6">
           {activeView === "dashboard" ? (
             <>
-              <section className="relative overflow-hidden rounded-[var(--radius-xl)] bg-[linear-gradient(120deg,#3A1D7A_0%,#4F2BA8_45%,#5B3FC4_100%)] px-6 pb-24 pt-7 text-white shadow-[var(--shadow-lg)] lg:px-10 lg:pb-28 lg:pt-9">
+              <section className="relative overflow-hidden rounded-[var(--radius-xl)] bg-[linear-gradient(120deg,#3A1D7A_0%,#4F2BA8_45%,#5B3FC4_100%)] px-4 pb-24 pt-6 text-white shadow-[var(--shadow-lg)] sm:px-6 lg:px-10 lg:pb-28 lg:pt-9">
                 <p className="text-[11px] font-[800] uppercase tracking-[3px] text-white/70">{t.creatorPortal}</p>
                 <h1 className="mt-2 text-[clamp(28px,4vw,44px)] font-[800] leading-tight tracking-tight">
                   {t.welcomeBack}, {firstName}! 👋
@@ -497,8 +497,8 @@ export function CreatorDashboardView({
                 ))}
               </div>
 
-              <div className="grid grid-cols-12 gap-6">
-                <section className="col-span-12 overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] lg:col-span-8">
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">
+                <section className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] lg:col-span-8">
                   <div className="relative h-20 overflow-hidden bg-[var(--surface)]">
                     <svg viewBox="0 0 400 80" className="absolute inset-0 h-full w-full" fill="none" aria-hidden="true">
                       <g stroke="rgba(0,87,255,0.16)" strokeWidth="1.5">
@@ -545,7 +545,7 @@ export function CreatorDashboardView({
                             );
                           })}
                         </div>
-                        <div className="mt-5 flex items-center justify-between gap-3">
+                        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
                           <p className="text-[12px] font-[700] text-[var(--muted-2)]">
                             {latestCourse.modules} {t.modulesCount} · {latestCourse.enrollments} {t.studentsCount}
                           </p>
@@ -564,7 +564,7 @@ export function CreatorDashboardView({
                   </div>
                 </section>
 
-                <section className="col-span-12 grid content-start gap-4 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-6 shadow-[var(--shadow-sm)] lg:col-span-4">
+                <section className="grid content-start gap-4 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)] sm:p-6 lg:col-span-4">
                   <p className="text-[11px] font-[800] uppercase tracking-[1.4px] text-[var(--muted)]">{t.analyticsLabel}</p>
                   <div className="grid justify-items-center gap-1">
                     <ProgressDonut percent={metrics.completionRate} />
@@ -596,7 +596,7 @@ export function CreatorDashboardView({
                   <p className="pr-eyebrow">{t.navCourseCreator}</p>
                   <h1 className="pr-h2 mt-1">{t.editableCourses}</h1>
                 </div>
-                <div className="flex flex-wrap items-center gap-4">
+                <div className="grid w-full gap-2 sm:w-auto sm:grid-flow-col sm:auto-cols-max sm:items-center sm:gap-4">
                   <Link
                     href="/courses"
                     className="inline-flex min-h-11 items-center justify-center rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-5 text-sm font-[900] text-[var(--ink)] transition hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(0,87,255,0.16)]"
@@ -647,7 +647,7 @@ export function CreatorDashboardView({
 
           {activeView === "students" ? (
             <section className="grid gap-4">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="pr-eyebrow">{t.navMyStudents}</p>
                   <h1 className="pr-h2 mt-1">{t.enrolledStudentsHeading}</h1>
@@ -743,17 +743,17 @@ export function CreatorDashboardView({
 
                     return (
                       <div className="grid gap-4">
-                        <div className="flex flex-wrap items-center gap-6 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] px-6 py-5 shadow-[var(--shadow-sm)]">
+                        <div className="flex flex-wrap items-center gap-4 rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] px-4 py-5 shadow-[var(--shadow-sm)] sm:gap-6 sm:px-6">
                           <div>
                             <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">{t.analyticsCourseLabel}</p>
                             <p className="mt-0.5 text-[17px] font-[900] text-[var(--ink)]">{course.title}</p>
                           </div>
-                          <div className="h-8 w-px bg-[var(--border)]" />
+                          <div className="hidden h-8 w-px bg-[var(--border)] sm:block" />
                           <div>
                             <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">{t.analyticsTotalEnrollments}</p>
                             <p className="mt-0.5 text-[28px] font-[900] leading-none text-[var(--ink)]">{course.totalEnrollments}</p>
                           </div>
-                          <div className="h-8 w-px bg-[var(--border)]" />
+                          <div className="hidden h-8 w-px bg-[var(--border)] sm:block" />
                           <div>
                             <p className="text-[11px] font-[800] uppercase tracking-[1.2px] text-[var(--muted)]">{t.analyticsTotalLessons}</p>
                             <p className="mt-0.5 text-[28px] font-[900] leading-none text-[var(--ink)]">{course.lessons.length}</p>
@@ -769,13 +769,13 @@ export function CreatorDashboardView({
                               {lessons.map((lesson) => (
                                 <div key={lesson.id} className="px-5 py-4">
                                   <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                                    <div className="flex items-center gap-2 min-w-0">
+                                    <div className="flex min-w-0 flex-1 items-center gap-2">
                                       {lesson.type === "QUIZ" && (
                                         <span className="shrink-0 rounded-full bg-[var(--warning-50)] px-2 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] text-[var(--warning)]">{t.quiz}</span>
                                       )}
-                                      <p className="truncate text-[14px] font-[700] text-[var(--ink)]">{lesson.title}</p>
+                                      <p className="min-w-0 text-[14px] font-[700] leading-5 text-[var(--ink)] sm:truncate">{lesson.title}</p>
                                     </div>
-                                    <div className="flex shrink-0 items-center gap-3 text-[13px]">
+                                    <div className="flex w-full items-center justify-between gap-3 text-[13px] sm:w-auto sm:justify-start">
                                       <span className="font-[600] text-[var(--muted)]">{lesson.completedCount} / {course.totalEnrollments} {t.analyticsStudentsSuffix}</span>
                                       <span className="min-w-[36px] text-right text-[15px] font-[900] text-[var(--ink)]">{lesson.completionRate}%</span>
                                     </div>
@@ -822,12 +822,12 @@ export function CreatorDashboardView({
                               </div>
                               <div className="divide-y divide-[rgba(234,88,12,0.1)]">
                                 {dropOffLessons.map((lesson, idx) => (
-                                  <div key={lesson.id} className="flex items-center gap-4 px-5 py-3">
+                                  <div key={lesson.id} className="flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-5">
                                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[rgba(234,88,12,0.12)] text-[11px] font-[900] text-[var(--warning)]">
                                       {idx + 1}
                                     </span>
                                     <div className="min-w-0 flex-1">
-                                      <p className="truncate text-[13px] font-[700] text-[var(--ink)]">{lesson.title}</p>
+                                      <p className="text-[13px] font-[700] leading-5 text-[var(--ink)] sm:truncate">{lesson.title}</p>
                                       <p className="text-[11px] text-[var(--muted)]">{lesson.moduleTitle}</p>
                                     </div>
                                     <div className="shrink-0 text-right">
@@ -1025,7 +1025,7 @@ export function CreatorDashboardView({
                       {studentJourney.enrollments.map((enr) => {
                         const pct = enr.totalLessons > 0 ? Math.round((enr.completedLessons / enr.totalLessons) * 100) : 0;
                         return (
-                          <article key={enr.courseId} className="flex flex-wrap items-center gap-5 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
+                          <article key={enr.courseId} className="flex flex-wrap items-center gap-4 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)] sm:gap-5 sm:p-5">
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">
                                 <p className="text-[15px] font-[900] text-[var(--ink)]">{enr.courseTitle}</p>
@@ -1044,7 +1044,7 @@ export function CreatorDashboardView({
                             </div>
                             <Link
                               href={`/courses/${encodeURIComponent(enr.courseId)}`}
-                              className="shrink-0 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[13px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.3)] hover:bg-[var(--card)]"
+                              className="inline-flex min-h-10 w-full shrink-0 items-center justify-center rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[13px] font-[800] text-[var(--ink-2)] transition hover:border-[rgba(0,87,255,0.3)] hover:bg-[var(--card)] sm:w-auto"
                             >
                               {pct === 100 ? t.reviewCourse : t.continueLearning}
                             </Link>

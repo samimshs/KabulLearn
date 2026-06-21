@@ -160,7 +160,7 @@ export function CourseUpdateForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-6 rounded-[24px] border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm">
+    <form onSubmit={handleSubmit} className="grid gap-5 rounded-[20px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-sm sm:gap-6 sm:rounded-[24px] sm:p-5">
 
       {/* ── Section: Basic Info ───────────────────────────────── */}
       <div className="grid gap-4">
@@ -173,7 +173,7 @@ export function CourseUpdateForm({
           <input className={inputSm} value={form.slug} onChange={(e) => patchForm({ slug: e.target.value })} placeholder="course-slug" />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <div className="grid gap-1">
             <span className={`${pill} text-[var(--muted)]`}>{t.levelLabel}</span>
             <select
@@ -198,12 +198,12 @@ export function CourseUpdateForm({
 
       {/* ── Section: Title ───────────────────────────────────── */}
       <div className="grid gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className={sectionHeader}>{t.englishTitle}</p>
           <TBtn loading={translatTitle} onClick={() => void translateTitle()} />
         </div>
         <input className={inputSm} value={form.titleEn} onChange={(e) => patchForm({ titleEn: e.target.value })} placeholder="Course title in English" />
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid gap-2 sm:grid-cols-2">
           <div className="grid gap-1">
             <span className={`${pill} text-[var(--muted)]`}>{t.pashtoTitle}</span>
             <input dir="rtl" className={`${inputSm} ${translatTitle ? "opacity-50" : ""}`} value={form.titlePs} onChange={(e) => patchForm({ titlePs: e.target.value })} placeholder="د کورس سرلیک" />
@@ -217,7 +217,7 @@ export function CourseUpdateForm({
 
       {/* ── Section: Description ─────────────────────────────── */}
       <div className="grid gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className={sectionHeader}>{t.englishDescLabel}</p>
           <TBtn loading={translatDesc} onClick={() => void translateDescription()} />
         </div>
@@ -228,7 +228,7 @@ export function CourseUpdateForm({
           onChange={(e) => patchForm({ descriptionEn: e.target.value })}
           placeholder="Course summary in English"
         />
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid gap-2 sm:grid-cols-2">
           <div className="grid gap-1">
             <span className={`${pill} text-[var(--muted)]`}>{t.pashtoDescLabel}</span>
             <textarea
@@ -288,7 +288,7 @@ export function CourseUpdateForm({
 
       {/* ── Section: Instructors ─────────────────────────────── */}
       <div className="grid gap-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className={sectionHeader}>{t.instructors}</p>
           <button
             type="button"
@@ -336,12 +336,12 @@ export function CourseUpdateForm({
 
             {/* Job Title */}
             <div className="grid gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className={`${pill} text-[var(--muted)]`}>{t.professionalTitleEn}</span>
                 <TBtn loading={translatInstTitle === idx} onClick={() => void translateInstructorTitle(idx)} />
               </div>
               <input className={inputSm} value={inst.title ?? ""} onChange={(e) => patchInstructor(idx, { title: e.target.value || undefined })} placeholder="Senior Data Scientist" />
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid gap-2 sm:grid-cols-2">
                 <div className="grid gap-1">
                   <span className={`${pill} text-[var(--muted)]`}>{t.professionalTitlePs}</span>
                   <input dir="rtl" className={`${inputSm} ${translatInstTitle === idx ? "opacity-50" : ""}`} value={inst.titlePs ?? ""} onChange={(e) => patchInstructor(idx, { titlePs: e.target.value || undefined })} placeholder="د مسلک سرلیک" />
@@ -355,12 +355,12 @@ export function CourseUpdateForm({
 
             {/* Bio */}
             <div className="grid gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className={`${pill} text-[var(--muted)]`}>{t.bioEnLabel}</span>
                 <TBtn loading={translatInstBio === idx} onClick={() => void translateInstructorBio(idx)} />
               </div>
               <textarea rows={2} className="min-h-[60px] w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm outline-none focus:border-[#0f766e]" value={inst.bio ?? ""} onChange={(e) => patchInstructor(idx, { bio: e.target.value || undefined })} />
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid gap-2 sm:grid-cols-2">
                 <div className="grid gap-1">
                   <span className={`${pill} text-[var(--muted)]`}>{t.bioPsLabel}</span>
                   <textarea dir="rtl" rows={2} className={`min-h-[55px] w-full rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm outline-none focus:border-[#0f766e] ${translatInstBio === idx ? "opacity-50" : ""}`} value={inst.bioPs ?? ""} onChange={(e) => patchInstructor(idx, { bioPs: e.target.value || undefined })} />
@@ -373,7 +373,7 @@ export function CourseUpdateForm({
             </div>
 
             {/* Social links */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               <div className="grid gap-1">
                 <span className={`${pill} text-[var(--muted)]`}>{t.linkedinUrlLabel}</span>
                 <input className={inputSm} value={inst.linkedinUrl ?? ""} onChange={(e) => patchInstructor(idx, { linkedinUrl: e.target.value || undefined })} placeholder="https://linkedin.com/in/..." />
@@ -388,11 +388,11 @@ export function CourseUpdateForm({
       </div>
 
       {/* ── Save ─────────────────────────────────────────────── */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex h-11 items-center justify-center rounded-xl bg-[#0f766e] px-6 text-sm font-black text-white transition hover:bg-[#115e59] disabled:cursor-wait disabled:opacity-70"
+          className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#0f766e] px-6 text-sm font-black text-white transition hover:bg-[#115e59] disabled:cursor-wait disabled:opacity-70 sm:w-auto"
         >
           {isPending ? t.saving : t.saveCourse}
         </button>

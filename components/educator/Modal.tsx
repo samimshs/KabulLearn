@@ -32,7 +32,7 @@ export function Modal({ isOpen, onClose, title, size = "lg", children }: ModalPr
   const maxW = size === "sm" ? "max-w-lg" : size === "xl" ? "max-w-6xl" : "max-w-2xl";
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-12">
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-3 py-4 sm:px-4 sm:py-12">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-[rgba(10,9,20,0.48)] backdrop-blur-sm"
@@ -42,14 +42,14 @@ export function Modal({ isOpen, onClose, title, size = "lg", children }: ModalPr
 
       {/* Dialog */}
       <div
-        className={`relative w-full ${maxW} rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[0_32px_80px_rgba(10,9,20,0.18)]`}
+        className={`relative w-full ${maxW} max-h-[calc(100svh-32px)] overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[0_32px_80px_rgba(10,9,20,0.18)] sm:max-h-none`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
-          <h2 id="modal-title" className="text-[17px] font-[800] tracking-tight text-[var(--ink)]">
+        <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3 sm:px-6 sm:py-4">
+          <h2 id="modal-title" className="min-w-0 text-[16px] font-[800] tracking-tight text-[var(--ink)] sm:text-[17px]">
             {title}
           </h2>
           <button
@@ -65,7 +65,7 @@ export function Modal({ isOpen, onClose, title, size = "lg", children }: ModalPr
         </div>
 
         {/* Body */}
-        <div className="p-6">
+        <div className="max-h-[calc(100svh-104px)] overflow-y-auto p-4 sm:max-h-none sm:p-6">
           {children}
         </div>
       </div>

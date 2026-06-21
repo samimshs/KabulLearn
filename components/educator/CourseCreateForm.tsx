@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition, type CSSProperties, type Dispatch, type SetStateAction } from "react";
 import Image from "next/image";
 import { LessonType } from "@prisma/client";
 import { useRouter } from "next/navigation";
@@ -1230,10 +1230,10 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
   const isStructureStep = active.key === "structure";
 
   return (
-    <section className={`min-h-[calc(100vh-120px)] bg-[var(--surface)] px-4 py-3 ${className}`}>
+    <section className={`min-h-[calc(100vh-120px)] bg-[var(--surface)] px-3 py-3 sm:px-4 ${className}`}>
       <div className={`mx-auto flex min-h-[calc(100vh-145px)] w-full flex-col transition-all ${isStructureStep ? "max-w-[1400px]" : "max-w-3xl"}`}>
         <header className="sticky top-0 z-20 shrink-0 border-b border-[var(--border)] bg-[var(--surface)]/95 pb-3 pt-1 backdrop-blur">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="text-[10px] font-black uppercase tracking-[1.5px] text-[var(--brand)]">{t.cwTitle}</p>
@@ -1245,8 +1245,8 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
               <p className="mt-1 text-xs font-semibold leading-5 text-[var(--muted)]">{active.help}</p>
             </div>
           </div>
-          <nav className="mt-3" aria-label="Course wizard steps">
-            <ol className="flex">
+          <nav className="mt-3 overflow-x-auto pb-1" aria-label="Course wizard steps">
+            <ol className="flex min-w-[520px] sm:min-w-0">
               {steps.map((step, i) => {
                 const isLast = i === steps.length - 1;
                 const isFirst = i === 0;
@@ -1291,7 +1291,7 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
           </nav>
         </header>
 
-        <main className={`my-3 min-h-0 flex-1 rounded-[22px] border border-[var(--border)] bg-[var(--card)] shadow-[0_18px_50px_rgba(15,23,42,0.07)] ${isStructureStep ? "overflow-hidden p-0" : "p-5"}`}>
+        <main className={`my-3 min-h-0 flex-1 rounded-[18px] border border-[var(--border)] bg-[var(--card)] shadow-[0_18px_50px_rgba(15,23,42,0.07)] sm:rounded-[22px] ${isStructureStep ? "overflow-hidden p-0" : "p-4 sm:p-5"}`}>
           <StepBody
             step={active.key}
             state={state}
@@ -1339,12 +1339,12 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
           />
         </main>
 
-        <footer className="sticky bottom-0 flex shrink-0 items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3 shadow-[0_-14px_36px_rgba(15,23,42,0.08)] backdrop-blur">
+        <footer className="sticky bottom-0 flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-3 shadow-[0_-14px_36px_rgba(15,23,42,0.08)] backdrop-blur">
           <button
             type="button"
             onClick={() => setActiveStep(steps[Math.max(0, activeIndex - 1)].key)}
             disabled={activeIndex === 0}
-            className="h-10 rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 text-sm font-black text-[var(--muted)] transition hover:border-[var(--border)] disabled:cursor-not-allowed disabled:opacity-40"
+            className="h-10 flex-1 rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 text-sm font-black text-[var(--muted)] transition hover:border-[var(--border)] disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none"
           >
             {t.cwBack}
           </button>
@@ -1353,7 +1353,7 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
               type="button"
               onClick={createDraft}
               disabled={isPending || saveComplete}
-              className="h-10 rounded-xl bg-[var(--brand)] px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(0,87,255,0.2)] transition hover:bg-[var(--brand-hover)] disabled:cursor-default disabled:opacity-70"
+              className="h-10 flex-1 rounded-xl bg-[var(--brand)] px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(0,87,255,0.2)] transition hover:bg-[var(--brand-hover)] disabled:cursor-default disabled:opacity-70 sm:flex-none"
             >
               {isPending ? (isEditMode ? t.saving : t.cwCreatingDraft) : saveComplete ? t.cwSaved : (isEditMode ? t.saveChanges : t.cwCreateDraft)}
             </button>
@@ -1361,7 +1361,7 @@ export function CourseCreateForm({ className = "", initialCourse }: { className?
             <button
               type="button"
               onClick={() => setActiveStep(steps[Math.min(steps.length - 1, activeIndex + 1)].key)}
-              className="h-10 rounded-xl bg-[var(--brand)] px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(0,87,255,0.2)] transition hover:bg-[var(--brand-hover)]"
+              className="h-10 flex-1 rounded-xl bg-[var(--brand)] px-5 text-sm font-black text-white shadow-[0_12px_28px_rgba(0,87,255,0.2)] transition hover:bg-[var(--brand-hover)] sm:flex-none"
             >
               {t.cwContinue}
             </button>
@@ -1915,15 +1915,15 @@ function StructureColumns(props: {
   const divider = (col: "col1" | "col2" | "col4") => (
     <div
       onMouseDown={(e) => startResize(col, e)}
-      className="w-1.5 shrink-0 cursor-col-resize select-none bg-[var(--surface)] transition-colors hover:bg-[#0f766e]/30"
+      className="hidden w-1.5 shrink-0 cursor-col-resize select-none bg-[var(--surface)] transition-colors hover:bg-[#0f766e]/30 lg:block"
     />
   );
 
   return (
-    <div className="flex min-h-[520px] overflow-hidden rounded-[24px]">
+    <div className="flex min-h-[520px] flex-col overflow-hidden rounded-[18px] lg:flex-row lg:rounded-[24px]">
 
       {/* ── Col 1: Modules ── */}
-      <div style={{ width: widths.col1 }} className="flex shrink-0 flex-col overflow-y-auto bg-[var(--surface)]">
+      <div style={{ "--col-width": `${widths.col1}px` } as CSSProperties} className="flex w-full flex-col overflow-y-auto bg-[var(--surface)] lg:w-[var(--col-width)] lg:shrink-0">
         <p className={colHeader}>{t.modules}</p>
         <FieldError message={props.fieldErrors.structure} />
         <div className="flex flex-1 flex-col gap-1 p-2">
@@ -1982,7 +1982,7 @@ function StructureColumns(props: {
       {divider("col1")}
 
       {/* ── Col 2: Lesson list + module title ── */}
-      <div style={{ width: widths.col2 }} className="flex shrink-0 flex-col overflow-y-auto">
+      <div style={{ "--col-width": `${widths.col2}px` } as CSSProperties} className="flex w-full flex-col overflow-y-auto lg:w-[var(--col-width)] lg:shrink-0">
         <p className={colHeader}>{t.lessons}</p>
         {selectedModule ? (
           <div className="flex flex-1 flex-col gap-2 p-3">
@@ -2097,7 +2097,7 @@ function StructureColumns(props: {
               </div>
               <input className={inputSm} value={lesson.titleEn} onChange={(e) => patchLesson({ titleEn: e.target.value })} placeholder={t.cwLessonPlaceholder} />
               <span className={`${pill} text-[var(--muted)]`}>PS / DA</span>
-              <div className="grid grid-cols-2 gap-1">
+              <div className="grid gap-1 sm:grid-cols-2">
                 <input dir="rtl" className={inputSm} value={lesson.titlePs} onChange={(e) => patchLesson({ titlePs: e.target.value })} placeholder="عنوان لوست (پښتو)" />
                 <input dir="rtl" className={inputSm} value={lesson.titleDa} onChange={(e) => patchLesson({ titleDa: e.target.value })} placeholder="عنوان لوست (دری)" />
               </div>
@@ -2180,9 +2180,9 @@ function StructureColumns(props: {
                   <span className={`${pill} text-[var(--muted)]`}>
                     {lesson.type === "LINK" ? "URL" : `${lesson.type} URL`}
                   </span>
-                  <div className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] pr-2">
+                  <div className="flex min-w-0 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] pr-2">
                     <input
-                      className="h-8 flex-1 bg-transparent px-3 text-xs font-semibold outline-none"
+                      className="h-8 min-w-0 flex-1 bg-transparent px-3 text-xs font-semibold outline-none"
                       value={lesson.resourceUrl}
                       onChange={(e) => patchLesson({ resourceUrl: e.target.value })}
                       placeholder={lesson.type === "LINK" ? "https://example.com/resource" : "https://drive.google.com/..."}
@@ -2219,7 +2219,7 @@ function StructureColumns(props: {
       {showQuizCol && lesson && (
         <>
           {divider("col4")}
-          <div style={{ width: widths.col4 }} className="flex shrink-0 flex-col overflow-y-auto">
+          <div style={{ "--col-width": `${widths.col4}px` } as CSSProperties} className="flex w-full flex-col overflow-y-auto lg:w-[var(--col-width)] lg:shrink-0">
             <div className={`flex items-center justify-between gap-2 ${colHeader}`}>
               <span>{t.cwQuiz} — {t.questionsLabel}</span>
               {(lesson.draftQuestions ?? []).length > 0 && (
@@ -2329,7 +2329,7 @@ function StructureColumns(props: {
                               )
                             )}
                           </div>
-                          <div className="grid grid-cols-2 gap-1 pl-[22px]">
+                          <div className="grid gap-1 pl-[22px] sm:grid-cols-2">
                             <input
                               dir="rtl"
                               className={`h-6 rounded-md border px-2 text-[10px] outline-none focus:border-[#0f766e] ${c.isCorrect ? "border-emerald-200 bg-[var(--card)]" : "border-[var(--border)] bg-[var(--surface)]"}`}
@@ -2582,7 +2582,7 @@ function ExternalInstructorForm({
 
       {/* Job title (EN) + translate row */}
       <div className="grid gap-1">
-        <div className="flex items-end gap-2">
+        <div className="flex flex-wrap items-end gap-2">
           <label className={`${labelCls} flex-1`}>
             {t.cwInstructorJobTitle}
             <input
@@ -2609,7 +2609,7 @@ function ExternalInstructorForm({
 
       {/* Bio (EN) + translate row */}
       <div className="grid gap-1">
-        <div className="flex items-end gap-2">
+        <div className="flex flex-wrap items-end gap-2">
           <label className={`${labelCls} flex-1`}>
             {t.bioEnLabel}
             <textarea

@@ -90,7 +90,7 @@ export function MessagesInbox() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-220px)] min-h-[480px] overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
+    <div className="flex h-[calc(100svh-190px)] min-h-[460px] overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] sm:h-[calc(100vh-220px)] sm:min-h-[480px]">
 
       {/* Conversation list */}
       <aside className={`flex-col overflow-hidden border-e border-[var(--border)] md:w-[300px] md:shrink-0 ${activeId ? "hidden md:flex" : "flex flex-1"}`}>
@@ -174,7 +174,7 @@ export function MessagesInbox() {
                 messages.map((m) => (
                   <div key={m.id} className={`flex ${m.mine ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`max-w-[78%] rounded-[14px] px-3.5 py-2 text-[13px] font-[500] leading-relaxed shadow-sm ${
+                      className={`max-w-[88%] rounded-[14px] px-3.5 py-2 text-[13px] font-[500] leading-relaxed shadow-sm sm:max-w-[78%] ${
                         m.mine
                           ? "rounded-br-sm bg-[var(--brand)] text-white"
                           : "rounded-bl-sm bg-[var(--surface)] text-[var(--ink)] border border-[var(--border)]"
@@ -215,7 +215,7 @@ export function MessagesInbox() {
                     }}
                     rows={1}
                     placeholder={t.typeMessage}
-                    className="max-h-32 min-h-[42px] flex-1 resize-none rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] font-[500] text-[var(--ink)] outline-none focus:border-[var(--brand)] focus:bg-[var(--card)]"
+                    className="max-h-32 min-h-[42px] min-w-0 flex-1 resize-none rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[13px] font-[500] text-[var(--ink)] outline-none focus:border-[var(--brand)] focus:bg-[var(--card)]"
                   />
                   <button
                     type="submit"

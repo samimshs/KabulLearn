@@ -407,8 +407,8 @@ export default async function AdminDashboardPage({
 
   function SectionHeading({ eyebrow, title, badge }: { eyebrow: string; title: string; badge?: React.ReactNode }) {
     return (
-      <div className="mb-8 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-5">
-        <div>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3 border-b border-[var(--border)] pb-5 sm:mb-8">
+        <div className="min-w-0">
           <p className="text-[11px] font-[800] uppercase tracking-[1.5px] text-[var(--brand)]">{eyebrow}</p>
           <h2 className="mt-1 text-[22px] font-[900] tracking-[-0.4px] text-[var(--ink)]">{title}</h2>
         </div>
@@ -428,24 +428,24 @@ export default async function AdminDashboardPage({
   }
 
   return (
-    <div className="flex min-h-screen bg-[var(--surface)]">
+    <div className="flex min-h-screen w-full min-w-0 bg-[var(--surface)]">
       <AdminSidebarNav items={navItems} />
 
       {/* ── Content ──────────────────────────────────────────────── */}
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
 
         {/* Alert bar */}
         {(reviewCount > 0 || pendingRequests.length > 0) && (
-          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-[rgba(217,119,6,0.2)] bg-[rgba(254,243,199,0.96)] px-6 py-3 backdrop-blur-sm dark:border-[rgba(217,119,6,0.15)] dark:bg-[rgba(78,52,5,0.95)]">
-            <div className="flex items-center gap-3">
+          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-[rgba(217,119,6,0.2)] bg-[rgba(254,243,199,0.96)] px-4 py-3 backdrop-blur-sm dark:border-[rgba(217,119,6,0.15)] dark:bg-[rgba(78,52,5,0.95)] sm:px-6">
+            <div className="flex min-w-0 items-center gap-3">
               <span className="grid h-6 w-6 place-items-center rounded-full bg-[var(--warning)] text-white">
                 <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="currentColor"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
               </span>
-              <p className="text-[13px] font-[800] text-[var(--warning)]">
+              <p className="min-w-0 text-[13px] font-[800] leading-5 text-[var(--warning)]">
                 {[reviewCount > 0 && `${reviewCount} course${reviewCount > 1 ? "s" : ""} awaiting review`, pendingRequests.length > 0 && `${pendingRequests.length} educator request${pendingRequests.length > 1 ? "s" : ""} pending`].filter(Boolean).join(" · ")}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {reviewCount > 0 && <a href="#review" className="rounded-full bg-[var(--warning)] px-3 py-1 text-[11px] font-[900] text-white">Review now →</a>}
               {pendingRequests.length > 0 && <a href="#requests" className="rounded-full border border-[rgba(124,58,237,0.3)] bg-[rgba(124,58,237,0.08)] px-3 py-1 text-[11px] font-[900] text-[#7C3AED]">View requests →</a>}
             </div>
@@ -459,7 +459,7 @@ export default async function AdminDashboardPage({
           </div>
         )}
 
-        <div className="px-6 pb-24 pt-8 lg:px-10 grid gap-16">
+        <div className="grid gap-10 px-4 pb-20 pt-6 sm:px-6 lg:gap-16 lg:px-10 lg:pb-24 lg:pt-8">
 
           {/* ═══════════════════════════════════════════════════════
               OVERVIEW
@@ -738,7 +738,8 @@ export default async function AdminDashboardPage({
                 <p className="text-[14px] font-[800] text-[var(--muted)]">No courses yet.</p>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
+              <>
+              <div className="hidden overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] md:block">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[820px] border-collapse text-left">
                     <thead>
@@ -774,6 +775,28 @@ export default async function AdminDashboardPage({
                   </table>
                 </div>
               </div>
+              <div className="grid gap-3 md:hidden">
+                {courses.map((course) => (
+                  <article key={course.id} className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)]">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-[14px] font-[900] leading-snug text-[var(--ink)]">{course.titleEn}</p>
+                        <p className="mt-1 line-clamp-2 text-[12px] font-[500] leading-5 text-[var(--muted)]">{course.descriptionEn}</p>
+                      </div>
+                      <span className={`inline-flex shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-[900] uppercase tracking-[0.8px] ${statusClass(course.status)}`}>{statusLabel(course.status)}</span>
+                    </div>
+                    <div className="mt-3 grid gap-1.5 text-[12px] font-[700] text-[var(--muted)]">
+                      <p><span className="text-[var(--ink-2)]">Author:</span> {course.author.name ?? course.author.email}</p>
+                      <p><span className="text-[var(--ink-2)]">Stats:</span> {course._count.modules} modules · {course._count.enrollments} enrolled</p>
+                    </div>
+                    <div className="mt-4 grid gap-2">
+                      <ReassignCourseButton courseId={course.id} courseTitle={course.titleEn} currentAuthorId={course.authorId} educators={educators} />
+                      <DeleteCourseButton courseId={course.id} label={course.titleEn} />
+                    </div>
+                  </article>
+                ))}
+              </div>
+              </>
             )}
           </section>
 
@@ -842,7 +865,7 @@ export default async function AdminDashboardPage({
             <SectionHeading eyebrow="Access control" title="Users & roles" />
 
             <div className="mb-4 flex flex-wrap items-center gap-2">
-              <form className="flex gap-2" action="/admin">
+              <form className="flex w-full flex-wrap gap-2 sm:w-auto" action="/admin">
                 <select name="role" defaultValue={roleFilter} className="pr-input max-w-48 text-[13px]">
                   <option value="">All roles</option>
                   {Object.values(UserRole).map((role) => (
@@ -859,7 +882,8 @@ export default async function AdminDashboardPage({
                 <p className="text-[14px] font-[800] text-[var(--muted)]">No users found.</p>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
+              <>
+              <div className="hidden overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)] md:block">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[860px] border-collapse text-left">
                     <thead>
@@ -923,6 +947,52 @@ export default async function AdminDashboardPage({
                   </table>
                 </div>
               </div>
+              <div className="grid gap-3 md:hidden">
+                {users.map((user) => {
+                  const initials = (user.name ?? user.email).split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? "").join("") || "?";
+                  const hue = user.id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
+                  return (
+                    <article key={user.id} className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)]">
+                      <div className="flex items-start gap-3">
+                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-[12px] font-[900] text-white" style={{ background: `hsl(${hue},50%,42%)` }}>{initials}</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[14px] font-[900] text-[var(--ink)]">{user.name ?? "Unnamed user"}</p>
+                          <p className="text-[12px] font-[600] text-[var(--muted)]">{user.email}</p>
+                          <span className={`mt-2 inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-[900] uppercase tracking-[1px] ${roleClass(user.role)}`}>{roleLabel(user.role)}</span>
+                        </div>
+                      </div>
+                      <div className="mt-4 grid gap-3">
+                        <div className="grid gap-2 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-3">
+                          <p className="text-[11px] font-[900] uppercase tracking-[1px] text-[var(--muted)]">Change role</p>
+                          <div className="grid gap-2">
+                            {Object.values(UserRole).map((roleOption) => (
+                              <form key={roleOption} action={handleUpdateUserRole} className="grid gap-1.5">
+                                <input type="hidden" name="userId" value={user.id} />
+                                <input type="hidden" name="role" value={roleOption} />
+                                <input type="password" name="adminPassword" autoComplete="current-password" placeholder="Admin pw" className="pr-input h-9 text-[12px]" />
+                                <button type="submit" disabled={roleOption === user.role} className={`min-h-9 rounded-[var(--radius)] px-3 text-[12px] font-[800] transition ${roleOption === user.role ? "cursor-not-allowed border border-[var(--border)] bg-[var(--card)] text-[var(--muted)]" : "border border-[var(--border)] bg-[var(--card)] text-[var(--ink)] hover:border-[rgba(0,87,255,0.3)] hover:text-[var(--brand)]"}`}>
+                                  {roleLabel(roleOption)}
+                                </button>
+                              </form>
+                            ))}
+                          </div>
+                        </div>
+                        <details className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)]">
+                          <summary className="cursor-pointer list-none px-4 py-2 text-[12px] font-[900] uppercase tracking-[1px] text-[var(--brand)]">Reset password</summary>
+                          <form action={handleResetUserPassword} className="grid gap-2 border-t border-[var(--border)] p-3">
+                            <input type="hidden" name="userId" value={user.id} />
+                            <input name="password" type="text" minLength={8} placeholder="Temporary password" className="pr-input text-[13px]" />
+                            <input name="adminPassword" type="password" autoComplete="current-password" placeholder="Your admin password" className="pr-input text-[13px]" />
+                            <button type="submit" className="pr-btn-secondary !min-h-9 text-[12px]">Save temporary password</button>
+                          </form>
+                        </details>
+                        <DeleteUserButton userId={user.id} label={user.email} />
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+              </>
             )}
           </section>
 

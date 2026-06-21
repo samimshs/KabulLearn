@@ -270,7 +270,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
           {activeView === "dashboard" ? (
             <div className="grid gap-7">
       {/* ── 1. Welcome card + quick stats ─────────────────────────── */}
-      <section className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[linear-gradient(135deg,#0057FF_0%,#0E7490_100%)] p-7 text-white shadow-[var(--shadow-lg)] lg:p-9">
+      <section className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-[linear-gradient(135deg,#0057FF_0%,#0E7490_100%)] p-4 text-white shadow-[var(--shadow-lg)] sm:p-7 lg:p-9">
         <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr] lg:items-center">
           <div>
             <p className="text-[11px] font-[800] uppercase tracking-[3px] text-white/70">{t.myLearning}</p>
@@ -279,7 +279,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
             </h1>
             <p className="mt-2 text-[15px] font-[500] text-white/80">{t.continueJourney}</p>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {statTiles.map((s) => (
               <div key={s.label} className="rounded-[var(--radius-lg)] bg-white/15 px-4 py-3 backdrop-blur-sm">
                 <p className="text-[26px] font-[900] leading-none">{s.value}</p>
@@ -378,8 +378,8 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
             <p className="pr-eyebrow">{t.myLearning}</p>
             <h2 className="pr-h2 mt-1">{t.myCourses}</h2>
           </div>
-          <div className="flex items-center gap-2">
-            <label className="flex h-9 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 text-[var(--muted)] focus-within:border-[var(--brand)] focus-within:bg-[var(--card)]">
+          <div className="grid w-full gap-2 sm:w-auto sm:grid-flow-col sm:auto-cols-max sm:items-center">
+            <label className="flex h-10 w-full items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 text-[var(--muted)] focus-within:border-[var(--brand)] focus-within:bg-[var(--card)] sm:h-9 sm:w-auto">
               <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0" fill="none" aria-hidden="true">
                 <circle cx="7" cy="7" r="4.2" stroke="currentColor" strokeWidth="1.5" />
                 <path d="m10 10 2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -389,7 +389,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t.searchYourCourses}
                 aria-label={t.searchYourCourses}
-                className="w-36 bg-transparent text-[12px] font-[700] text-[var(--ink)] outline-none placeholder:text-[var(--muted)]"
+                className="min-w-0 flex-1 bg-transparent text-[12px] font-[700] text-[var(--ink)] outline-none placeholder:text-[var(--muted)] sm:w-36"
               />
             </label>
             <Link href="/courses" className="pr-btn-ghost !min-h-9 px-3 text-[12px]">{t.availableCourses}</Link>
@@ -442,7 +442,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
                       </div>
 
                       <div className="mt-auto grid gap-3 pt-4">
-                        <div className="flex items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
                           <AvatarStack instructors={course.instructors} />
                           <Link
                             href={
@@ -510,7 +510,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
               return (
                 <div
                   key={cert.id}
-                  className={`flex flex-wrap items-center gap-4 px-5 py-4 transition hover:bg-[var(--surface)] ${i > 0 ? "border-t border-[var(--border)]" : ""}`}
+                  className={`flex flex-wrap items-center gap-3 px-4 py-4 transition hover:bg-[var(--surface)] sm:gap-4 sm:px-5 ${i > 0 ? "border-t border-[var(--border)]" : ""}`}
                 >
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[rgba(124,58,237,0.08)] text-[#7C3AED]" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6"><circle cx="12" cy="9" r="5" stroke="currentColor" strokeWidth="1.7" /><path d="m9 13-1.5 8L12 19l4.5 2L15 13" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /></svg>
@@ -529,7 +529,7 @@ export function DashboardView({ userName, userProfile, sessions, dbError, stats,
                     {grade}%
                   </span>
 
-                  <div className="flex shrink-0 items-center gap-2">
+                  <div className="grid w-full shrink-0 grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center">
                     <a
                       href={`/courses/${encodeURIComponent(cert.courseId)}/certificate/download`}
                       className="pr-btn-ghost !min-h-9 px-3 text-[12px]"

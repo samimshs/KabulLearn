@@ -64,10 +64,10 @@ export function AdminPromoCodesSection({
   const activeCount = promoCodes.filter((p) => p.isActive).length;
 
   return (
-    <div className="p-5 lg:p-6">
+    <div className="p-4 sm:p-5 lg:p-6">
 
       {/* ── Create form ────────────────────────────────────────────── */}
-      <div className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] p-5">
+      <div className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-5">
         <p className="mb-4 text-[11px] font-[900] uppercase tracking-[1.5px] text-[var(--brand)]">New promo code</p>
 
         <form ref={formRef} action={handleCreate}>
@@ -159,7 +159,7 @@ export function AdminPromoCodesSection({
             </div>
           </div>
 
-          <div className="mt-5 flex items-center gap-4">
+          <div className="mt-5 flex flex-wrap items-center gap-3">
             <button
               type="submit"
               disabled={isPending}
@@ -194,7 +194,7 @@ export function AdminPromoCodesSection({
 
       {/* ── Existing codes ──────────────────────────────────────────── */}
       <div className="mt-6">
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <p className="text-[11px] font-[900] uppercase tracking-[1.5px] text-[var(--brand)]">
             Promo codes
           </p>
@@ -208,7 +208,8 @@ export function AdminPromoCodesSection({
             <p className="text-[13px] font-[700] text-[var(--muted)]">No promo codes yet — create one above.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-[14px] border border-[var(--border)]">
+          <>
+          <div className="hidden overflow-x-auto rounded-[14px] border border-[var(--border)] md:block">
             <table className="w-full min-w-[640px]">
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--surface)]">
@@ -295,6 +296,75 @@ export function AdminPromoCodesSection({
               </tbody>
             </table>
           </div>
+          <div className="grid gap-3 md:hidden">
+            {promoCodes.map((p) => {
+              const expired = p.expiresAt ? new Date(p.expiresAt) < new Date() : false;
+              const exhausted = p.maxUses !== null && p.usedCount >= p.maxUses;
+              const statusOk = p.isActive && !expired && !exhausted;
+              const statusLabel = !p.isActive ? "Disabled" : expired ? "Expired" : exhausted ? "Used up" : "Active";
+
+              return (
+                <article key={p.id} className="rounded-[14px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-[var(--shadow-sm)]">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <span className="rounded-[6px] border border-[var(--border)] bg-[var(--surface)] px-2 py-1 font-mono text-[12px] font-[900] tracking-[2px] text-[var(--ink)]">
+                      {p.code}
+                    </span>
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10.5px] font-[900] uppercase tracking-[1px] ${
+                      statusOk
+                        ? "bg-[var(--success-50)] text-[var(--success)]"
+                        : "bg-[var(--danger-50)] text-[var(--danger)]"
+                    }`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${statusOk ? "bg-[var(--success)]" : "bg-[var(--danger)]"}`} />
+                      {statusLabel}
+                    </span>
+                  </div>
+                  <dl className="mt-4 grid grid-cols-2 gap-3 text-[12px]">
+                    <div>
+                      <dt className="font-[900] uppercase tracking-[1px] text-[var(--muted)]">Discount</dt>
+                      <dd className="mt-0.5 font-[800] text-[var(--ink)]">
+                        {p.discountType === "PERCENT" ? `${p.discountValue}% off` : `$${(p.discountValue / 100).toFixed(2)} off`}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-[900] uppercase tracking-[1px] text-[var(--muted)]">Usage</dt>
+                      <dd className="mt-0.5 font-[800] text-[var(--brand)]">
+                        {p.usedCount}<span className="text-[var(--muted)]"> / {p.maxUses !== null ? p.maxUses : "∞"}</span>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-[900] uppercase tracking-[1px] text-[var(--muted)]">Expires</dt>
+                      <dd className="mt-0.5 font-[700] text-[var(--ink-2)]">
+                        {p.expiresAt ? new Date(p.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Never"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-[900] uppercase tracking-[1px] text-[var(--muted)]">Scope</dt>
+                      <dd className="mt-0.5 line-clamp-2 font-[700] text-[var(--ink-2)]">{p.courseTitle ?? "All courses"}</dd>
+                    </div>
+                  </dl>
+                  <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[var(--border)] pt-3">
+                    <button
+                      type="button"
+                      onClick={() => handleToggle(p.id, !p.isActive)}
+                      disabled={isPending}
+                      className="min-h-9 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-3 text-[12px] font-[900] text-[var(--brand)] transition hover:bg-[var(--card)] disabled:opacity-40"
+                    >
+                      {p.isActive ? "Disable" : "Enable"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(p.id, p.code)}
+                      disabled={isPending}
+                      className="min-h-9 rounded-[var(--radius)] border border-[rgba(196,43,43,0.22)] bg-[var(--danger-50)] px-3 text-[12px] font-[900] text-[var(--danger)] transition hover:bg-[var(--card)] disabled:opacity-40"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+          </>
         )}
       </div>
     </div>

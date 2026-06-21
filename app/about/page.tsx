@@ -52,13 +52,21 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* Mission */}
-      <section className="pr-card p-6 sm:p-8">
-        <h2 className="text-2xl font-[800] tracking-[-0.4px] text-[var(--ink)]">{c.missionTitle}</h2>
-        <div className="mt-5 space-y-4 text-[15px] font-[500] leading-8 text-[var(--muted)]">
-          {c.missionParagraphs.map((p) => <p key={p}>{p}</p>)}
-        </div>
-      </section>
+      {/* Mission + video side by side */}
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+        <section className="pr-card p-6 sm:p-8">
+          <h2 className="text-2xl font-[800] tracking-[-0.4px] text-[var(--ink)]">{c.missionTitle}</h2>
+          <div className="mt-5 space-y-4 text-[15px] font-[500] leading-8 text-[var(--muted)]">
+            {c.missionParagraphs.map((p) => <p key={p}>{p}</p>)}
+          </div>
+        </section>
+
+        <VideoPlaceholder
+          title={t.introVideoTitle}
+          description={t.introVideoDescription}
+          youtubeUrl={videos[VIDEO_KEYS.intro]}
+        />
+      </div>
 
       {/* Stats */}
       {stats.length > 0 && (
@@ -99,12 +107,6 @@ export default async function AboutPage() {
         </p>
       </section>
 
-      {/* Intro video */}
-      <VideoPlaceholder
-        title={t.introVideoTitle}
-        description={t.introVideoDescription}
-        youtubeUrl={videos[VIDEO_KEYS.intro]}
-      />
 
     </main>
   );

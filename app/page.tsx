@@ -261,11 +261,13 @@ export default async function Home() {
 
       <div id="kl-home-more" className="kl-home-body">
         <section className="mt-14">
-          <VideoPlaceholder
-            title={dict.introVideoTitle}
-            description={dict.introVideoDescription}
-            youtubeUrl={videos[VIDEO_KEYS.intro]}
-          />
+          <div className="mx-auto max-w-3xl rounded-[var(--radius-xl)] border border-[var(--border)] p-3 shadow-[var(--shadow)] bg-[var(--card)]">
+            <VideoPlaceholder
+              title={dict.introVideoTitle}
+              description={dict.introVideoDescription}
+              youtubeUrl={videos[VIDEO_KEYS.intro]}
+            />
+          </div>
         </section>
 
         {featured.length > 0 && (

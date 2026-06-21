@@ -303,14 +303,14 @@ export default async function Home() {
         {role !== "EDUCATOR" && role !== "ADMIN" && <EducatorCta />}
 
         <section className="mt-14 mb-4">
-          <div className="grid items-stretch gap-6 lg:grid-cols-2">
-            <VideoPlaceholder
-              title={dict.introVideoTitle}
-              description={dict.introVideoDescription}
-              youtubeUrl={videos[VIDEO_KEYS.intro]}
-              className="w-full"
-            />
-            {!role && (
+          {!role ? (
+            <div className="grid items-stretch gap-6 lg:grid-cols-2">
+              <VideoPlaceholder
+                title={dict.introVideoTitle}
+                description={dict.introVideoDescription}
+                youtubeUrl={videos[VIDEO_KEYS.intro]}
+                className="w-full"
+              />
               <div className="flex flex-col justify-center rounded-[var(--radius-xl)] bg-gradient-to-br from-[#021533] via-[#00255f] to-[var(--brand)] px-7 py-12 text-center lg:py-16">
                 <h2 className="text-[28px] font-[800] tracking-[-0.6px] text-white lg:text-[34px]">{dict.homeClosingTitle}</h2>
                 <p className="mx-auto mt-3 max-w-xl text-[15px] font-[400] leading-relaxed text-white/80">{dict.homeClosingBody}</p>
@@ -319,8 +319,14 @@ export default async function Home() {
                   <Link href="/courses" className="pr-btn-ghost !border-[var(--card)] !bg-transparent !text-white hover:!border-white hover:!text-white">{dict.heroCta}</Link>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <VideoPlaceholder
+              title={dict.introVideoTitle}
+              description={dict.introVideoDescription}
+              youtubeUrl={videos[VIDEO_KEYS.intro]}
+            />
+          )}
         </section>
       </div>
     </main>

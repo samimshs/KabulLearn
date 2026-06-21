@@ -93,7 +93,7 @@ export function VideoPlaceholder({
   return (
     <div className={`${className} rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-3 shadow-[var(--shadow)]`}>
       <div
-        className="grid min-h-[220px] place-items-center rounded-[var(--radius-lg)] border border-dashed border-[rgba(0,87,255,0.35)] bg-[linear-gradient(135deg,rgba(0,87,255,0.08),rgba(255,255,255,0.82))] p-6 text-center"
+        className="grid min-h-[220px] place-items-center rounded-[var(--radius-lg)] border border-dashed border-[rgba(0,87,255,0.35)] bg-[linear-gradient(135deg,rgba(0,87,255,0.08),transparent)] p-6 text-center"
         role="img"
         aria-label={`${title}. ${description}`}
       >

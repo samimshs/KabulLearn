@@ -53,7 +53,7 @@ export default async function AboutPage() {
       </section>
 
       {/* Mission + video side by side */}
-      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
         <section className="pr-card p-6 sm:p-8">
           <h2 className="text-2xl font-[800] tracking-[-0.4px] text-[var(--ink)]">{c.missionTitle}</h2>
           <div className="mt-5 space-y-4 text-[15px] font-[500] leading-8 text-[var(--muted)]">
@@ -65,6 +65,7 @@ export default async function AboutPage() {
           title={t.introVideoTitle}
           description={t.introVideoDescription}
           youtubeUrl={videos[VIDEO_KEYS.intro]}
+          className="h-full w-full"
         />
       </div>
 

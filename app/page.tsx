@@ -260,14 +260,6 @@ export default async function Home() {
       </section>
 
       <div id="kl-home-more" className="kl-home-body">
-        <section className="mt-14">
-          <VideoPlaceholder
-            title={dict.introVideoTitle}
-            description={dict.introVideoDescription}
-            youtubeUrl={videos[VIDEO_KEYS.intro]}
-          />
-        </section>
-
         {featured.length > 0 && (
           <section className="mt-14" aria-label={dict.featuredCoursesTitle}>
             <div className="flex flex-wrap items-end justify-between gap-3">
@@ -306,6 +298,14 @@ export default async function Home() {
               ))}
             </ol>
           </div>
+        </section>
+
+        <section className="mt-14">
+          <VideoPlaceholder
+            title={dict.introVideoTitle}
+            description={dict.introVideoDescription}
+            youtubeUrl={videos[VIDEO_KEYS.intro]}
+          />
         </section>
 
         {role !== "EDUCATOR" && role !== "ADMIN" && <EducatorCta />}

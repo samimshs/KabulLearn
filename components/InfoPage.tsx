@@ -69,35 +69,39 @@ export function VideoPlaceholder({
 
   if (embedUrl) {
     return (
-      <div className="overflow-hidden rounded-[var(--radius-xl)] border border-[var(--border)] bg-black shadow-[var(--shadow)]">
-        <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-          <iframe
-            src={embedUrl}
-            title={title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="absolute inset-0 h-full w-full border-0"
-          />
+      <div className="mx-auto max-w-3xl rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-3 shadow-[var(--shadow)]">
+        <div className="overflow-hidden rounded-[var(--radius-lg)]">
+          <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+            <iframe
+              src={embedUrl}
+              title={title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 h-full w-full border-0"
+            />
+          </div>
         </div>
         {description && (
-          <p className="px-5 py-3 text-sm font-[600] text-[var(--muted)]">{description}</p>
+          <p className="px-2 pt-3 pb-1 text-sm font-[600] text-[var(--muted)]">{description}</p>
         )}
       </div>
     );
   }
 
   return (
-    <div
-      className="grid min-h-[220px] place-items-center rounded-[var(--radius-xl)] border border-dashed border-[rgba(0,87,255,0.35)] bg-[linear-gradient(135deg,rgba(0,87,255,0.08),rgba(255,255,255,0.82))] p-6 text-center"
-      role="img"
-      aria-label={`${title}. ${description}`}
-    >
-      <div>
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[var(--card)] text-[var(--brand)] shadow-[var(--shadow-sm)]">
-          <span className="text-xs font-[900] uppercase tracking-[1px]">Play</span>
+    <div className="mx-auto max-w-3xl rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--card)] p-3 shadow-[var(--shadow)]">
+      <div
+        className="grid min-h-[220px] place-items-center rounded-[var(--radius-lg)] border border-dashed border-[rgba(0,87,255,0.35)] bg-[linear-gradient(135deg,rgba(0,87,255,0.08),rgba(255,255,255,0.82))] p-6 text-center"
+        role="img"
+        aria-label={`${title}. ${description}`}
+      >
+        <div>
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[var(--card)] text-[var(--brand)] shadow-[var(--shadow-sm)]">
+            <span className="text-xs font-[900] uppercase tracking-[1px]">Play</span>
+          </div>
+          <p className="mt-4 text-lg font-[800] text-[var(--ink)]">{title}</p>
+          <p className="mt-2 max-w-md text-sm font-[600] text-[var(--muted)]">{description}</p>
         </div>
-        <p className="mt-4 text-lg font-[800] text-[var(--ink)]">{title}</p>
-        <p className="mt-2 max-w-md text-sm font-[600] text-[var(--muted)]">{description}</p>
       </div>
     </div>
   );

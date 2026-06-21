@@ -52,13 +52,6 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* Intro video */}
-      <VideoPlaceholder
-        title={t.introVideoTitle}
-        description={t.introVideoDescription}
-        youtubeUrl={videos[VIDEO_KEYS.intro]}
-      />
-
       {/* Mission */}
       <section className="pr-card p-6 sm:p-8">
         <h2 className="text-2xl font-[800] tracking-[-0.4px] text-[var(--ink)]">{c.missionTitle}</h2>
@@ -105,6 +98,13 @@ export default async function AboutPage() {
           {c.orgText.split("info@kabulhub.com")[1]}
         </p>
       </section>
+
+      {/* Intro video */}
+      <VideoPlaceholder
+        title={t.introVideoTitle}
+        description={t.introVideoDescription}
+        youtubeUrl={videos[VIDEO_KEYS.intro]}
+      />
 
     </main>
   );

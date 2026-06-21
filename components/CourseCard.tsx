@@ -261,7 +261,7 @@ export function CourseCard({ course, isAuthenticated = false }: { course: Course
                     href={`/creators/${encodeURIComponent(inst.username)}`}
                     title={inst.name}
                     aria-label={inst.name}
-                    className="relative inline-block rounded-full ring-2 ring-[var(--card)] transition hover:z-10 hover:ring-[var(--brand)]"
+                    className="relative inline-block rounded-full ring-2 ring-[var(--card)] transition hover:z-10 focus:z-10 active:z-10 hover:ring-[var(--brand)] after:absolute after:-inset-2 after:content-['']"
                   >
                     {inst.avatarUrl ? (
                       <img

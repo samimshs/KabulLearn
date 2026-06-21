@@ -428,7 +428,7 @@ export default async function AdminDashboardPage({
   }
 
   return (
-    <div className="flex min-h-screen w-full min-w-0 bg-[var(--surface)]">
+    <div className="flex min-h-screen w-full min-w-0 flex-col bg-[var(--surface)] lg:flex-row">
       <AdminSidebarNav items={navItems} />
 
       {/* ── Content ──────────────────────────────────────────────── */}
@@ -436,7 +436,7 @@ export default async function AdminDashboardPage({
 
         {/* Alert bar */}
         {(reviewCount > 0 || pendingRequests.length > 0) && (
-          <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-[rgba(217,119,6,0.2)] bg-[rgba(254,243,199,0.96)] px-4 py-3 backdrop-blur-sm dark:border-[rgba(217,119,6,0.15)] dark:bg-[rgba(78,52,5,0.95)] sm:px-6">
+          <div className="top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-[rgba(217,119,6,0.2)] bg-[rgba(254,243,199,0.96)] px-4 py-3 backdrop-blur-sm dark:border-[rgba(217,119,6,0.15)] dark:bg-[rgba(78,52,5,0.95)] sm:px-6 lg:sticky">
             <div className="flex min-w-0 items-center gap-3">
               <span className="grid h-6 w-6 place-items-center rounded-full bg-[var(--warning)] text-white">
                 <svg viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="currentColor"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>

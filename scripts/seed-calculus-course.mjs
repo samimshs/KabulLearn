@@ -1,6 +1,6 @@
 /**
  * Seeds the "Introduction to Calculus" demo course
- * assigned to samimshs@gmail.com (Sami Wardak, EDUCATOR).
+ * managed by samimshs@gmail.com, with public attribution to Khan Academy.
  *
  * Khan Academy calculus videos are embedded via the YouTube IFrame API.
  * The platform's VideoPlayer component accepts bare video IDs.
@@ -22,7 +22,18 @@ loadEnvConfig(path.join(__dirname, ".."));
 const db = new PrismaClient();
 
 const AUTHOR_EMAIL     = "samimshs@gmail.com";
-const CREATOR_USERNAME = "sami-wardak";
+const CREATOR_USERNAME = "khan-academy";
+const CREATOR_PROFILE = {
+  username: CREATOR_USERNAME,
+  name: "Khan Academy",
+  professionalTitle: "Nonprofit educational organization",
+  bio: "Khan Academy is a nonprofit educational organization that offers free online lessons, practice exercises, and instructional videos across subjects including mathematics, science, computing, economics, and humanities.",
+  bioPs: "خان اکادمۍ یوه غیرانتفاعي تعلیمي اداره ده چې د ریاضیاتو، ساینس، کمپیوټر، اقتصاد او بشري علومو په ګډون په بېلابېلو مضمونونو کې وړیا آنلاین درسونه، تمرینونه او ښوونیزې ویډیوګانې وړاندې کوي.",
+  bioDa: "خان آکادمی یک سازمان آموزشی غیرانتفاعی است که درس‌های آنلاین رایگان، تمرین‌ها و ویدیوهای آموزشی را در مضمون‌هایی مانند ریاضیات، ساینس، کمپیوتر، اقتصاد و علوم انسانی ارائه می‌کند.",
+  avatarUrl: null,
+  linkedinUrl: null,
+  youtubeUrl: "https://www.youtube.com/@khanacademy"
+};
 
 // ─── Course definition ────────────────────────────────────────────────────────
 const COURSE = {
@@ -708,13 +719,27 @@ async function main() {
     select: { id: true, name: true }
   });
 
-  const creatorProfile = await db.creatorProfile.findUniqueOrThrow({
+  const creatorProfile = await db.creatorProfile.upsert({
     where: { username: CREATOR_USERNAME },
+    update: {
+      name: CREATOR_PROFILE.name,
+      professionalTitle: CREATOR_PROFILE.professionalTitle,
+      bio: CREATOR_PROFILE.bio,
+      bioPs: CREATOR_PROFILE.bioPs,
+      bioDa: CREATOR_PROFILE.bioDa,
+      avatarUrl: CREATOR_PROFILE.avatarUrl,
+      linkedinUrl: CREATOR_PROFILE.linkedinUrl,
+      youtubeUrl: CREATOR_PROFILE.youtubeUrl
+    },
+    create: {
+      ...CREATOR_PROFILE,
+      createdById: author.id
+    },
     select: { id: true }
   });
 
-  console.log(`Author: ${author.name} (${author.id})`);
-  console.log(`Creator profile: ${CREATOR_USERNAME} (${creatorProfile.id})`);
+  console.log(`Technical owner: ${author.name} (${author.id})`);
+  console.log(`Public author profile: ${CREATOR_PROFILE.name} (${creatorProfile.id})`);
 
   // Upsert course
   await db.course.upsert({
@@ -844,17 +869,17 @@ async function main() {
     console.log(`    ✓ Quiz: ${q.titleEn} (${q.questions.length} questions)`);
   }
 
-  // Link course to creator profile via CourseInstructor if not already done
-  const existingInstructor = await db.courseInstructor.findUnique({
-    where: { courseId_profileId: { courseId: COURSE.id, profileId: creatorProfile.id } }
+  // Keep the visible instructor list aligned with the public Khan Academy attribution.
+  await db.courseInstructor.deleteMany({
+    where: { courseId: COURSE.id, profileId: { not: creatorProfile.id } }
   });
 
-  if (!existingInstructor) {
-    await db.courseInstructor.create({
-      data: { courseId: COURSE.id, profileId: creatorProfile.id, order: 0 }
-    });
-    console.log("  ✓ Instructor linked");
-  }
+  await db.courseInstructor.upsert({
+    where: { courseId_profileId: { courseId: COURSE.id, profileId: creatorProfile.id } },
+    create: { courseId: COURSE.id, profileId: creatorProfile.id, order: 0 },
+    update: { order: 0 }
+  });
+  console.log("  ✓ Public instructor linked");
 
   console.log(`\n✅ Done — ${COURSE.id}: ${COURSE.modules.length} modules, ${totalVideo} video lessons, ${totalQuestions} quiz questions`);
 }

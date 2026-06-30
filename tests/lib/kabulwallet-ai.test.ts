@@ -6,6 +6,7 @@ import {
   kabulWalletInsightRequestSchema,
   kabulWalletLanguageDirective,
   kabulWalletRowsToTableText,
+  kabulWalletSystemPrompt,
 } from "@/lib/kabulwallet-ai";
 
 const validRequest = {
@@ -42,6 +43,13 @@ describe("KabulWallet AI endpoint helpers", () => {
     const summary: Record<string, unknown> = { ...validRequest.financialSummary };
     delete summary.previousMonthExpensesUSD;
     expect(kabulWalletInsightRequestSchema.safeParse({ ...validRequest, financialSummary: summary }).success).toBe(true);
+  });
+
+  it("explains ledger direction so the model never reverses who owes whom", () => {
+    expect(kabulWalletSystemPrompt).toContain("owed_to_me");
+    expect(kabulWalletSystemPrompt).toContain("i_owe");
+    expect(kabulWalletSystemPrompt).toContain("owes you");
+    expect(kabulWalletSystemPrompt).toContain("you owe");
   });
 
   it("rejects private or unexpected financial fields", () => {

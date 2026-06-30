@@ -38,6 +38,12 @@ describe("KabulWallet AI endpoint helpers", () => {
     expect(kabulWalletInsightRequestSchema.safeParse(validRequest).success).toBe(true);
   });
 
+  it("accepts an omitted previousMonthExpensesUSD (Swift sends no key for nil)", () => {
+    const summary: Record<string, unknown> = { ...validRequest.financialSummary };
+    delete summary.previousMonthExpensesUSD;
+    expect(kabulWalletInsightRequestSchema.safeParse({ ...validRequest, financialSummary: summary }).success).toBe(true);
+  });
+
   it("rejects private or unexpected financial fields", () => {
     const requestWithNotes = {
       ...validRequest,

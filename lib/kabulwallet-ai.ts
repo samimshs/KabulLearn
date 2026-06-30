@@ -31,7 +31,9 @@ export const kabulWalletInsightRequestSchema = z.object({
     receivablesUSD: finiteNumber,
     payablesUSD: finiteNumber,
     monthlyExpensesUSD: finiteNumber,
-    previousMonthExpensesUSD: finiteNumber.nullable(),
+    // `.nullish()` (not `.nullable()`): Swift's JSONEncoder OMITS this key when the
+    // value is nil (no prior-month data), so it can be a number, null, or absent.
+    previousMonthExpensesUSD: finiteNumber.nullish(),
     topExpenseCategories: z.array(categoryAmountSchema).max(30),
     budgetStatus: z.array(categoryAmountSchema).max(30),
     zakatDueUSD: finiteNumber,

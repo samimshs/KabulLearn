@@ -99,3 +99,64 @@ export function hasValidKabulWalletToken(headers: Headers, configuredToken: stri
 
 export type KabulWalletInsightRequest = z.infer<typeof kabulWalletInsightRequestSchema>;
 export type KabulWalletInsightResponse = z.infer<typeof kabulWalletInsightResponseSchema>;
+
+// --- AI Excel/CSV import (POST /api/ai/import) -----------------------------
+// The iOS app uploads a CSV or .xlsx file and expects { items: [...] } matching
+// FinancialImportItem in the app. Kinds/currencies are fixed enums the app applies.
+
+export const kabulWalletImportItemSchema = z
+  .object({
+    kind: z.enum(["expense", "asset", "receivable", "payable"]),
+    date: z.string().max(32),
+    name: z.string().min(1).max(160),
+    category: z.string().min(1).max(80),
+    amount: finiteNumber.positive(),
+    currency: z.enum(["USD", "AFN"]),
+    notes: z.string().max(200),
+    confidence: z.number().min(0).max(1),
+  })
+  .strict();
+
+export const kabulWalletImportResponseSchema = z
+  .object({
+    items: z.array(kabulWalletImportItemSchema).max(500),
+  })
+  .strict();
+
+export const kabulWalletImportSystemPrompt = `You extract financial transactions from a user's uploaded bank or bookkeeping spreadsheet for the KabulWallet app.
+Use ONLY rows that are present in the provided table; never invent, estimate, or duplicate transactions that are not shown.
+Skip header rows, totals, subtotals, running balances, and blank rows.
+For every real transaction, output one item:
+- kind: "expense" for money spent or paid out, "asset" for an owned balance/account, "receivable" for money owed TO the user, "payable" for money the user owes. When unsure, use "expense".
+- amount: a positive number. Strip currency symbols, thousands separators, and signs; use the absolute value.
+- currency: "AFN" if the row clearly indicates Afghanis (AFN, ؋, افغانی); otherwise "USD".
+- date: the transaction date formatted as YYYY-MM-DD. If the row has no clear date, use an empty string.
+- name: a short human-readable description from the row (merchant, person, or memo).
+- category: a concise category such as Rent, Groceries, Fuel, Utilities, Transportation, Healthcare, Dining Out, Internet & Phone, School Fees, Salary, or Other.
+- notes: brief optional context, otherwise an empty string.
+- confidence: a number from 0 to 1 reflecting how confident you are in this item.
+Return at most 500 items. If the table contains no recognizable transactions, return an empty items array.`;
+
+/// Flattens parsed spreadsheet/CSV rows into a compact tab-separated table for the
+/// model. Caps rows and total characters so the prompt stays bounded.
+export function kabulWalletRowsToTableText(
+  rows: ReadonlyArray<ReadonlyArray<unknown>>,
+  maxRows = 400,
+  maxChars = 40_000,
+): string {
+  const lines: string[] = [];
+  for (const row of rows.slice(0, maxRows)) {
+    const cells = row.map((cell) => {
+      if (cell == null) return "";
+      if (cell instanceof Date) return cell.toISOString().slice(0, 10);
+      return String(cell).replace(/[\t\r\n]+/g, " ").trim();
+    });
+    if (cells.every((c) => c === "")) continue;
+    lines.push(cells.join("\t"));
+    if (lines.join("\n").length >= maxChars) break;
+  }
+  return lines.join("\n").slice(0, maxChars);
+}
+
+export type KabulWalletImportItem = z.infer<typeof kabulWalletImportItemSchema>;
+export type KabulWalletImportResponse = z.infer<typeof kabulWalletImportResponseSchema>;

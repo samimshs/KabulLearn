@@ -170,3 +170,35 @@ export function kabulWalletRowsToTableText(
 
 export type KabulWalletImportItem = z.infer<typeof kabulWalletImportItemSchema>;
 export type KabulWalletImportResponse = z.infer<typeof kabulWalletImportResponseSchema>;
+
+// --- AI receipt total extraction (POST /api/ai/receipt) --------------------
+// Fallback for the iOS receipt scanner: the app does on-device OCR, and when its
+// heuristic can't confidently find the paid total it sends the recognized TEXT
+// (never the image) here for the model to pull out the grand total.
+
+export const kabulWalletReceiptRequestSchema = z
+  .object({
+    text: z.string().min(1).max(20_000),
+  })
+  .strict();
+
+export const kabulWalletReceiptResponseSchema = z
+  .object({
+    amount: finiteNumber.positive().nullable(),
+    currency: z.enum(["USD", "AFN"]).nullable(),
+    merchant: z.string().max(120).nullable(),
+    date: z.string().max(32).nullable(),
+    category: z.string().max(60).nullable(),
+  })
+  .strict();
+
+export const kabulWalletReceiptSystemPrompt = `You read raw OCR text from a single shopping or payment receipt and extract what the customer actually paid.
+Return the FINAL grand total (the amount paid, after tax and discounts) — never a subtotal, an individual item price, a tax line, change given, or a phone/invoice number. Common total labels include: Total, Grand Total, Amount Due, Balance Due, Total Due, مجموع, جمع, ټول, قابل پرداخت.
+- amount: the paid total as a positive number with any currency symbols and thousands separators removed; null only if you truly cannot find it.
+- currency: "AFN" if the receipt indicates Afghanis (AFN, ؋, افغانی), otherwise "USD"; null if genuinely unclear.
+- merchant: the store or business name if present, otherwise null.
+- date: the receipt date formatted as YYYY-MM-DD, otherwise null.
+- category: your best single guess from exactly this list — Groceries, Fuel, Dining Out, Healthcare, Transportation, Utilities, Clothing, Rent, Internet & Phone, School Fees, Other — otherwise null.
+Use only what appears in the text; never invent values.`;
+
+export type KabulWalletReceiptResponse = z.infer<typeof kabulWalletReceiptResponseSchema>;

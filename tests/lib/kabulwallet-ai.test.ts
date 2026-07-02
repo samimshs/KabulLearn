@@ -5,6 +5,8 @@ import {
   kabulWalletImportResponseSchema,
   kabulWalletInsightRequestSchema,
   kabulWalletLanguageDirective,
+  kabulWalletReceiptRequestSchema,
+  kabulWalletReceiptResponseSchema,
   kabulWalletRowsToTableText,
   kabulWalletSystemPrompt,
 } from "@/lib/kabulwallet-ai";
@@ -114,5 +116,28 @@ describe("KabulWallet AI import helpers", () => {
     const rows = Array.from({ length: 1000 }, (_, i) => [`row${i}`, i]);
     const text = kabulWalletRowsToTableText(rows, 50);
     expect(text.split("\n")).toHaveLength(50);
+  });
+});
+
+describe("KabulWallet AI receipt helpers", () => {
+  it("requires non-empty receipt text and rejects extra fields", () => {
+    expect(kabulWalletReceiptRequestSchema.safeParse({ text: "TOTAL 910.00" }).success).toBe(true);
+    expect(kabulWalletReceiptRequestSchema.safeParse({ text: "" }).success).toBe(false);
+    expect(kabulWalletReceiptRequestSchema.safeParse({ text: "x", image: "..." }).success).toBe(false);
+  });
+
+  it("accepts a full or all-null receipt result but rejects bad values", () => {
+    expect(kabulWalletReceiptResponseSchema.safeParse({
+      amount: 910.5, currency: "AFN", merchant: "Shop", date: "2026-07-01", category: "Groceries",
+    }).success).toBe(true);
+    expect(kabulWalletReceiptResponseSchema.safeParse({
+      amount: null, currency: null, merchant: null, date: null, category: null,
+    }).success).toBe(true);
+    expect(kabulWalletReceiptResponseSchema.safeParse({
+      amount: -5, currency: null, merchant: null, date: null, category: null,
+    }).success).toBe(false);
+    expect(kabulWalletReceiptResponseSchema.safeParse({
+      amount: 10, currency: "EUR", merchant: null, date: null, category: null,
+    }).success).toBe(false);
   });
 });
